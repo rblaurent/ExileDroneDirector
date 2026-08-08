@@ -1,0 +1,80 @@
+# Blueprint Graph Workflow
+
+## Purpose
+
+Exile Drone Director is Blueprint-only. The Enhanced DevKit's Python API can
+create assets, variables, components, input assets, and structs, then compile
+and save them. It can locate an Event Graph, but it does not expose concrete K2
+node constructors or graph insertion methods.
+
+Graph implementation therefore uses Unreal's native clipboard serialization as
+a development source format. This avoids treating slow, coordinate-dependent
+mouse automation as the primary authoring method while keeping every runtime
+asset as a normal, inspectable Blueprint.
+
+## Authoring loop
+
+1. Create the smallest new node pattern in a mod-owned Blueprint using the
+   visible editor.
+2. Compile and prove that pattern in PIE before turning it into a template.
+3. Select only the proven nodes and copy them with `Ctrl+C`.
+4. Export the clipboard into `tools/blueprint/snippets/*.eddgraph`:
+
+   ```powershell
+   .\tools\blueprint\Export-BlueprintGraphClipboard.ps1 `
+     -DestinationPath .\tools\blueprint\snippets\toggle-drone.eddgraph
+   ```
+
+5. Review the textual graph, reduce it to one responsibility, and replace only
+   intentional default values with uppercase `{{TOKENS}}`.
+6. Validate the snippet offline:
+
+   ```powershell
+   .\tools\blueprint\Test-BlueprintGraphSnippet.ps1 `
+     -Path .\tools\blueprint\snippets\toggle-drone.eddgraph `
+     -AllowTokens
+   ```
+
+7. Resolve tokens and prepare it for paste:
+
+   ```powershell
+   .\tools\blueprint\Set-BlueprintGraphClipboard.ps1 `
+     -SnippetPath .\tools\blueprint\snippets\toggle-drone.eddgraph `
+     -Token @{ DIAGNOSTIC_TEXT = '[EDD] Drone mode toggled' }
+   ```
+
+8. Paste once into the intended mod-owned graph, compile immediately, inspect
+   warnings, save, and run the snippet's acceptance test.
+
+## Rules
+
+- Never paste or save nodes into a Conan base-game asset.
+- A snippet has one responsibility and one documented acceptance signal.
+- Source graph exports must belong to `/Game/Mods/ExileDroneDirector/`.
+- Never hand-edit `NodeGuid`, `PinId`, or `LinkedTo` relationships casually.
+- Do not paste a snippet twice unless it is explicitly designed to be repeated.
+- Compile after every paste; do not accumulate multiple unverified graph batches.
+- Runtime state machines live in named Blueprint functions or components, not a
+  monolithic Event Graph.
+- PIE evidence is recorded in `docs/devkit-findings.md` before a diagnostic node
+  is removed or generalized.
+- The player pawn remains possessed. Camera work changes the local view target;
+  it never moves or repurposes the player as the drone.
+
+## Resource profile
+
+The export, validation, templating, documentation, and repository tests are
+lightweight and do not launch Unreal. Asset compilation, PIE, and cooking still
+load the Enhanced DevKit and must not run alongside a resource-heavy game.
+
+## First planned snippets
+
+1. Client-director BeginPlay diagnostic.
+2. Toggle-key edge detection and state branch.
+3. Spawn local drone and cache the original view target.
+4. Enter Drone Mode and set the local view target.
+5. Idempotent emergency restore and drone destruction.
+6. Six-axis input accumulation with normal, precision, and boost scaling.
+
+Each snippet is captured only after its live-editor version compiles and passes
+its focused PIE check.

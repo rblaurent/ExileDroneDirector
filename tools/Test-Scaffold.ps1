@@ -14,6 +14,7 @@ $requiredFiles = @(
     'docs\architecture.md',
     'docs\event-system.md',
     'docs\devkit-findings.md',
+    'docs\blueprint-workflow.md',
     'docs\visual-design-system.md',
     'docs\implementation-plan.md',
     '.gitattributes',
@@ -23,7 +24,11 @@ $requiredFiles = @(
     'tools\Invoke-UnrealPython.ps1',
     'tools\unreal\Probe-EnhancedApi.py',
     'tools\unreal\Inspect-BlueprintApi.py',
-    'tools\unreal\Generate-MvpScaffold.py'
+    'tools\unreal\Inspect-GraphApi.py',
+    'tools\unreal\Generate-MvpScaffold.py',
+    'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
+    'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
+    'tools\blueprint\Test-BlueprintGraphSnippet.ps1'
 )
 
 $missing = @(

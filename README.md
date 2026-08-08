@@ -36,6 +36,8 @@ Read these in order:
 
 6. `docs/devkit-findings.md` — verified Enhanced installation identity, exact
    integration paths, local API findings, and rejected Legacy assumptions.
+7. `docs/blueprint-workflow.md` — the validated graph-snippet workflow used to
+   batch Blueprint logic without relying on per-node mouse automation.
 
 ## Architectural invariants
 
@@ -59,8 +61,11 @@ The scaffold includes a Funcom ModController, client-only director component,
 SpectatorPawn-based CineCamera drone, spline path preview, Flypath data structs,
 HUD widget, and Enhanced Input assets. All compile and save with zero errors.
 
-The next technical milestone is executable Drone Mode: enter, fly, adjust the
-CineCamera, and safely exit without unpossessing or moving the player pawn.
+PIE now proves that Funcom discovers and spawns `BP_EDD_ModController`, attaches
+`BPC_EDD_ClientDirector` to the Conan player controller, and executes the client
+component's BeginPlay graph. The next technical milestone is executable Drone
+Mode: enter, fly, adjust the CineCamera, and safely exit without unpossessing or
+moving the player pawn.
 
 ## Repository layout
 
@@ -72,6 +77,8 @@ CineCamera, and safely exit without unpossessing or moving the player pawn.
   repository and an installed DevKit.
 - `tools/Test-Scaffold.ps1` — validates the textual scaffold and optionally the
   first-slice Unreal assets.
+- `tools/blueprint/` — validates, exports, and prepares native Blueprint graph
+  clipboard snippets without launching the DevKit.
 
 ## DevKit setup
 

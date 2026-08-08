@@ -96,9 +96,40 @@ Verified integration points:
 The source mirror sync was verified under Windows PowerShell 5.1 and all Unreal
 binary extensions are covered by Git LFS.
 
+## Verified first runtime integration
+
+A single-player PIE run in `/Game/Dev/AlmostEmpty` proved the complete first
+client attachment chain:
+
+1. `LogModManager` found `BP_EDD_ModController_C` in the active mod.
+2. Persistence spawned `BP_EDD_ModController_C` alongside the example controller.
+3. `BPC_EDD_ClientDirector_C` executed its BeginPlay `Print String` node.
+4. PIE reached the Conan character-creation UI without modifying or possessing a
+   base-game pawn.
+
+The initial diagnostic string was `Hello`; its value is unimportant. The log
+owner was `[BPC_EDD_ClientDirector_C]`, which is the acceptance evidence that the
+Funcom client-only `AdditionalClassComponent` rule instantiates and runs the
+project component.
+
+This proves local PIE discovery and attachment. It does not yet prove cooked,
+listen-server, dedicated-server, restoration, or authenticated-player behavior.
+
+## Blueprint graph automation boundary
+
+The editor Python API can locate the component Event Graph, but the graph object
+has no node insertion methods. This Enhanced build exposes base `EdGraph` and
+`K2Node` types without the concrete event/call/branch constructors required for
+safe graph authoring.
+
+Unreal's native Blueprint clipboard serialization is available and includes node
+classes, function references, pins, links, positions, defaults, and identifiers.
+The project therefore uses reviewed `.eddgraph` snippets for batch graph work.
+See `docs/blueprint-workflow.md` and `tools/blueprint/`.
+
 ## Pending local reconnaissance
 
-- Input mapping and Blueprint event-graph implementation
+- Toggle input, view-target lifecycle, and movement graph implementation
 - Camera view-target lifecycle in PIE and cooked runtime
 - PIE and cook commands/output locations
 - Authenticated server identity and persistence APIs

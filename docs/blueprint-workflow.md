@@ -84,9 +84,13 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
    presses producing `true`, then `false`.**
 3. Spawn one local drone and reuse its typed cached reference. **Proven in PIE:
    first entry spawned it and the next entry reused it.**
-4. Cache the original view target, place the drone, and switch the local view.
-5. Idempotent emergency restore and drone destruction.
-6. Six-axis input accumulation with normal, precision, and boost scaling.
+4. Cache the original local view target once. **Proven in PIE: first entry
+   cached it and the next entry reused it.**
+5. Guard and switch the local view to the drone, then restore the cached player
+   view. **Proven in PIE across enter, exit, cached re-entry, and second exit.**
+6. Place the drone at the current camera before the local view switch.
+7. Emergency restoration, teardown recovery, and drone destruction.
+8. Six-axis input accumulation with normal, precision, and boost scaling.
 
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.

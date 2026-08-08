@@ -64,10 +64,14 @@ HUD widget, and Enhanced Input assets. All compile and save with zero errors.
 PIE now proves that Funcom discovers and spawns `BP_EDD_ModController`, attaches
 `BPC_EDD_ClientDirector` to the Conan player controller, executes the client
 component, edge-toggles persistent Drone Mode state, and spawns exactly one
-typed local drone camera that is reused on the next entry. The next technical
-milestone is the view lifecycle: cache the original view target, place the
-drone at the current camera, switch locally, and restore safely without
-unpossessing or moving the player pawn.
+typed local drone camera that is reused on the next entry. It also captures the
+local controller's original view target exactly once and reuses that reference
+on later entries. The client now switches Player Controller 0 to the guarded
+drone view and restores the cached player view on exit. A four-transition PIE
+run proved enter, restore, cached re-entry, and second restore with no Blueprint
+runtime errors. The next technical milestone is to place the drone at the
+current camera before switching, without unpossessing or moving the player
+pawn.
 
 ## Repository layout
 

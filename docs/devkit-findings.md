@@ -166,8 +166,74 @@ messages:
 The Blueprint compiled successfully in 96 ms and was saved before PIE. The
 third-press reuse diagnostic proves that the first spawned reference remained
 valid and that the function did not create a second camera. This does not yet
-prove original-view-target capture, camera placement at the current view,
-view-target switching, restoration, destruction, or cooked behavior.
+prove camera placement at the current view, view-target switching, restoration,
+destruction, or cooked behavior.
+
+## Verified idempotent original-view-target capture
+
+`ActivateDroneView` now owns a separate, focused cache contract. It resolves
+local Player Controller 0, reads `Get View Target`, and writes
+`OriginalViewTargetRef` only when the existing reference is not valid. Both
+camera-ready paths in `EnterDroneMode` delegate to this function.
+
+The component compiled successfully after the isolated function was built and
+again after both delegation calls were added. A three-press PIE run produced:
+
+```text
+[BPC_EDD_ClientDirector_C] true
+[BPC_EDD_ClientDirector_C] [EDD] Drone camera spawned
+[BPC_EDD_ClientDirector_C] [EDD] Original view target cached
+[BPC_EDD_ClientDirector_C] false
+[BPC_EDD_ClientDirector_C] true
+[BPC_EDD_ClientDirector_C] [EDD] Drone camera already valid
+[BPC_EDD_ClientDirector_C] [EDD] Original view target already cached
+```
+
+This proves the original view is captured before any future view switch,
+persists across a normal Drone Mode exit/re-entry, and is not overwritten by a
+later entry. It does not yet prove drone placement, local view-target switching,
+restoration, destruction, or cooked behavior.
+
+## Verified reusable local view lifecycle
+
+Three named functions now divide the camera lifecycle into explicit contracts:
+
+1. `ActivateDroneView` caches the current view target once, then delegates both
+   the new-cache and reuse paths to `SwitchToDroneView`.
+2. `SwitchToDroneView` validates `DroneCameraRef`, resolves local Player
+   Controller 0, and calls `SetViewTargetWithBlend` with the typed drone camera.
+3. `ExitDroneMode` independently validates `OriginalViewTargetRef` and restores
+   that actor through the same local Player Controller 0 API.
+
+Both view calls currently use a zero-second blend. This keeps the first
+acceptance contract immediate and deterministic; cinematic transition shaping
+belongs to a later camera-profile layer rather than this lifecycle primitive.
+
+The complete client director compiled successfully in 81 ms. One PIE session
+then exercised four F10 transitions and produced these ordered diagnostics:
+
+```text
+[BPC_EDD_ClientDirector_C] [EDD] Drone camera spawned
+[BPC_EDD_ClientDirector_C] [EDD] Original view target cached
+[BPC_EDD_ClientDirector_C] [EDD] Drone view active
+[BPC_EDD_ClientDirector_C] [EDD] Player view restored
+[BPC_EDD_ClientDirector_C] [EDD] Drone camera already valid
+[BPC_EDD_ClientDirector_C] [EDD] Original view target already cached
+[BPC_EDD_ClientDirector_C] [EDD] Drone view active
+[BPC_EDD_ClientDirector_C] [EDD] Player view restored
+```
+
+No `Accessed None`, Blueprint runtime error, or PIE error appeared. The second
+entry proves both references are reusable; the second exit proves restoration
+is not a one-shot path. Source contracts additionally require both validity
+guards, both exact view targets, local Player Controller 0, and diagnostics that
+execute only after `SetViewTargetWithBlend` returns. Deliberate mutations of the
+view API and restoration reference were rejected by the offline suite.
+
+This proves reusable local view switching and normal restoration. It does not
+yet prove placement at the pre-switch camera transform, emergency restoration
+after teardown/disconnect, input-context cleanup, cooked behavior, or
+multiplayer isolation.
 
 ## Blueprint graph automation boundary
 
@@ -183,7 +249,7 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 
 ## Pending local reconnaissance
 
-- Original view-target capture, switching, restoration, and movement graphs
-- Camera view-target lifecycle in PIE and cooked runtime
+- Drone placement at the pre-switch camera and movement graphs
+- Emergency camera restoration and the view lifecycle in cooked runtime
 - PIE and cook commands/output locations
 - Authenticated server identity and persistence APIs

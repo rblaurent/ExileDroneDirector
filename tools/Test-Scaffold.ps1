@@ -33,7 +33,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-BlueprintGraphContracts.ps1',
     'tools\blueprint\snippets\toggle-input.eddgraph',
     'tools\blueprint\snippets\toggle-state.eddgraph',
-    'tools\blueprint\snippets\enter-drone-mode.eddgraph'
+    'tools\blueprint\snippets\enter-drone-mode.eddgraph',
+    'tools\blueprint\snippets\activate-drone-view.eddgraph',
+    'tools\blueprint\snippets\switch-to-drone-view.eddgraph',
+    'tools\blueprint\snippets\exit-drone-mode.eddgraph'
 )
 
 $missing = @(

@@ -8,6 +8,12 @@ import unreal
 PREFIX = "EDD_CLIENT_VARIABLES"
 CLIENT_PATH = "/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector"
 DRONE_PATH = "/Game/Mods/ExileDroneDirector/Core/Camera/BP_EDD_DroneCamera"
+REQUIRED_FUNCTIONS = (
+    "EnterDroneMode",
+    "ActivateDroneView",
+    "SwitchToDroneView",
+    "ExitDroneMode",
+)
 
 
 def emit(label: str, value) -> None:
@@ -106,8 +112,8 @@ ensure_object_reference(
     "OriginalViewTargetRef",
     unreal.Actor,
 )
-ensure_function_graph(client_blueprint, "EnterDroneMode")
-ensure_function_graph(client_blueprint, "ExitDroneMode")
+for required_function in REQUIRED_FUNCTIONS:
+    ensure_function_graph(client_blueprint, required_function)
 
 unreal.BlueprintEditorLibrary.compile_blueprint(client_blueprint)
 if not unreal.EditorAssetLibrary.save_asset(CLIENT_PATH, only_if_is_dirty=False):
@@ -117,7 +123,7 @@ client_class = require_class(CLIENT_PATH)
 client_default = unreal.get_default_object(client_class)
 require_generated_property(client_default, "DroneCameraRef")
 require_generated_property(client_default, "OriginalViewTargetRef")
-for required_function in ("EnterDroneMode", "ExitDroneMode"):
+for required_function in REQUIRED_FUNCTIONS:
     if unreal.BlueprintEditorLibrary.find_graph(
         client_blueprint,
         unreal.Name(required_function),

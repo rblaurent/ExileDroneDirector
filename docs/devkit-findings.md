@@ -22,8 +22,18 @@ Legacy kit using all of the following local evidence:
 - `Engine/Build/Build.version`: `4.15.3`
 - Content root: `Games/ConanSandbox/Content/Mods`
 
-It was rejected before any Exile Drone Director asset was created. The Enhanced
-kit is being installed separately under a distinct `F:` path.
+It was rejected before any Exile Drone Director asset was created.
+
+The correct Enhanced kit was subsequently installed and verified:
+
+- Install root: `F:\CEUE5Devkit`
+- Project: `F:\CEUE5Devkit\UE4\ConanSandbox.uproject`
+- Editor: `Engine\Binaries\Win64\UnrealEditor.exe`
+- Engine: Unreal Engine `5.6.1`, changelist `370197`
+- Branch: `++exiles+release`
+- DevKit content root: `F:\CEUE5Devkit\UE4\Content`
+- DevKit mod root: `F:\CEUE5Devkit\UE4\Content\Mods`
+- Epic manifest status: complete (`bIsIncompleteInstall: false`)
 
 ## Mandatory verification before project creation
 
@@ -49,14 +59,25 @@ check. A path merely containing the word `Enhanced` is not accepted as proof.
 - The Mod Controller remains the supported hub for component attachment and
   data-table merging unless local inspection proves an Enhanced-specific change.
 
+## Generated mod container
+
+The Funcom DevKit creator generated and activated:
+
+`F:\CEUE5Devkit\UE4\Content\Mods\ExileDroneDirector`
+
+Initial contents are `active.txt`, `modinfo.json`, `Content/`, and `Shared/`.
+The generated metadata identifies `minimumVersion` as `Enhanced`. The mod was
+created through Funcom's Dreamworld Mods UI; its metadata schema was not guessed
+or copied from the Legacy kit.
+
+The editor was launched with Python Script Plugin and Editor Scripting Utilities
+enabled. Both mounted successfully, making repeatable editor automation possible.
+
 ## Pending local reconnaissance
 
-- Exact Enhanced project and content paths
-- Mod creation output and metadata schema
 - Mod Controller parent class and component-copy rules
 - Owning client player/controller attachment candidate
 - Input binding strategy
 - Camera and Cine Camera Blueprint exposure in cooked runtime
 - PIE and cook commands/output locations
 - Authenticated server identity and persistence APIs
-

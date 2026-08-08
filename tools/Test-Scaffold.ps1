@@ -18,7 +18,10 @@ $requiredFiles = @(
     'docs\implementation-plan.md',
     '.gitattributes',
     '.gitignore',
-    'tools\Sync-DevKitContent.ps1'
+    'tools\Sync-DevKitContent.ps1',
+    'tools\Test-RepositoryBudget.ps1',
+    'tools\Invoke-UnrealPython.ps1',
+    'tools\unreal\Probe-EnhancedApi.py'
 )
 
 $missing = @(

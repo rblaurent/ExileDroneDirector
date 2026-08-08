@@ -1,0 +1,22 @@
+{
+	"name": "ExileDroneDirector",
+	"description": "",
+	"changeNote": "",
+	"author": "",
+	"authorUrl": "",
+	"versionMajor": 1,
+	"versionMinor": 0,
+	"versionBuild": 0,
+	"bRequiresLoadOnStartup": false,
+	"steamPublishedFileId": "",
+	"steamTestLivePublishedFileId": "",
+	"steamWorkshopFileIds":
+	{
+	},
+	"steamVisibility": 2,
+	"folderName": "ExileDroneDirector",
+	"devkitRevisionNumber": 0,
+	"devkitSnapshotId": 0,
+	"fileSize": 0,
+	"minimumVersion": "Enhanced"
+}

@@ -45,6 +45,11 @@ asset as a normal, inspectable Blueprint.
 
 8. Paste once into the intended mod-owned graph, compile immediately, inspect
    warnings, save, and run the snippet's acceptance test.
+9. Run the semantic contract suite before committing graph source:
+
+   ```powershell
+   .\tools\blueprint\Test-BlueprintGraphContracts.ps1
+   ```
 
 ## Rules
 
@@ -58,6 +63,11 @@ asset as a normal, inspectable Blueprint.
   monolithic Event Graph.
 - PIE evidence is recorded in `docs/devkit-findings.md` before a diagnostic node
   is removed or generalized.
+- A graph screenshot is supporting evidence only. Checked-in node serialization
+  proves links; compile/save proves asset validity; PIE proves runtime behavior.
+- Snippet execution inputs must be intentionally internal or intentionally
+  unlinked and documented as public caller entry points. Dangling external links
+  are rejected.
 - The player pawn remains possessed. Camera work changes the local view target;
   it never moves or repurposes the player as the drone.
 
@@ -69,8 +79,9 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
 
 ## First planned snippets
 
-1. Client-director BeginPlay diagnostic.
-2. Toggle-key edge detection and state branch.
+1. Client-director BeginPlay diagnostic. **Proven in PIE.**
+2. Toggle-key edge detection and state transition. **Proven in PIE with two
+   presses producing `true`, then `false`.**
 3. Spawn local drone and cache the original view target.
 4. Enter Drone Mode and set the local view target.
 5. Idempotent emergency restore and drone destruction.

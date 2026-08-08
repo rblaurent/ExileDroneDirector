@@ -115,6 +115,31 @@ project component.
 This proves local PIE discovery and attachment. It does not yet prove cooked,
 listen-server, dedicated-server, restoration, or authenticated-player behavior.
 
+## Verified local Drone Mode state transition
+
+A focused PIE acceptance run on 2026-08-08 proved the first executable Drone
+Mode contract inside `BPC_EDD_ClientDirector`:
+
+1. Event Tick polls local Player Controller 0 with
+   `WasInputKeyJustPressed(F10)`.
+2. Only the true edge executes the state transition.
+3. The transition computes and stores
+   `DroneModeActive = NOT DroneModeActive`.
+4. The diagnostic converts the Set node's post-write output to a string and
+   logs only after the write completes.
+
+The compiled Blueprint reported green status and `All Saved`. In one PIE
+session, two F10 presses produced these ordered component-owned messages:
+
+```text
+[BPC_EDD_ClientDirector_C] true
+[BPC_EDD_ClientDirector_C] false
+```
+
+This proves edge detection, persistent component state, correct inversion, and
+post-write diagnostic ordering. It does not yet prove camera spawn, view-target
+switching, restoration, or input-context installation.
+
 ## Blueprint graph automation boundary
 
 The editor Python API can locate the component Event Graph, but the graph object
@@ -129,7 +154,7 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 
 ## Pending local reconnaissance
 
-- Toggle input, view-target lifecycle, and movement graph implementation
+- Drone camera spawn, view-target lifecycle, and movement graph implementation
 - Camera view-target lifecycle in PIE and cooked runtime
 - PIE and cook commands/output locations
 - Authenticated server identity and persistence APIs

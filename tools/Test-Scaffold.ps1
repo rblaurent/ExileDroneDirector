@@ -28,7 +28,10 @@ $requiredFiles = @(
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
-    'tools\blueprint\Test-BlueprintGraphSnippet.ps1'
+    'tools\blueprint\Test-BlueprintGraphSnippet.ps1',
+    'tools\blueprint\Test-BlueprintGraphContracts.ps1',
+    'tools\blueprint\snippets\toggle-input.eddgraph',
+    'tools\blueprint\snippets\toggle-state.eddgraph'
 )
 
 $missing = @(
@@ -68,3 +71,6 @@ Write-Output "Content mirror: $contentRoot"
 if (-not $RequireMvpAssets) {
     Write-Output 'MVP asset presence was not required for this pre-DevKit validation.'
 }
+
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphContracts.ps1') `
+    -ProjectRoot $ProjectRoot

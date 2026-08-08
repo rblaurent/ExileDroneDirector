@@ -11,8 +11,18 @@ The tools in this directory never launch Unreal:
   Blueprint editor into a normalized `.eddgraph` source file.
 - `Test-BlueprintGraphSnippet.ps1` validates node boundaries, identifiers,
   internal links, node classes, and the mod namespace.
+- `Test-BlueprintGraphContracts.ps1` verifies the semantic wiring contract of
+  every checked-in snippet, including execution order and diagnostic source.
 - `Set-BlueprintGraphClipboard.ps1` resolves explicit `{{TOKEN}}` placeholders
   and places the graph on the Windows clipboard for pasting in Unreal.
+
+Validated snippets:
+
+- `toggle-input.eddgraph` owns edge-triggered local key polling and exposes
+  `INPUT_KEY` and `DIAGNOSTIC_TEXT` tokens.
+- `toggle-state.eddgraph` owns exactly one state transition. Its unlinked Set
+  execution pin is the caller entry point; it writes
+  `DroneModeActive = NOT DroneModeActive`, then logs the post-set value.
 
 Authoritative workflow and safety rules live in
 `docs/blueprint-workflow.md`.

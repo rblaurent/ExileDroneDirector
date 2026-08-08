@@ -300,6 +300,7 @@ The first complete editor supports:
 - Exposure compensation
 - Post-process blend weights
 - Procedural motion intensity
+- Cues and State Clips for supported local and world interactions
 
 Tracks may be hidden from the simple interface but remain part of the same
 evaluation model.
@@ -568,3 +569,21 @@ The product direction is proven when a player can:
 
 That is the minimum complete creative and social loop. Additional effects and
 flight presets deepen it; they do not substitute for it.
+
+## 20. Event and visual-system extensions
+
+The timeline supports typed one-shot **Cues** and interval-based **State Clips**.
+They cover safe local presentation and, under explicit server authority, bound
+world interactions such as waiting for or opening a door. Normal scrubbing never
+fires irreversible world actions. Clones retain event structure but disable
+world bindings until the new owner deliberately rebinds them. The complete
+authoring, authority, lease, failure, and cloning rules are defined in
+`docs/event-system.md`.
+
+The complete UI follows the centralized system in
+`docs/visual-design-system.md`. Its direction is a premium modern cinematography
+tool expressed through Conan's charcoal, iron, bone, copper, ember, and blood
+palette. Design tokens, shared components, progressive disclosure, batched
+timeline rendering, explicit interaction states, accessibility, and visual QA are
+release requirements. Functional but incoherent or ad hoc UMG screens do not
+satisfy the product definition.

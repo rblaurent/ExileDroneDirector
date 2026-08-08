@@ -67,6 +67,36 @@ root.
 
 The project cooks, loads, and has confirmed client/server attachment candidates.
 
+## 3.1 UI technology and design-system spike
+
+This bounded spike begins immediately after the empty mod cooks; it does not wait
+for the full-editor phase.
+
+### Objectives
+
+Prove that the Enhanced DevKit exposes the UMG painting, focus, pooling, and input
+hooks needed for a polished production timeline and establish the shared theme
+before one-off widgets proliferate.
+
+### Tasks
+
+1. Create central theme/token assets using the palette, type, spacing, shape,
+   motion, track, and state definitions in `docs/visual-design-system.md`.
+2. Build production candidates for button, numeric field, slider, panel, icon,
+   tooltip, track row, key, Cue, and State Clip components.
+3. Prototype the responsive viewport/list/inspector/timeline workspace.
+4. Demonstrate adaptive timeline grid/ruler, pan/zoom, playhead scrub, batched
+   curve drawing, pooled key/clip dragging, and context-inspector switching.
+5. Prove text focus does not leak drone/timeline shortcuts and Emergency Exit
+   remains reachable.
+6. Measure at 1080p, 1440p, 4K, ultrawide, and representative UI scales.
+
+### Exit gate
+
+The interaction foundation meets its frame-time budget, scales correctly, and
+passes the initial visual QA checklist using mock data. These widgets become the
+production component library rather than a disposable mockup.
+
 ## 4. Phase 1 — Safe local camera vertical slice
 
 ### Objectives
@@ -374,6 +404,44 @@ Complete the social Flypath loop.
 The complete create/refine/publish/discover/play/clone/remix loop works on a
 dedicated server with enforced privacy and immutable playback.
 
+## 11.1 Event tracks and world-interaction vertical slice
+
+### Objectives
+
+Add safe local Cues and server-authorized State Clips without turning Flypaths
+into an unrestricted remote-control mechanism.
+
+### Tasks
+
+1. Implement Event track, Cue, State Clip, target-binding, adapter, and compiled
+   execution-plan structures from `docs/event-system.md`.
+2. Implement local presentation Cues and deterministic Cue-crossing ledger.
+3. Implement absolute-time State Clip evaluation and scrub-safe preview.
+4. Build Bind Target viewport interaction and resolution diagnostics.
+5. Implement EDD Event Anchor, then a narrow door adapter.
+6. Ship `Wait Until Open` before any mutating door operation.
+7. Add viewer-authorized interaction and typed server results.
+8. Add bounded cinematic state leases only after cancellation, disconnect,
+   conflict, and restoration tests pass.
+9. Add publishing capability metadata, policy controls, rate limits, and clone
+   binding disable/rebind behavior.
+
+### Acceptance sequence
+
+- Scrubbing across a Cue never executes a world action.
+- Real playback fires each configured Cue exactly once per loop/direction policy.
+- A door State Clip reaches open state before camera arrival or applies its
+  explicit failure policy.
+- Unauthorized viewers cannot change the door.
+- Cancel/disconnect restores or safely yields leases without affecting camera
+  restoration.
+- A clone is private and cannot use the source world binding until reauthorized.
+
+### Exit gate
+
+Local Cues and one narrow door workflow operate predictably on a dedicated server
+with explicit permission, failure, clone, and cleanup behavior.
+
 ## 12. Phase 9 — Streaming, capture, and playback polish
 
 ### Objectives
@@ -491,6 +559,9 @@ utility tests and golden sampled outputs that can be run before cooking.
 | Large revisions overload RPC/storage | High | Limits, on-demand fetch, hashes, full-document measurement before deltas |
 | DevKit update moves private base members | Medium | Attachment adapters, minimal base coupling, version diagnostics |
 | Direct video output unavailable | Low | External recording is the supported baseline |
+| World events become a remote-control/PvP exploit | Critical | Typed adapters, server policy, revision validation, target binding, rate limits, clone rebind |
+| Stateful event rollback overwrites concurrent changes | High | Adapter conflict detection, bounded leases, conservative yield, explicit persistent actions |
+| Blueprint UMG timeline becomes slow/incoherent | High | Early production UI spike, batched drawing, pooling/virtualization, token/component enforcement |
 
 ## 16. Planned asset organization
 
@@ -522,6 +593,13 @@ Content/Mods/ExileDroneDirector/
     Timeline/
     Playback/
     Settings/
+    Style/
+    Components/
+  Events/
+    Adapters/
+    Bindings/
+    Execution/
+    Anchors/
   Debug/
   Tests/
 ```
@@ -534,6 +612,7 @@ Content/Mods/ExileDroneDirector/
 - **0.4 Camera Suite:** lens, focus, effects, full timeline.
 - **0.5 Server Drafts:** identity, persistence, ownership, conflicts.
 - **0.6 Sharing Alpha:** publish, library, viewer playback, cloning.
+- **0.7 Directing Alpha:** local Cues, State Clips, bindings, and safe door adapter.
 - **0.8 Capture Beta:** streaming/capture polish, admin policy, migrations.
 - **1.0 Public Release:** hardened complete loop and documentation.
 
@@ -546,9 +625,12 @@ Version numbers describe capability gates, not calendar promises.
 3. Create `ExileDroneDirector` through the official mod menu.
 4. Implement `BP_EDD_ModController` and diagnostic client/server components.
 5. Identify the owning local player and authenticated server identity paths.
-6. Spawn a local camera, switch view target, and restore it.
-7. Cook and test that slice before building waypoint UI.
-8. Sync assets to Git and record the exact integration findings.
+6. Verify UMG custom painting, input focus, theme assets, and component styling.
+7. Inspect persistent object identity and door interaction interfaces for the
+   event-binding adapter.
+8. Spawn a local camera, switch view target, and restore it.
+9. Cook and test that slice before building waypoint UI.
+10. Sync assets to Git and record the exact integration findings.
 
 The first technical milestone is not “the camera moved in PIE.” It is “the cooked
 mod entered and exited Drone Mode safely on a dedicated server client.”

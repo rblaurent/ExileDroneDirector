@@ -656,3 +656,42 @@ and cancellation/restoration work reliably.
 
 Each unknown has a bounded spike in the implementation plan. Findings update the
 adapter layer and asset parent classes, not the domain semantics.
+
+## 25. Event subsystem boundary
+
+The timeline event subsystem is a sibling of trajectory/camera evaluation. It
+compiles typed Cues and State Clips into a deterministic execution plan with an
+absolute-time state index and Cue-crossing ledger. It never accepts arbitrary
+class/function names from a client.
+
+Local Cinematic events execute entirely on the viewer. Viewer Interaction and
+Server World scopes cross a dedicated server-authoritative adapter layer that
+validates authenticated identity, published revision/hash, target binding,
+operation, server policy, rate limit, and current object state. Stateful
+interactions may use bounded server leases only when an adapter supports reliable
+read/restore/conflict behavior.
+
+Serialized target bindings use durable Conan object IDs when available or an EDD
+Event Anchor fallback. Transient actor pointers and unvalidated transform-only
+lookup are not authoritative. Clone operations disable world bindings until the
+new owner rebinds them. Full structures, RPC sequence, adapter behavior, door
+policies, and acceptance scenarios are defined in `docs/event-system.md`.
+
+## 26. UI and theme architecture
+
+All UMG screens consume semantic tokens and shared components defined by the
+visual design system. Theme assets provide palette, typography, spacing, borders,
+icons, motion, track styles, and interaction states. Literal one-off styling in
+screen widgets is rejected during review.
+
+Timeline grids/curves/static guides use batched custom painting where the DevKit
+allows it. Only visible interactive keys, handles, Cues, and State Clips receive
+pooled widgets. Library/track rows are virtualized, and one authoritative
+time-to-screen transform drives drawing, hit testing, snapping, zoom, and pan.
+
+UI view models remain separate from Flypath documents and actors. A focus router
+coordinates text entry, drone controls, viewport gestures, timeline shortcuts,
+modals, and Emergency Exit. The UMG technology foundation is proven early rather
+than deferred until polish. The token values, component inventory, visual states,
+performance strategy, anti-patterns, and release quality gate are defined in
+`docs/visual-design-system.md`.

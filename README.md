@@ -2,9 +2,9 @@
 
 Exile Drone Director is a Blueprint-only cinematic creation and sharing mod for
 Conan Exiles Enhanced. Players fly a virtual drone, capture camera waypoints,
-refine movement/timing/lens/effects, and publish immutable Flypath revisions to
-their server. Other server members can play public Flypaths or clone them into
-private editable copies.
+refine movement/timing/lens/effects, choreograph supported timeline events, and
+publish immutable Flypath revisions to their server. Other server members can
+play public Flypaths or clone them into private editable copies.
 
 ## Product loop
 
@@ -22,7 +22,11 @@ Read these in order:
    movement profiles, lens/effects, playback, and server policy.
 2. `docs/architecture.md` — client/server boundaries, data model, persistence,
    trajectory compilation, deterministic evaluation, security, and recovery.
-3. `docs/implementation-plan.md` — phased build plan, exit gates, test matrix,
+3. `docs/event-system.md` — Cues, State Clips, door/object binding, execution
+   scopes, event authority, cloning safety, and synchronized-performance rules.
+4. `docs/visual-design-system.md` — Conan-derived palette, design tokens,
+   component library, timeline language, UMG strategy, and UI quality gates.
+5. `docs/implementation-plan.md` — phased build plan, exit gates, test matrix,
    risks, asset organization, and release criteria.
 
 ## Architectural invariants
@@ -36,6 +40,9 @@ Read these in order:
 - Geometry, time/speed, airframe, gimbal, lens, and effects are separate smooth
   evaluation layers.
 - Published trajectories are deterministic and independent of client frame rate.
+- Timeline world interactions are typed, bound, permission-checked events—not
+  arbitrary remote function calls.
+- Every screen uses one theme and component system derived from Conan's palette.
 
 ## Current status
 

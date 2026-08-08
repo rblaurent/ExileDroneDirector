@@ -4,7 +4,7 @@
   "target": "Conan Exiles Enhanced",
   "engine": "Unreal Engine 5.6.1",
   "implementation": "Blueprint-only",
-  "version": "0.2.0-design",
+  "version": "0.3.0-design",
   "mvpAssets": [
     "BP_EDD_ModController.uasset",
     "Core/Client/BPC_EDD_ClientDirector.uasset",

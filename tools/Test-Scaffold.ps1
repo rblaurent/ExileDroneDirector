@@ -12,6 +12,8 @@ $requiredFiles = @(
     'project.json',
     'docs\product-design.md',
     'docs\architecture.md',
+    'docs\event-system.md',
+    'docs\visual-design-system.md',
     'docs\implementation-plan.md',
     'tools\Sync-DevKitContent.ps1'
 )

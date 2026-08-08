@@ -1,0 +1,16 @@
+{
+  "name": "Exile Drone Director",
+  "modFolder": "ExileDroneDirector",
+  "target": "Conan Exiles Enhanced",
+  "engine": "Unreal Engine 5.6.1",
+  "implementation": "Blueprint-only",
+  "version": "0.1.0-dev",
+  "mvpAssets": [
+    "BP_EDD_ModController.uasset",
+    "Blueprints/BPC_EDD_DroneDirector.uasset",
+    "Blueprints/BP_EDD_DroneCamera.uasset",
+    "Blueprints/BP_EDD_PathPreview.uasset",
+    "Data/ST_EDD_Waypoint.uasset",
+    "UI/WBP_EDD_DroneHUD.uasset"
+  ]
+}

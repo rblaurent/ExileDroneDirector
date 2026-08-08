@@ -34,6 +34,9 @@ Read these in order:
 5. `docs/implementation-plan.md` — phased build plan, exit gates, test matrix,
    risks, asset organization, and release criteria.
 
+6. `docs/devkit-findings.md` — verified Enhanced installation identity, exact
+   integration paths, local API findings, and rejected Legacy assumptions.
+
 ## Architectural invariants
 
 - The player pawn remains possessed and is never moved by a Flypath.

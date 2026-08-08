@@ -13,8 +13,11 @@ $requiredFiles = @(
     'docs\product-design.md',
     'docs\architecture.md',
     'docs\event-system.md',
+    'docs\devkit-findings.md',
     'docs\visual-design-system.md',
     'docs\implementation-plan.md',
+    '.gitattributes',
+    '.gitignore',
     'tools\Sync-DevKitContent.ps1'
 )
 

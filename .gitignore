@@ -1,0 +1,19 @@
+# Unreal-generated output must never be mirrored into the source repository.
+Saved/
+Intermediate/
+DerivedDataCache/
+Binaries/
+
+# Cooked/distributed output is a release artifact, not Blueprint source.
+*.pak
+*.ucas
+*.utoc
+*.sig
+*.log
+
+# Local editor and operating-system state.
+.vs/
+.idea/
+Thumbs.db
+Desktop.ini
+

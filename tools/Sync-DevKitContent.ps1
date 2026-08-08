@@ -16,9 +16,20 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $modName = 'ExileDroneDirector'
-$assetExtensions = @('.uasset', '.umap')
+$assetExtensions = @('.uasset', '.umap', '.ubulk', '.uexp')
+$metadataNames = @('modinfo.json')
 
 $resolvedRoot = (Resolve-Path -LiteralPath $DevKitRoot).Path
+$buildVersionPath = Join-Path $resolvedRoot 'Engine\Build\Build.version'
+if (-not (Test-Path -LiteralPath $buildVersionPath -PathType Leaf)) {
+    throw "No Unreal Engine Build.version was found beneath '$resolvedRoot'."
+}
+
+$buildVersion = Get-Content -LiteralPath $buildVersionPath -Raw | ConvertFrom-Json
+if ($buildVersion.MajorVersion -ne 5 -or $buildVersion.MinorVersion -ne 6) {
+    throw "Wrong DevKit engine version $($buildVersion.MajorVersion).$($buildVersion.MinorVersion).$($buildVersion.PatchVersion) at '$resolvedRoot'. Exile Drone Director requires the Conan Exiles Enhanced UE 5.6 DevKit; the similarly named UE 4.15 kit is Legacy."
+}
+
 $candidateModRoots = @(
     (Join-Path $resolvedRoot 'UE4\Content\Mods'),
     (Join-Path $resolvedRoot 'Games\ConanSandbox\Content\Mods')
@@ -54,7 +65,10 @@ $copied = 0
 $unchanged = 0
 $conflicts = [System.Collections.Generic.List[string]]::new()
 $sourceFiles = Get-ChildItem -LiteralPath $source -File -Recurse |
-    Where-Object { $assetExtensions -contains $_.Extension.ToLowerInvariant() }
+    Where-Object {
+        ($assetExtensions -contains $_.Extension.ToLowerInvariant()) -or
+        ($metadataNames -contains $_.Name.ToLowerInvariant())
+    }
 
 foreach ($file in $sourceFiles) {
     $relativePath = [System.IO.Path]::GetRelativePath($source, $file.FullName)

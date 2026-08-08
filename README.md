@@ -54,13 +54,13 @@ Read these in order:
 
 ## Current status
 
-The product design, technical architecture, implementation sequence, source
-mirror, and synchronization tooling are established. Unreal `.uasset` files must
-be authored and cooked through the official Conan Exiles Enhanced DevKit; they
-cannot be generated faithfully as text source.
+The Enhanced UE 5.6.1 mod container and first Unreal asset scaffold now exist.
+The scaffold includes a Funcom ModController, client-only director component,
+SpectatorPawn-based CineCamera drone, spline path preview, Flypath data structs,
+HUD widget, and Enhanced Input assets. All compile and save with zero errors.
 
-The first technical milestone is a cooked dedicated-server client that can enter,
-fly, and safely exit Drone Mode without unpossessing or moving the player pawn.
+The next technical milestone is executable Drone Mode: enter, fly, adjust the
+CineCamera, and safely exit without unpossessing or moving the player pawn.
 
 ## Repository layout
 

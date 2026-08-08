@@ -73,11 +73,32 @@ or copied from the Legacy kit.
 The editor was launched with Python Script Plugin and Editor Scripting Utilities
 enabled. Both mounted successfully, making repeatable editor automation possible.
 
+## Verified first asset scaffold
+
+The first idempotent generation pass created 14 mod-owned packages beneath the
+Dreamworld `Local/` overlay (142 KB total). The commandlet completed with zero
+errors and no scaffold warnings.
+
+Verified integration points:
+
+- `BP_EDD_ModController` inherits Funcom's `ModController`.
+- `BPC_EDD_ClientDirector` is attached to
+  `FunCombat_PlayerController` using `AdditionalClassComponent` with the
+  client-only `CLIENT` rule.
+- `BP_EDD_DroneCamera` inherits `SpectatorPawn` and owns a
+  `CineCameraComponent` named `DroneCamera`.
+- `BP_EDD_PathPreview` owns a `SplineComponent` named `PathSpline`.
+- Enhanced Input actions and a mapping context were created for toggle, move,
+  look, boost, and waypoint capture.
+- Flypath document, waypoint, and segment struct assets plus the initial HUD
+  Widget Blueprint were created.
+
+The source mirror sync was verified under Windows PowerShell 5.1 and all Unreal
+binary extensions are covered by Git LFS.
+
 ## Pending local reconnaissance
 
-- Mod Controller parent class and component-copy rules
-- Owning client player/controller attachment candidate
-- Input binding strategy
-- Camera and Cine Camera Blueprint exposure in cooked runtime
+- Input mapping and Blueprint event-graph implementation
+- Camera view-target lifecycle in PIE and cooked runtime
 - PIE and cook commands/output locations
 - Authenticated server identity and persistence APIs

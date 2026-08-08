@@ -71,7 +71,7 @@ $sourceFiles = Get-ChildItem -LiteralPath $source -File -Recurse |
     }
 
 foreach ($file in $sourceFiles) {
-    $relativePath = [System.IO.Path]::GetRelativePath($source, $file.FullName)
+    $relativePath = $file.FullName.Substring($source.Length).TrimStart([char[]]@('\', '/'))
     $targetPath = Join-Path $destination $relativePath
     $targetDirectory = Split-Path -Parent $targetPath
 

@@ -21,7 +21,9 @@ $requiredFiles = @(
     'tools\Sync-DevKitContent.ps1',
     'tools\Test-RepositoryBudget.ps1',
     'tools\Invoke-UnrealPython.ps1',
-    'tools\unreal\Probe-EnhancedApi.py'
+    'tools\unreal\Probe-EnhancedApi.py',
+    'tools\unreal\Inspect-BlueprintApi.py',
+    'tools\unreal\Generate-MvpScaffold.py'
 )
 
 $missing = @(

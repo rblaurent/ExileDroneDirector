@@ -1,0 +1,562 @@
+# Exile Drone Director — Implementation Plan
+
+Status: execution plan for Conan Exiles Enhanced DevKit development
+Planning rule: every phase ends in a cooked, testable vertical capability
+Release strategy: prove safety and persistence before investing in maximal polish
+
+## 1. Delivery strategy
+
+Development proceeds through vertical slices rather than building all UI, all
+math, or all networking in isolation. The first complete loop is intentionally
+small:
+
+**Create private Flypath → capture two waypoints → save on server → publish →
+second client plays → second client clones privately**
+
+That loop establishes the camera boundary, client/server attachment, durable
+identity, persistence, authorization, network transport, immutable publication,
+local evaluation, and cloning. Subsequent phases improve trajectory quality,
+editor depth, camera visuals, and release hardening without replacing the core.
+
+## 2. Engineering rules
+
+- Build Blueprint assets only inside the official Enhanced DevKit.
+- Keep all mod-owned assets under `Content/Mods/ExileDroneDirector`.
+- Never edit or relocate base-game assets; attach components through the Mod
+  Controller and subclass/reference supported classes.
+- Sync closed-editor `.uasset` source back to the Git repository after each
+  verified slice.
+- Test both PIE and cooked mod behavior; PIE success alone is insufficient.
+- Test on a dedicated server as soon as the first RPC exists.
+- Keep authoring data, compiled trajectory data, and UI state separate.
+- Never use display name as ownership authority.
+- Never add a smoothness feature without a discontinuity/scrub test.
+- Never enter a camera state without a tested restoration path.
+
+## 3. Phase 0 — DevKit reconnaissance and project creation
+
+### Objectives
+
+Confirm the Enhanced-specific integration points and create the real mod asset
+root.
+
+### Tasks
+
+1. Complete and verify the DevKit installation.
+2. Launch the DevKit and create `ExileDroneDirector` through its mod menu.
+3. Record exact generated paths and Mod Controller conventions.
+4. Identify candidate player controller, player character, HUD, game state,
+   game mode, and server-owned persistence hosts.
+5. Inspect component attachment rules for Client, Server, and Server and Client
+   Copies.
+6. Identify available input system and safe custom-action strategy.
+7. Confirm camera, Cine Camera, post-process, SaveGame, GUID, quaternion, spline,
+   and file/runtime rendering nodes exposed to Blueprint.
+8. Identify the durable authenticated account/player ID exposed server-side.
+9. Create a findings document with exact asset paths, screenshots, and rejected
+   alternatives.
+
+### Verification
+
+- Mod loads in PIE with a visible diagnostic message.
+- Cooked empty mod loads in local game without modifying a base asset.
+- Client and dedicated-server component BeginPlay can be distinguished in logs.
+- The repository's sync tool recognizes the actual DevKit layout.
+
+### Exit gate
+
+The project cooks, loads, and has confirmed client/server attachment candidates.
+
+## 4. Phase 1 — Safe local camera vertical slice
+
+### Objectives
+
+Enter Drone Mode, move a local camera, and restore the game perfectly.
+
+### Assets
+
+- `BP_EDD_ModController`
+- `BPC_EDD_ClientDirector`
+- `BP_EDD_DroneCamera`
+- `WBP_EDD_DroneHUD`
+- Initial state/input enums and settings struct
+
+### Tasks
+
+1. Attach the client director only to the owning local player context.
+2. Implement the client state machine: Inactive, Entering, Flying, Restoring.
+3. Cache original view target, input mode, cursor, HUD state, and movement policy.
+4. Spawn a non-replicated camera actor and call local view-target switching.
+5. Implement six-axis movement, mouse look, speed trim, normal/fine/boost modes,
+   and optional horizon lock.
+6. Leave the player pawn possessed and physically unchanged.
+7. Implement idempotent Emergency Exit.
+8. Bind restoration to death, pawn replacement, teleport, disconnect, UI close,
+   camera destruction, and component end-play.
+9. Add an opt-in collision sweep and diagnostic HUD.
+
+### Test matrix
+
+- Single-player PIE
+- Listen server as host and client
+- Dedicated server with two clients
+- Enter/exit ten consecutive times
+- Exit while moving and while UI has keyboard focus
+- Die/respawn, teleport, disconnect, and close UI while active
+- Destroy camera actor artificially
+- Reload mod/session and verify normal Conan camera/input
+
+### Exit gate
+
+The cooked mod can fly for ten minutes and survives every restoration test without
+moving the pawn, losing input, retaining a cursor/HUD override, or duplicating a
+camera actor.
+
+## 5. Phase 2 — Local Flypath authoring core
+
+### Objectives
+
+Create an in-memory private Flypath and edit intentional waypoints.
+
+### Assets
+
+- `ST_EDD_FlypathDocument`
+- `ST_EDD_Waypoint`
+- `ST_EDD_Segment`
+- `BP_EDD_PathPreview`
+- Editor command/undo structs
+- Expanded `WBP_EDD_Editor`
+
+### Tasks
+
+1. Implement stable IDs for waypoints, segments, and editor commands.
+2. Capture current drone position, body/gimbal rotation, basic focal length/FOV,
+   and focus distance into a waypoint.
+3. Append, insert, replace, duplicate, reorder, and delete waypoints.
+4. Jump the editor camera to a selected waypoint without moving the pawn.
+5. Provide exact numeric transform editing plus WASD/mouse fine adjustment.
+6. Render numbered markers and a linear path preview.
+7. Implement transactional undo/redo for all waypoint operations.
+8. Implement structural validation and clear diagnostics.
+9. Keep draft model independent from preview actor components.
+
+### Verification
+
+- Author twenty waypoints and edit the middle ten.
+- Undo/redo the full operation chain without changing IDs/order incorrectly.
+- Delete and reinsert endpoints.
+- Feed invalid/NaN-equivalent values through UI boundaries and reject them.
+- Maintain acceptable editor frame time with the initial maximum waypoint count.
+
+### Exit gate
+
+A creator can compose and revise a local multi-waypoint Flypath reliably, and its
+document can be serialized/deserialized in memory without loss.
+
+## 6. Phase 3 — Trajectory compiler v1
+
+### Objectives
+
+Produce deterministic, scrub-safe playback with linear, manual cubic, and smooth
+cinematic trajectories.
+
+### Assets
+
+- Trajectory compiler Blueprint/function library
+- Compiled segment/sample structs
+- Arc-length table implementation
+- Time-profile curve assets/presets
+- Trajectory diagnostics
+
+### Tasks
+
+1. Define the compiled Flypath representation and engine version `1`.
+2. Implement Linear spatial segments.
+3. Implement cubic Hermite/Bezier with generated and manual tangents.
+4. Implement quintic position interpolation with shared position, velocity, and
+   acceleration boundary constraints for C2 cinematic continuity.
+5. Implement Stop, Glide, Fly-by, Tight, and Cut corner modes.
+6. Build adaptive arc-length tables and distance-to-parameter inversion.
+7. Implement monotonic Linear, Smoothstep, Smootherstep, and Cinematic S-curve
+   time profiles.
+8. Implement duration and target-speed modes plus impossible-constraint warnings.
+9. Sample curves for overshoot, collision, duration, and continuity diagnostics.
+10. Make evaluation a pure function of compiled data and absolute time.
+
+### Verification
+
+- Constant-speed test over unequal curved segments.
+- Direct scrub to arbitrary time equals forward playback result.
+- Position is exact at required interpolating waypoints.
+- Numeric derivative probes show expected C0/C1/C2 continuity.
+- No curve loop/overshoot with standard auto presets on adversarial waypoint sets.
+- Linear and Cut remain deliberately discontinuous only where requested.
+- Identical document and engine version produce identical sampled outputs.
+
+### Exit gate
+
+The editor plays and scrubs linear, manual, and C2 cinematic paths with stable
+timing and actionable diagnostics.
+
+## 7. Phase 4 — Rotation, flight profiles, and deterministic drone character
+
+### Objectives
+
+Separate airframe and gimbal and deliver Cinematic, Hybrid, and FPV identities.
+
+### Tasks
+
+1. Normalize and sign-align serialized rotations.
+2. Implement quaternion multi-key interpolation using SQUAD or a Blueprint-safe
+   equivalent with smooth angular velocity.
+3. Implement Cinematic airframe tangent/look-ahead orientation and clamped
+   curvature-derived banking.
+4. Implement independent gimbal orientation, horizon lock, fixed look-at, and
+   weighted body-lock.
+5. Implement Hybrid stabilization as a continuous blend.
+6. Build deterministic FPV compilation with gates, acceleration/turn limits,
+   bank/pitch derivation, camera uptilt, and fixed-timestep prebaking.
+7. Add Cinewhoop, Freestyle, Long-range, Cinematic, and Hybrid presets.
+8. Add deterministic coherent wind/vibration tracks with stored seeds.
+9. Add a minimum-snap/seventh-order spike; adopt only if Blueprint solve cost and
+   numerical stability beat the quintic system meaningfully.
+
+### Verification
+
+- No quaternion long-way flips or Euler wrap artifacts.
+- Angular velocity does not visibly jump at smooth waypoint boundaries.
+- Scrubbing produces stable body/gimbal transforms.
+- FPV playback is identical at different game frame rates.
+- Presets produce observably distinct behavior from identical waypoints.
+- Procedural motion repeats exactly and blends in/out continuously.
+
+### Exit gate
+
+One waypoint layout can be replayed convincingly as stabilized cinematic,
+body-expressive hybrid, and momentum-driven FPV without reauthoring positions.
+
+## 8. Phase 5 — Camera, lens, focus, and visual tracks
+
+### Objectives
+
+Turn trajectory playback into authored cinematography.
+
+### Tasks
+
+1. Confirm cooked Cine Camera/post-process property availability.
+2. Implement the common scalar-track evaluator and curve presets.
+3. Add focal length, filmback, aperture, focus distance, focus influence,
+   exposure EV, and effect blend-weight tracks.
+4. Implement manual focus, Set Focus Here trace, fixed focus marker, rack focus,
+   and smoothed fixed-target autofocus.
+5. Add linear-distance and reciprocal-distance/diopter focus interpolation.
+6. Visualize focal plane and approximate depth-of-field range in editor.
+7. Add dolly-zoom authoring helper.
+8. Add supported bloom, vignette, grading/tint, motion blur, chromatic aberration,
+   sharpening, matte, and other verified effect tracks.
+9. Build named base looks without hiding individual values.
+10. Implement viewer comfort overrides for roll, shake, blur, exposure changes,
+    and chromatic aberration.
+
+### Verification
+
+- Every continuous scalar track passes value/derivative boundary probes.
+- Focus and focal-length pulls scrub and replay identically.
+- Dolly zoom keeps the selected fixed subject approximately constant in frame.
+- Unsupported cooked properties fail as unavailable, not as broken controls.
+- Comfort overrides are local and do not mutate the Flypath document.
+
+### Exit gate
+
+A creator can author a smooth lens/focus/effect sequence aligned with movement,
+and another viewer can safely reduce comfort-sensitive effects.
+
+## 9. Phase 6 — Full editor UI
+
+### Objectives
+
+Deliver the library/editor/timeline workflow described by the product design.
+
+### Tasks
+
+1. Implement responsive editor layout with collapsible panels.
+2. Build waypoint list, viewport overlays, and property inspector.
+3. Build timeline travel/hold blocks and draggable playhead.
+4. Add track visibility, key selection, key dragging, box selection, and retime.
+5. Build curve editor with semantic presets and advanced tangent controls.
+6. Add Smooth Selected/Everything with lock-aware transactions.
+7. Add error/warning navigation to exact waypoint/segment/track.
+8. Add remappable controls and prevent bindings while editing text.
+9. Add dirty/saving/conflict/recovery status.
+10. Add keyboard navigation and usable scaling at supported resolutions.
+
+### Verification
+
+- Complete an authoring task using primarily mouse/UI.
+- Repeat using primarily keyboard/drone controls.
+- Undo/redo bulk retime and smoothing as single transactions.
+- Resize/collapse panels without losing selection or active edit.
+- Test input focus, text fields, sliders, curve handles, and Emergency Exit.
+
+### Exit gate
+
+A knowledgeable player can create and fine-tune a polished Flypath without
+opening debug tools or understanding the underlying Blueprint graph.
+
+## 10. Phase 7 — Server repository, identity, and private drafts
+
+### Objectives
+
+Persist owner-editable private Flypaths across dedicated-server restarts.
+
+### Tasks
+
+1. Complete storage-adapter spike and select the supported server persistence
+   mechanism.
+2. Implement server repository and metadata index.
+3. Resolve durable authenticated account identity.
+4. Implement server policy and validation limits.
+5. Implement Create, List Mine, Fetch Draft, Save Draft, Rename, and Delete.
+6. Add optimistic concurrency and typed errors.
+7. Add debounced save, retry/backoff, offline-change state, and save-as-new conflict
+   recovery.
+8. Add schema/version serialization and first migration harness.
+9. Add bounded rate limiting and server logs.
+
+### Verification
+
+- Create/save/reconnect/reload private Flypath.
+- Restart dedicated server and recover identical data/ownership.
+- Attempt update/delete from a second account and receive Forbidden.
+- Open same path in two sessions and exercise RevisionConflict.
+- Corrupt/incompletely write a test candidate and recover previous committed data.
+- Exceed every configured limit and receive a safe typed failure.
+
+### Exit gate
+
+Private Flypaths are durable, server-authoritative, owner-protected, and
+recoverable.
+
+## 11. Phase 8 — Publishing, discovery, playback, and cloning
+
+### Objectives
+
+Complete the social Flypath loop.
+
+### Tasks
+
+1. Implement atomic Publish Draft and Unpublish.
+2. Implement paged My Flypaths and Server Flypaths metadata queries.
+3. Implement published snapshot fetch/cache by ID, revision, and hash.
+4. Implement library search/filter/sort and compatibility badges.
+5. Implement individual viewer playback preparation, countdown, controls, and
+   safe restoration.
+6. Implement Clone Published as a deep private copy with attribution.
+7. Ensure draft edits never mutate published revision.
+8. Ensure republish never changes active playback snapshots.
+9. Add administrative unpublish/delete and policy controls.
+10. Add region/bounds compatibility checks.
+
+### Two-client acceptance scenario
+
+1. Player A creates and saves a private Flypath.
+2. Player B cannot list or fetch it.
+3. Player A publishes revision 1.
+4. Player B discovers and begins revision 1 playback.
+5. Player A edits the draft and publishes revision 2.
+6. Player B finishes revision 1 unchanged.
+7. Player B replays and receives revision 2.
+8. Player B clones revision 2; clone is private and owned by B.
+9. Player A edits/deletes the source; B's clone remains unchanged.
+
+### Exit gate
+
+The complete create/refine/publish/discover/play/clone/remix loop works on a
+dedicated server with enforced privacy and immutable playback.
+
+## 12. Phase 9 — Streaming, capture, and playback polish
+
+### Objectives
+
+Make real-world server playback and recording dependable.
+
+### Tasks
+
+1. Test camera-driven streaming at route extremes and different regions.
+2. Implement route preparation/prewarming supported by Conan.
+3. Add conservative bounds/speed policy where streaming cannot keep up.
+4. Implement Clean Playback HUD suppression and configurable countdown.
+5. Document OBS and Steam Recording workflows.
+6. Add loop, selection playback, and deterministic repeated takes.
+7. Probe runtime Movie Render Pipeline and image/video outputs in cooked build.
+8. Add direct rendering only behind an experimental flag if completely safe.
+9. Investigate optional local thumbnail capture.
+
+### Verification
+
+- Long route, fast FPV route, dense build, dungeon/interior, and low-client-FPS
+  cases.
+- Cancel capture at every stage and restore UI/view.
+- Repeated takes produce identical evaluated transforms.
+- Remote recording never moves the player pawn.
+
+### Exit gate
+
+Clean external recording is reliable; direct rendering is either verified and
+isolated or explicitly documented as unsupported.
+
+## 13. Phase 10 — Release hardening
+
+### Objectives
+
+Ship a supportable public Workshop release.
+
+### Tasks
+
+1. Profile Blueprint CPU, allocations, preview component counts, network payloads,
+   server storage, and load times.
+2. Tune policy defaults and waypoint/key limits from measurements.
+3. Complete schema migration and downgrade/future-version messages.
+4. Test mod load order and known UI/input conflicts.
+5. Validate installation/update on fresh client and dedicated server.
+6. Write player guide, server-admin guide, privacy/PvP warning, troubleshooting,
+   and recovery instructions.
+7. Add in-mod version/build diagnostics.
+8. Produce sample Flypaths covering cinematic, hybrid, FPV, orbit, rack focus,
+   and dolly zoom.
+9. Run a closed two-server beta before public Workshop publication.
+
+### Exit gate
+
+No critical camera-restoration, ownership, privacy, persistence, or corrupt-save
+defects remain; public documentation matches actual cooked behavior.
+
+## 14. Test strategy
+
+### 14.1 Automated/math harnesses
+
+Where Blueprint automation is available, build data-driven tests for:
+
+- Curve endpoints and finite values
+- C0/C1/C2/C3 derivative continuity expectations
+- Arc-length constant-speed error tolerance
+- Time-curve monotonicity
+- Quaternion shortest path and angular continuity
+- Deterministic procedural noise
+- Serialization round-trip and migration
+- Authorization decision tables
+- Document bounds and validation
+
+If the DevKit lacks a useful automation runner, expose deterministic editor
+utility tests and golden sampled outputs that can be run before cooking.
+
+### 14.2 Manual runtime matrix
+
+- Single-player
+- Listen server host/client
+- Dedicated server with at least two accounts
+- High/low frame rate
+- Death/respawn
+- Teleport and region transition
+- Disconnect/reconnect
+- Server restart
+- Mod update/schema migration
+- Dense player build and empty landscape
+- Long cinematic and high-speed FPV paths
+- Different UI scaling/resolutions and remapped controls
+
+### 14.3 Release-blocking defect classes
+
+- Player camera/input cannot be restored
+- Player pawn moved/teleported unintentionally
+- Unauthorized private data access or mutation
+- Clone linked to or mutating its source
+- Published revision changes during active playback
+- Server persistence corruption or destructive migration
+- Non-deterministic published trajectory at different frame rates
+- Unbounded RPC/storage payload
+
+## 15. Risk register and mitigation
+
+| Risk | Impact | Mitigation/spike |
+| --- | --- | --- |
+| No clean dedicated-server mod persistence | Critical | Repository adapter spike; persisted actor or supported server SaveGame fallback |
+| No durable Blueprint account ID | Critical | Inspect authenticated controller/player state; block sharing until authoritative identity exists |
+| Camera view target does not drive streaming | High | Early remote-route spike; prewarm/bounds restrictions; same-region policy |
+| Cine Camera/post-process stripped in cook | High | Cooked Phase 0/5 probes; fallback Camera component and supported properties |
+| Blueprint global minimum-snap solve unstable | Medium | Ship quintic C2 first; precompute bounded systems; reserve seventh-order for verified cases |
+| FPV integration depends on frame rate | High | Fixed-step compile/prebake and absolute-time sample evaluation |
+| UMG curve editor too expensive/fragile | Medium | Semantic presets first; advanced editor built after core evaluator |
+| Public Flypaths enable PvP scouting | High | Admin/creative defaults, range/region policy, explicit warnings |
+| Large revisions overload RPC/storage | High | Limits, on-demand fetch, hashes, full-document measurement before deltas |
+| DevKit update moves private base members | Medium | Attachment adapters, minimal base coupling, version diagnostics |
+| Direct video output unavailable | Low | External recording is the supported baseline |
+
+## 16. Planned asset organization
+
+```text
+Content/Mods/ExileDroneDirector/
+  BP_EDD_ModController
+  Core/
+    Client/
+    Server/
+    Camera/
+    Validation/
+  Data/
+    Structs/
+    Enums/
+    Presets/
+    Curves/
+  Trajectory/
+    Compiler/
+    Evaluator/
+    FlightProfiles/
+    Diagnostics/
+  Persistence/
+    Repository/
+    Adapters/
+    Migration/
+  UI/
+    Library/
+    Editor/
+    Timeline/
+    Playback/
+    Settings/
+  Debug/
+  Tests/
+```
+
+## 17. Version roadmap
+
+- **0.1 Camera Spike:** safe enter/fly/exit in cooked multiplayer.
+- **0.2 Local Authoring:** waypoints, undo, linear and cinematic playback.
+- **0.3 Drone Motion:** quaternion/gimbal, cinematic/hybrid/FPV profiles.
+- **0.4 Camera Suite:** lens, focus, effects, full timeline.
+- **0.5 Server Drafts:** identity, persistence, ownership, conflicts.
+- **0.6 Sharing Alpha:** publish, library, viewer playback, cloning.
+- **0.8 Capture Beta:** streaming/capture polish, admin policy, migrations.
+- **1.0 Public Release:** hardened complete loop and documentation.
+
+Version numbers describe capability gates, not calendar promises.
+
+## 18. Immediate actions once installation completes
+
+1. Verify Epic manifest and final DevKit path.
+2. Launch DevKit and record engine/build version.
+3. Create `ExileDroneDirector` through the official mod menu.
+4. Implement `BP_EDD_ModController` and diagnostic client/server components.
+5. Identify the owning local player and authenticated server identity paths.
+6. Spawn a local camera, switch view target, and restore it.
+7. Cook and test that slice before building waypoint UI.
+8. Sync assets to Git and record the exact integration findings.
+
+The first technical milestone is not “the camera moved in PIE.” It is “the cooked
+mod entered and exited Drone Mode safely on a dedicated server client.”
+
+## 19. Definition of done for 1.0
+
+The release is done when the product release criteria in the design specification
+pass on a dedicated server, all release-blocking defect classes are cleared, the
+server can restart without losing or exposing Flypaths, motion and camera tracks
+remain smooth and deterministic, and a normal player can complete the full
+creative/social loop without developer assistance.

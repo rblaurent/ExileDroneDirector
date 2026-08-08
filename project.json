@@ -4,13 +4,15 @@
   "target": "Conan Exiles Enhanced",
   "engine": "Unreal Engine 5.6.1",
   "implementation": "Blueprint-only",
-  "version": "0.1.0-dev",
+  "version": "0.2.0-design",
   "mvpAssets": [
     "BP_EDD_ModController.uasset",
-    "Blueprints/BPC_EDD_DroneDirector.uasset",
-    "Blueprints/BP_EDD_DroneCamera.uasset",
-    "Blueprints/BP_EDD_PathPreview.uasset",
-    "Data/ST_EDD_Waypoint.uasset",
-    "UI/WBP_EDD_DroneHUD.uasset"
+    "Core/Client/BPC_EDD_ClientDirector.uasset",
+    "Core/Camera/BP_EDD_DroneCamera.uasset",
+    "Trajectory/BP_EDD_PathPreview.uasset",
+    "Data/Structs/ST_EDD_FlypathDocument.uasset",
+    "Data/Structs/ST_EDD_Waypoint.uasset",
+    "Data/Structs/ST_EDD_Segment.uasset",
+    "UI/Editor/WBP_EDD_DroneHUD.uasset"
   ]
 }

@@ -10,8 +10,9 @@ $ErrorActionPreference = 'Stop'
 $requiredFiles = @(
     'README.md',
     'project.json',
+    'docs\product-design.md',
     'docs\architecture.md',
-    'docs\mvp-backlog.md',
+    'docs\implementation-plan.md',
     'tools\Sync-DevKitContent.ps1'
 )
 

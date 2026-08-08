@@ -6,6 +6,11 @@ refine movement/timing/lens/effects, choreograph supported timeline events, and
 publish immutable Flypath revisions to their server. Other server members can
 play public Flypaths or clone them into private editable copies.
 
+It is deliberately a dedicated Flypath and camera-direction tool rather than a
+general server-management framework. Playback can be fully directed, free-look
+while the path carries the camera, or six-axis freecam around the moving path
+carrier.
+
 ## Product loop
 
 **Fly → capture → refine → preview → publish → discover → experience → clone → remix**

@@ -65,6 +65,7 @@ One per owning client. Responsibilities:
 - Request lists/revisions and submit server commands
 - Compile and cache trajectories
 - Drive editor preview and published playback
+- Own transient operator-override state for Free Look and Carrier Freecam
 - Enforce emergency exit on death, teleport, region transition, disconnect, or
   component end-play
 
@@ -513,11 +514,36 @@ At playback time `t`:
 4. Evaluate gimbal orientation and look-at blend.
 5. Evaluate focal length, aperture, focus, exposure, and effect channels.
 6. Apply deterministic procedural offsets/noise.
-7. Apply viewer comfort overrides.
-8. Set camera transform and post-process state.
+7. Apply transient local operator look/translation offsets.
+8. Apply viewer comfort overrides.
+9. Set camera transform and post-process state.
 
 Evaluation uses precomputed tables/coefficients and avoids solving global curves
 per frame.
+
+### 14.1 Interactive carrier override
+
+The compiled Flypath always produces a deterministic carrier transform. A
+non-serialized `ST_EDD_OperatorOverrideState` can then add one of three local
+runtime modes:
+
+- `Directed`: zero live offset; use the authored camera result.
+- `FreeLook`: keep authored/carrier position and replace or add to gimbal aim.
+- `CarrierFreecam`: apply live six-axis translation and rotation relative to a
+  stable carrier frame.
+
+The carrier frame uses parallel transport or an equivalent twist-minimizing
+construction rather than raw Frenet normals, which become unstable near straight
+segments and inflection points. Operator translation may be world-aligned or
+carrier/body-relative. Mode entry captures the current evaluated pose as the
+zero-error blend origin. Recenter and mode exit decay position and rotation
+offsets smoothly to zero with bounded velocity and acceleration.
+
+Operator state is client-local, allocation-free during Tick, excluded from
+Flypath hashes, and discarded on session restoration. It cannot affect Cue or
+State Clip timing. If an author explicitly records an operator pass, sampled
+input is reduced into normal editable gimbal/carrier-offset tracks before save;
+raw per-frame input is never placed in a published record.
 
 ## 15. Procedural motion
 

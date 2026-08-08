@@ -298,6 +298,20 @@ Direct mode foregrounds Event tracks and target binding while preserving the
 viewport. Bound objects receive a restrained outline and label. Permission and
 scope are visible before publication, not buried in an advanced dialog.
 
+### 7.5 Playback HUD and operator modes
+
+Playback defaults to a nearly clean frame. A compact transport strip appears on
+input and fades when idle. It contains time/progress, pause, restart, a three-way
+mode control for Directed, Free Look, and Carrier Freecam, Recenter, comfort
+override, and Exit. The current mode is always named; it is never represented by
+an unexplained camera icon alone.
+
+Free Look shows a restrained gimbal-reticle state. Carrier Freecam additionally
+shows offset distance, movement-speed tier, reference frame (World or Body), and
+soft-tether proximity only while relevant. Recenter progress is communicated by
+subtle motion/reticle convergence rather than a modal message. The HUD must be
+fully suppressible for recording while Emergency Exit remains globally bound.
+
 ## 8. Timeline visual behavior
 
 - Current time uses Ember and remains visible over every track color.

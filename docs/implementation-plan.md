@@ -119,11 +119,13 @@ Enter Drone Mode, move a local camera, and restore the game perfectly.
 4. Spawn a non-replicated camera actor and call local view-target switching.
 5. Implement six-axis movement, mouse look, speed trim, normal/fine/boost modes,
    and optional horizon lock.
-6. Leave the player pawn possessed and physically unchanged.
-7. Implement idempotent Emergency Exit.
-8. Bind restoration to death, pawn replacement, teleport, disconnect, UI close,
+6. Separate camera input from carrier motion so the same controller can support
+   Directed, Free Look, and Carrier Freecam modes during later playback.
+7. Leave the player pawn possessed and physically unchanged.
+8. Implement idempotent Emergency Exit.
+9. Bind restoration to death, pawn replacement, teleport, disconnect, UI close,
    camera destruction, and component end-play.
-9. Add an opt-in collision sweep and diagnostic HUD.
+10. Add an opt-in collision sweep and diagnostic HUD.
 
 ### Test matrix
 
@@ -381,11 +383,17 @@ Complete the social Flypath loop.
 4. Implement library search/filter/sort and compatibility badges.
 5. Implement individual viewer playback preparation, countdown, controls, and
    safe restoration.
-6. Implement Clone Published as a deep private copy with attribution.
-7. Ensure draft edits never mutate published revision.
-8. Ensure republish never changes active playback snapshots.
-9. Add administrative unpublish/delete and policy controls.
-10. Add region/bounds compatibility checks.
+6. Implement Directed, Free Look, and Carrier Freecam playback modes with
+   snap-free entry, recenter, return-to-directed, speed trim, and emergency exit.
+7. Implement a stable twist-minimizing carrier frame plus world-aligned and
+   body-relative operator controls.
+8. Keep operator offsets local and outside published snapshot hashes, event
+   evaluation, and server authority.
+9. Implement Clone Published as a deep private copy with attribution.
+10. Ensure draft edits never mutate published revision.
+11. Ensure republish never changes active playback snapshots.
+12. Add administrative unpublish/delete and policy controls.
+13. Add region/bounds compatibility checks.
 
 ### Two-client acceptance scenario
 
@@ -456,9 +464,12 @@ Make real-world server playback and recording dependable.
 4. Implement Clean Playback HUD suppression and configurable countdown.
 5. Document OBS and Steam Recording workflows.
 6. Add loop, selection playback, and deterministic repeated takes.
-7. Probe runtime Movie Render Pipeline and image/video outputs in cooked build.
-8. Add direct rendering only behind an experimental flag if completely safe.
-9. Investigate optional local thumbnail capture.
+7. Add optional authoring-pass capture that reduces live Free Look/Carrier
+   Freecam operation into editable gimbal and carrier-offset keys.
+8. Verify that pausing freezes the carrier while preserving live camera control.
+9. Probe runtime Movie Render Pipeline and image/video outputs in cooked build.
+10. Add direct rendering only behind an experimental flag if completely safe.
+11. Investigate optional local thumbnail capture.
 
 ### Verification
 

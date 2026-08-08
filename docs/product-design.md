@@ -65,6 +65,15 @@ a build, create a tour, stage a reveal, or become a shared template. Cross-serve
 export may be added later, but it must not weaken the ownership and privacy model
 of the server library.
 
+### 2.7 Remain a dedicated camera-path tool
+
+Exile Drone Director does one job deeply: authoring, refining, sharing, and
+experiencing camera Flypaths. It is not a general server-administration suite,
+quest framework, actor puppeteer, building toolkit, or all-purpose visual
+scripting system. World interaction exists only where it directly supports a
+shot, through narrow typed event adapters. Integrations must not make unrelated
+systems prerequisites for the core camera workflow.
+
 ## 3. Terminology
 
 - **Flypath:** the editable cinematic asset and its revision history.
@@ -79,6 +88,10 @@ of the server library.
 - **Flight profile:** the rules that convert the authored path into drone-body
   and gimbal behavior.
 - **Camera track:** lens, focus, exposure, and visual-effect animation.
+- **Carrier:** the evaluated moving reference frame produced by the Flypath
+  before live operator input is applied.
+- **Operator override:** transient local free-look or six-axis input layered over
+  the carrier during preview or playback.
 - **Published snapshot:** the complete data downloaded for uninterrupted local
   playback.
 
@@ -480,6 +493,36 @@ Minimal playback controls are pause/resume, restart, optional scrub, comfort
 override, and emergency exit. Authoring overlays are hidden. On completion or
 cancel, the system restores the original view target and every cached input/UI
 state.
+
+### 13.1 Directed and interactive playback modes
+
+Playback can remain completely authored or permit local live operation:
+
+1. **Directed:** position, body, gimbal, lens, and effects follow the authored
+   Flypath exactly.
+2. **Free Look:** the Flypath continues to carry the camera, while mouse or
+   controller input temporarily controls the gimbal/look direction.
+3. **Carrier Freecam:** the Flypath acts as a moving rail or invisible carrier.
+   The player has six-axis control over a local camera offset around it as well
+   as unrestricted look control.
+
+Free Look and Carrier Freecam are opt-in playback controls. Live input is local,
+never changes the published snapshot, and is never replicated as an authoritative
+world position. Entering an interactive mode blends from the authored camera to
+the live offset without a snap. Recenter and return-to-directed commands blend
+back to the authored transform; Emergency Exit always restores the Conan camera
+immediately.
+
+Carrier offsets use a stable transported path frame so spline curvature or drone
+bank does not unexpectedly corkscrew the operator around the route. World-aligned
+and body-relative controls may both be offered, with world-aligned as the comfort
+default. A configurable soft tether prevents accidental loss of the route while
+still allowing unrestricted freecam where server policy permits it.
+
+During authoring, an operator pass may optionally be recorded into editable
+gimbal and carrier-offset tracks. During ordinary viewing it remains ephemeral.
+Pausing stops the carrier but leaves interactive camera control available for
+inspection and reframing.
 
 Playback is individual by default. Synchronized premieres, queued tours, or
 forced server-wide playback are outside the first release.

@@ -82,8 +82,9 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
 1. Client-director BeginPlay diagnostic. **Proven in PIE.**
 2. Toggle-key edge detection and state transition. **Proven in PIE with two
    presses producing `true`, then `false`.**
-3. Spawn local drone and cache the original view target.
-4. Enter Drone Mode and set the local view target.
+3. Spawn one local drone and reuse its typed cached reference. **Proven in PIE:
+   first entry spawned it and the next entry reused it.**
+4. Cache the original view target, place the drone, and switch the local view.
 5. Idempotent emergency restore and drone destruction.
 6. Six-axis input accumulation with normal, precision, and boost scaling.
 

@@ -25,13 +25,15 @@ $requiredFiles = @(
     'tools\unreal\Probe-EnhancedApi.py',
     'tools\unreal\Inspect-BlueprintApi.py',
     'tools\unreal\Inspect-GraphApi.py',
+    'tools\unreal\Configure-ClientDirectorVariables.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Test-BlueprintGraphSnippet.ps1',
     'tools\blueprint\Test-BlueprintGraphContracts.ps1',
     'tools\blueprint\snippets\toggle-input.eddgraph',
-    'tools\blueprint\snippets\toggle-state.eddgraph'
+    'tools\blueprint\snippets\toggle-state.eddgraph',
+    'tools\blueprint\snippets\enter-drone-mode.eddgraph'
 )
 
 $missing = @(

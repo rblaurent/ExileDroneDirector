@@ -62,10 +62,12 @@ SpectatorPawn-based CineCamera drone, spline path preview, Flypath data structs,
 HUD widget, and Enhanced Input assets. All compile and save with zero errors.
 
 PIE now proves that Funcom discovers and spawns `BP_EDD_ModController`, attaches
-`BPC_EDD_ClientDirector` to the Conan player controller, and executes the client
-component's BeginPlay graph. The next technical milestone is executable Drone
-Mode: enter, fly, adjust the CineCamera, and safely exit without unpossessing or
-moving the player pawn.
+`BPC_EDD_ClientDirector` to the Conan player controller, executes the client
+component, edge-toggles persistent Drone Mode state, and spawns exactly one
+typed local drone camera that is reused on the next entry. The next technical
+milestone is the view lifecycle: cache the original view target, place the
+drone at the current camera, switch locally, and restore safely without
+unpossessing or moving the player pawn.
 
 ## Repository layout
 

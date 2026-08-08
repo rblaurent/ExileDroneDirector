@@ -4,7 +4,7 @@
   "target": "Conan Exiles Enhanced",
   "engine": "Unreal Engine 5.6.1",
   "implementation": "Blueprint-only",
-  "version": "0.4.2-toggle-proof",
+  "version": "0.4.3-camera-spawn-proof",
   "mvpAssets": [
     "Local/BP_EDD_ModController.uasset",
     "Local/Core/Client/BPC_EDD_ClientDirector.uasset",

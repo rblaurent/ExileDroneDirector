@@ -137,8 +137,37 @@ session, two F10 presses produced these ordered component-owned messages:
 ```
 
 This proves edge detection, persistent component state, correct inversion, and
-post-write diagnostic ordering. It does not yet prove camera spawn, view-target
-switching, restoration, or input-context installation.
+post-write diagnostic ordering. It does not yet prove view-target switching,
+restoration, or input-context installation.
+
+## Verified idempotent local drone-camera spawn
+
+A second focused PIE acceptance run on 2026-08-08 proved the first
+`EnterDroneMode` function contract:
+
+1. `DroneCameraRef` is checked with `Is Valid` before any spawn attempt.
+2. An invalid reference spawns exactly `BP_EDD_DroneCamera` with an explicit
+   identity transform and caches the returned typed reference.
+3. A valid reference bypasses spawning and takes the reuse path.
+4. The Event Graph dispatches the post-write `DroneModeActive` value to
+   `EnterDroneMode` or `ExitDroneMode`.
+
+Three F10 presses in one PIE session produced these ordered component-owned
+messages:
+
+```text
+[BPC_EDD_ClientDirector_C] true
+[BPC_EDD_ClientDirector_C] [EDD] Drone camera spawned
+[BPC_EDD_ClientDirector_C] false
+[BPC_EDD_ClientDirector_C] true
+[BPC_EDD_ClientDirector_C] [EDD] Drone camera already valid
+```
+
+The Blueprint compiled successfully in 96 ms and was saved before PIE. The
+third-press reuse diagnostic proves that the first spawned reference remained
+valid and that the function did not create a second camera. This does not yet
+prove original-view-target capture, camera placement at the current view,
+view-target switching, restoration, destruction, or cooked behavior.
 
 ## Blueprint graph automation boundary
 
@@ -154,7 +183,7 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 
 ## Pending local reconnaissance
 
-- Drone camera spawn, view-target lifecycle, and movement graph implementation
+- Original view-target capture, switching, restoration, and movement graphs
 - Camera view-target lifecycle in PIE and cooked runtime
 - PIE and cook commands/output locations
 - Authenticated server identity and persistence APIs

@@ -53,10 +53,16 @@ are enforced by the server rather than trusted to the client UI.
 
 ### 2.5 Playback must never strand the player
 
-The player pawn remains possessed and physically present. Entering Drone Mode or
-playback changes the local view target; it does not transform or possess the
-character. Manual exit, death, teleport, region change, disconnect, errors, and
-mod shutdown all restore normal camera, input, cursor, and HUD state.
+The player pawn remains physically present and is never moved along the
+Flypath. The current native SpectatorPawn movement backend temporarily transfers
+the local controller from the cached player pawn to the drone, because Unreal
+does not consume that pawn's movement input while it is unpossessed. Exiting
+Drone Mode restores the cached pawn, or safely unpossesses when no original pawn
+exists. Manual exit, death, teleport, region change, disconnect, errors, and mod
+shutdown must all restore normal possession, camera, input, cursor, and HUD
+state. Multiplayer authority tests may require a manual local transform backend
+that preserves these same user-facing guarantees without transferring server
+possession.
 
 ### 2.6 A Flypath is a server-local cultural object
 

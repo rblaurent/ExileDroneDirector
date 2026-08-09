@@ -35,6 +35,19 @@ The correct Enhanced kit was subsequently installed and verified:
 - DevKit mod root: `F:\CEUE5Devkit\UE4\Content\Mods`
 - Epic manifest status: complete (`bIsIncompleteInstall: false`)
 
+The interactive editor must be launched with `-ModDevKit`:
+
+```powershell
+& 'F:\CEUE5Devkit\Engine\Binaries\Win64\UnrealEditor.exe' `
+  'F:\CEUE5Devkit\UE4\ConanSandbox.uproject' `
+  -ModDevKit
+```
+
+Launching the same project without `-ModDevKit` produces a normal Unreal editor
+session in which `/Game/Mods/ExileDroneDirector` is not mounted. Mod asset loads
+then fail despite the physical files being present. Verify the launch argument
+before treating that symptom as missing or corrupt content.
+
 ## Mandatory verification before project creation
 
 Do not create, copy, sync, open, resave, or cook project assets until all checks
@@ -44,7 +57,8 @@ pass:
 2. `Engine/Build/Build.version` reports engine major `5`, minor `6`.
 3. A writable mod root exists at `UE4/Content/Mods` or the current Enhanced
    documentation's replacement path.
-4. The editor launches with the Enhanced Conan project and exposes the mod menu.
+4. The editor launches with the Enhanced Conan project, includes `-ModDevKit`,
+   and exposes the mod menu.
 5. The generated mod folder and `modinfo.json` are recorded before adding assets.
 
 `tools/Sync-DevKitContent.ps1` independently enforces the engine-major/minor
@@ -290,13 +304,11 @@ No Blueprint runtime error or `Accessed None` occurred. Offline negative tests
 also reject a missing camera-location sampler and either missing Enter placement
 delegation.
 
-This proves exact placement, reuse, activation, and normal restoration in the
-current PIE phase. That phase is Conan character creation and reports
-`get_controlled_pawn() = None`; it therefore cannot prove a possessed pawn kept
-the same identity and transform. The graphs contain no possession or pawn
-movement call, but the possessed-pawn runtime invariant remains pending for a
-gameplay map. Cooked behavior, multiplayer isolation, and emergency restoration
-also remain pending.
+This proved exact placement, reuse, activation, and normal restoration at that
+stage. The character-creation phase reports `get_controlled_pawn() = None`, so a
+same-character restore still requires a gameplay map. Later movement work added
+explicit drone possession and a guarded no-original-pawn fallback, documented
+below. Cooked behavior and multiplayer isolation remain pending.
 
 ## Verified manual and invalid-camera emergency recovery
 
@@ -360,6 +372,63 @@ hook in PIE. It does not yet prove restoration from death, pawn replacement,
 teleport, disconnect, UI close, component end-play, a cooked build, or a second
 network client.
 
+## Verified native movement, possession, and restoration
+
+The first six-axis translation slice uses one named 17-node
+`ApplyTranslationInput` function on `BP_EDD_DroneCamera`:
+
+1. Resolve local Player Controller 0.
+2. Sample W, S, D, A, E, and Q with `GetInputAnalogKeyState`.
+3. Form the signed axes `W-S`, `D-A`, and `E-Q`.
+4. Resolve the drone's actor forward, right, and up vectors.
+5. Execute three chained `AddMovementInput` calls with `bForce = true`.
+
+`SpectatorPawnMovement.MaxSpeed` and `BaseMoveSpeed` are both 600;
+`BoostMultiplier` is 3 but is not yet applied by the first translation graph.
+The client Event Graph invokes this function only while `DroneModeActive` is
+true and `DroneCameraRef` is valid. The movement graph round-tripped with 17
+unique nodes, exact W/S/D/A/E/Q defaults, three reciprocal forced movement
+calls, and no compiler metadata errors.
+
+An unpossessed runtime probe revealed an important engine contract:
+`AddMovementInput` accumulated a pending vector, but
+`SpectatorPawnMovement` did not consume it. Possessing the drone cleared the
+pending vector and enabled native movement. The client lifecycle now makes that
+resource transition explicit:
+
+- `CacheOriginalPawn` stores `GetPlayerPawn(0)` in typed `OriginalPawnRef`.
+- `PossessDroneCamera` validates `DroneCameraRef`, resolves Player Controller 0,
+  and calls `Possess`.
+- `RestoreOriginalPossession` possesses a valid cached pawn; when the cached
+  pawn is invalid it calls `UnPossess`.
+- `ActivateDroneView` caches the pawn before its existing view-target work.
+- `SwitchToDroneView` possesses the drone before `SetViewTargetWithBlend`.
+- `ExitDroneMode` restores possession before restoring the cached view target.
+
+All helper and integration graphs were copied back from the live editor,
+checked for unique node/pin IDs and reciprocal links, compiled with `Good to
+go`, and saved. A focused PIE run on 2026-08-09 then proved:
+
+- F10 automatically controlled `BP_EDD_DroneCamera_C_0`.
+- Holding W moved from `(-2173.704, -2186.757, -105.795)` to
+  `(-1666.702, -1703.676, -105.795)`, matching yaw `43.616` forward travel.
+- Holding D moved from `(-1666.702, -1703.676, -105.795)` to
+  `(-1981.526, -1373.263, -105.795)`, matching the local right axis.
+- Holding E raised Z from `-105.795` to `220.903` without changing X/Y.
+- F9 logged player-view restoration and emergency completion, then
+  `get_controlled_pawn()` returned `None`, which is the correct guarded result
+  for the character-creation map's missing original pawn.
+- A second F10 reused and re-possessed the same drone actor; a second F9 again
+  restored cleanly.
+
+No Blueprint runtime error or `Accessed None` occurred. This proves the native
+movement backend and the no-original-pawn lifecycle in single-player PIE. It
+does not yet prove that possession is permitted and isolated on a listen server
+or dedicated client. Those tests decide whether this adapter remains native
+SpectatorPawn movement or changes to manual local transform integration. A
+gameplay-map test must also prove that a real original pawn is restored with the
+same identity and unchanged transform.
+
 ## Blueprint graph automation boundary
 
 The editor Python API can locate the component Event Graph, but the graph object
@@ -374,8 +443,9 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 
 ## Pending local reconnaissance
 
-- Possessed-pawn identity/transform proof in a gameplay-map PIE run
-- Six-axis local drone movement graphs
+- Original-pawn identity/transform restoration in a gameplay-map PIE run
+- Mouse look, speed trim, precision, boost, and horizon-lock movement layers
+- Listen-server and dedicated-client possession authority/isolation
 - Remaining death, teleport, disconnect, UI-close, and component-end-play hooks
 - Emergency camera restoration and the view lifecycle in cooked runtime
 - PIE and cook commands/output locations

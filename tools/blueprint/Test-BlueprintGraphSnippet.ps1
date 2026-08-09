@@ -42,7 +42,10 @@ process {
         $invalidClasses = @(
             $beginMatches |
                 ForEach-Object { $_.Groups['Class'].Value } |
-                Where-Object { $_ -notmatch '^/Script/BlueprintGraph\.' } |
+                Where-Object {
+                    $_ -notmatch '^/Script/BlueprintGraph\.' -and
+                    $_ -ne '/Script/UnrealEd.EdGraphNode_Comment'
+                } |
                 Select-Object -Unique
         )
         if ($invalidClasses.Count -gt 0) {

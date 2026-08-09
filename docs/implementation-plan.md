@@ -115,19 +115,28 @@ Enter Drone Mode, move a local camera, and restore the game perfectly.
 
 1. Attach the client director only to the owning local player context.
 2. Implement the client state machine: Inactive, Entering, Flying, Restoring.
-3. Cache original view target, input mode, cursor, HUD state, and movement policy.
+3. Cache original pawn, view target, input mode, cursor, HUD state, and movement
+   policy.
 4. Spawn a non-replicated camera actor and call local view-target switching.
 5. Implement six-axis movement, mouse look, speed trim, normal/fine/boost modes,
    and optional horizon lock.
 6. Separate camera input from carrier motion so the same controller can support
    Directed, Free Look, and Carrier Freecam modes during later playback.
-7. Leave the player pawn possessed and physically unchanged.
+7. Keep the player pawn physically unchanged. For the current native
+   SpectatorPawn movement backend, temporarily possess the drone and restore the
+   cached player pawn on exit; retain a manual local transform fallback if
+   multiplayer authority rules reject client-local possession.
 8. Implement idempotent Emergency Exit.
 9. Bind restoration to death, pawn replacement, teleport, disconnect, UI close,
    camera destruction, and component end-play.
 10. Add an opt-in collision sweep and diagnostic HUD.
 
-Current vertical-slice progress: task 8 is proven idempotent through the F9
+Current vertical-slice progress: task 5 has a proven first translation slice
+(W/S, D/A, E/Q at a 600-unit movement cap); the mouse-look, trim, precision,
+boost, and horizon-lock portions remain. Task 7 is proven in the
+character-creation PIE map's no-original-pawn case through guarded `UnPossess`,
+and same-drone re-entry works. A gameplay-map pawn restore and multiplayer
+authority behavior remain mandatory. Task 8 is proven idempotent through the F9
 manual path, and the camera-destruction portion of task 9 is proven through an
 active-camera validity guard. The remaining lifecycle hooks stay explicit work;
 the camera-destruction proof does not stand in for death, teleport, disconnect,

@@ -10,9 +10,12 @@ CLIENT_PATH = "/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector"
 DRONE_PATH = "/Game/Mods/ExileDroneDirector/Core/Camera/BP_EDD_DroneCamera"
 REQUIRED_FUNCTIONS = (
     "EnterDroneMode",
+    "CacheOriginalPawn",
     "PlaceDroneAtCurrentView",
     "ActivateDroneView",
+    "PossessDroneCamera",
     "SwitchToDroneView",
+    "RestoreOriginalPossession",
     "ExitDroneMode",
     "EmergencyExitDroneMode",
 )
@@ -114,6 +117,12 @@ ensure_object_reference(
     "OriginalViewTargetRef",
     unreal.Actor,
 )
+ensure_object_reference(
+    client_blueprint,
+    CLIENT_PATH,
+    "OriginalPawnRef",
+    unreal.Pawn,
+)
 for required_function in REQUIRED_FUNCTIONS:
     ensure_function_graph(client_blueprint, required_function)
 
@@ -125,6 +134,7 @@ client_class = require_class(CLIENT_PATH)
 client_default = unreal.get_default_object(client_class)
 require_generated_property(client_default, "DroneCameraRef")
 require_generated_property(client_default, "OriginalViewTargetRef")
+require_generated_property(client_default, "OriginalPawnRef")
 for required_function in REQUIRED_FUNCTIONS:
     if unreal.BlueprintEditorLibrary.find_graph(
         client_blueprint,

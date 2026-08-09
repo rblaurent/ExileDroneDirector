@@ -26,6 +26,7 @@ $requiredFiles = @(
     'tools\unreal\Inspect-BlueprintApi.py',
     'tools\unreal\Inspect-GraphApi.py',
     'tools\unreal\Configure-ClientDirectorVariables.py',
+    'tools\unreal\Configure-DroneMovement.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -39,7 +40,11 @@ $requiredFiles = @(
     'tools\blueprint\snippets\switch-to-drone-view.eddgraph',
     'tools\blueprint\snippets\exit-drone-mode.eddgraph',
     'tools\blueprint\snippets\emergency-exit-drone-mode.eddgraph',
-    'tools\blueprint\snippets\client-director-event-graph.eddgraph'
+    'tools\blueprint\snippets\client-director-event-graph.eddgraph',
+    'tools\blueprint\snippets\apply-translation-input.eddgraph',
+    'tools\blueprint\snippets\cache-original-pawn.eddgraph',
+    'tools\blueprint\snippets\possess-drone-camera.eddgraph',
+    'tools\blueprint\snippets\restore-original-possession.eddgraph'
 )
 
 $missing = @(

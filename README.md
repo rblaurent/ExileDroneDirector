@@ -41,8 +41,12 @@ Read these in order:
 
 ## Architectural invariants
 
-- The player pawn remains possessed and is never moved by a Flypath.
-- Drone authoring and playback use a local camera view target.
+- The player pawn is never moved, teleported, or destroyed by a Flypath.
+- The current single-player movement backend caches the original pawn,
+  temporarily possesses the local drone, and restores possession on exit; this
+  backend remains subject to listen-server and dedicated-client authority tests.
+- Drone authoring and playback use a local camera/view target and never treat
+  the player's character transform as Flypath data.
 - Every exit/error path restores camera, input, cursor, and HUD state.
 - The server is authoritative for ownership, privacy, publishing, cloning, and
   persistence.
@@ -75,11 +79,18 @@ exit. Manual F9 emergency exit is now idempotent, and an active camera validity
 guard automatically restores the player if the drone actor disappears. A
 forced-destruction PIE test restored `CameraActor_0`, cleared
 `DroneModeActive`, left zero drone actors, and then spawned a fresh drone on the
-next entry. No Blueprint runtime error or `Accessed None` occurred. The current
-character-creation PIE map has no controlled pawn, so a possessed-pawn runtime
-invariant remains an explicit gameplay-map acceptance check. The next technical
-milestone is safe local movement input plus the remaining death, teleport,
-disconnect, and component-end-play restoration hooks.
+next entry. The drone now has six-axis local translation input: W/S, D/A, and
+E/Q drive forward, right, and up through a 600-unit SpectatorPawnMovement cap.
+Because native movement input is not consumed while the SpectatorPawn is
+unpossessed, Drone Mode caches `OriginalPawnRef`, possesses the drone before
+movement, and restores that pawn on exit. The character-creation PIE map has no
+controlled pawn, so its guarded fallback calls `UnPossess`; W, D, and E runtime
+probes all produced the expected axis displacement, F9 returned to no controlled
+pawn, and a second F10 re-possessed the cached drone. No Blueprint runtime error
+or `Accessed None` occurred. The next technical milestone is mouse look,
+precision/boost speed modes, a gameplay-map pawn restoration test, multiplayer
+possession-authority validation, and the remaining death, teleport, disconnect,
+and component-end-play restoration hooks.
 
 ## Repository layout
 

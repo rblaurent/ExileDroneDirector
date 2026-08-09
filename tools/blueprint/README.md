@@ -29,17 +29,32 @@ Validated snippets:
 - `place-drone-at-current-view.eddgraph` guards `DroneCameraRef`, samples local
   Player Camera Manager 0, and atomically copies its evaluated world location
   and rotation to the drone before view activation.
-- `activate-drone-view.eddgraph` caches the original local view target once and
-  delegates both cache outcomes to the view switch.
-- `switch-to-drone-view.eddgraph` guards `DroneCameraRef` and switches local
-  Player Controller 0 through `SetViewTargetWithBlend`.
-- `exit-drone-mode.eddgraph` guards `OriginalViewTargetRef` and restores the
-  same local controller through the paired engine API.
+- `cache-original-pawn.eddgraph` captures typed `OriginalPawnRef` from local
+  Player Pawn 0 before Drone Mode changes controller ownership.
+- `possess-drone-camera.eddgraph` guards `DroneCameraRef` and possesses it with
+  local Player Controller 0.
+- `restore-original-possession.eddgraph` restores a valid `OriginalPawnRef`, or
+  safely calls `UnPossess` when the entry context had no pawn.
+- `activate-drone-view.eddgraph` caches the original pawn, caches the original
+  local view target once, and delegates both view-cache outcomes to the switch.
+- `switch-to-drone-view.eddgraph` guards and possesses `DroneCameraRef` before
+  switching local Player Controller 0 through `SetViewTargetWithBlend`.
+- `exit-drone-mode.eddgraph` restores controller possession first, then guards
+  `OriginalViewTargetRef` and restores the same local view through the paired
+  engine API.
 - `emergency-exit-drone-mode.eddgraph` idempotently delegates normal view
   restoration, forces `DroneModeActive` false, then logs completion.
 - `client-director-event-graph.eddgraph` owns the complete executable client
   dispatch: F10 normal entry/exit, F9 manual emergency exit, and automatic
-  emergency restoration when an active drone camera becomes invalid.
+  emergency restoration when an active drone camera becomes invalid. A valid
+  active drone delegates translation to `ApplyTranslationInput`.
+- `apply-translation-input.eddgraph` samples W/S, D/A, and E/Q, constructs three
+  signed local axes, and chains forced forward/right/up movement input.
+
+Design comment nodes exported by Unreal use
+`/Script/UnrealEd.EdGraphNode_Comment`; the snippet validator permits that one
+documentation class in addition to executable `/Script/BlueprintGraph.*`
+nodes.
 
 Authoritative workflow and safety rules live in
 `docs/blueprint-workflow.md`.

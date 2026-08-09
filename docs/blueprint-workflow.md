@@ -14,6 +14,10 @@ asset as a normal, inspectable Blueprint.
 
 ## Authoring loop
 
+Launch the interactive editor with the Conan project **and** `-ModDevKit`.
+Without that flag the editor does not mount `/Game/Mods/ExileDroneDirector`, so
+Blueprint automation will report that valid mod assets cannot be loaded.
+
 1. Create the smallest new node pattern in a mod-owned Blueprint using the
    visible editor.
 2. Compile and prove that pattern in PIE before turning it into a template.
@@ -68,8 +72,11 @@ asset as a normal, inspectable Blueprint.
 - Snippet execution inputs must be intentionally internal or intentionally
   unlinked and documented as public caller entry points. Dangling external links
   are rejected.
-- The player pawn remains possessed. Camera work changes the local view target;
-  it never moves or repurposes the player as the drone.
+- Camera work never moves the player character. The verified SpectatorPawn
+  backend caches `OriginalPawnRef`, temporarily possesses the drone, and restores
+  the cached pawn (or calls `UnPossess` when none existed) before exit completes.
+- Possession is a tested runtime resource, not an incidental side effect: every
+  entry/exit graph must state and validate its cache/restore contract.
 
 ## Resource profile
 
@@ -95,7 +102,10 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
    **Proven in PIE for repeatable manual F9 restoration and forced destruction
    of the active drone actor. Death, teleport, disconnect, and component
    end-play hooks remain pending.**
-8. Six-axis input accumulation with normal, precision, and boost scaling.
+8. Six-axis input accumulation. **First translation slice proven in PIE: W/S,
+   D/A, and E/Q feed forced local forward/right/up movement, W/D/E produced the
+   expected displacement, and exit/re-entry restored and reacquired possession.
+   Mouse look plus precision/boost scaling remain pending.**
 
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.

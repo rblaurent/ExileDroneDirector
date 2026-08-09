@@ -718,6 +718,69 @@ Conan-character assumption in the synthetic `DefaultPawn` fixture. No EDD
 Blueprint produced a runtime error. The corrected explicit-world-up rerun used
 directly seeded rotation and completed without that fixture contamination.
 
+## First atomic waypoint capture (2026-08-09)
+
+The first authoring-data slice is implemented in
+`BPC_EDD_ClientDirector.CaptureCurrentWaypoint`. The Enhanced editor Python API
+can create typed Blueprint arrays, including native `Transform[]`, but does not
+expose user-defined-struct field authoring. `ST_EDD_Waypoint` therefore remains
+an empty scaffold for now. The accepted transitional draft contract uses six
+component-owned lockstep arrays:
+
+- `DraftWaypointIds` (`Integer[]`)
+- `DraftWaypointTransforms` (`Transform[]`)
+- `DraftWaypointFocalLengths` (`Float[]`, serialized here as real/double)
+- `DraftWaypointApertures` (`Float[]`, real/double)
+- `DraftWaypointFocusDistances` (`Float[]`, real/double)
+- `DraftWaypointHoldSeconds` (`Float[]`, real/double)
+
+`NextWaypointId` begins at 1. The 24-node/86-pin function validates the typed
+`DroneCameraRef`, appends every channel through one uninterrupted exec chain,
+sets the incremented ID only after all six appends, and then emits
+`[EDD] Waypoint captured`. Hold time defaults to zero. Focal length, aperture,
+and manual focus distance currently come from authored drone variables whose
+verified class defaults are 35, 2.8, and 1000. The final lens-control slice must
+keep those values synchronized with the CineCamera component.
+
+The client EventGraph now has 37 total nodes/131 pins. After the existing local
+owner, Drone Mode active, valid camera, speed, translation, mouse rotation, and
+roll/horizon work, it polls local Player Controller 0 with
+`WasInputKeyJustPressed(K)`. The true path calls `CaptureCurrentWaypoint`; the
+false path terminates without mutation. Unreal resolved the self-call's function
+GUID, compiled the asset with `Good to go`, and the copied live graph passed both
+generic reciprocal-link validation and a dedicated semantic contract.
+
+Focused two-player PIE used exact `DefaultPawn` fixtures so the unfinished Conan
+character state could not alter possession or restoration. Two direct Blueprint
+function calls captured seeded transforms at `(1111,222,888)` and
+`(1444,-333,999)`. Acceptance results were:
+
+- all six arrays progressed `0 -> 1 -> 2` together;
+- IDs were exactly `[1,2]`, then `NextWaypointId` was 3;
+- both transforms and all three lens channels matched their capture-time values;
+- both hold values were zero;
+- the remote client's six arrays remained empty and its world contained no host
+  drone;
+- exit restored the exact original controlled pawn and view target;
+- no EDD Blueprint runtime error or `Accessed None` occurred.
+
+The active character-creation widget consumed synthetic Windows `K` events even
+after the deterministic pawn fixture and game-only input mode were installed.
+Do not claim an automated K-input runtime pass from this run. The function is
+runtime-proven and the K-edge graph is structurally proven; one physical K press
+after completing character creation remains the hands-on acceptance gate. It is
+safe to complete character creation in PIE, but automated tests should keep the
+fixture because character/profile state may differ across PIE worlds or fresh
+saves.
+
+Reusable tools added with this slice:
+
+- `Configure-WaypointCapture.py` for idempotent variables/defaults/function setup;
+- `Build-WaypointCaptureGraph.py` and `Build-ClientWaypointDispatch.py` for
+  deterministic graph composition;
+- `Test-WaypointCaptureContracts.py` for exact data/exec topology;
+- `Validate-WaypointCapturePIE.py` for phased deterministic runtime inspection.
+
 ## Blueprint graph automation boundary
 
 The editor Python API can locate the component Event Graph, but the graph object

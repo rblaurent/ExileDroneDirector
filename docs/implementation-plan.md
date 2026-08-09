@@ -199,6 +199,21 @@ Create an in-memory private Flypath and edit intentional waypoints.
 8. Implement structural validation and clear diagnostics.
 9. Keep draft model independent from preview actor components.
 
+Current vertical-slice progress: task 1 now has a stable monotonic waypoint ID
+source, and the first append portion of task 2 is implemented and runtime-
+proven. `CaptureCurrentWaypoint` snapshots the local drone transform plus focal
+length, aperture, manual focus distance, and zero hold time into six temporary
+lockstep arrays owned only by `BPC_EDD_ClientDirector`; it advances the ID only
+after every channel append completes. These arrays are an explicit transitional
+model while the DevKit-authored `ST_EDD_Waypoint` fields are still empty, not a
+replacement for the final document struct. The function and K-edge dispatch
+have semantic graph contracts. Two deterministic host captures produced IDs
+`[1,2]`, preserved the first snapshot after the second, left the remote client's
+draft empty, leaked no host drone into the remote world, and restored the exact
+host view target. A physical K press after completing character creation remains
+the input acceptance gate because the active creation widget consumes synthetic
+Windows key injection.
+
 ### Verification
 
 - Author twenty waypoints and edit the middle ten.

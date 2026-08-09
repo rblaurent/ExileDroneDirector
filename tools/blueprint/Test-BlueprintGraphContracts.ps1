@@ -36,6 +36,7 @@ $switchPath = Join-Path $snippetRoot 'switch-to-drone-view.eddgraph'
 $exitPath = Join-Path $snippetRoot 'exit-drone-mode.eddgraph'
 $emergencyPath = Join-Path $snippetRoot 'emergency-exit-drone-mode.eddgraph'
 $eventGraphPath = Join-Path $snippetRoot 'client-director-event-graph.eddgraph'
+$waypointCapturePath = Join-Path $snippetRoot 'capture-current-waypoint.eddgraph'
 $movementPath = Join-Path $snippetRoot 'apply-translation-input.eddgraph'
 $rotationPath = Join-Path $snippetRoot 'apply-rotation-input.eddgraph'
 $rollPath = Join-Path $snippetRoot 'apply-roll-and-horizon-input.eddgraph'
@@ -56,6 +57,7 @@ $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.
     $exitPath,
     $emergencyPath,
     $eventGraphPath,
+    $waypointCapturePath,
     $movementPath,
     $rotationPath,
     $rollPath,
@@ -65,6 +67,12 @@ $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.
     $possessDronePath,
     $restorePawnPath
 ) -AllowTokens | Write-Verbose
+
+$waypointContractTester = Join-Path $ProjectRoot 'tools\blueprint\Test-WaypointCaptureContracts.py'
+& python $waypointContractTester --capture $waypointCapturePath --event $eventGraphPath
+if ($LASTEXITCODE -ne 0) {
+    throw "Waypoint capture semantic contracts failed with exit code $LASTEXITCODE."
+}
 
 $input = [IO.File]::ReadAllText($inputPath)
 $inputNodes = [regex]::Matches($input, '(?m)^Begin Object Class=').Count
@@ -701,8 +709,8 @@ Assert-GraphMatch $emergencyPrint 'PinName="bPrintToLog"[^\r\n]*DefaultValue="tr
 
 $eventGraph = [IO.File]::ReadAllText($eventGraphPath)
 $eventGraphNodes = [regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/BlueprintGraph\.').Count
-if ($eventGraphNodes -ne 32) {
-    throw "Client-director EventGraph contract expected 32 executable nodes; found $eventGraphNodes."
+if ($eventGraphNodes -ne 36) {
+    throw "Client-director EventGraph contract expected 36 executable nodes; found $eventGraphNodes."
 }
 if ([regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/UnrealEd\.EdGraphNode_Comment').Count -ne 1) {
     throw 'Client-director EventGraph must retain exactly one design comment node.'
@@ -797,4 +805,4 @@ foreach ($viewGraph in @($place, $activate, $switch, $exit, $movement, $rotation
     }
 }
 
-Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, client-director-event-graph, apply-translation-input, apply-rotation-input, apply-roll-and-horizon-input, update-speed-controls, drone-camera-event-graph (legacy possession helpers also remain structurally validated)'
+Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, capture-current-waypoint, client-director-event-graph, apply-translation-input, apply-rotation-input, apply-roll-and-horizon-input, update-speed-controls, drone-camera-event-graph (legacy possession helpers also remain structurally validated)'

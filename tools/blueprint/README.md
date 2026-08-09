@@ -22,6 +22,14 @@ The tools in this directory never launch Unreal:
 - `Build-ClientRollDispatch.py` appends the ordered camera call to a pre-roll
   client graph and is byte-for-byte idempotent once exactly one roll dispatch
   already exists.
+- `Build-WaypointCaptureGraph.py` composes the six-channel atomic capture
+  function from live-harvested, mod-owned node forms and emits both complete and
+  body-only graphs with reproducible identifiers.
+- `Build-ClientWaypointDispatch.py` appends the guarded K-edge capture call
+  after roll/horizon processing and is byte-for-byte deterministic and
+  idempotent.
+- `Test-WaypointCaptureContracts.py` verifies exact array types, data sources,
+  append order, ID increment, and EventGraph dispatch semantics.
 
 Validated snippets:
 
@@ -56,7 +64,12 @@ Validated snippets:
   drone camera becomes invalid. A valid active drone delegates speed evaluation
   to `UpdateSpeedControls`, translation to `ApplyTranslationInput`, then
   mouse rotation to `ApplyRotationInput`, then manual bank to
-  `ApplyRollAndHorizonInput` on the same guarded tick.
+  `ApplyRollAndHorizonInput`, then K-edge waypoint capture on the same guarded
+  tick.
+- `capture-current-waypoint.eddgraph` validates `DroneCameraRef`, appends the
+  current ID, transform, focal length, aperture, focus distance, and zero hold
+  time atomically, advances `NextWaypointId`, and emits its development
+  diagnostic.
 - `apply-translation-input.eddgraph` samples W/S, D/A, and E/Q, constructs three
   signed local axes, scales one vector by the smoothed `CurrentMoveSpeed` and
   world delta time, and applies one local actor offset.

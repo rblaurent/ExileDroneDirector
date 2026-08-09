@@ -142,6 +142,20 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
     seeded pitch 20/yaw 45/roll 60 settled at pitch 20/yaw 45/roll 0.001354.
     The 33-node/116-pin function and 33-node client Event Graph are exported
     with reciprocal-link and explicit `(0,0,1)` world-up contracts.**
+12. Atomic waypoint capture. **The named `CaptureCurrentWaypoint` function
+    appends ID, transform, focal length, aperture, focus distance, and hold time
+    to six lockstep draft arrays, then advances `NextWaypointId`. Its complete
+    24-node/86-pin graph round-tripped through Unreal, compiled green, and is
+    guarded internally by a valid typed drone reference. The client EventGraph
+    polls `K` with `WasInputKeyJustPressed` only after owner, active-mode,
+    camera-validity, speed, translation, rotation, and roll processing. Two
+    direct runtime function calls in deterministic two-player PIE produced IDs
+    `[1,2]`, equal channel lengths, exact transforms and lens values, zero
+    remote-client draft mutation, no leaked drone, and exact view restoration.
+    The character-creation widget consumed synthetic keyboard injection, so one
+    physical `K` acceptance press after completing character creation remains a
+    deliberately separate hands-on gate; the serialized K-edge topology is
+    enforced offline.**
 
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.

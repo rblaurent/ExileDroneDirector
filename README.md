@@ -120,10 +120,14 @@ while the host remained exactly at 1.195 degrees, and both F9 exits restored
 their exact original pawn and view target. The C/Z fixture triggers known
 `FunCombat_PlayerController` null-character errors because the deliberately
 minimal `DefaultPawn` has no Conan character; neither EDD Blueprint emitted a
-runtime error. Horizon-lock variables and design contracts exist, but automatic
-recentering is not yet implemented or claimed. The next technical milestone is
-horizon behavior, followed by the
-remaining death, teleport,
+runtime error. H now toggles smooth horizon lock. Held C/Z always wins; with
+lock disabled the authored bank persists, and with lock enabled the camera
+interpolates toward a level frame built from its current forward direction and
+explicit world up. The corrected two-player proof held about 74 degrees of bank
+with lock off, visibly eased it toward zero after H, preserved seeded pitch 20
+and yaw 45, isolated host/client state, and restored exact prior view targets.
+The next technical milestone is the first waypoint/flypath data slice, alongside
+the remaining death, teleport,
 disconnect, UI-close, and component-end-play restoration hooks.
 
 ## Repository layout

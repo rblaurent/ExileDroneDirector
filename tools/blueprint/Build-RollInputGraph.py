@@ -1,4 +1,4 @@
-"""Build the native Unreal clipboard graph for smooth manual drone roll.
+"""Build the native Unreal clipboard graph for manual roll and horizon lock.
 
 This tool clones node forms that were exported from compiled mod-owned graphs,
 assigns fresh node and pin identifiers, and writes every link reciprocally.  It
@@ -132,25 +132,50 @@ def main() -> None:
     args = parser.parse_args()
 
     snippets = args.project_root / "tools" / "blueprint" / "snippets"
+    templates_root = args.project_root / "tools" / "blueprint" / "templates"
     seed_blocks = read_blocks(args.seed)
     translation = read_blocks(snippets / "apply-translation-input.eddgraph")
     rotation = read_blocks(snippets / "apply-rotation-input.eddgraph")
     speed = read_blocks(snippets / "update-speed-controls.eddgraph")
+    client = read_blocks(snippets / "client-director-event-graph.eddgraph")
+    toggle_state = read_blocks(snippets / "toggle-state.eddgraph")
+    horizon_forms = read_blocks(templates_root / "horizon-node-forms.eddgraph")
 
     templates = {
         "entry": find_block(seed_blocks, r"K2Node_FunctionEntry"),
         "manual": find_block(seed_blocks, r'MemberName="ManualRollSpeed"'),
         "current": find_block(seed_blocks, r'MemberName="CurrentRollSpeed"'),
         "response": find_block(seed_blocks, r'MemberName="RollInputResponse"'),
+        "horizon_response": find_block(
+            seed_blocks, r'MemberName="HorizonLockResponse"'
+        ),
         "setter": find_block(speed, r"K2Node_VariableSet.*?MemberName=\"CurrentMoveSpeed\""),
         "controller": find_block(translation, r'MemberName="GetPlayerController"'),
         "analog": find_block(translation, r'MemberName="GetInputAnalogKeyState"'),
+        "pressed": find_block(client, r'MemberName="WasInputKeyJustPressed"'),
+        "branch": find_block(
+            client,
+            r"^Begin Object Class=/Script/BlueprintGraph\.K2Node_IfThenElse\b",
+        ),
+        "not_bool": find_block(toggle_state, r'MemberName="Not_PreBool"'),
         "subtract": find_block(translation, r'OperationName="Subtract"'),
         "multiply": find_block(speed, r'OperationName="Multiply".*?Multiply_DoubleDouble'),
+        "vector": find_block(translation, r'MemberName="MakeVector"'),
         "delta": find_block(speed, r'MemberName="GetWorldDeltaSeconds"'),
         "interp": find_block(speed, r'MemberName="FInterpTo"'),
         "rotator": find_block(rotation, r'MemberName="MakeRotator"'),
         "rotate": find_block(rotation, r'MemberName="K2_AddActorLocalRotation"'),
+        "lock_get": find_block(
+            horizon_forms, r"K2Node_VariableGet.*?MemberName=\"HorizonLockEnabled\""
+        ),
+        "lock_set": find_block(
+            horizon_forms, r"K2Node_VariableSet.*?MemberName=\"HorizonLockEnabled\""
+        ),
+        "actor_rotation": find_block(horizon_forms, r'MemberName="K2_GetActorRotation"'),
+        "forward": find_block(horizon_forms, r'MemberName="GetActorForwardVector"'),
+        "level_target": find_block(horizon_forms, r'MemberName="MakeRotFromXZ"'),
+        "rotation_interp": find_block(horizon_forms, r'MemberName="RInterpTo"'),
+        "set_rotation": find_block(horizon_forms, r'MemberName="K2_SetActorRotation"'),
     }
 
     current_guid = re.search(
@@ -176,10 +201,22 @@ def main() -> None:
 
     nodes = {
         "entry": make("entry", "entry", 0, 0),
-        "setter": make(
+        "controller": make("controller", "controller", 0, 600),
+        "h_pressed": make(
+            "h_pressed",
+            "pressed",
+            250,
+            -200,
+            {'DefaultValue="F10"': 'DefaultValue="H"'},
+        ),
+        "toggle_branch": make("toggle_branch", "branch", 550, -100),
+        "lock_get_toggle": make("lock_get_toggle", "lock_get", 300, 100),
+        "lock_not": make("lock_not", "not_bool", 550, 100),
+        "lock_set": make("lock_set", "lock_set", 800, -200),
+        "roll_set": make(
+            "roll_set",
             "setter",
-            "setter",
-            1450,
+            1700,
             0,
             {
                 'MemberName="CurrentMoveSpeed",MemberGuid=7B898E994928FE7FABF311838CD1AFAE':
@@ -187,37 +224,88 @@ def main() -> None:
                 'PinName="CurrentMoveSpeed"': 'PinName="CurrentRollSpeed"',
             },
         ),
-        "controller": make("controller", "controller", 0, 450),
         "c": make(
             "c",
             "analog",
             300,
-            300,
+            500,
             {'DefaultValue="W"': 'DefaultValue="C"'},
         ),
         "z": make(
             "z",
             "analog",
             300,
-            550,
+            750,
             {'DefaultValue="W"': 'DefaultValue="Z"'},
         ),
-        "subtract": make("subtract", "subtract", 600, 400),
-        "manual": make("manual", "manual", 600, 650),
-        "target": make("target", "multiply", 850, 450),
-        "current": make("current", "current", 900, 50),
-        "delta": make("delta", "delta", 900, 200),
-        "response": make("response", "response", 900, 300),
-        "interp": make("interp", "interp", 1150, 100),
-        "roll_delta": make("roll_delta", "multiply", 1700, 250),
-        "rotator": make("rotator", "rotator", 1950, 150),
-        "rotate": make("rotate", "rotate", 2200, 0),
+        "subtract": make("subtract", "subtract", 600, 600),
+        "manual": make("manual", "manual", 600, 850),
+        "target": make("target", "multiply", 850, 650),
+        "current": make("current", "current", 1100, 100),
+        "delta": make("delta", "delta", 1100, 250),
+        "response": make("response", "response", 1100, 400),
+        "interp": make("interp", "interp", 1400, 150),
+        "roll_delta": make("roll_delta", "multiply", 1950, 500),
+        "rotator": make("rotator", "rotator", 2200, 450),
+        "rotate": make("rotate", "rotate", 3300, 200),
+        "c_down": make(
+            "c_down",
+            "pressed",
+            1900,
+            -100,
+            {
+                'MemberName="WasInputKeyJustPressed"': 'MemberName="IsInputKeyDown"',
+                'DefaultValue="F10"': 'DefaultValue="C"',
+            },
+        ),
+        "c_branch": make("c_branch", "branch", 2200, 0),
+        "z_down": make(
+            "z_down",
+            "pressed",
+            2150,
+            -250,
+            {
+                'MemberName="WasInputKeyJustPressed"': 'MemberName="IsInputKeyDown"',
+                'DefaultValue="F10"': 'DefaultValue="Z"',
+            },
+        ),
+        "z_branch": make("z_branch", "branch", 2450, 0),
+        "lock_get_mode": make("lock_get_mode", "lock_get", 2450, -250),
+        "lock_branch": make("lock_branch", "branch", 2750, 0),
+        "actor_rotation": make("actor_rotation", "actor_rotation", 2800, 500),
+        "forward": make("forward", "forward", 2800, 700),
+        "up_vector": make(
+            "up_vector",
+            "vector",
+            2800,
+            900,
+        ),
+        "level_target": make("level_target", "level_target", 3100, 700),
+        "horizon_response": make(
+            "horizon_response", "horizon_response", 3100, 900
+        ),
+        "rotation_interp": make("rotation_interp", "rotation_interp", 3400, 600),
+        "set_rotation": make("set_rotation", "set_rotation", 3750, 0),
     }
+    nodes["up_vector"].text = re.sub(
+        r'(PinName="Z"[^\r\n]*?,DefaultValue=")0\.0"',
+        r'\g<1>1.0"',
+        nodes["up_vector"].text,
+        count=1,
+    )
 
-    connect(nodes["entry"], "then", nodes["setter"], "execute")
-    connect(nodes["setter"], "then", nodes["rotate"], "execute")
+    connect(nodes["entry"], "then", nodes["toggle_branch"], "execute")
     connect(nodes["controller"], "ReturnValue", nodes["c"], "self")
     connect(nodes["controller"], "ReturnValue", nodes["z"], "self")
+    connect(nodes["controller"], "ReturnValue", nodes["h_pressed"], "self")
+    connect(nodes["controller"], "ReturnValue", nodes["c_down"], "self")
+    connect(nodes["controller"], "ReturnValue", nodes["z_down"], "self")
+    connect(nodes["h_pressed"], "ReturnValue", nodes["toggle_branch"], "Condition")
+    connect(nodes["lock_get_toggle"], "HorizonLockEnabled", nodes["lock_not"], "A")
+    connect(nodes["lock_not"], "ReturnValue", nodes["lock_set"], "HorizonLockEnabled")
+    connect(nodes["toggle_branch"], "then", nodes["lock_set"], "execute")
+    connect(nodes["toggle_branch"], "else", nodes["roll_set"], "execute")
+    connect(nodes["lock_set"], "then", nodes["roll_set"], "execute")
     connect(nodes["c"], "ReturnValue", nodes["subtract"], "A")
     connect(nodes["z"], "ReturnValue", nodes["subtract"], "B")
     connect(nodes["subtract"], "ReturnValue", nodes["target"], "A")
@@ -226,11 +314,42 @@ def main() -> None:
     connect(nodes["target"], "ReturnValue", nodes["interp"], "Target")
     connect(nodes["delta"], "ReturnValue", nodes["interp"], "DeltaTime")
     connect(nodes["response"], "RollInputResponse", nodes["interp"], "InterpSpeed")
-    connect(nodes["interp"], "ReturnValue", nodes["setter"], "CurrentRollSpeed")
-    connect(nodes["setter"], "Output_Get", nodes["roll_delta"], "A")
+    connect(nodes["interp"], "ReturnValue", nodes["roll_set"], "CurrentRollSpeed")
+    connect(nodes["roll_set"], "Output_Get", nodes["roll_delta"], "A")
     connect(nodes["delta"], "ReturnValue", nodes["roll_delta"], "B")
     connect(nodes["roll_delta"], "ReturnValue", nodes["rotator"], "Roll")
     connect(nodes["rotator"], "ReturnValue", nodes["rotate"], "DeltaRotation")
+    connect(nodes["roll_set"], "then", nodes["c_branch"], "execute")
+    connect(nodes["c_down"], "ReturnValue", nodes["c_branch"], "Condition")
+    connect(nodes["c_branch"], "then", nodes["rotate"], "execute")
+    connect(nodes["c_branch"], "else", nodes["z_branch"], "execute")
+    connect(nodes["z_down"], "ReturnValue", nodes["z_branch"], "Condition")
+    connect(nodes["z_branch"], "then", nodes["rotate"], "execute")
+    connect(nodes["z_branch"], "else", nodes["lock_branch"], "execute")
+    connect(
+        nodes["lock_get_mode"],
+        "HorizonLockEnabled",
+        nodes["lock_branch"],
+        "Condition",
+    )
+    connect(nodes["lock_branch"], "then", nodes["set_rotation"], "execute")
+    connect(nodes["lock_branch"], "else", nodes["rotate"], "execute")
+    connect(
+        nodes["actor_rotation"], "ReturnValue", nodes["rotation_interp"], "Current"
+    )
+    connect(nodes["forward"], "ReturnValue", nodes["level_target"], "X")
+    connect(nodes["up_vector"], "ReturnValue", nodes["level_target"], "Z")
+    connect(nodes["level_target"], "ReturnValue", nodes["rotation_interp"], "Target")
+    connect(nodes["delta"], "ReturnValue", nodes["rotation_interp"], "DeltaTime")
+    connect(
+        nodes["horizon_response"],
+        "HorizonLockResponse",
+        nodes["rotation_interp"],
+        "InterpSpeed",
+    )
+    connect(
+        nodes["rotation_interp"], "ReturnValue", nodes["set_rotation"], "NewRotation"
+    )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text("\n".join(node.text for node in nodes.values()) + "\n", encoding="utf-8")
@@ -241,7 +360,7 @@ def main() -> None:
             if key == "entry":
                 continue
             node_text = node.text
-            if key == "setter":
+            if key == "toggle_branch":
                 node_text = re.sub(
                     r",LinkedTo=\(K2Node_FunctionEntry_0 [0-9A-F]{32},\)",
                     "",

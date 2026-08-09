@@ -33,6 +33,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-BlueprintGraphSnippet.ps1',
     'tools\blueprint\Test-BlueprintGraphContracts.ps1',
     'tools\blueprint\Build-RollInputGraph.py',
+    'tools\blueprint\templates\horizon-node-forms.eddgraph',
     'tools\blueprint\Build-ClientRollDispatch.py',
     'tools\blueprint\snippets\toggle-input.eddgraph',
     'tools\blueprint\snippets\toggle-state.eddgraph',

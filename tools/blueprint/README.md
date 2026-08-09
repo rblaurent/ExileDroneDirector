@@ -15,7 +15,8 @@ The tools in this directory never launch Unreal:
   every checked-in snippet, including execution order and diagnostic source.
 - `Set-BlueprintGraphClipboard.ps1` resolves explicit `{{TOKEN}}` placeholders
   and places the graph on the Windows clipboard for pasting in Unreal.
-- `Build-RollInputGraph.py` composes the manual-bank function from reviewed
+- `Build-RollInputGraph.py` composes manual bank, H toggle, held-input
+  arbitration, and smooth world-up horizon stabilization from reviewed
   mod-owned node forms. Its paste output deliberately leaves the first exec pin
   unlinked so the existing live function entry must be connected explicitly.
 - `Build-ClientRollDispatch.py` appends the ordered camera call to a pre-roll
@@ -64,10 +65,12 @@ Validated snippets:
   preserves zero roll, and applies one local actor rotation without sweep or
   teleport.
 - `apply-roll-and-horizon-input.eddgraph` samples C-minus-Z as a signed bank
-  axis, eases `CurrentRollSpeed` toward `ManualRollSpeed * axis`, integrates the
-  post-write speed over world delta time, and applies one roll-only local actor
-  rotation. The current milestone proves manual bank; horizon recentering is
-  deliberately not claimed by this graph yet.
+  axis, eases `CurrentRollSpeed` toward `ManualRollSpeed * axis`, and gives held
+  C/Z precedence over stabilization. H edge-toggles `HorizonLockEnabled`; idle
+  locked frames build a level target from current forward plus explicit
+  `(0,0,1)` world up, then `RInterpTo` with `HorizonLockResponse` before one
+  absolute world-rotation write. Disabled lock preserves bank while residual
+  speed decays through the manual local-rotation path.
 - `update-speed-controls.eddgraph` applies proportional mouse-wheel cruise trim,
   clamps it to the configured speed range, gives Ctrl precision precedence over
   Shift boost, and eases `CurrentMoveSpeed` toward the selected target with

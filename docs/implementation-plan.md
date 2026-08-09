@@ -144,7 +144,11 @@ implemented as a separate named contract: proportional 1.25x wheel trim,
 30-6000 clamp, 0.25x Ctrl precision, 3x Shift boost, precision precedence, and
 delta-time `FInterpTo` smoothing. Host and remote-client runtime checks proved
 baseline, easing, target speeds, movement-distance ordering, isolation, and
-exact F9 restoration. Physical-wheel feel and horizon lock remain.
+exact F9 restoration. Physical-wheel feel remains a hands-on gate. Smooth
+horizon lock is now compiled and runtime-proven: H toggles it, held C/Z wins,
+disabled lock preserves bank, and enabled lock eases toward explicit world up
+without changing current pitch/yaw. Host/client isolation and exact F9
+restoration were re-proven with the completed 33-node function.
 Task 8 is proven idempotent through F9, and camera destruction within task 9 is
 proven through the active-camera validity guard. Death, teleport, disconnect,
 UI-close, component-end-play, dedicated-server, and cooked-runtime acceptance

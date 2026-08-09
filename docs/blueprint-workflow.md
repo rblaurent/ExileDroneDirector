@@ -130,14 +130,18 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
     exactly unchanged. Mouse-wheel topology and proportional inverse math are
     structurally checked; synthetic Windows wheel messages do not enter Conan's
     mouse-input channel, so physical-wheel feel remains a manual gate.**
-11. Smooth manual roll. **Proven in the deterministic two-player fixture: C
+11. Smooth manual roll and horizon lock. **Proven in the deterministic
+    two-player fixture: C
     banked the host from 0 to +71.77 degrees, release speed decayed from 9.30 to
     approximately zero, and Z produced the opposite signed speed and returned
     bank near level. The remote client then banked independently to +71.27
     degrees while the host remained exactly unchanged. Both F9 exits restored
-    the original pawn/view target. The 15-node/52-pin function and 33-node
-    client Event Graph are exported with reciprocal-link contracts. Automatic
-    horizon recentering remains the next slice.**
+    the original pawn/view target. H now edge-toggles horizon lock; held C/Z
+    overrides it, disabled lock preserves bank, and enabled lock eases the
+    camera toward explicit world up while preserving forward direction. A
+    seeded pitch 20/yaw 45/roll 60 settled at pitch 20/yaw 45/roll 0.001354.
+    The 33-node/116-pin function and 33-node client Event Graph are exported
+    with reciprocal-link and explicit `(0,0,1)` world-up contracts.**
 
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.

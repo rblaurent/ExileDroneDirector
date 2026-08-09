@@ -10,6 +10,7 @@ CLIENT_PATH = "/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector"
 DRONE_PATH = "/Game/Mods/ExileDroneDirector/Core/Camera/BP_EDD_DroneCamera"
 REQUIRED_FUNCTIONS = (
     "EnterDroneMode",
+    "PlaceDroneAtCurrentView",
     "ActivateDroneView",
     "SwitchToDroneView",
     "ExitDroneMode",

@@ -89,6 +89,8 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
 5. Guard and switch the local view to the drone, then restore the cached player
    view. **Proven in PIE across enter, exit, cached re-entry, and second exit.**
 6. Place the drone at the current camera before the local view switch.
+   **Proven in PIE on both initial spawn and cached-camera reuse, with exact
+   location/rotation equality before both switches.**
 7. Emergency restoration, teardown recovery, and drone destruction.
 8. Six-axis input accumulation with normal, precision, and boost scaling.
 

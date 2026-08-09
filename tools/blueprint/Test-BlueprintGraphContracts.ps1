@@ -30,12 +30,13 @@ $snippetRoot = Join-Path $ProjectRoot 'tools\blueprint\snippets'
 $inputPath = Join-Path $snippetRoot 'toggle-input.eddgraph'
 $statePath = Join-Path $snippetRoot 'toggle-state.eddgraph'
 $enterPath = Join-Path $snippetRoot 'enter-drone-mode.eddgraph'
+$placePath = Join-Path $snippetRoot 'place-drone-at-current-view.eddgraph'
 $activatePath = Join-Path $snippetRoot 'activate-drone-view.eddgraph'
 $switchPath = Join-Path $snippetRoot 'switch-to-drone-view.eddgraph'
 $exitPath = Join-Path $snippetRoot 'exit-drone-mode.eddgraph'
 $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1'
 
-& $validator -Path @($inputPath, $statePath, $enterPath, $activatePath, $switchPath, $exitPath) -AllowTokens | Write-Verbose
+& $validator -Path @($inputPath, $statePath, $enterPath, $placePath, $activatePath, $switchPath, $exitPath) -AllowTokens | Write-Verbose
 
 $input = [IO.File]::ReadAllText($inputPath)
 $inputNodes = [regex]::Matches($input, '(?m)^Begin Object Class=').Count
@@ -80,14 +81,14 @@ Assert-GraphMatch $statePrint 'PinName="bPrintToLog"[^\r\n]*DefaultValue="true"'
 
 $enter = [IO.File]::ReadAllText($enterPath)
 $enterNodes = [regex]::Matches($enter, '(?m)^Begin Object Class=').Count
-if ($enterNodes -ne 12) {
-    throw "Enter-drone-mode contract expected 12 nodes; found $enterNodes."
+if ($enterNodes -ne 14) {
+    throw "Enter-drone-mode contract expected 14 nodes; found $enterNodes."
 }
 if ($enter -match '(?m)^\s*Error(Type|Msg)=') {
     throw 'Enter-drone-mode source must not retain stale compiler error metadata.'
 }
 
-$enterEntry = Get-NodeBlock $enter 'K2Node_FunctionEntry_0'
+$enterEntry = Get-NodeBlock $enter 'K2Node_FunctionEntry_2'
 $enterBranch = Get-NodeBlock $enter 'K2Node_IfThenElse_0'
 $cameraGet = Get-NodeBlock $enter 'K2Node_VariableGet_0'
 $cameraValid = Get-NodeBlock $enter 'K2Node_CallFunction_0'
@@ -99,6 +100,8 @@ $makeTransform = Get-NodeBlock $enter 'K2Node_CallFunction_4'
 $validActivate = Get-NodeBlock $enter 'K2Node_CallFunction_3'
 $spawnActivate = Get-NodeBlock $enter 'K2Node_CallFunction_5'
 $spawnReroute = Get-NodeBlock $enter 'K2Node_Knot_1'
+$validPlace = Get-NodeBlock $enter 'K2Node_CallFunction_7'
+$spawnPlace = Get-NodeBlock $enter 'K2Node_CallFunction_6'
 
 Assert-GraphMatch $enterEntry 'FunctionReference=\(MemberName="EnterDroneMode"\)' 'Enter-drone-mode must implement the named function contract.'
 Assert-GraphMatch $enterEntry 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_0 ' 'EnterDroneMode entry must execute its validity guard.'
@@ -123,14 +126,65 @@ Assert-GraphMatch $makeTransform 'PinName="Scale"[^\r\n]*DefaultValue="1\.000000
 Assert-GraphMatch $makeTransform 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_SpawnActorFromClass_0 ' 'Make Transform output must feed Spawn Actor.'
 Assert-GraphMatch $spawnPrint 'DefaultValue="\[EDD\] Drone camera spawned"' 'Spawn path must expose its acceptance diagnostic.'
 Assert-GraphMatch $spawnPrint 'PinName="bPrintToLog"[^\r\n]*DefaultValue="true"' 'Spawn acceptance diagnostic must be written to the log.'
-Assert-GraphMatch $spawnPrint 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_5 ' 'Spawn path must activate the drone view after reporting camera readiness.'
+Assert-GraphMatch $spawnPrint 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_6 ' 'Spawn path must place the camera after reporting camera readiness.'
 Assert-GraphMatch $validPrint 'DefaultValue="\[EDD\] Drone camera already valid"' 'Reuse path must expose its acceptance diagnostic.'
 Assert-GraphMatch $validPrint 'PinName="bPrintToLog"[^\r\n]*DefaultValue="true"' 'Reuse acceptance diagnostic must be written to the log.'
-Assert-GraphMatch $validPrint 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_3 ' 'Reuse path must activate the drone view after reporting camera readiness.'
+Assert-GraphMatch $validPrint 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_7 ' 'Reuse path must place the camera after reporting camera readiness.'
+Assert-GraphMatch $validPlace 'FunctionReference=\(MemberName="PlaceDroneAtCurrentView"' 'Valid-camera path must delegate placement to the named function.'
+Assert-GraphMatch $validPlace 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_CallFunction_2 ' 'Valid-camera placement must execute from the reuse diagnostic.'
+Assert-GraphMatch $validPlace 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_3 ' 'Valid-camera placement must complete before view activation.'
+Assert-GraphMatch $spawnPlace 'FunctionReference=\(MemberName="PlaceDroneAtCurrentView"' 'Spawn path must delegate placement to the named function.'
+Assert-GraphMatch $spawnPlace 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_CallFunction_1 ' 'Spawn-path placement must execute from the spawn diagnostic.'
+Assert-GraphMatch $spawnPlace 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_5 ' 'Spawn-path placement must complete before view activation.'
 Assert-GraphMatch $validActivate 'FunctionReference=\(MemberName="ActivateDroneView"' 'Valid-camera path must delegate view activation to the named function.'
-Assert-GraphMatch $validActivate 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_CallFunction_2 ' 'Valid-camera activation must be entered from the reuse diagnostic.'
+Assert-GraphMatch $validActivate 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_CallFunction_7 ' 'Valid-camera activation must be entered from completed placement.'
 Assert-GraphMatch $spawnActivate 'FunctionReference=\(MemberName="ActivateDroneView"' 'Spawn path must delegate view activation to the named function.'
-Assert-GraphMatch $spawnActivate 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_CallFunction_1 ' 'Spawn-path activation must be entered from the spawn diagnostic.'
+Assert-GraphMatch $spawnActivate 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_CallFunction_6 ' 'Spawn-path activation must be entered from completed placement.'
+
+$place = [IO.File]::ReadAllText($placePath)
+$placeNodes = [regex]::Matches($place, '(?m)^Begin Object Class=').Count
+if ($placeNodes -ne 10) {
+    throw "Place-drone-at-current-view contract expected 10 nodes; found $placeNodes."
+}
+
+$placeEntry = Get-NodeBlock $place 'K2Node_FunctionEntry_0'
+$placeBranch = Get-NodeBlock $place 'K2Node_IfThenElse_0'
+$placeCameraGet = Get-NodeBlock $place 'K2Node_VariableGet_0'
+$placeCameraValid = Get-NodeBlock $place 'K2Node_CallFunction_0'
+$placeSuccess = Get-NodeBlock $place 'K2Node_CallFunction_3'
+$placeSkipped = Get-NodeBlock $place 'K2Node_CallFunction_4'
+$placeCameraManager = Get-NodeBlock $place 'K2Node_CallFunction_1'
+$placeCameraLocation = Get-NodeBlock $place 'K2Node_CallFunction_2'
+$placeCameraRotation = Get-NodeBlock $place 'K2Node_CallFunction_5'
+$placeTransform = Get-NodeBlock $place 'K2Node_CallFunction_6'
+
+Assert-GraphMatch $placeEntry 'FunctionReference=\(MemberName="PlaceDroneAtCurrentView"\)' 'Placement must implement the named function contract.'
+Assert-GraphMatch $placeEntry 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_0 ' 'Placement entry must execute its camera guard.'
+Assert-GraphMatch $placeCameraGet 'VariableReference=\(MemberName="DroneCameraRef"' 'Placement must read the typed camera reference.'
+Assert-GraphMatch $placeCameraGet 'PinName="DroneCameraRef"[^\r\n]*LinkedTo=\(K2Node_CallFunction_0 ' 'DroneCameraRef must feed the placement validity check.'
+Assert-GraphMatch $placeCameraGet 'PinName="DroneCameraRef"[^\r\n]*K2Node_CallFunction_6 ' 'DroneCameraRef must be the actor moved by placement.'
+Assert-GraphMatch $placeCameraValid 'MemberName="IsValid"' 'Placement must validate DroneCameraRef.'
+Assert-GraphMatch $placeCameraValid 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_0 ' 'Camera validity must drive the placement Branch.'
+Assert-GraphMatch $placeBranch 'PinFriendlyName=.*?"true".*?LinkedTo=\(K2Node_CallFunction_6 ' 'A valid camera must execute the transform write.'
+Assert-GraphMatch $placeBranch 'PinFriendlyName=.*?"false".*?LinkedTo=\(K2Node_CallFunction_4 ' 'An invalid camera must execute only the skipped diagnostic.'
+Assert-GraphMatch $placeCameraManager 'MemberName="GetPlayerCameraManager"' 'Placement must resolve the live local camera manager.'
+Assert-GraphMatch $placeCameraManager 'PinName="PlayerIndex"[^\r\n]*DefaultValue="0"' 'Placement must sample local Player Camera Manager 0.'
+Assert-GraphMatch $placeCameraManager 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_2 [^\r\n]*K2Node_CallFunction_5 ' 'The same camera manager must feed both location and rotation sampling.'
+Assert-GraphMatch $placeCameraLocation 'MemberName="GetCameraLocation"' 'Placement must sample the evaluated camera location.'
+Assert-GraphMatch $placeCameraLocation 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_6 ' 'Evaluated camera location must feed NewLocation.'
+Assert-GraphMatch $placeCameraRotation 'MemberName="GetCameraRotation"' 'Placement must sample the evaluated camera rotation.'
+Assert-GraphMatch $placeCameraRotation 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_6 ' 'Evaluated camera rotation must feed NewRotation.'
+Assert-GraphMatch $placeTransform 'MemberName="K2_SetActorLocationAndRotation"' 'Placement must perform one atomic actor location-and-rotation write.'
+Assert-GraphMatch $placeTransform 'PinName="self"[^\r\n]*LinkedTo=\(K2Node_VariableGet_0 ' 'Placement transform target must be DroneCameraRef.'
+Assert-GraphMatch $placeTransform 'PinName="NewLocation"[^\r\n]*LinkedTo=\(K2Node_CallFunction_2 ' 'Placement NewLocation must come from GetCameraLocation.'
+Assert-GraphMatch $placeTransform 'PinName="NewRotation"[^\r\n]*LinkedTo=\(K2Node_CallFunction_5 ' 'Placement NewRotation must come from GetCameraRotation.'
+Assert-GraphMatch $placeTransform 'PinName="bSweep"[^\r\n]*DefaultValue="false"' 'Camera placement must not sweep through gameplay collision.'
+Assert-GraphMatch $placeTransform 'PinName="bTeleport"[^\r\n]*DefaultValue="false"' 'Initial camera placement must preserve the normal engine move semantic.'
+Assert-GraphMatch $placeTransform 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_3 ' 'Placement success must be reported only after the transform write.'
+Assert-GraphMatch $placeSuccess 'DefaultValue="\[EDD\] Drone placed at current view"' 'Placement success must expose its acceptance diagnostic.'
+Assert-GraphMatch $placeSuccess 'PinName="bPrintToLog"[^\r\n]*DefaultValue="true"' 'Placement success must be written to the log.'
+Assert-GraphMatch $placeSkipped 'DefaultValue="\[EDD\] Drone placement skipped: no camera"' 'Invalid placement must expose its guarded diagnostic.'
+Assert-GraphMatch $placeSkipped 'PinName="bPrintToLog"[^\r\n]*DefaultValue="true"' 'Invalid-placement diagnostic must be written to the log.'
 
 $activate = [IO.File]::ReadAllText($activatePath)
 $activateNodes = [regex]::Matches($activate, '(?m)^Begin Object Class=').Count
@@ -258,10 +312,10 @@ Assert-GraphMatch $exitSuccess 'PinName="bPrintToLog"[^\r\n]*DefaultValue="true"
 Assert-GraphMatch $exitSkipped 'DefaultValue="\[EDD\] View restoration skipped: no original target"' 'Invalid restoration must expose its guarded diagnostic.'
 Assert-GraphMatch $exitSkipped 'PinName="bPrintToLog"[^\r\n]*DefaultValue="true"' 'Invalid-restoration diagnostic must be written to the log.'
 
-foreach ($viewGraph in @($activate, $switch, $exit)) {
+foreach ($viewGraph in @($place, $activate, $switch, $exit)) {
     if ($viewGraph -match '(?m)^\s*Error(Type|Msg)=') {
         throw 'View-lifecycle graph source must not retain stale compiler error metadata.'
     }
 }
 
-Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, activate-drone-view, switch-to-drone-view, exit-drone-mode'
+Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode'

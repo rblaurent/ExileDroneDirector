@@ -235,6 +235,69 @@ yet prove placement at the pre-switch camera transform, emergency restoration
 after teardown/disconnect, input-context cleanup, cooked behavior, or
 multiplayer isolation.
 
+## Verified camera-relative drone placement
+
+`PlaceDroneAtCurrentView` now owns one narrow, idempotent placement contract:
+
+1. Validate the typed `DroneCameraRef`.
+2. Resolve local Player Camera Manager 0.
+3. Sample its evaluated `GetCameraLocation` and `GetCameraRotation` values.
+4. Apply both values atomically to the drone with
+   `SetActorLocationAndRotation` before any view-target switch.
+5. Report either `[EDD] Drone placed at current view` or the guarded
+   no-camera diagnostic.
+
+Both the already-valid and newly-spawned paths in `EnterDroneMode` call this
+function before `ActivateDroneView`. The isolated placement graph compiled in
+77 ms; the complete client director compiled successfully in 73 ms. Its source
+contract fixes the graph at 10 nodes and requires the camera guard, Player
+Camera Manager 0, reciprocal location and rotation links, the typed drone as
+the transform target, no sweep, no teleport, and post-write diagnostics. The
+14-node Enter contract independently requires both placement delegations to
+finish before their paired activation calls.
+
+A focused PIE run on 2026-08-09 exercised two complete F10 enter/exit cycles.
+The initial pre-entry camera state was:
+
+```text
+view=CameraActor_0
+location=(-2173.703563, -2186.756988, -105.795139)
+rotation=(pitch=0.000000, yaw=43.616007, roll=-0.000000)
+```
+
+The first entry spawned `BP_EDD_DroneCamera_C_0`; its actor transform, active
+view-target transform, and Player Camera Manager transform all matched those
+values exactly at the printed precision. Exit restored `CameraActor_0` at the
+same transform. The second entry reused the same
+`BP_EDD_DroneCamera_C_0`, placed it from the restored camera again, and produced
+the same exact equality before a second successful restoration. The ordered
+component diagnostics were:
+
+```text
+[EDD] Drone camera spawned
+[EDD] Drone placed at current view
+[EDD] Original view target cached
+[EDD] Drone view active
+[EDD] Player view restored
+[EDD] Drone camera already valid
+[EDD] Drone placed at current view
+[EDD] Original view target already cached
+[EDD] Drone view active
+[EDD] Player view restored
+```
+
+No Blueprint runtime error or `Accessed None` occurred. Offline negative tests
+also reject a missing camera-location sampler and either missing Enter placement
+delegation.
+
+This proves exact placement, reuse, activation, and normal restoration in the
+current PIE phase. That phase is Conan character creation and reports
+`get_controlled_pawn() = None`; it therefore cannot prove a possessed pawn kept
+the same identity and transform. The graphs contain no possession or pawn
+movement call, but the possessed-pawn runtime invariant remains pending for a
+gameplay map. Cooked behavior, multiplayer isolation, and emergency restoration
+also remain pending.
+
 ## Blueprint graph automation boundary
 
 The editor Python API can locate the component Event Graph, but the graph object
@@ -249,7 +312,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 
 ## Pending local reconnaissance
 
-- Drone placement at the pre-switch camera and movement graphs
+- Possessed-pawn identity/transform proof in a gameplay-map PIE run
+- Six-axis local drone movement graphs
 - Emergency camera restoration and the view lifecycle in cooked runtime
 - PIE and cook commands/output locations
 - Authenticated server identity and persistence APIs

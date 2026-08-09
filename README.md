@@ -68,10 +68,13 @@ typed local drone camera that is reused on the next entry. It also captures the
 local controller's original view target exactly once and reuses that reference
 on later entries. The client now switches Player Controller 0 to the guarded
 drone view and restores the cached player view on exit. A four-transition PIE
-run proved enter, restore, cached re-entry, and second restore with no Blueprint
-runtime errors. The next technical milestone is to place the drone at the
-current camera before switching, without unpossessing or moving the player
-pawn.
+run now proves exact pre-switch placement as well: both the first camera and
+the reused camera copied Player Camera Manager 0's evaluated location and
+rotation before activation, then restored the same original view target on
+exit. No Blueprint runtime error or `Accessed None` occurred. The current
+character-creation PIE map has no controlled pawn, so a possessed-pawn runtime
+invariant remains an explicit gameplay-map acceptance check. The next technical
+milestone is safe local movement input and emergency restoration.
 
 ## Repository layout
 

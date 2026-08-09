@@ -24,7 +24,11 @@ Validated snippets:
   execution pin is the caller entry point; it writes
   `DroneModeActive = NOT DroneModeActive`, then logs the post-set value.
 - `enter-drone-mode.eddgraph` guards and reuses a typed drone camera reference,
-  spawning exactly one camera when necessary before delegating activation.
+  spawning exactly one camera when necessary, placing it, then delegating
+  activation.
+- `place-drone-at-current-view.eddgraph` guards `DroneCameraRef`, samples local
+  Player Camera Manager 0, and atomically copies its evaluated world location
+  and rotation to the drone before view activation.
 - `activate-drone-view.eddgraph` caches the original local view target once and
   delegates both cache outcomes to the view switch.
 - `switch-to-drone-view.eddgraph` guards `DroneCameraRef` and switches local

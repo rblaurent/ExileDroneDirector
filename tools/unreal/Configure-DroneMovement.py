@@ -1,4 +1,4 @@
-"""Add and verify the drone actor's first translation-control contract."""
+"""Add and verify the drone actor's local flight-control contracts."""
 
 from __future__ import annotations
 
@@ -7,10 +7,11 @@ import unreal
 
 PREFIX = "EDD_DRONE_MOVEMENT"
 DRONE_PATH = "/Game/Mods/ExileDroneDirector/Core/Camera/BP_EDD_DroneCamera"
-REQUIRED_FUNCTIONS = ("ApplyTranslationInput",)
+REQUIRED_FUNCTIONS = ("ApplyTranslationInput", "ApplyRotationInput")
 DEFAULTS = {
     "BaseMoveSpeed": 600.0,
     "BoostMultiplier": 3.0,
+    "LookSensitivity": 0.12,
 }
 MOVEMENT_COMPONENT_DEFAULTS = {
     "max_speed": DEFAULTS["BaseMoveSpeed"],

@@ -110,7 +110,14 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
    W/S, D/A, and E/Q form signed local axes, scale by `BaseMoveSpeed` and world
    delta time, and apply one local offset. Host and remote-client movement stayed
    isolated, controlled pawns were unchanged, and exit restored the exact prior
-   view target. Mouse look plus precision/boost scaling remain pending.**
+   view target.**
+9. Local mouse look. **Implemented as a nine-node named function: mouse delta
+   from local Player Controller 0, configurable sensitivity, inverted pitch,
+   zero roll, and one actor-local rotation. It compiles, round-trips, and is
+   dispatched only after translation behind the existing owner/locality guards.
+   Host yaw and cross-world isolation were observed in PIE; a real-mouse client
+   pitch/yaw feel pass remains pending because synthetic input does not reach the
+   separate preview's raw-input channel. Precision/boost scaling remains next.**
 
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.

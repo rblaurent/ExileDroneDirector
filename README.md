@@ -79,7 +79,12 @@ forced-destruction PIE test restored `CameraActor_0`, cleared
 `DroneModeActive`, left zero drone actors, and then spawned a fresh drone on the
 next entry. The drone now has frame-rate-independent six-axis local translation:
 W/S, D/A, and E/Q form one local vector, scaled by `BaseMoveSpeed` and world
-delta time, then applied as a single actor-local offset. A two-player
+delta time, then applied as a single actor-local offset. Mouse look now samples
+Player Controller 0's `GetInputMouseDelta`, applies a configurable
+`LookSensitivity` of 0.12 degrees per mouse unit, inverts pitch, preserves zero
+roll, and performs one actor-local rotation after translation on each active
+tick. The nine-node function and its client dispatch round-trip through reviewed
+Blueprint graph snippets and compile without errors. A two-player
 listen-server PIE test used two deterministic possessed `DefaultPawn` fixtures
 so Conan's unfinished character-creation flow could not contaminate the camera
 contract. Across the focused runs, host and remote client independently entered,
@@ -89,8 +94,14 @@ isolated client motion with a stationary host drone and no cross-world drone
 replication. Runtime BeginPlay explicitly disables both
 actor and movement replication because `SpectatorPawn` otherwise forced
 inherited replication on spawned instances. No Blueprint runtime error or
-`Accessed None` occurred. The next technical milestone is mouse look and
-precision/boost speed modes, followed by the remaining death, teleport,
+`Accessed None` occurred. A focused follow-up run also exercised host yaw while
+the remote PIE world remained free of host drones, then independently entered
+and exited the remote client's local drone with both exact original view targets
+restored. Automated raw-mouse injection into the separate client preview did not
+reach Unreal's raw-input path, so client pitch/yaw feel remains an explicit
+hands-on acceptance check rather than an overclaimed automated proof. The next
+technical milestone is precision/boost speed modes and horizon behavior,
+followed by the remaining death, teleport,
 disconnect, UI-close, and component-end-play restoration hooks.
 
 ## Repository layout

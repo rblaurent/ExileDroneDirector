@@ -562,6 +562,41 @@ non-authority client, unchanged possession, and exact view restoration. It
 does not replace the remaining dedicated-server, cooked-runtime, concrete Conan
 character, or abnormal-lifecycle acceptance gates.
 
+## First local mouse-look slice
+
+`BP_EDD_DroneCamera.ApplyRotationInput` is a reviewed nine-node function with a
+narrow contract:
+
+1. Resolve Player Controller 0 and sample `GetInputMouseDelta` once.
+2. Multiply DeltaX by `LookSensitivity` for yaw.
+3. Multiply DeltaY by the negated sensitivity for pitch.
+4. Keep roll exactly zero.
+5. Apply the resulting rotator once with `AddActorLocalRotation`; sweep and
+   teleport are both false.
+
+`LookSensitivity` defaults to `0.12` degrees per mouse unit. Mouse delta is not
+scaled by frame delta because it is already a per-frame accumulated input
+quantity. The active client Tick now executes `ApplyTranslationInput` and then
+`ApplyRotationInput` on the same validated, client-local camera reference. The
+function and client Event Graph compile with `Good to go`; their exported
+snippets contain 9 nodes/32 pins and 31 total nodes/111 pins respectively.
+
+The focused two-player listen-server run reused the exact deterministic
+`DefaultPawn` fixture above. Host entry created only the server-world local
+drone at `(1000, 0, 700)`. Its yaw changed from `-179.999893` to
+`-178.880084` while the remote world contained no drone, and F9 restored
+`DefaultPawn_0` as both controlled pawn and view target. Remote-client entry
+then created only its own non-replicated drone at `(1500, 500, 800)` while the
+host drone remained unchanged; remote F9 again restored the exact
+`DefaultPawn_0` view. There was no Blueprint runtime error or `Accessed None`.
+
+That run proves the compiled host rotation dispatch, owner-local world
+separation, unchanged possession, and exact restoration. It does **not** claim a
+remote-client raw-mouse or runtime pitch proof: Windows cursor/message synthesis
+did not reach the detached preview's raw-input channel. The exported reciprocal
+pin topology proves both pitch and yaw wiring structurally; actual remote-client
+pitch/yaw feel remains a hands-on acceptance item.
+
 ## Blueprint graph automation boundary
 
 The editor Python API can locate the component Event Graph, but the graph object
@@ -577,7 +612,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 ## Pending local reconnaissance
 
 - Concrete Conan-character view restoration in a gameplay-map PIE run
-- Mouse look, speed trim, precision, boost, and horizon-lock movement layers
+- Hands-on remote-client pitch/yaw feel; speed trim, precision, boost, and
+  horizon-lock movement layers
 - Remaining death, teleport, disconnect, UI-close, and component-end-play hooks
 - Emergency camera restoration and the view lifecycle in cooked runtime
 - PIE and cook commands/output locations

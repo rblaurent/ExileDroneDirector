@@ -135,7 +135,12 @@ listen-server PIE fixture. Each director gates input by owning-local-controller
 identity; host and remote client create non-replicated local drones, move them
 independently at the expected 600 units/second, retain their original controlled
 pawns, and restore their exact prior view targets. Task 5 has proven W/S, D/A,
-and E/Q translation; mouse look, trim, precision, boost, and horizon lock remain.
+and E/Q translation and now contains compiled local mouse-look dispatch using
+raw mouse delta, configurable sensitivity, inverted pitch, and zero roll. Host
+yaw plus host/client world isolation were observed in PIE; hands-on client
+pitch/yaw feel remains pending because the automation layer cannot inject raw
+mouse input into the detached preview. Trim, precision, boost, and horizon lock
+remain.
 Task 8 is proven idempotent through F9, and camera destruction within task 9 is
 proven through the active-camera validity guard. Death, teleport, disconnect,
 UI-close, component-end-play, dedicated-server, and cooked-runtime acceptance

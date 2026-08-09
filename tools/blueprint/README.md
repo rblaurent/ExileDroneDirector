@@ -47,10 +47,15 @@ Validated snippets:
   dispatch behind an owning-local-controller identity gate: F10 normal
   entry/exit, F9 manual emergency exit, and automatic restoration when an active
   drone camera becomes invalid. A valid active drone delegates translation to
-  `ApplyTranslationInput`.
+  `ApplyTranslationInput`, then rotation to `ApplyRotationInput` on the same
+  guarded tick.
 - `apply-translation-input.eddgraph` samples W/S, D/A, and E/Q, constructs three
   signed local axes, scales one vector by `BaseMoveSpeed` and world delta time,
   and applies one local actor offset.
+- `apply-rotation-input.eddgraph` samples Player Controller 0 mouse delta,
+  scales yaw by `LookSensitivity`, scales pitch by the negated sensitivity,
+  preserves zero roll, and applies one local actor rotation without sweep or
+  teleport.
 - `drone-camera-event-graph.eddgraph` explicitly disables actor and movement
   replication at BeginPlay to override `SpectatorPawn`'s inherited runtime state.
 

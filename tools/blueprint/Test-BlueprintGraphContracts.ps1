@@ -37,6 +37,7 @@ $exitPath = Join-Path $snippetRoot 'exit-drone-mode.eddgraph'
 $emergencyPath = Join-Path $snippetRoot 'emergency-exit-drone-mode.eddgraph'
 $eventGraphPath = Join-Path $snippetRoot 'client-director-event-graph.eddgraph'
 $movementPath = Join-Path $snippetRoot 'apply-translation-input.eddgraph'
+$rotationPath = Join-Path $snippetRoot 'apply-rotation-input.eddgraph'
 $droneEventPath = Join-Path $snippetRoot 'drone-camera-event-graph.eddgraph'
 $cachePawnPath = Join-Path $snippetRoot 'cache-original-pawn.eddgraph'
 $possessDronePath = Join-Path $snippetRoot 'possess-drone-camera.eddgraph'
@@ -54,6 +55,7 @@ $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.
     $emergencyPath,
     $eventGraphPath,
     $movementPath,
+    $rotationPath,
     $droneEventPath,
     $cachePawnPath,
     $possessDronePath,
@@ -435,6 +437,46 @@ Assert-GraphMatch $movementOffset 'PinName="DeltaLocation"[^\r\n]*LinkedTo=\(K2N
 Assert-GraphMatch $movementOffset 'PinName="bSweep"[^\r\n]*DefaultValue="false"' 'Freecam translation must not sweep against gameplay collision.'
 Assert-GraphMatch $movementOffset 'PinName="bTeleport"[^\r\n]*DefaultValue="false"' 'Freecam translation must use ordinary local offsets.'
 
+$rotation = [IO.File]::ReadAllText($rotationPath)
+$rotationNodes = [regex]::Matches($rotation, '(?m)^Begin Object Class=').Count
+if ($rotationNodes -ne 9) {
+    throw "Apply-rotation-input contract expected 9 nodes; found $rotationNodes."
+}
+$rotationEntry = Get-NodeBlock $rotation 'K2Node_FunctionEntry_0'
+$rotationController = Get-NodeBlock $rotation 'K2Node_CallFunction_0'
+$rotationMake = Get-NodeBlock $rotation 'K2Node_CallFunction_1'
+$rotationMouseDelta = Get-NodeBlock $rotation 'K2Node_CallFunction_2'
+$rotationApply = Get-NodeBlock $rotation 'K2Node_CallFunction_3'
+$rotationSensitivity = Get-NodeBlock $rotation 'K2Node_VariableGet_0'
+$rotationYaw = Get-NodeBlock $rotation 'K2Node_PromotableOperator_0'
+$rotationNegate = Get-NodeBlock $rotation 'K2Node_MacroInstance_0'
+$rotationPitch = Get-NodeBlock $rotation 'K2Node_PromotableOperator_1'
+
+Assert-GraphMatch $rotationEntry 'FunctionReference=\(MemberName="ApplyRotationInput"\)' 'Rotation must implement the named ApplyRotationInput contract.'
+Assert-GraphMatch $rotationEntry 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_3 ' 'ApplyRotationInput entry must execute exactly one local rotation write.'
+Assert-GraphMatch $rotationController 'MemberName="GetPlayerController"' 'Rotation input must resolve the local player controller.'
+Assert-GraphMatch $rotationController 'PinName="PlayerIndex"[^\r\n]*DefaultValue="0"' 'Rotation input must sample Player Controller 0.'
+Assert-GraphMatch $rotationController 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_2 ' 'The local controller must feed GetInputMouseDelta.'
+Assert-GraphMatch $rotationMouseDelta 'MemberName="GetInputMouseDelta"' 'Rotation input must sample raw mouse delta once per dispatch.'
+Assert-GraphMatch $rotationMouseDelta 'PinName="DeltaX"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_0 ' 'Mouse DeltaX must feed yaw scaling.'
+Assert-GraphMatch $rotationMouseDelta 'PinName="DeltaY"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_1 ' 'Mouse DeltaY must feed pitch scaling.'
+Assert-GraphMatch $rotationSensitivity 'VariableReference=\(MemberName="LookSensitivity"' 'Rotation input must read the configurable LookSensitivity.'
+Assert-GraphMatch $rotationSensitivity 'PinName="LookSensitivity"[^\r\n]*LinkedTo=\(K2Node_MacroInstance_0 [^,]+,K2Node_PromotableOperator_0 ' 'LookSensitivity must feed both inverted pitch and yaw scaling.'
+Assert-GraphMatch $rotationNegate 'StandardMacros:NegateFloat' 'Pitch sensitivity must be explicitly inverted.'
+Assert-GraphMatch $rotationNegate 'PinName="Result"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_1 ' 'Inverted sensitivity must feed pitch scaling.'
+Assert-GraphMatch $rotationYaw 'OperationName="Multiply"' 'Yaw must be a direct delta-by-sensitivity product.'
+Assert-GraphMatch $rotationYaw 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_1 ' 'Scaled yaw must feed MakeRotator.'
+Assert-GraphMatch $rotationPitch 'OperationName="Multiply"' 'Pitch must be a delta-by-inverted-sensitivity product.'
+Assert-GraphMatch $rotationPitch 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_1 ' 'Scaled pitch must feed MakeRotator.'
+Assert-GraphMatch $rotationMake 'MemberName="MakeRotator"' 'Rotation input must construct one explicit rotator.'
+Assert-GraphMatch $rotationMake 'PinName="Roll"[^\r\n]*DefaultValue="0\.0"' 'Mouse look must not introduce roll.'
+Assert-GraphMatch $rotationMake 'PinName="Pitch"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_1 ' 'MakeRotator pitch must consume the scaled DeltaY path.'
+Assert-GraphMatch $rotationMake 'PinName="Yaw"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_0 ' 'MakeRotator yaw must consume the scaled DeltaX path.'
+Assert-GraphMatch $rotationMake 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_3 ' 'The completed rotator must feed AddActorLocalRotation.'
+Assert-GraphMatch $rotationApply 'MemberName="K2_AddActorLocalRotation"' 'Mouse look must use explicit actor-local rotation.'
+Assert-GraphMatch $rotationApply 'PinName="bSweep"[^\r\n]*DefaultValue="false"' 'Freecam rotation must not sweep.'
+Assert-GraphMatch $rotationApply 'PinName="bTeleport"[^\r\n]*DefaultValue="false"' 'Freecam rotation must use ordinary local rotation.'
+
 $droneEvent = [IO.File]::ReadAllText($droneEventPath)
 $droneEventNodes = [regex]::Matches($droneEvent, '(?m)^Begin Object Class=').Count
 if ($droneEventNodes -ne 3) {
@@ -475,8 +517,8 @@ Assert-GraphMatch $emergencyPrint 'PinName="bPrintToLog"[^\r\n]*DefaultValue="tr
 
 $eventGraph = [IO.File]::ReadAllText($eventGraphPath)
 $eventGraphNodes = [regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/BlueprintGraph\.').Count
-if ($eventGraphNodes -ne 29) {
-    throw "Client-director EventGraph contract expected 29 executable nodes; found $eventGraphNodes."
+if ($eventGraphNodes -ne 30) {
+    throw "Client-director EventGraph contract expected 30 executable nodes; found $eventGraphNodes."
 }
 if ([regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/UnrealEd\.EdGraphNode_Comment').Count -ne 1) {
     throw 'Client-director EventGraph must retain exactly one design comment node.'
@@ -501,6 +543,7 @@ $cameraGet = Get-NodeBlock $eventGraph 'K2Node_VariableGet_2'
 $cameraValid = Get-NodeBlock $eventGraph 'K2Node_CallFunction_10'
 $invalidEmergency = Get-NodeBlock $eventGraph 'K2Node_CallFunction_11'
 $translationInput = Get-NodeBlock $eventGraph 'K2Node_CallFunction_12'
+$rotationInput = Get-NodeBlock $eventGraph 'K2Node_CallFunction_13'
 $ownerGet = Get-NodeBlock $eventGraph 'K2Node_CallFunction_14'
 $localControllerGet = Get-NodeBlock $eventGraph 'K2Node_CallFunction_15'
 $ownerEquals = Get-NodeBlock $eventGraph 'K2Node_CallFunction_16'
@@ -540,6 +583,10 @@ Assert-GraphMatch $cameraBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_CallFun
 Assert-GraphMatch $invalidEmergency 'FunctionReference=\(MemberName="EmergencyExitDroneMode"' 'The invalid-camera path must delegate to EmergencyExitDroneMode.'
 Assert-GraphMatch $translationInput 'FunctionReference=.*MemberName="ApplyTranslationInput"' 'Active-mode movement must delegate to BP_EDD_DroneCamera.ApplyTranslationInput.'
 Assert-GraphMatch $translationInput 'PinName="self"[^\r\n]*LinkedTo=\(K2Node_VariableGet_2 ' 'Translation input must target the validated DroneCameraRef.'
+Assert-GraphMatch $translationInput 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_13 ' 'Translation input must complete before rotation input executes.'
+Assert-GraphMatch $rotationInput 'FunctionReference=.*MemberName="ApplyRotationInput"' 'Active-mode look must delegate to BP_EDD_DroneCamera.ApplyRotationInput.'
+Assert-GraphMatch $rotationInput 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_CallFunction_12 ' 'Rotation input must execute after translation on the same active tick.'
+Assert-GraphMatch $rotationInput 'PinName="self"[^\r\n]*LinkedTo=\(K2Node_VariableGet_2 ' 'Rotation input must target the validated DroneCameraRef.'
 
 $inactivePath = [regex]::Match($activeBranch, '(?m)^\s*CustomProperties Pin \([^\r\n]*PinName="else"[^\r\n]*$')
 if (-not $inactivePath.Success -or $inactivePath.Value -match 'LinkedTo=') {
@@ -551,10 +598,10 @@ foreach ($emergencyGraph in @($emergency, $eventGraph)) {
     }
 }
 
-foreach ($viewGraph in @($place, $activate, $switch, $exit, $movement, $droneEvent)) {
+foreach ($viewGraph in @($place, $activate, $switch, $exit, $movement, $rotation, $droneEvent)) {
     if ($viewGraph -match '(?m)^\s*Error(Type|Msg)=') {
         throw 'View-lifecycle graph source must not retain stale compiler error metadata.'
     }
 }
 
-Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, client-director-event-graph, apply-translation-input, drone-camera-event-graph (legacy possession helpers also remain structurally validated)'
+Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, client-director-event-graph, apply-translation-input, apply-rotation-input, drone-camera-event-graph (legacy possession helpers also remain structurally validated)'

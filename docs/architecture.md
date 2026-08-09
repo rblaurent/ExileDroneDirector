@@ -91,17 +91,26 @@ lens channels; ID and hold remain stable. Delete removes the same index from all
 six channels and preserves that index when a successor exists or clamps to the
 last survivor/`-1`.
 
-The active-mode client dispatch maps K/R/Delete to those three operations and
-then formats one shared local status message from `Length(DraftWaypointIds)` and
-`SelectedWaypointIndex`. This feedback is intentionally transient; authoritative
-server persistence, publication, and collaboration begin in the later repository
-slice.
+When playback is inactive, the active-mode client dispatch maps K/R/Delete to
+those three operations and then formats one shared local status message from
+`Length(DraftWaypointIds)` and `SelectedWaypointIndex`. P enters a separate
+start/stop arbitration path. While `PlaybackActive` is true, the tick calls only
+the absolute-time playback evaluator; manual flight and authoring do not run.
+Normal and emergency exits clear playback before view restoration. This bridge
+and its feedback are intentionally transient; authoritative server persistence,
+publication, and collaboration begin in the later repository slice.
 
 This bridge is not a persistence or networking model. It exists to prove
 atomic edit semantics and camera capture before `ST_EDD_Waypoint`,
 `ST_EDD_FlypathDocument`, undo commands, serialization, and server DTOs are
 authored. No other client may read these arrays, and no UI or playback system
 should bind directly to them once the document model is promoted.
+
+The current linear evaluator assigns one configurable duration to every segment,
+derives segment index and local alpha from absolute game time, interpolates
+transforms with quaternion rotation, and writes the final authored transform
+exactly before deactivating. It is the validation kernel for the later compiled
+trajectory model, not the final cinematic timing or curve representation.
 
 ### 3.3 `BPC_EDD_ServerService`
 

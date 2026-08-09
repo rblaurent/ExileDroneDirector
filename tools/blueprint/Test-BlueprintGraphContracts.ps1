@@ -102,6 +102,12 @@ if ($LASTEXITCODE -ne 0) {
     throw "Linear playback semantic contracts failed with exit code $LASTEXITCODE."
 }
 
+$linearPlaybackDispatchTester = Join-Path $ProjectRoot 'tools\blueprint\Test-LinearPlaybackDispatchContracts.py'
+& python $linearPlaybackDispatchTester --event $eventGraphPath
+if ($LASTEXITCODE -ne 0) {
+    throw "Linear playback dispatch contracts failed with exit code $LASTEXITCODE."
+}
+
 $input = [IO.File]::ReadAllText($inputPath)
 $inputNodes = [regex]::Matches($input, '(?m)^Begin Object Class=').Count
 if ($inputNodes -ne 5) {
@@ -737,8 +743,8 @@ Assert-GraphMatch $emergencyPrint 'PinName="bPrintToLog"[^\r\n]*DefaultValue="tr
 
 $eventGraph = [IO.File]::ReadAllText($eventGraphPath)
 $eventGraphNodes = [regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/BlueprintGraph\.').Count
-if ($eventGraphNodes -ne 50) {
-    throw "Client-director EventGraph contract expected 50 executable nodes plus one design comment; found $eventGraphNodes executable nodes."
+if ($eventGraphNodes -ne 61) {
+    throw "Client-director EventGraph contract expected 61 executable nodes plus one design comment; found $eventGraphNodes executable nodes."
 }
 if ([regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/UnrealEd\.EdGraphNode_Comment').Count -ne 1) {
     throw 'Client-director EventGraph must retain exactly one design comment node.'
@@ -753,6 +759,8 @@ if ([regex]::Matches($eventGraph, 'MemberName="EmergencyExitDroneMode"').Count -
 $tickEvent = Get-NodeBlock $eventGraph 'K2Node_Event_1'
 $f10Branch = Get-NodeBlock $eventGraph 'K2Node_IfThenElse_0'
 $f10Poll = Get-NodeBlock $eventGraph 'K2Node_CallFunction_2'
+$modeBranch = Get-NodeBlock $eventGraph 'K2Node_IfThenElse_1'
+$normalExit = Get-NodeBlock $eventGraph 'K2Node_CallFunction_6'
 $f9Branch = Get-NodeBlock $eventGraph 'K2Node_IfThenElse_2'
 $f9Poll = Get-NodeBlock $eventGraph 'K2Node_CallFunction_8'
 $manualEmergency = Get-NodeBlock $eventGraph 'K2Node_CallFunction_9'
@@ -770,6 +778,17 @@ $ownerGet = Get-NodeBlock $eventGraph 'K2Node_CallFunction_14'
 $localControllerGet = Get-NodeBlock $eventGraph 'K2Node_CallFunction_15'
 $ownerEquals = Get-NodeBlock $eventGraph 'K2Node_CallFunction_16'
 $ownerGate = Get-NodeBlock $eventGraph 'K2Node_IfThenElse_5'
+$playbackPoll = Get-NodeBlock $eventGraph 'K2Node_CallFunction_52'
+$playbackEdgeBranch = Get-NodeBlock $eventGraph 'K2Node_IfThenElse_9'
+$playbackActiveGet = Get-NodeBlock $eventGraph 'K2Node_VariableGet_5'
+$playbackToggleBranch = Get-NodeBlock $eventGraph 'K2Node_IfThenElse_10'
+$playbackUpdateBranch = Get-NodeBlock $eventGraph 'K2Node_IfThenElse_11'
+$playbackStart = Get-NodeBlock $eventGraph 'K2Node_CallFunction_53'
+$playbackToggleStop = Get-NodeBlock $eventGraph 'K2Node_CallFunction_54'
+$playbackUpdate = Get-NodeBlock $eventGraph 'K2Node_CallFunction_55'
+$playbackNormalStop = Get-NodeBlock $eventGraph 'K2Node_CallFunction_56'
+$playbackManualStop = Get-NodeBlock $eventGraph 'K2Node_CallFunction_57'
+$playbackInvalidStop = Get-NodeBlock $eventGraph 'K2Node_CallFunction_58'
 
 Assert-GraphMatch $tickEvent 'EventReference=.*MemberName="ReceiveTick"' 'Emergency polling must run from the component tick.'
 Assert-GraphMatch $tickEvent 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_5 ' 'ReceiveTick must enter the owning-local-controller gate first.'
@@ -790,7 +809,13 @@ Assert-GraphMatch $f10Branch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_IfThenElse
 Assert-GraphMatch $f9Poll 'MemberName="WasInputKeyJustPressed"' 'F9 emergency exit must use edge-triggered polling.'
 Assert-GraphMatch $f9Poll 'PinName="Key"[^\r\n]*DefaultValue="F9"' 'The emergency hotkey must remain F9.'
 Assert-GraphMatch $f9Poll 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_2 ' 'F9 polling must drive the emergency branch.'
-Assert-GraphMatch $f9Branch 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_9 ' 'F9 must immediately execute the manual emergency caller.'
+Assert-GraphMatch $modeBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_CallFunction_56 ' 'Normal F10 exit must stop playback before restoring the view.'
+Assert-GraphMatch $playbackNormalStop 'MemberName="StopLinearPlayback"' 'Normal F10 exit must delegate cleanup to StopLinearPlayback.'
+Assert-GraphMatch $playbackNormalStop 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_6 ' 'Normal playback cleanup must complete before ExitDroneMode.'
+Assert-GraphMatch $normalExit 'FunctionReference=\(MemberName="ExitDroneMode"' 'Normal F10 exit must retain ExitDroneMode restoration.'
+Assert-GraphMatch $f9Branch 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_57 ' 'F9 must stop playback before emergency restoration.'
+Assert-GraphMatch $playbackManualStop 'MemberName="StopLinearPlayback"' 'F9 cleanup must delegate to StopLinearPlayback.'
+Assert-GraphMatch $playbackManualStop 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_9 ' 'F9 cleanup must complete before EmergencyExitDroneMode.'
 Assert-GraphMatch $manualEmergency 'FunctionReference=\(MemberName="EmergencyExitDroneMode"' 'The manual F9 path must delegate to EmergencyExitDroneMode.'
 Assert-GraphMatch $f9Branch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_3 ' 'A tick without F9 must continue to the active-mode recovery guard.'
 Assert-GraphMatch $activeGet 'VariableReference=\(MemberName="DroneModeActive"' 'Automatic recovery must read DroneModeActive.'
@@ -800,9 +825,24 @@ Assert-GraphMatch $cameraGet 'VariableReference=\(MemberName="DroneCameraRef"' '
 Assert-GraphMatch $cameraGet 'PinName="DroneCameraRef"[^\r\n]*LinkedTo=\(K2Node_CallFunction_10 ' 'DroneCameraRef must feed the recovery validity check.'
 Assert-GraphMatch $cameraValid 'MemberName="IsValid"' 'Automatic recovery must validate DroneCameraRef.'
 Assert-GraphMatch $cameraValid 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_4 ' 'Camera validity must drive the recovery branch.'
-Assert-GraphMatch $cameraBranch 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_17 ' 'A valid active camera must update speed controls before movement.'
-Assert-GraphMatch $cameraBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_CallFunction_11 ' 'An invalid active camera must execute automatic emergency restoration.'
+Assert-GraphMatch $cameraBranch 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_9 ' 'A valid active camera must enter playback arbitration before movement.'
+Assert-GraphMatch $cameraBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_CallFunction_58 ' 'An invalid active camera must stop playback before emergency restoration.'
+Assert-GraphMatch $playbackInvalidStop 'MemberName="StopLinearPlayback"' 'Invalid-camera cleanup must delegate to StopLinearPlayback.'
+Assert-GraphMatch $playbackInvalidStop 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_11 ' 'Invalid-camera cleanup must complete before EmergencyExitDroneMode.'
 Assert-GraphMatch $invalidEmergency 'FunctionReference=\(MemberName="EmergencyExitDroneMode"' 'The invalid-camera path must delegate to EmergencyExitDroneMode.'
+Assert-GraphMatch $playbackPoll 'MemberName="WasInputKeyJustPressed"' 'Playback toggle must use edge-triggered polling.'
+Assert-GraphMatch $playbackPoll 'PinName="Key"[^\r\n]*DefaultValue="P"' 'The playback hotkey must remain P.'
+Assert-GraphMatch $playbackPoll 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_9 ' 'P polling must drive playback edge arbitration.'
+Assert-GraphMatch $playbackEdgeBranch 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_10 ' 'A P edge must enter only the start/stop chooser.'
+Assert-GraphMatch $playbackEdgeBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_11 ' 'A tick without P must enter update/manual arbitration.'
+Assert-GraphMatch $playbackActiveGet 'VariableReference=\(MemberName="PlaybackActive"' 'Playback arbitration must read PlaybackActive once for both decisions.'
+Assert-GraphMatch $playbackToggleBranch 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_54 ' 'Active P toggle must stop playback.'
+Assert-GraphMatch $playbackToggleBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_CallFunction_53 ' 'Inactive P toggle must start playback.'
+Assert-GraphMatch $playbackStart 'MemberName="StartLinearPlayback"' 'Playback start must delegate to the compiled kernel.'
+Assert-GraphMatch $playbackToggleStop 'MemberName="StopLinearPlayback"' 'Playback stop must delegate to the compiled kernel.'
+Assert-GraphMatch $playbackUpdateBranch 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_55 ' 'Active playback ticks must update the path.'
+Assert-GraphMatch $playbackUpdateBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_CallFunction_17 ' 'Inactive playback ticks must retain manual flight controls.'
+Assert-GraphMatch $playbackUpdate 'MemberName="UpdateLinearPlayback"' 'Playback ticks must delegate to the absolute-time update kernel.'
 Assert-GraphMatch $speedInput 'FunctionReference=.*MemberName="UpdateSpeedControls"' 'Active-mode input must delegate to BP_EDD_DroneCamera.UpdateSpeedControls.'
 Assert-GraphMatch $speedInput 'PinName="self"[^\r\n]*LinkedTo=\(K2Node_VariableGet_2 ' 'Speed control must target the validated DroneCameraRef.'
 Assert-GraphMatch $speedInput 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_12 ' 'Speed control must complete before translation executes.'

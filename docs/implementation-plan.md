@@ -39,9 +39,15 @@ This section is the authoritative handoff. Detailed evidence remains in
 - `CaptureCurrentWaypoint`, `ReplaceSelectedWaypoint`, and
   `DeleteSelectedWaypoint` are compiled live functions with reciprocal native
   entry links.
-- The live 51-node/200-pin client EventGraph exposes mutually exclusive K
-  capture, R replace, and Delete removal shortcuts. Each successful mutation
-  continues to shared dynamic feedback: `[EDD] Draft waypoints: N | selected: I`.
+- `StartLinearPlayback`, `UpdateLinearPlayback`, and `StopLinearPlayback` are
+  compiled absolute-time functions. P toggles playback; active playback ticks
+  suppress manual flight and waypoint edits.
+- The live 62-node/235-pin client EventGraph retains mutually exclusive K
+  capture, R replace, and Delete removal shortcuts while inactive. Each
+  successful mutation continues to shared dynamic feedback:
+  `[EDD] Draft waypoints: N | selected: I`.
+- Normal F10 exit, manual F9 emergency exit, and invalid-camera recovery each
+  stop playback before restoring the player view.
 
 ### Runtime and structural evidence
 
@@ -53,6 +59,11 @@ This section is the authoritative handoff. Detailed evidence remains in
 - Physical PIE acceptance proves F10 entry, K capture, R replacement, Delete
   removal, and F9 restoration. The feedback build additionally proves a real K
   press emits `[EDD] Draft waypoints: 1 | selected: 0`.
+- Pure reference tests prove direct-time linear evaluation, exact authored
+  endpoints, equal segment duration, negative-time clamping, history
+  independence, and shortest quaternion interpolation. Live playback dispatch
+  is compiled and round-trip validated; its deterministic PIE movement gate is
+  the next test.
 - Reviewed live graph snippets cover capture, replace, and delete. Their tests
   validate pin types, execution order, stable ID/hold behavior, all six array
   mutations, selection repair, and exact native function-entry linkage.
@@ -64,7 +75,8 @@ This section is the authoritative handoff. Detailed evidence remains in
 
 - `Build-ClientWaypointEditDispatch.py` produces the proven 43-node K/R/Delete
   dispatch; `Build-WaypointFeedbackDispatch.py` extends it to the live 51-node
-  feedback graph.
+  feedback graph; `Build-LinearPlaybackDispatch.py` extends that to the live
+  62-node playback-arbitrated graph.
 - The generated graph and the copied post-compile Unreal round-trip both pass
   generic reciprocal-link validation, capture/edit semantics, and the dedicated
   feedback contract. The contract caught and prevented an invalid first draft
@@ -72,9 +84,10 @@ This section is the authoritative handoff. Detailed evidence remains in
 
 ### Not implemented yet
 
-- No polished editor UI, visible waypoint/path preview, timeline, trajectory
-  playback, save/load, server repository, sharing, permissions, cloning, or
-  event execution exists yet.
+- No polished editor UI, visible waypoint/path preview, timeline, cinematic
+  curves, lens playback, save/load, server repository, sharing, permissions,
+  cloning, or event execution exists yet. The current playback is deliberately
+  limited to equal-duration transform interpolation over the transient draft.
 - Draft waypoint data is client-local and transient. Other server members
   cannot see or play it.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
@@ -85,15 +98,16 @@ This section is the authoritative handoff. Detailed evidence remains in
 The user explicitly deferred the attended cook/Workshop step for the night. The
 next autonomous implementation slice is therefore:
 
-1. Begin from the committed `0.13.0` feedback checkpoint with one DevKit editor.
-2. Add a minimal linear-playback state contract to the client director.
-3. Evaluate every captured transform from absolute playback time with a fixed
-   per-segment duration; do not integrate position from frame to frame.
-4. Compile, save, copy the live graph back out, and enforce exact pin-level
-   contracts for start, evaluation, endpoint completion, and invalid drafts.
-5. Prove direct-time evaluation and ordinary forward playback agree, then run a
-   physical two-player PIE route without moving or possessing either pawn.
-6. Close, sync, run the complete repository suite, commit, and push the slice.
+1. Begin from the committed compiled playback-dispatch checkpoint with one
+   DevKit editor.
+2. Run deterministic two-player PIE tests for invalid drafts, initial snap,
+   midpoint and exact endpoint evaluation, completion, explicit stop, and
+   remote-client isolation.
+3. Confirm the controlled pawn, controller possession, and original view target
+   remain unchanged/restored through the complete route.
+4. Run physical F10/K/P/P/F9 acceptance after the deterministic fixture passes.
+5. Close, sync, run the complete repository suite, bump the internal playback
+   checkpoint, commit, and push.
 
 The first supported cook/package and normal-client test remain mandatory before
 any public release or Workshop/G-Portal deployment; they resume in an attended

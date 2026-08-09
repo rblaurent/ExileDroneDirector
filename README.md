@@ -136,14 +136,16 @@ captures, exact replacement, survivor/empty deletion, invalid-index no-ops,
 remote isolation, exact original pawn/view restoration, and restoration of lens
 class defaults. The guarded active-mode EventGraph now exposes mutually
 exclusive `K`, `R`, and `Delete` edges and prints the current draft count and
-selected index after each successful mutation. The generated 51-node graph,
-compiled Unreal round-trip, deterministic two-player edit cycle, and physical
-F10/K/R/Delete/F9 route are validated. Cooked-package validation remains a
-required release gate but is explicitly deferred until an attended session. The
-next autonomous checkpoint is a deterministic equal-duration linear playback
-kernel over the captured transforms, followed by promotion from transitional
-arrays into the authored waypoint/flypath document structs and the remaining
-lifecycle restoration hooks.
+selected index after each successful mutation. The client now also has compiled
+absolute-time start/update/stop playback functions. P toggles the equal-duration
+linear path; active playback suppresses manual flight and edits, and every
+normal/emergency exit stops playback first. The generated and Unreal-round-trip
+62-node/235-pin EventGraph passes reciprocal-link and semantic contracts. The
+next autonomous gate is deterministic two-player PIE movement/isolation and a
+physical F10/K/P/P/F9 route. Cooked-package validation remains required but is
+explicitly deferred until an attended session. After the playback gate, the
+transitional arrays are promoted into authored waypoint/flypath document structs
+and the remaining lifecycle restoration hooks.
 
 ## Repository layout
 

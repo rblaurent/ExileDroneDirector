@@ -597,6 +597,51 @@ did not reach the detached preview's raw-input channel. The exported reciprocal
 pin topology proves both pitch and yaw wiring structurally; actual remote-client
 pitch/yaw feel remains a hands-on acceptance item.
 
+## Smooth speed-control slice
+
+`BP_EDD_DroneCamera.UpdateSpeedControls` now owns a narrow, ordered contract:
+
+1. Sample `MouseWheelAxis` and compute a symmetric proportional factor as
+   `Exp(Loge(SpeedTrimRatio) * wheel)`, so opposite wheel steps multiply and
+   divide by the same ratio.
+2. Multiply the existing `CruiseMoveSpeed`, clamp the result between
+   `MinMoveSpeed` and `MaxMoveSpeed`, and persist it.
+3. Select normal cruise or Shift boost, then wrap that selection in the Ctrl
+   precision selector so precision wins if both modifiers are down.
+4. `FInterpTo` from `CurrentMoveSpeed` to the selected target with world delta
+   seconds and `SpeedResponse`, then persist current speed.
+
+The active client tick executes speed, translation, then rotation on the same
+validated local drone. Translation consumes `CurrentMoveSpeed`, not the legacy
+base value.
+
+The first PIE attempt exposed a real graph defect that compile/save could not:
+the clamp's `Value` pin was unlinked, so both cruise and current speed fell from
+600 to the 30-unit minimum immediately. The pin was repaired, the graph compiled
+green, and the offline graph contract now requires the exact
+trim-multiply-to-clamp link so this failure cannot silently return.
+
+The clean two-player listen-server rerun reused the deterministic `DefaultPawn`
+fixture and proved:
+
+- initial cruise/current values remained exactly `600/600`;
+- a short Shift sample produced `CurrentMoveSpeed=1427.38`, proving a smooth
+  intermediate rather than a snap, and sustained Shift reached `1799.42`;
+- Ctrl reached `150.79`; Ctrl+Shift converged toward the same precision target,
+  proving precision precedence;
+- one second of W moved about 610 units normally, 1643 while boost ramped, and
+  221 while precision ramped;
+- remote-client boost reached `1798.22` and moved only the client drone; the
+  host drone remained exactly at its pre-client transform;
+- host and client F9 each restored the exact original controlled pawn and view
+  target, with no `Blueprint Runtime Error` or `Accessed None`.
+
+Windows `mouse_event` and posted `WM_MOUSEWHEEL` messages did not reach the PIE
+mouse-input channel, matching the raw-mouse automation limitation found during
+look testing. Wheel behavior is therefore structurally validated—including the
+clamp link and multiplicative inverse topology—but physical wheel feel remains a
+hands-on acceptance item.
+
 ## Blueprint graph automation boundary
 
 The editor Python API can locate the component Event Graph, but the graph object
@@ -612,8 +657,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 ## Pending local reconnaissance
 
 - Concrete Conan-character view restoration in a gameplay-map PIE run
-- Hands-on remote-client pitch/yaw feel; speed trim, precision, boost, and
-  horizon-lock movement layers
+- Hands-on remote-client pitch/yaw and physical-wheel feel; horizon-lock
+  movement layer
 - Remaining death, teleport, disconnect, UI-close, and component-end-play hooks
 - Emergency camera restoration and the view lifecycle in cooked runtime
 - PIE and cook commands/output locations

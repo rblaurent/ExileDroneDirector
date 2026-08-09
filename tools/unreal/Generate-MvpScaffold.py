@@ -187,7 +187,14 @@ for variable_name, type_name in (
 
 for variable_name, type_name in (
     ("BaseMoveSpeed", "real"),
+    ("CruiseMoveSpeed", "real"),
+    ("CurrentMoveSpeed", "real"),
     ("BoostMultiplier", "real"),
+    ("PrecisionMultiplier", "real"),
+    ("SpeedTrimRatio", "real"),
+    ("MinMoveSpeed", "real"),
+    ("MaxMoveSpeed", "real"),
+    ("SpeedResponse", "real"),
     ("LookSensitivity", "real"),
     ("FocalLength", "real"),
     ("Aperture", "real"),
@@ -267,4 +274,3 @@ log(f"REUSED|{reused}")
 log(f"WARNINGS|{warnings}")
 log(f"PHYSICAL_ASSETS|{physical_assets}")
 log("COMPLETE")
-

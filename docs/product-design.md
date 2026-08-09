@@ -247,10 +247,17 @@ Default flight controls provide forward/back, strafe, ascend/descend, yaw,
 pitch, optional roll, and mouse-wheel speed trim. Precision modifiers are:
 
 - Normal movement for composition
-- Coarse/boost movement for travel
-- Fine movement for centimeter-scale framing
+- Shift coarse/boost movement for travel, targeting 3x cruise speed
+- Ctrl fine movement for centimeter-scale framing, targeting 0.25x cruise speed
 - Optional local-space or world-space translation
 - Optional horizon lock
+
+Mouse-wheel trim changes cruise speed in proportional 1.25x steps rather than
+fixed world-unit increments, so it remains useful at both room scale and long
+travel distances. Cruise speed is clamped to 30-6000 units/second. Trim,
+precision, and boost all select a target speed; the runtime interpolates the
+current speed toward that target instead of snapping. If Ctrl and Shift are held
+together, precision wins. The HUD exposes both cruise and current speed.
 
 Control bindings are remappable and must avoid silently replacing core Conan
 bindings.

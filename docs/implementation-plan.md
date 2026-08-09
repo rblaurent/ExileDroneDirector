@@ -139,8 +139,12 @@ and E/Q translation and now contains compiled local mouse-look dispatch using
 raw mouse delta, configurable sensitivity, inverted pitch, and zero roll. Host
 yaw plus host/client world isolation were observed in PIE; hands-on client
 pitch/yaw feel remains pending because the automation layer cannot inject raw
-mouse input into the detached preview. Trim, precision, boost, and horizon lock
-remain.
+mouse input into the detached preview. Speed trim, precision, and boost are now
+implemented as a separate named contract: proportional 1.25x wheel trim,
+30-6000 clamp, 0.25x Ctrl precision, 3x Shift boost, precision precedence, and
+delta-time `FInterpTo` smoothing. Host and remote-client runtime checks proved
+baseline, easing, target speeds, movement-distance ordering, isolation, and
+exact F9 restoration. Physical-wheel feel and horizon lock remain.
 Task 8 is proven idempotent through F9, and camera destruction within task 9 is
 proven through the active-camera validity guard. Death, teleport, disconnect,
 UI-close, component-end-play, dedicated-server, and cooked-runtime acceptance

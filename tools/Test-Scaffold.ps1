@@ -43,6 +43,7 @@ $requiredFiles = @(
     'tools\blueprint\snippets\client-director-event-graph.eddgraph',
     'tools\blueprint\snippets\apply-translation-input.eddgraph',
     'tools\blueprint\snippets\apply-rotation-input.eddgraph',
+    'tools\blueprint\snippets\update-speed-controls.eddgraph',
     'tools\blueprint\snippets\drone-camera-event-graph.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
@@ -63,6 +64,38 @@ $manifestPath = Join-Path $ProjectRoot 'project.json'
 $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
 if ($manifest.modFolder -ne 'ExileDroneDirector') {
     throw "Unexpected modFolder in project.json: $($manifest.modFolder)"
+}
+
+$movementConfigPath = Join-Path $ProjectRoot 'tools\unreal\Configure-DroneMovement.py'
+$movementConfig = [IO.File]::ReadAllText($movementConfigPath)
+$expectedMovementDefaults = [ordered]@{
+    BaseMoveSpeed = '600.0'
+    CruiseMoveSpeed = '600.0'
+    CurrentMoveSpeed = '600.0'
+    BoostMultiplier = '3.0'
+    PrecisionMultiplier = '0.25'
+    SpeedTrimRatio = '1.25'
+    MinMoveSpeed = '30.0'
+    MaxMoveSpeed = '6000.0'
+    SpeedResponse = '6.0'
+    LookSensitivity = '0.12'
+}
+foreach ($entry in $expectedMovementDefaults.GetEnumerator()) {
+    $pattern = '"{0}"\s*:\s*{1}' -f [regex]::Escape($entry.Key), [regex]::Escape($entry.Value)
+    if ($movementConfig -notmatch $pattern) {
+        throw "Missing movement default contract: $($entry.Key)=$($entry.Value)"
+    }
+}
+foreach ($functionName in @('ApplyTranslationInput', 'ApplyRotationInput', 'UpdateSpeedControls')) {
+    if ($movementConfig -notmatch ('"{0}"' -f [regex]::Escape($functionName))) {
+        throw "Missing movement function contract: $functionName"
+    }
+}
+$trimRatio = [double]$expectedMovementDefaults.SpeedTrimRatio
+$trimUp = [Math]::Exp([Math]::Log($trimRatio))
+$trimDown = [Math]::Exp(-[Math]::Log($trimRatio))
+if ([Math]::Abs(($trimUp * $trimDown) - 1.0) -gt 0.000000001) {
+    throw 'SpeedTrimRatio must yield reciprocal positive and negative steps.'
 }
 
 $contentRoot = Join-Path $ProjectRoot "DevKitContent\$($manifest.modFolder)"

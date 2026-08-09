@@ -99,6 +99,14 @@ exit. BeginPlay explicitly disables actor and movement replication; this runtime
 override is required because `SpectatorPawn` inheritance otherwise re-enabled
 replication on spawned instances despite the intended class defaults.
 
+Free-flight speed uses two values rather than directly multiplying input by a
+mode flag. `CruiseMoveSpeed` is the persistent mouse-wheel-trimmed target base;
+`CurrentMoveSpeed` is the smoothed runtime value consumed by translation. Wheel
+steps multiply/divide cruise speed by 1.25 and clamp it to 30-6000 units/second.
+Ctrl targets 0.25x cruise speed, Shift targets 3x, and precision wins if both are
+held. `FInterpTo` with a default response of 6 interpolates current toward target
+before translation, keeping trim, precision, and boost changes continuous.
+
 ### 3.5 `BP_EDD_PathPreview`
 
 Local non-replicated visualization actor. It renders waypoint markers, segment

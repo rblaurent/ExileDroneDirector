@@ -107,17 +107,25 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
    of the active drone actor. Death, teleport, disconnect, and component
    end-play hooks remain pending.**
 8. Six-axis transform integration. **Proven in two-player listen-server PIE:
-   W/S, D/A, and E/Q form signed local axes, scale by `BaseMoveSpeed` and world
-   delta time, and apply one local offset. Host and remote-client movement stayed
-   isolated, controlled pawns were unchanged, and exit restored the exact prior
-   view target.**
+   W/S, D/A, and E/Q form signed local axes, scale by smoothed
+   `CurrentMoveSpeed` and world delta time, and apply one local offset. Host and
+   remote-client movement stayed isolated, controlled pawns were unchanged, and
+   exit restored the exact prior view target.**
 9. Local mouse look. **Implemented as a nine-node named function: mouse delta
    from local Player Controller 0, configurable sensitivity, inverted pitch,
    zero roll, and one actor-local rotation. It compiles, round-trips, and is
    dispatched only after translation behind the existing owner/locality guards.
    Host yaw and cross-world isolation were observed in PIE; a real-mouse client
    pitch/yaw feel pass remains pending because synthetic input does not reach the
-   separate preview's raw-input channel. Precision/boost scaling remains next.**
+   separate preview's raw-input channel.**
+10. Smooth speed controls. **Proven in the deterministic two-player fixture:
+    baseline held at 600, a short boost eased to 1427, sustained boost reached
+    1799, precision reached 151, and Ctrl won when Ctrl+Shift were held. One
+    second of W travelled about 610 units normally, 1643 while boosting, and
+    221 while easing into precision. Remote-client boost left the host drone
+    exactly unchanged. Mouse-wheel topology and proportional inverse math are
+    structurally checked; synthetic Windows wheel messages do not enter Conan's
+    mouse-input channel, so physical-wheel feel remains a manual gate.**
 
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.

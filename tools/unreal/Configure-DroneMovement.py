@@ -7,10 +7,21 @@ import unreal
 
 PREFIX = "EDD_DRONE_MOVEMENT"
 DRONE_PATH = "/Game/Mods/ExileDroneDirector/Core/Camera/BP_EDD_DroneCamera"
-REQUIRED_FUNCTIONS = ("ApplyTranslationInput", "ApplyRotationInput")
+REQUIRED_FUNCTIONS = (
+    "ApplyTranslationInput",
+    "ApplyRotationInput",
+    "UpdateSpeedControls",
+)
 DEFAULTS = {
     "BaseMoveSpeed": 600.0,
+    "CruiseMoveSpeed": 600.0,
+    "CurrentMoveSpeed": 600.0,
     "BoostMultiplier": 3.0,
+    "PrecisionMultiplier": 0.25,
+    "SpeedTrimRatio": 1.25,
+    "MinMoveSpeed": 30.0,
+    "MaxMoveSpeed": 6000.0,
+    "SpeedResponse": 6.0,
     "LookSensitivity": 0.12,
 }
 MOVEMENT_COMPONENT_DEFAULTS = {
@@ -87,9 +98,37 @@ def ensure_function_graph(blueprint, function_name: str) -> None:
     emit("FUNCTION_CREATED", function_name)
 
 
+def has_generated_property(variable_name: str) -> bool:
+    generated_class = require_class(DRONE_PATH)
+    default_object = unreal.get_default_object(generated_class)
+    for candidate in property_candidates(variable_name):
+        try:
+            default_object.get_editor_property(candidate)
+            return True
+        except Exception:
+            continue
+    return False
+
+
+def ensure_real_variable(blueprint, variable_name: str) -> None:
+    if has_generated_property(variable_name):
+        emit("VARIABLE_ALREADY_PRESENT", variable_name)
+        return
+    pin_type = unreal.BlueprintEditorLibrary.get_basic_type_by_name("real")
+    if not unreal.BlueprintEditorLibrary.add_member_variable(
+        blueprint,
+        variable_name,
+        pin_type,
+    ):
+        raise RuntimeError(f"Failed to add Blueprint variable: {variable_name}")
+    emit("VARIABLE_CREATED", variable_name)
+
+
 drone_blueprint = require_asset(DRONE_PATH)
 for required_function in REQUIRED_FUNCTIONS:
     ensure_function_graph(drone_blueprint, required_function)
+for required_variable in DEFAULTS:
+    ensure_real_variable(drone_blueprint, required_variable)
 
 unreal.BlueprintEditorLibrary.compile_blueprint(drone_blueprint)
 drone_class = require_class(DRONE_PATH)

@@ -78,8 +78,9 @@ guard automatically restores the player if the drone actor disappears. A
 forced-destruction PIE test restored `CameraActor_0`, cleared
 `DroneModeActive`, left zero drone actors, and then spawned a fresh drone on the
 next entry. The drone now has frame-rate-independent six-axis local translation:
-W/S, D/A, and E/Q form one local vector, scaled by `BaseMoveSpeed` and world
-delta time, then applied as a single actor-local offset. Mouse look now samples
+W/S, D/A, and E/Q form one local vector, scaled by smoothed
+`CurrentMoveSpeed` and world delta time, then applied as a single actor-local
+offset. Mouse look now samples
 Player Controller 0's `GetInputMouseDelta`, applies a configurable
 `LookSensitivity` of 0.12 degrees per mouse unit, inverts pitch, preserves zero
 roll, and performs one actor-local rotation after translation on each active
@@ -99,9 +100,16 @@ the remote PIE world remained free of host drones, then independently entered
 and exited the remote client's local drone with both exact original view targets
 restored. Automated raw-mouse injection into the separate client preview did not
 reach Unreal's raw-input path, so client pitch/yaw feel remains an explicit
-hands-on acceptance check rather than an overclaimed automated proof. The next
-technical milestone is precision/boost speed modes and horizon behavior,
-followed by the remaining death, teleport,
+hands-on acceptance check rather than an overclaimed automated proof.
+`UpdateSpeedControls` now owns proportional mouse-wheel cruise trim, clamping,
+Ctrl precision, Shift boost, precision precedence, and smoothed target changes.
+A deterministic two-player PIE run proved a 600 baseline, intermediate easing,
+approximately 1800 boost and 150 precision targets, normal/boost/precision
+movement-distance ordering, local client isolation, and exact F9 restoration.
+Synthetic wheel events did not reach Conan's mouse-input channel, so physical
+wheel feel remains a manual check while its complete pin topology is enforced
+offline. The next technical milestone is horizon behavior, followed by the
+remaining death, teleport,
 disconnect, UI-close, and component-end-play restoration hooks.
 
 ## Repository layout

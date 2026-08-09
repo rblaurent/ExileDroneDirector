@@ -38,6 +38,7 @@ $emergencyPath = Join-Path $snippetRoot 'emergency-exit-drone-mode.eddgraph'
 $eventGraphPath = Join-Path $snippetRoot 'client-director-event-graph.eddgraph'
 $movementPath = Join-Path $snippetRoot 'apply-translation-input.eddgraph'
 $rotationPath = Join-Path $snippetRoot 'apply-rotation-input.eddgraph'
+$speedPath = Join-Path $snippetRoot 'update-speed-controls.eddgraph'
 $droneEventPath = Join-Path $snippetRoot 'drone-camera-event-graph.eddgraph'
 $cachePawnPath = Join-Path $snippetRoot 'cache-original-pawn.eddgraph'
 $possessDronePath = Join-Path $snippetRoot 'possess-drone-camera.eddgraph'
@@ -56,6 +57,7 @@ $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.
     $eventGraphPath,
     $movementPath,
     $rotationPath,
+    $speedPath,
     $droneEventPath,
     $cachePawnPath,
     $possessDronePath,
@@ -417,7 +419,7 @@ if ([regex]::Matches($movement, 'MemberName="Subtract_DoubleDouble"').Count -ne 
     throw 'ApplyTranslationInput must construct exactly three signed axis values.'
 }
 Assert-GraphMatch $movement 'MemberName="MakeVector"' 'ApplyTranslationInput must assemble the three signed local axes into one vector.'
-Assert-GraphMatch $movement 'VariableReference=\(MemberName="BaseMoveSpeed"' 'ApplyTranslationInput must scale by the configurable BaseMoveSpeed.'
+Assert-GraphMatch $movement 'VariableReference=\(MemberName="CurrentMoveSpeed"' 'ApplyTranslationInput must consume the smoothed CurrentMoveSpeed.'
 Assert-GraphMatch $movement 'MemberName="GetWorldDeltaSeconds"' 'ApplyTranslationInput must be frame-rate independent.'
 if ([regex]::Matches($movement, 'OperationName="Multiply"').Count -ne 2) {
     throw 'ApplyTranslationInput must multiply once by speed and once by DeltaSeconds.'
@@ -436,6 +438,58 @@ Assert-GraphMatch $movementEntry 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFu
 Assert-GraphMatch $movementOffset 'PinName="DeltaLocation"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_4 ' 'AddActorLocalOffset must consume the speed-and-delta-scaled vector.'
 Assert-GraphMatch $movementOffset 'PinName="bSweep"[^\r\n]*DefaultValue="false"' 'Freecam translation must not sweep against gameplay collision.'
 Assert-GraphMatch $movementOffset 'PinName="bTeleport"[^\r\n]*DefaultValue="false"' 'Freecam translation must use ordinary local offsets.'
+
+$speed = [IO.File]::ReadAllText($speedPath)
+$speedNodes = [regex]::Matches($speed, '(?m)^Begin Object Class=').Count
+if ($speedNodes -ne 31) {
+    throw "Update-speed-controls contract expected 31 nodes; found $speedNodes."
+}
+if ([regex]::Matches($speed, 'MemberName="IsInputKeyDown"').Count -ne 2) {
+    throw 'UpdateSpeedControls must sample exactly the boost and precision modifier keys.'
+}
+if ([regex]::Matches($speed, 'OperationName="Multiply"').Count -ne 4) {
+    throw 'UpdateSpeedControls must contain exactly four multiplicative operations.'
+}
+
+$speedEntry = Get-NodeBlock $speed 'K2Node_FunctionEntry_0'
+$speedSetCruise = Get-NodeBlock $speed 'K2Node_VariableSet_3'
+$speedSetCurrent = Get-NodeBlock $speed 'K2Node_VariableSet_2'
+$speedWheel = Get-NodeBlock $speed 'K2Node_CallFunction_9'
+$speedClamp = Get-NodeBlock $speed 'K2Node_CallFunction_13'
+$speedInterp = Get-NodeBlock $speed 'K2Node_CallFunction_4'
+$speedBoostSelect = Get-NodeBlock $speed 'K2Node_CallFunction_7'
+$speedPrecisionSelect = Get-NodeBlock $speed 'K2Node_CallFunction_8'
+$speedCtrl = Get-NodeBlock $speed 'K2Node_CallFunction_5'
+$speedShift = Get-NodeBlock $speed 'K2Node_CallFunction_6'
+$speedTrimMultiply = Get-NodeBlock $speed 'K2Node_PromotableOperator_3'
+
+Assert-GraphMatch $speedEntry 'FunctionReference=\(MemberName="UpdateSpeedControls"\)' 'Speed control must implement the named UpdateSpeedControls contract.'
+Assert-GraphMatch $speedEntry 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_VariableSet_3 ' 'Speed evaluation must persist the clamped cruise speed first.'
+Assert-GraphMatch $speedSetCruise 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_VariableSet_2 ' 'Cruise trim must be stored before the smoothed current speed.'
+Assert-GraphMatch $speedWheel 'MemberName="GetInputAnalogKeyState"' 'Speed trim must sample the mouse wheel as an analog axis.'
+Assert-GraphMatch $speedWheel 'PinName="Key"[^\r\n]*DefaultValue="MouseWheelAxis"' 'Speed trim must use MouseWheelAxis.'
+Assert-GraphMatch $speed 'MemberName="Loge"' 'Symmetric multiplicative trim must take the natural log of SpeedTrimRatio.'
+Assert-GraphMatch $speed 'MemberName="Exp"' 'Symmetric multiplicative trim must exponentiate the signed wheel step.'
+Assert-GraphMatch $speedTrimMultiply 'PinName="A"[^\r\n]*LinkedTo=\(K2Node_VariableGet_6 ' 'Trim must multiply the previous CruiseMoveSpeed.'
+Assert-GraphMatch $speedTrimMultiply 'PinName="B"[^\r\n]*LinkedTo=\(K2Node_CallFunction_11 ' 'Trim must multiply cruise speed by the exponential wheel factor.'
+Assert-GraphMatch $speedTrimMultiply 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_13 ' 'The computed trim value must feed the clamp; an unlinked clamp value collapses speed to its minimum.'
+Assert-GraphMatch $speedClamp 'MemberName="FClamp"' 'Cruise trim must be clamped.'
+Assert-GraphMatch $speedClamp 'PinName="Value"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_3 ' 'The clamp value must consume the multiplicatively trimmed cruise speed.'
+Assert-GraphMatch $speedClamp 'PinName="Min"[^\r\n]*LinkedTo=\(K2Node_VariableGet_7 ' 'Cruise trim must respect MinMoveSpeed.'
+Assert-GraphMatch $speedClamp 'PinName="Max"[^\r\n]*LinkedTo=\(K2Node_VariableGet_9 ' 'Cruise trim must respect MaxMoveSpeed.'
+Assert-GraphMatch $speedClamp 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_VariableSet_3 ' 'The clamped trim must be persisted as CruiseMoveSpeed.'
+Assert-GraphMatch $speedShift 'PinName="Key"[^\r\n]*DefaultValue="LeftShift"' 'Boost mode must use Left Shift.'
+Assert-GraphMatch $speedShift 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_7 ' 'Shift must select the boost target.'
+Assert-GraphMatch $speedCtrl 'PinName="Key"[^\r\n]*DefaultValue="LeftControl"' 'Precision mode must use Left Control.'
+Assert-GraphMatch $speedCtrl 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_8 ' 'Control must drive the outer target selector so precision wins over boost.'
+Assert-GraphMatch $speedBoostSelect 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_8 ' 'The boost-or-cruise result must feed the precision selector.'
+Assert-GraphMatch $speedPrecisionSelect 'PinName="A"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_1 ' 'The outer selector must choose CruiseMoveSpeed times PrecisionMultiplier when Control is held.'
+Assert-GraphMatch $speedInterp 'MemberName="FInterpTo"' 'CurrentMoveSpeed must ease toward the selected target.'
+Assert-GraphMatch $speedInterp 'PinName="Current"[^\r\n]*LinkedTo=\(K2Node_VariableGet_0 ' 'FInterpTo must start from CurrentMoveSpeed.'
+Assert-GraphMatch $speedInterp 'PinName="Target"[^\r\n]*LinkedTo=\(K2Node_CallFunction_8 ' 'FInterpTo must target the precision-precedence selector.'
+Assert-GraphMatch $speedInterp 'PinName="DeltaTime"[^\r\n]*LinkedTo=\(K2Node_CallFunction_0 ' 'Speed easing must use world delta seconds.'
+Assert-GraphMatch $speedInterp 'PinName="InterpSpeed"[^\r\n]*LinkedTo=\(K2Node_VariableGet_4 ' 'Speed easing must use the configurable SpeedResponse.'
+Assert-GraphMatch $speedInterp 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_VariableSet_2 ' 'The interpolated value must be persisted as CurrentMoveSpeed.'
 
 $rotation = [IO.File]::ReadAllText($rotationPath)
 $rotationNodes = [regex]::Matches($rotation, '(?m)^Begin Object Class=').Count
@@ -517,8 +571,8 @@ Assert-GraphMatch $emergencyPrint 'PinName="bPrintToLog"[^\r\n]*DefaultValue="tr
 
 $eventGraph = [IO.File]::ReadAllText($eventGraphPath)
 $eventGraphNodes = [regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/BlueprintGraph\.').Count
-if ($eventGraphNodes -ne 30) {
-    throw "Client-director EventGraph contract expected 30 executable nodes; found $eventGraphNodes."
+if ($eventGraphNodes -ne 31) {
+    throw "Client-director EventGraph contract expected 31 executable nodes; found $eventGraphNodes."
 }
 if ([regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/UnrealEd\.EdGraphNode_Comment').Count -ne 1) {
     throw 'Client-director EventGraph must retain exactly one design comment node.'
@@ -544,6 +598,7 @@ $cameraValid = Get-NodeBlock $eventGraph 'K2Node_CallFunction_10'
 $invalidEmergency = Get-NodeBlock $eventGraph 'K2Node_CallFunction_11'
 $translationInput = Get-NodeBlock $eventGraph 'K2Node_CallFunction_12'
 $rotationInput = Get-NodeBlock $eventGraph 'K2Node_CallFunction_13'
+$speedInput = Get-NodeBlock $eventGraph 'K2Node_CallFunction_17'
 $ownerGet = Get-NodeBlock $eventGraph 'K2Node_CallFunction_14'
 $localControllerGet = Get-NodeBlock $eventGraph 'K2Node_CallFunction_15'
 $ownerEquals = Get-NodeBlock $eventGraph 'K2Node_CallFunction_16'
@@ -578,9 +633,12 @@ Assert-GraphMatch $cameraGet 'VariableReference=\(MemberName="DroneCameraRef"' '
 Assert-GraphMatch $cameraGet 'PinName="DroneCameraRef"[^\r\n]*LinkedTo=\(K2Node_CallFunction_10 ' 'DroneCameraRef must feed the recovery validity check.'
 Assert-GraphMatch $cameraValid 'MemberName="IsValid"' 'Automatic recovery must validate DroneCameraRef.'
 Assert-GraphMatch $cameraValid 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_4 ' 'Camera validity must drive the recovery branch.'
-Assert-GraphMatch $cameraBranch 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_12 ' 'A valid active camera must execute translation input.'
+Assert-GraphMatch $cameraBranch 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_17 ' 'A valid active camera must update speed controls before movement.'
 Assert-GraphMatch $cameraBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_CallFunction_11 ' 'An invalid active camera must execute automatic emergency restoration.'
 Assert-GraphMatch $invalidEmergency 'FunctionReference=\(MemberName="EmergencyExitDroneMode"' 'The invalid-camera path must delegate to EmergencyExitDroneMode.'
+Assert-GraphMatch $speedInput 'FunctionReference=.*MemberName="UpdateSpeedControls"' 'Active-mode input must delegate to BP_EDD_DroneCamera.UpdateSpeedControls.'
+Assert-GraphMatch $speedInput 'PinName="self"[^\r\n]*LinkedTo=\(K2Node_VariableGet_2 ' 'Speed control must target the validated DroneCameraRef.'
+Assert-GraphMatch $speedInput 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_12 ' 'Speed control must complete before translation executes.'
 Assert-GraphMatch $translationInput 'FunctionReference=.*MemberName="ApplyTranslationInput"' 'Active-mode movement must delegate to BP_EDD_DroneCamera.ApplyTranslationInput.'
 Assert-GraphMatch $translationInput 'PinName="self"[^\r\n]*LinkedTo=\(K2Node_VariableGet_2 ' 'Translation input must target the validated DroneCameraRef.'
 Assert-GraphMatch $translationInput 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_13 ' 'Translation input must complete before rotation input executes.'
@@ -598,10 +656,10 @@ foreach ($emergencyGraph in @($emergency, $eventGraph)) {
     }
 }
 
-foreach ($viewGraph in @($place, $activate, $switch, $exit, $movement, $rotation, $droneEvent)) {
+foreach ($viewGraph in @($place, $activate, $switch, $exit, $movement, $rotation, $speed, $droneEvent)) {
     if ($viewGraph -match '(?m)^\s*Error(Type|Msg)=') {
         throw 'View-lifecycle graph source must not retain stale compiler error metadata.'
     }
 }
 
-Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, client-director-event-graph, apply-translation-input, apply-rotation-input, drone-camera-event-graph (legacy possession helpers also remain structurally validated)'
+Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, client-director-event-graph, apply-translation-input, apply-rotation-input, update-speed-controls, drone-camera-event-graph (legacy possession helpers also remain structurally validated)'

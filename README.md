@@ -71,10 +71,15 @@ drone view and restores the cached player view on exit. A four-transition PIE
 run now proves exact pre-switch placement as well: both the first camera and
 the reused camera copied Player Camera Manager 0's evaluated location and
 rotation before activation, then restored the same original view target on
-exit. No Blueprint runtime error or `Accessed None` occurred. The current
+exit. Manual F9 emergency exit is now idempotent, and an active camera validity
+guard automatically restores the player if the drone actor disappears. A
+forced-destruction PIE test restored `CameraActor_0`, cleared
+`DroneModeActive`, left zero drone actors, and then spawned a fresh drone on the
+next entry. No Blueprint runtime error or `Accessed None` occurred. The current
 character-creation PIE map has no controlled pawn, so a possessed-pawn runtime
 invariant remains an explicit gameplay-map acceptance check. The next technical
-milestone is safe local movement input and emergency restoration.
+milestone is safe local movement input plus the remaining death, teleport,
+disconnect, and component-end-play restoration hooks.
 
 ## Repository layout
 

@@ -14,6 +14,7 @@ REQUIRED_FUNCTIONS = (
     "ActivateDroneView",
     "SwitchToDroneView",
     "ExitDroneMode",
+    "EmergencyExitDroneMode",
 )
 
 

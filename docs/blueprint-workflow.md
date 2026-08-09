@@ -92,6 +92,9 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
    **Proven in PIE on both initial spawn and cached-camera reuse, with exact
    location/rotation equality before both switches.**
 7. Emergency restoration, teardown recovery, and drone destruction.
+   **Proven in PIE for repeatable manual F9 restoration and forced destruction
+   of the active drone actor. Death, teleport, disconnect, and component
+   end-play hooks remain pending.**
 8. Six-axis input accumulation with normal, precision, and boost scaling.
 
 Each snippet is captured only after its live-editor version compiles and passes

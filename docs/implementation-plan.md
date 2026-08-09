@@ -127,6 +127,12 @@ Enter Drone Mode, move a local camera, and restore the game perfectly.
    camera destruction, and component end-play.
 10. Add an opt-in collision sweep and diagnostic HUD.
 
+Current vertical-slice progress: task 8 is proven idempotent through the F9
+manual path, and the camera-destruction portion of task 9 is proven through an
+active-camera validity guard. The remaining lifecycle hooks stay explicit work;
+the camera-destruction proof does not stand in for death, teleport, disconnect,
+UI-close, or component-end-play acceptance.
+
 ### Test matrix
 
 - Single-player PIE

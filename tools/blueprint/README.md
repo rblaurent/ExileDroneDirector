@@ -35,6 +35,11 @@ Validated snippets:
   Player Controller 0 through `SetViewTargetWithBlend`.
 - `exit-drone-mode.eddgraph` guards `OriginalViewTargetRef` and restores the
   same local controller through the paired engine API.
+- `emergency-exit-drone-mode.eddgraph` idempotently delegates normal view
+  restoration, forces `DroneModeActive` false, then logs completion.
+- `client-director-event-graph.eddgraph` owns the complete executable client
+  dispatch: F10 normal entry/exit, F9 manual emergency exit, and automatic
+  emergency restoration when an active drone camera becomes invalid.
 
 Authoritative workflow and safety rules live in
 `docs/blueprint-workflow.md`.

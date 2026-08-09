@@ -37,7 +37,9 @@ $requiredFiles = @(
     'tools\blueprint\snippets\place-drone-at-current-view.eddgraph',
     'tools\blueprint\snippets\activate-drone-view.eddgraph',
     'tools\blueprint\snippets\switch-to-drone-view.eddgraph',
-    'tools\blueprint\snippets\exit-drone-mode.eddgraph'
+    'tools\blueprint\snippets\exit-drone-mode.eddgraph',
+    'tools\blueprint\snippets\emergency-exit-drone-mode.eddgraph',
+    'tools\blueprint\snippets\client-director-event-graph.eddgraph'
 )
 
 $missing = @(

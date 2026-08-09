@@ -298,6 +298,68 @@ movement call, but the possessed-pawn runtime invariant remains pending for a
 gameplay map. Cooked behavior, multiplayer isolation, and emergency restoration
 also remain pending.
 
+## Verified manual and invalid-camera emergency recovery
+
+`EmergencyExitDroneMode` now owns a four-node, idempotent recovery contract:
+
+1. Delegate view restoration to the already-guarded `ExitDroneMode` primitive.
+2. Force `DroneModeActive` to `false` after restoration returns.
+3. Report `[EDD] Emergency exit complete` to the log.
+
+The client Event Graph polls F9 only after a tick does not consume F10. F9's
+true path calls the emergency function directly. Its false path checks
+`DroneModeActive`; only an active session continues to an `IsValid` check of
+the typed `DroneCameraRef`, whose false path calls the same emergency function.
+The saved executable Event Graph contains 24 Blueprint nodes, and the complete
+client director compiled successfully in 102 ms.
+
+Offline mutation checks reject changing F9 to F8, removing either emergency
+caller, or changing the emergency `DroneModeActive` write from `false` to
+`true`.
+
+A focused PIE run on 2026-08-09 first exercised normal entry followed by F9:
+
+```text
+[EDD] Drone camera spawned
+[EDD] Drone placed at current view
+[EDD] Original view target cached
+[EDD] Drone view active
+[EDD] Player view restored
+[EDD] Emergency exit complete
+```
+
+Calling F9 again while already restored repeated the guarded restoration and
+completion diagnostics without a runtime failure, proving that the public
+emergency primitive tolerates an already-inactive session.
+
+The same PIE session then entered Drone Mode again and destroyed the active
+`BP_EDD_DroneCamera_C` actor through the editor console. On the next component
+tick the invalid-camera guard restored the view and cleared active state. The
+queried post-recovery state was:
+
+```text
+view=/Game/Dev/UEDPIE_0_AlmostEmpty.AlmostEmpty:PersistentLevel.CameraActor_0
+active=False
+drones=0
+```
+
+A subsequent F10 entry spawned a replacement camera and reported:
+
+```text
+view=BP_EDD_DroneCamera_C
+active=True
+drones=1
+```
+
+F9 then restored the player again. No Blueprint runtime error or `Accessed
+None` occurred during the manual exit, forced camera loss, automatic recovery,
+or re-entry windows.
+
+This proves the public emergency function and the active-camera destruction
+hook in PIE. It does not yet prove restoration from death, pawn replacement,
+teleport, disconnect, UI close, component end-play, a cooked build, or a second
+network client.
+
 ## Blueprint graph automation boundary
 
 The editor Python API can locate the component Event Graph, but the graph object
@@ -314,6 +376,7 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 
 - Possessed-pawn identity/transform proof in a gameplay-map PIE run
 - Six-axis local drone movement graphs
+- Remaining death, teleport, disconnect, UI-close, and component-end-play hooks
 - Emergency camera restoration and the view lifecycle in cooked runtime
 - PIE and cook commands/output locations
 - Authenticated server identity and persistence APIs

@@ -161,11 +161,10 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
     valid survivor/empty selection, invalid-index no-ops, zero remote-client
     draft mutation, no leaked drone, exact view restoration, and restored class
     defaults.
-    The character-creation widget consumed synthetic keyboard injection, so one
-    physical `K` acceptance press after completing character creation remains a
-    deliberately separate hands-on gate; the serialized K-edge topology is
-    enforced offline. The generated R/Delete dispatch is also contract-valid but
-    intentionally remains unapplied until that physical-input session.**
+    Real F10, K, R, Delete, and F9 input has now passed in two-player PIE. The
+    live 51-node dispatch reports the dynamic waypoint count and selected index
+    after every successful mutation. Its complete compiled graph was copied back
+    from Unreal and is enforced by capture, edit, and feedback contracts.**
 
 When pasting a function body without its native `K2Node_FunctionEntry`, a
 one-sided `LinkedTo` reference in pasted text is not enough. Unreal does not add

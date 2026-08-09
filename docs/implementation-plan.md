@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.12.0-waypoint-edit`
+Current internal build: `0.13.0-waypoint-feedback`
 
 ## 1. Delivery strategy
 
@@ -39,8 +39,9 @@ This section is the authoritative handoff. Detailed evidence remains in
 - `CaptureCurrentWaypoint`, `ReplaceSelectedWaypoint`, and
   `DeleteSelectedWaypoint` are compiled live functions with reciprocal native
   entry links.
-- The live 37-node client EventGraph exposes K capture. Replace and delete are
-  callable and runtime-proven but do not yet have live physical shortcuts.
+- The live 51-node/200-pin client EventGraph exposes mutually exclusive K
+  capture, R replace, and Delete removal shortcuts. Each successful mutation
+  continues to shared dynamic feedback: `[EDD] Draft waypoints: N | selected: I`.
 
 ### Runtime and structural evidence
 
@@ -49,6 +50,9 @@ This section is the authoritative handoff. Detailed evidence remains in
 - The selected-waypoint edit cycle proves two atomic captures, exact transform
   and lens replacement, survivor and empty deletion behavior, invalid-index
   no-ops, remote-client isolation, and restored drone class defaults.
+- Physical PIE acceptance proves F10 entry, K capture, R replacement, Delete
+  removal, and F9 restoration. The feedback build additionally proves a real K
+  press emits `[EDD] Draft waypoints: 1 | selected: 0`.
 - Reviewed live graph snippets cover capture, replace, and delete. Their tests
   validate pin types, execution order, stable ID/hold behavior, all six array
   mutations, selection repair, and exact native function-entry linkage.
@@ -56,15 +60,15 @@ This section is the authoritative handoff. Detailed evidence remains in
   repository budget pass. Tracked source is only a few MiB; DevKit and cooked
   outputs are never committed.
 
-### Prepared but deliberately not live yet
+### Reproducible graph evidence
 
-- `Build-ClientWaypointEditDispatch.py` deterministically extends the proven K
-  tail with mutually exclusive R replace and Delete removal polling.
-- The generated extension is 43 nodes/151 pins and passes generic reciprocal-
-  link plus semantic K/R/Delete contracts offline.
-- It was not pasted before the current pause. Documentation must never describe
-  R/Delete as live until a copied post-compile EventGraph passes those same
-  contracts and physical input is accepted in PIE.
+- `Build-ClientWaypointEditDispatch.py` produces the proven 43-node K/R/Delete
+  dispatch; `Build-WaypointFeedbackDispatch.py` extends it to the live 51-node
+  feedback graph.
+- The generated graph and the copied post-compile Unreal round-trip both pass
+  generic reciprocal-link validation, capture/edit semantics, and the dedicated
+  feedback contract. The contract caught and prevented an invalid first draft
+  whose string defaults were discarded during Unreal reconstruction.
 
 ### Not implemented yet
 
@@ -78,27 +82,22 @@ This section is the authoritative handoff. Detailed evidence remains in
 
 ### Exact next DevKit session
 
-1. Confirm the Git working tree is clean and only one DevKit editor instance is
-   running. Sync repository assets `ToDevKit` only while Unreal is closed.
-2. Export the current live client EventGraph, generate the K/R/Delete extension
-   with `Build-ClientWaypointEditDispatch.py`, and run both the generic snippet
-   validator and `Test-WaypointCaptureContracts.py` before paste.
-3. Paste the reviewed 43-node EventGraph, compile, save, copy the live graph
-   back out, and re-run the same contracts against the round-trip. Do not trust
-   compile success alone.
-4. Start two-player PIE and rerun `Validate-WaypointCapturePIE.py` with
-   `EDD_PHASE='edit_cycle'` before testing input.
-5. Complete one disposable character in PIE. The creation widget consumes
-   synthetic key injection; this is a one-time test-state step, not a blocker to
-   direct deterministic fixtures.
-6. Physically accept F10, flight controls, K capture, R replace, Delete removal,
-   and F9 restoration. Add minimal visible/log feedback sufficient to identify
-   selected index and draft count.
-7. Stop PIE, compile/save, close Unreal, wait for `LogExit: Exiting.`, sync
-   `FromDevKit`, run the full repository tests, then commit and push.
-8. Perform the first cook/package reconnaissance immediately afterward. Record
-   the actual output layout and whether Funcom's cook/upload plugin exposes a
-   usable commandlet.
+The user explicitly deferred the attended cook/Workshop step for the night. The
+next autonomous implementation slice is therefore:
+
+1. Begin from the committed `0.13.0` feedback checkpoint with one DevKit editor.
+2. Add a minimal linear-playback state contract to the client director.
+3. Evaluate every captured transform from absolute playback time with a fixed
+   per-segment duration; do not integrate position from frame to frame.
+4. Compile, save, copy the live graph back out, and enforce exact pin-level
+   contracts for start, evaluation, endpoint completion, and invalid drafts.
+5. Prove direct-time evaluation and ordinary forward playback agree, then run a
+   physical two-player PIE route without moving or possessing either pawn.
+6. Close, sync, run the complete repository suite, commit, and push the slice.
+
+The first supported cook/package and normal-client test remain mandatory before
+any public release or Workshop/G-Portal deployment; they resume in an attended
+session without invalidating the implementation work above.
 
 The shortcut-extension preparation sequence, run from the repository root after
 copying the complete live EventGraph, is:
@@ -330,10 +329,11 @@ final document struct. All three live graphs have semantic pin-level contracts.
 A deterministic two-player edit cycle proved two captures, lens/transform
 replacement, middle/end/empty deletion behavior, invalid-index no-op behavior,
 remote-client isolation, exact pawn/view restoration, and restoration of the
-drone class defaults. The reviewed K capture dispatch remains live. A generated
-R/Delete edit-dispatch extension passes offline graph contracts but has not yet
-been pasted into the live EventGraph; physical shortcut acceptance follows the
-one-time PIE character-creation flow.
+drone class defaults. The reviewed K/R/Delete dispatch and shared dynamic
+count/selection feedback are live in the 51-node EventGraph. Real keyboard input
+passed after the one-time PIE character was saved, and the complete compiled
+graph now round-trips into the checked-in textual source with capture, edit, and
+feedback contracts.
 
 ### Verification
 
@@ -794,7 +794,7 @@ Content/Mods/ExileDroneDirector/
 
 Version numbers describe capability gates, not calendar promises.
 
-Internal checkpoint versions such as `0.12.0-waypoint-edit` count validated
+Internal checkpoint versions such as `0.13.0-waypoint-feedback` count validated
 development slices. They do not claim that the public **0.1 Camera Spike** gate
 is complete; that gate still requires cooked multiplayer acceptance.
 
@@ -803,12 +803,12 @@ is complete; that gate still requires cooked multiplayer acceptance.
 The installation and initial camera reconnaissance are complete. Follow the
 exact session runbook in section 1.1. The immediate sequence is:
 
-1. Live K/R/Delete dispatch and physical PIE acceptance.
-2. Minimal waypoint count/selection feedback.
-3. First cook/package proof in normal Conan Enhanced.
-4. Test Workshop item and controlled G-Portal deployment.
-5. Only then expand the local draft into visible path preview, document structs,
-   serialization, undo/redo, and trajectory playback.
+1. Deterministic linear playback over the validated local waypoint draft.
+2. Visible path preview, document structs, serialization, and undo/redo.
+3. First cook/package proof in normal Conan Enhanced when an attended session is
+   available.
+4. Test Workshop item and controlled G-Portal deployment only after that cooked
+   build passes locally.
 
 The first public capability milestone is not “the camera moved in PIE.” It is
 “the cooked mod entered, flew, authored a small draft, and exited safely on a

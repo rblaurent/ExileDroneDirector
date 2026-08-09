@@ -73,7 +73,7 @@ One per owning client. Responsibilities:
 
 #### Current waypoint-authoring bridge
 
-The `0.12.0-waypoint-edit` implementation deliberately precedes the final
+The `0.13.0-waypoint-feedback` implementation deliberately precedes the final
 document structs. `BPC_EDD_ClientDirector` currently owns six client-local,
 transient lockstep arrays:
 
@@ -90,6 +90,12 @@ Replace validates camera plus selected ID index and changes only transform and
 lens channels; ID and hold remain stable. Delete removes the same index from all
 six channels and preserves that index when a successor exists or clamps to the
 last survivor/`-1`.
+
+The active-mode client dispatch maps K/R/Delete to those three operations and
+then formats one shared local status message from `Length(DraftWaypointIds)` and
+`SelectedWaypointIndex`. This feedback is intentionally transient; authoritative
+server persistence, publication, and collaboration begin in the later repository
+slice.
 
 This bridge is not a persistence or networking model. It exists to prove
 atomic edit semantics and camera capture before `ST_EDD_Waypoint`,

@@ -32,11 +32,16 @@ The tools in this directory never launch Unreal:
   delete functions from live-harvested node forms.
 - `Build-ClientWaypointEditDispatch.py` extends the proven K capture tail with
   mutually exclusive R replace and Delete removal edge polls.
+- `Build-WaypointFeedbackDispatch.py` extends that reviewed mutation dispatch
+  with one shared dynamic count/selection message and a distinct terminal print
+  after each successful mutation.
 - `Test-WaypointCaptureContracts.py` verifies exact array types, data sources,
   append order, selected-index assignment, ID increment, and available
   EventGraph dispatch semantics.
 - `Test-WaypointEditContracts.py` verifies guarded replacement, stable ID/hold,
   ordered six-channel removal, and deterministic post-delete selection.
+- `Test-WaypointFeedbackContracts.py` verifies that count and selection are
+  derived from live state and displayed after capture, replace, and delete.
 
 Validated snippets:
 

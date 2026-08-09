@@ -134,12 +134,16 @@ selection. The three live functions round-trip through Unreal and pass semantic
 pin-level contracts. A deterministic two-player PIE edit cycle proved two
 captures, exact replacement, survivor/empty deletion, invalid-index no-ops,
 remote isolation, exact original pawn/view restoration, and restoration of lens
-class defaults. The guarded active-mode EventGraph still exposes the proven `K`
-capture edge. A contract-valid R/Delete extension is prepared offline; applying
-it and completing physical shortcut acceptance after the one-time PIE character
-flow is the next checkpoint, followed by promotion from transitional arrays into
-the authored waypoint/flypath document structs and the remaining lifecycle
-restoration hooks.
+class defaults. The guarded active-mode EventGraph now exposes mutually
+exclusive `K`, `R`, and `Delete` edges and prints the current draft count and
+selected index after each successful mutation. The generated 51-node graph,
+compiled Unreal round-trip, deterministic two-player edit cycle, and physical
+F10/K/R/Delete/F9 route are validated. Cooked-package validation remains a
+required release gate but is explicitly deferred until an attended session. The
+next autonomous checkpoint is a deterministic equal-duration linear playback
+kernel over the captured transforms, followed by promotion from transitional
+arrays into the authored waypoint/flypath document structs and the remaining
+lifecycle restoration hooks.
 
 ## Repository layout
 

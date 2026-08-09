@@ -84,6 +84,12 @@ if ($LASTEXITCODE -ne 0) {
     throw "Waypoint edit semantic contracts failed with exit code $LASTEXITCODE."
 }
 
+$waypointFeedbackContractTester = Join-Path $ProjectRoot 'tools\blueprint\Test-WaypointFeedbackContracts.py'
+& python $waypointFeedbackContractTester --event $eventGraphPath
+if ($LASTEXITCODE -ne 0) {
+    throw "Waypoint feedback semantic contracts failed with exit code $LASTEXITCODE."
+}
+
 $input = [IO.File]::ReadAllText($inputPath)
 $inputNodes = [regex]::Matches($input, '(?m)^Begin Object Class=').Count
 if ($inputNodes -ne 5) {
@@ -719,8 +725,8 @@ Assert-GraphMatch $emergencyPrint 'PinName="bPrintToLog"[^\r\n]*DefaultValue="tr
 
 $eventGraph = [IO.File]::ReadAllText($eventGraphPath)
 $eventGraphNodes = [regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/BlueprintGraph\.').Count
-if ($eventGraphNodes -ne 36) {
-    throw "Client-director EventGraph contract expected 36 executable nodes; found $eventGraphNodes."
+if ($eventGraphNodes -ne 50) {
+    throw "Client-director EventGraph contract expected 50 executable nodes plus one design comment; found $eventGraphNodes executable nodes."
 }
 if ([regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/UnrealEd\.EdGraphNode_Comment').Count -ne 1) {
     throw 'Client-director EventGraph must retain exactly one design comment node.'

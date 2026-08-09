@@ -44,6 +44,7 @@ SECOND_LENS = FIRST_LENS
 REPLACED_LOCATION = unreal.Vector(-777.0, 4321.0, 1234.0)
 REPLACED_ROTATION = unreal.Rotator(pitch=-22.0, yaw=121.0, roll=-47.0)
 REPLACED_LENS = (52.0, 4.0, 2750.0)
+PHYSICAL_REPLACED_ROTATION = unreal.Rotator(pitch=-22.0, yaw=121.0, roll=0.0)
 
 
 def emit(label: str, value) -> None:
@@ -354,6 +355,115 @@ def edit_cycle() -> None:
         set_drone_class_defaults(FIRST_LENS)
 
 
+def physical_status() -> None:
+    server_world = world(0)
+    host = controller(server_world, 0)
+    component = director(host)
+    drones = exact_actors(server_world, load_class(DRONE_CLASS_PATH))
+    emit("PHYSICAL_MODE_ACTIVE", bool(get_value(component, "DroneModeActive")))
+    emit("PHYSICAL_DRONE_COUNT", len(drones))
+    emit("PHYSICAL_VIEW_TARGET", host.get_view_target().get_path_name() if host.get_view_target() else None)
+    emit("PHYSICAL_ORIGINAL_VIEW", get_value(component, "OriginalViewTargetRef"))
+    emit("PHYSICAL_SELECTED", int(get_value(component, "SelectedWaypointIndex")))
+    emit("PHYSICAL_NEXT_ID", int(get_value(component, "NextWaypointId")))
+    emit("PHYSICAL_LENGTHS", {name: len(value) for name, value in channels(component).items()})
+
+
+def physical_prepare() -> None:
+    server_world = world(0)
+    host = controller(server_world, 0)
+    component = director(host)
+    force_game_input(host)
+    if bool(get_value(component, "DroneModeActive")):
+        component.call_method("ExitDroneMode")
+    require(not bool(get_value(component, "DroneModeActive")), "physical baseline remained active")
+    require(len(exact_actors(server_world, load_class(DRONE_CLASS_PATH))) == 0, "physical baseline retained a drone")
+    require_lengths(channels(component), 0)
+    require(int(get_value(component, "SelectedWaypointIndex")) == -1, "physical baseline selection must be -1")
+    require(int(get_value(component, "NextWaypointId")) == 1, "physical baseline next ID must be 1")
+    emit("PHYSICAL_BASELINE_VIEW", host.get_view_target().get_path_name())
+    emit("PHYSICAL_READY_FOR_F10", True)
+
+
+def physical_after_enter() -> None:
+    server_world = world(0)
+    host = controller(server_world, 0)
+    component = director(host)
+    drones = exact_actors(server_world, load_class(DRONE_CLASS_PATH))
+    require(bool(get_value(component, "DroneModeActive")), "physical F10 did not activate Drone Mode")
+    require(len(drones) == 1, f"physical F10 expected one drone, found {len(drones)}")
+    require(host.get_view_target() == drones[0], "physical F10 did not switch the view target to the drone")
+    original = get_value(component, "OriginalViewTargetRef")
+    require(original is not None and original != drones[0], "physical F10 did not retain the original view target")
+    require_lengths(channels(component), 0)
+    emit("PHYSICAL_F10_VALID", True)
+    emit("PHYSICAL_READY_FOR_K", True)
+
+
+def physical_after_capture() -> None:
+    server_world = world(0)
+    component = director(controller(server_world, 0))
+    values = channels(component)
+    require(bool(get_value(component, "DroneModeActive")), "Drone Mode became inactive before physical K inspection")
+    require_lengths(values, 1)
+    require(values["DraftWaypointIds"] == [1], f"physical K IDs incorrect:{values['DraftWaypointIds']}")
+    require(int(get_value(component, "SelectedWaypointIndex")) == 0, "physical K did not select index 0")
+    require(int(get_value(component, "NextWaypointId")) == 2, "physical K did not advance NextWaypointId")
+    emit("PHYSICAL_K_VALID", True)
+
+
+def physical_seed_replace() -> None:
+    server_world = world(0)
+    component = director(controller(server_world, 0))
+    require_lengths(channels(component), 1)
+    drones = exact_actors(server_world, load_class(DRONE_CLASS_PATH))
+    require(len(drones) == 1, "physical R seed requires one drone")
+    seed_camera(drones[0], REPLACED_LOCATION, REPLACED_ROTATION, FIRST_LENS)
+    emit("PHYSICAL_READY_FOR_R", True)
+
+
+def physical_after_replace() -> None:
+    server_world = world(0)
+    component = director(controller(server_world, 0))
+    values = channels(component)
+    require_lengths(values, 1)
+    require(values["DraftWaypointIds"] == [1], "physical R changed the stable ID")
+    # Horizon lock is active during the live physical-key route, so the drone
+    # deliberately levels the seeded roll before R samples the transform.
+    require_transform(values["DraftWaypointTransforms"][0], REPLACED_LOCATION, PHYSICAL_REPLACED_ROTATION)
+    close_number(values["DraftWaypointFocalLengths"][0], FIRST_LENS[0])
+    close_number(values["DraftWaypointApertures"][0], FIRST_LENS[1])
+    close_number(values["DraftWaypointFocusDistances"][0], FIRST_LENS[2])
+    require(values["DraftWaypointHoldSeconds"] == [0.0], "physical R changed waypoint timing")
+    require(int(get_value(component, "SelectedWaypointIndex")) == 0, "physical R changed selection")
+    require(int(get_value(component, "NextWaypointId")) == 2, "physical R changed NextWaypointId")
+    emit("PHYSICAL_R_VALID", True)
+
+
+def physical_after_delete() -> None:
+    server_world = world(0)
+    component = director(controller(server_world, 0))
+    require_lengths(channels(component), 0)
+    require(int(get_value(component, "SelectedWaypointIndex")) == -1, "physical Delete did not clear selection")
+    require(int(get_value(component, "NextWaypointId")) == 2, "physical Delete changed NextWaypointId")
+    emit("PHYSICAL_DELETE_VALID", True)
+
+
+def physical_after_exit() -> None:
+    server_world = world(0)
+    host = controller(server_world, 0)
+    component = director(host)
+    original = get_value(component, "OriginalViewTargetRef")
+    require(not bool(get_value(component, "DroneModeActive")), "physical F9 did not deactivate Drone Mode")
+    drones = exact_actors(server_world, load_class(DRONE_CLASS_PATH))
+    require(len(drones) == 1, f"physical F9 expected one reusable inactive drone, found {len(drones)}")
+    require(get_value(component, "DroneCameraRef") == drones[0], "physical F9 lost the reusable drone reference")
+    require(original is not None and host.get_view_target() == original, "physical F9 did not restore the exact original view target")
+    require_lengths(channels(component), 0)
+    emit("PHYSICAL_F9_RESTORATION_VALID", True)
+    emit("PHYSICAL_SHORTCUT_SEQUENCE_COMPLETE", True)
+
+
 phase = globals().get("EDD_PHASE", "")
 phases = {
     "prepare": prepare,
@@ -362,6 +472,14 @@ phases = {
     "capture1": capture_first_direct,
     "capture2": capture_second_direct,
     "edit_cycle": edit_cycle,
+    "physical_status": physical_status,
+    "physical_prepare": physical_prepare,
+    "physical_after_enter": physical_after_enter,
+    "physical_after_capture": physical_after_capture,
+    "physical_seed_replace": physical_seed_replace,
+    "physical_after_replace": physical_after_replace,
+    "physical_after_delete": physical_after_delete,
+    "physical_after_exit": physical_after_exit,
 }
 require(phase in phases, f"unknown phase:{phase}")
 phases[phase]()

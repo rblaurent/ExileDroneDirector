@@ -182,7 +182,7 @@ def assert_capture(nodes: dict[str, Node]) -> None:
 
 
 def assert_dispatch(nodes: dict[str, Node]) -> None:
-    require(len(nodes) in {37, 43}, f"Client EventGraph expected 37 or 43 total nodes; found {len(nodes)}")
+    require(len(nodes) in {37, 43, 51}, f"Client EventGraph expected 37, 43, or 51 total nodes; found {len(nodes)}")
     roll = one(nodes, 'MemberName="ApplyRollAndHorizonInput"')
     capture = one(nodes, 'MemberName="CaptureCurrentWaypoint"')
 
@@ -219,7 +219,8 @@ def assert_dispatch(nodes: dict[str, Node]) -> None:
     require_link(roll, "then", branch_k, "execute", "Capture polling must run after roll/horizon processing")
     require_link(key_k, "ReturnValue", branch_k, "Condition", "K must use edge-triggered branch gating")
     require_link(branch_k, "then", capture, "execute", "Only the true K edge may capture a waypoint")
-    require(not pin(capture, "then").links, "Waypoint capture must terminate the active-input tick")
+    if len(nodes) != 51:
+        require(not pin(capture, "then").links, "Waypoint capture must terminate the active-input tick")
 
     replace_nodes = [node for node in nodes.values() if 'MemberName="ReplaceSelectedWaypoint"' in node.text]
     delete_nodes = [node for node in nodes.values() if 'MemberName="DeleteSelectedWaypoint"' in node.text]
@@ -229,7 +230,7 @@ def assert_dispatch(nodes: dict[str, Node]) -> None:
         require('ErrorType=' not in "".join(node.text for node in nodes.values()), "EventGraph retains compiler error metadata")
         return
 
-    require(len(replace_nodes) == 1 and len(delete_nodes) == 1, "The 43-node edit slice needs one replace and one delete call")
+    require(len(replace_nodes) == 1 and len(delete_nodes) == 1, "The edit slice needs one replace and one delete call")
     replace = replace_nodes[0]
     delete = delete_nodes[0]
     key_r = key_poll("R")
@@ -245,8 +246,14 @@ def assert_dispatch(nodes: dict[str, Node]) -> None:
     require_link(key_delete, "ReturnValue", branch_delete, "Condition", "Delete must use edge-triggered branch gating")
     require_link(branch_delete, "then", delete, "execute", "Only the true Delete edge may remove the selection")
     require(not pin(branch_delete, "else").links, "A tick without an authoring key must terminate without mutation")
-    require(not pin(replace, "then").links, "Waypoint replacement must terminate the active-input tick")
-    require(not pin(delete, "then").links, "Waypoint deletion must terminate the active-input tick")
+    if len(nodes) == 43:
+        require(not pin(capture, "then").links, "Waypoint capture must terminate the active-input tick")
+        require(not pin(replace, "then").links, "Waypoint replacement must terminate the active-input tick")
+        require(not pin(delete, "then").links, "Waypoint deletion must terminate the active-input tick")
+    else:
+        require(pin(capture, "then").links, "Feedback slice must continue after capture")
+        require(pin(replace, "then").links, "Feedback slice must continue after replacement")
+        require(pin(delete, "then").links, "Feedback slice must continue after deletion")
     require('ErrorType=' not in "".join(node.text for node in nodes.values()), "EventGraph retains compiler error metadata")
 
 

@@ -39,6 +39,9 @@ $eventGraphPath = Join-Path $snippetRoot 'client-director-event-graph.eddgraph'
 $waypointCapturePath = Join-Path $snippetRoot 'capture-current-waypoint.eddgraph'
 $waypointReplacePath = Join-Path $snippetRoot 'replace-selected-waypoint.eddgraph'
 $waypointDeletePath = Join-Path $snippetRoot 'delete-selected-waypoint.eddgraph'
+$linearStartPath = Join-Path $snippetRoot 'start-linear-playback.eddgraph'
+$linearUpdatePath = Join-Path $snippetRoot 'update-linear-playback.eddgraph'
+$linearStopPath = Join-Path $snippetRoot 'stop-linear-playback.eddgraph'
 $movementPath = Join-Path $snippetRoot 'apply-translation-input.eddgraph'
 $rotationPath = Join-Path $snippetRoot 'apply-rotation-input.eddgraph'
 $rollPath = Join-Path $snippetRoot 'apply-roll-and-horizon-input.eddgraph'
@@ -62,6 +65,9 @@ $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.
     $waypointCapturePath,
     $waypointReplacePath,
     $waypointDeletePath,
+    $linearStartPath,
+    $linearUpdatePath,
+    $linearStopPath,
     $movementPath,
     $rotationPath,
     $rollPath,
@@ -88,6 +94,12 @@ $waypointFeedbackContractTester = Join-Path $ProjectRoot 'tools\blueprint\Test-W
 & python $waypointFeedbackContractTester --event $eventGraphPath
 if ($LASTEXITCODE -ne 0) {
     throw "Waypoint feedback semantic contracts failed with exit code $LASTEXITCODE."
+}
+
+$linearPlaybackContractTester = Join-Path $ProjectRoot 'tools\blueprint\Test-LinearPlaybackContracts.py'
+& python $linearPlaybackContractTester --start $linearStartPath --update $linearUpdatePath --stop $linearStopPath
+if ($LASTEXITCODE -ne 0) {
+    throw "Linear playback semantic contracts failed with exit code $LASTEXITCODE."
 }
 
 $input = [IO.File]::ReadAllText($inputPath)

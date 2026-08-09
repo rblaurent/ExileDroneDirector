@@ -35,6 +35,9 @@ The tools in this directory never launch Unreal:
 - `Build-WaypointFeedbackDispatch.py` extends that reviewed mutation dispatch
   with one shared dynamic count/selection message and a distinct terminal print
   after each successful mutation.
+- `Build-LinearPlaybackGraphs.py` composes guarded start, absolute-time
+  equal-duration traversal, exact endpoint completion, and explicit stop graphs
+  from Unreal-reconstructed node forms.
 - `Test-WaypointCaptureContracts.py` verifies exact array types, data sources,
   append order, selected-index assignment, ID increment, and available
   EventGraph dispatch semantics.
@@ -42,6 +45,8 @@ The tools in this directory never launch Unreal:
   ordered six-channel removal, and deterministic post-delete selection.
 - `Test-WaypointFeedbackContracts.py` verifies that count and selection are
   derived from live state and displayed after capture, replace, and delete.
+- `Test-LinearPlaybackContracts.py` verifies the time source, segment math,
+  quaternion transform lerp, exact final endpoint, selection, and stop state.
 
 Validated snippets:
 

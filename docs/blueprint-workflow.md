@@ -72,11 +72,15 @@ Blueprint automation will report that valid mod assets cannot be loaded.
 - Snippet execution inputs must be intentionally internal or intentionally
   unlinked and documented as public caller entry points. Dangling external links
   are rejected.
-- Camera work never moves the player character. The verified SpectatorPawn
-  backend caches `OriginalPawnRef`, temporarily possesses the drone, and restores
-  the cached pawn (or calls `UnPossess` when none existed) before exit completes.
-- Possession is a tested runtime resource, not an incidental side effect: every
-  entry/exit graph must state and validate its cache/restore contract.
+- Camera work never moves the player character and never changes controller
+  possession. The verified backend switches only the local view target and
+  integrates the non-replicated drone transform explicitly with world delta time.
+- Every director component must prove `Owner == GetPlayerController(0)` before
+  reading local input. A non-local component terminates the tick with no side
+  effects.
+- `SpectatorPawn` inheritance can force replication at runtime. The drone's
+  BeginPlay graph must explicitly call `SetReplicates(false)` followed by
+  `SetReplicateMovement(false)`; class-default inspection alone is insufficient.
 
 ## Resource profile
 
@@ -102,10 +106,11 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
    **Proven in PIE for repeatable manual F9 restoration and forced destruction
    of the active drone actor. Death, teleport, disconnect, and component
    end-play hooks remain pending.**
-8. Six-axis input accumulation. **First translation slice proven in PIE: W/S,
-   D/A, and E/Q feed forced local forward/right/up movement, W/D/E produced the
-   expected displacement, and exit/re-entry restored and reacquired possession.
-   Mouse look plus precision/boost scaling remain pending.**
+8. Six-axis transform integration. **Proven in two-player listen-server PIE:
+   W/S, D/A, and E/Q form signed local axes, scale by `BaseMoveSpeed` and world
+   delta time, and apply one local offset. Host and remote-client movement stayed
+   isolated, controlled pawns were unchanged, and exit restored the exact prior
+   view target. Mouse look plus precision/boost scaling remain pending.**
 
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.

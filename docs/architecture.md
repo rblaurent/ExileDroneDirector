@@ -8,8 +8,8 @@ Authority model: server-authoritative Flypath storage; client-local authoring an
 
 The architecture must provide:
 
-- Safe local drone-camera control without moving or destroying the player pawn,
-  with possession treated as an explicit cached/restored runtime resource
+- Safe local drone-camera control without moving, destroying, or unpossessing the
+  player pawn
 - Responsive authoring and deterministic playback
 - Server-persistent private drafts and immutable published revisions
 - Server-enforced ownership, visibility, cloning, and moderation
@@ -89,15 +89,15 @@ Local non-replicated view-target actor containing:
 - Optional hidden airframe and gimbal transform hierarchy
 - Debug visualization disabled for clean playback
 
-The verified single-player backend temporarily possesses this SpectatorPawn so
-its native movement component consumes `AddMovementInput`. The director caches
-the original pawn and view target first, then restores both on exit; a missing
-original pawn falls back to `UnPossess`. The character actor remains physically
-unchanged in the world. Because normal Unreal possession is authority-sensitive,
-listen-server and dedicated-client tests are a release gate. If local drone
-possession is rejected or causes gameplay-side effects, the adapter changes to
-manual local transform integration while the state-machine and restoration
-contracts remain unchanged.
+The verified production backend never possesses this actor. Native
+`SpectatorPawnMovement` was rejected because unpossessed movement input is not
+consumed and client-side possession is authority-sensitive. Instead, the drone
+constructs a signed six-axis local vector, scales it by configured speed and
+world delta time, and applies one local transform offset. The director switches
+only the owning client's view target and restores the exact cached target on
+exit. BeginPlay explicitly disables actor and movement replication; this runtime
+override is required because `SpectatorPawn` inheritance otherwise re-enabled
+replication on spawned instances despite the intended class defaults.
 
 ### 3.5 `BP_EDD_PathPreview`
 

@@ -42,11 +42,9 @@ Read these in order:
 ## Architectural invariants
 
 - The player pawn is never moved, teleported, or destroyed by a Flypath.
-- The current single-player movement backend caches the original pawn,
-  temporarily possesses the local drone, and restores possession on exit; this
-  backend remains subject to listen-server and dedicated-client authority tests.
-- Drone authoring and playback use a local camera/view target and never treat
-  the player's character transform as Flypath data.
+- Drone authoring and playback use a non-replicated, client-local camera/view
+  target. Drone Mode never changes controller possession and never treats the
+  player's character transform as Flypath data.
 - Every exit/error path restores camera, input, cursor, and HUD state.
 - The server is authoritative for ownership, privacy, publishing, cloning, and
   persistence.
@@ -79,18 +77,21 @@ exit. Manual F9 emergency exit is now idempotent, and an active camera validity
 guard automatically restores the player if the drone actor disappears. A
 forced-destruction PIE test restored `CameraActor_0`, cleared
 `DroneModeActive`, left zero drone actors, and then spawned a fresh drone on the
-next entry. The drone now has six-axis local translation input: W/S, D/A, and
-E/Q drive forward, right, and up through a 600-unit SpectatorPawnMovement cap.
-Because native movement input is not consumed while the SpectatorPawn is
-unpossessed, Drone Mode caches `OriginalPawnRef`, possesses the drone before
-movement, and restores that pawn on exit. The character-creation PIE map has no
-controlled pawn, so its guarded fallback calls `UnPossess`; W, D, and E runtime
-probes all produced the expected axis displacement, F9 returned to no controlled
-pawn, and a second F10 re-possessed the cached drone. No Blueprint runtime error
-or `Accessed None` occurred. The next technical milestone is mouse look,
-precision/boost speed modes, a gameplay-map pawn restoration test, multiplayer
-possession-authority validation, and the remaining death, teleport, disconnect,
-and component-end-play restoration hooks.
+next entry. The drone now has frame-rate-independent six-axis local translation:
+W/S, D/A, and E/Q form one local vector, scaled by `BaseMoveSpeed` and world
+delta time, then applied as a single actor-local offset. A two-player
+listen-server PIE test used two deterministic possessed `DefaultPawn` fixtures
+so Conan's unfinished character-creation flow could not contaminate the camera
+contract. Across the focused runs, host and remote client independently entered,
+moved, and exited Drone Mode; neither controller changed its controlled pawn and
+each exact original view target was restored. The final post-fix run proved
+isolated client motion with a stationary host drone and no cross-world drone
+replication. Runtime BeginPlay explicitly disables both
+actor and movement replication because `SpectatorPawn` otherwise forced
+inherited replication on spawned instances. No Blueprint runtime error or
+`Accessed None` occurred. The next technical milestone is mouse look and
+precision/boost speed modes, followed by the remaining death, teleport,
+disconnect, UI-close, and component-end-play restoration hooks.
 
 ## Repository layout
 

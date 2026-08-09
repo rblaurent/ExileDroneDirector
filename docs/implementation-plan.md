@@ -122,25 +122,24 @@ Enter Drone Mode, move a local camera, and restore the game perfectly.
    and optional horizon lock.
 6. Separate camera input from carrier motion so the same controller can support
    Directed, Free Look, and Carrier Freecam modes during later playback.
-7. Keep the player pawn physically unchanged. For the current native
-   SpectatorPawn movement backend, temporarily possess the drone and restore the
-   cached player pawn on exit; retain a manual local transform fallback if
-   multiplayer authority rules reject client-local possession.
+7. Keep the player pawn physically unchanged and never change possession. Drive
+   the non-replicated local drone with explicit delta-time transform integration,
+   and restore only the cached view target on exit.
 8. Implement idempotent Emergency Exit.
 9. Bind restoration to death, pawn replacement, teleport, disconnect, UI close,
    camera destruction, and component end-play.
 10. Add an opt-in collision sweep and diagnostic HUD.
 
-Current vertical-slice progress: task 5 has a proven first translation slice
-(W/S, D/A, E/Q at a 600-unit movement cap); the mouse-look, trim, precision,
-boost, and horizon-lock portions remain. Task 7 is proven in the
-character-creation PIE map's no-original-pawn case through guarded `UnPossess`,
-and same-drone re-entry works. A gameplay-map pawn restore and multiplayer
-authority behavior remain mandatory. Task 8 is proven idempotent through the F9
-manual path, and the camera-destruction portion of task 9 is proven through an
-active-camera validity guard. The remaining lifecycle hooks stay explicit work;
-the camera-destruction proof does not stand in for death, teleport, disconnect,
-UI-close, or component-end-play acceptance.
+Current vertical-slice progress: tasks 1, 4, and 7 are proven in a two-player
+listen-server PIE fixture. Each director gates input by owning-local-controller
+identity; host and remote client create non-replicated local drones, move them
+independently at the expected 600 units/second, retain their original controlled
+pawns, and restore their exact prior view targets. Task 5 has proven W/S, D/A,
+and E/Q translation; mouse look, trim, precision, boost, and horizon lock remain.
+Task 8 is proven idempotent through F9, and camera destruction within task 9 is
+proven through the active-camera validity guard. Death, teleport, disconnect,
+UI-close, component-end-play, dedicated-server, and cooked-runtime acceptance
+remain explicit gates.
 
 ### Test matrix
 

@@ -37,6 +37,7 @@ $exitPath = Join-Path $snippetRoot 'exit-drone-mode.eddgraph'
 $emergencyPath = Join-Path $snippetRoot 'emergency-exit-drone-mode.eddgraph'
 $eventGraphPath = Join-Path $snippetRoot 'client-director-event-graph.eddgraph'
 $movementPath = Join-Path $snippetRoot 'apply-translation-input.eddgraph'
+$droneEventPath = Join-Path $snippetRoot 'drone-camera-event-graph.eddgraph'
 $cachePawnPath = Join-Path $snippetRoot 'cache-original-pawn.eddgraph'
 $possessDronePath = Join-Path $snippetRoot 'possess-drone-camera.eddgraph'
 $restorePawnPath = Join-Path $snippetRoot 'restore-original-possession.eddgraph'
@@ -53,6 +54,7 @@ $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.
     $emergencyPath,
     $eventGraphPath,
     $movementPath,
+    $droneEventPath,
     $cachePawnPath,
     $possessDronePath,
     $restorePawnPath
@@ -259,8 +261,8 @@ Assert-GraphMatch $cacheSwitch 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_CallF
 
 $switch = [IO.File]::ReadAllText($switchPath)
 $switchNodes = [regex]::Matches($switch, '(?m)^Begin Object Class=').Count
-if ($switchNodes -ne 10) {
-    throw "Switch-to-drone-view contract expected 10 nodes; found $switchNodes."
+if ($switchNodes -ne 9) {
+    throw "Switch-to-drone-view contract expected 9 nodes; found $switchNodes."
 }
 
 $switchEntry = Get-NodeBlock $switch 'K2Node_FunctionEntry_1'
@@ -272,7 +274,6 @@ $switchSetView = Get-NodeBlock $switch 'K2Node_CallFunction_2'
 $switchSuccess = Get-NodeBlock $switch 'K2Node_CallFunction_3'
 $switchSkipped = Get-NodeBlock $switch 'K2Node_CallFunction_4'
 $switchReroute = Get-NodeBlock $switch 'K2Node_Knot_0'
-$switchPossess = Get-NodeBlock $switch 'K2Node_CallFunction_7'
 
 Assert-GraphMatch $switchEntry 'FunctionReference=\(MemberName="SwitchToDroneView"\)' 'Switch-to-drone-view must implement the named function contract.'
 Assert-GraphMatch $switchEntry 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_0 ' 'SwitchToDroneView entry must execute its camera guard.'
@@ -281,15 +282,16 @@ Assert-GraphMatch $switchCameraGet 'PinName="DroneCameraRef"[^\r\n]*LinkedTo=\(K
 Assert-GraphMatch $switchCameraGet 'PinName="DroneCameraRef"[^\r\n]*K2Node_CallFunction_2 ' 'DroneCameraRef must feed SetViewTargetWithBlend NewViewTarget.'
 Assert-GraphMatch $switchCameraValid 'MemberName="IsValid"' 'Switch-to-drone-view must validate DroneCameraRef.'
 Assert-GraphMatch $switchCameraValid 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_0 ' 'Camera validity must drive the switch Branch.'
-Assert-GraphMatch $switchBranch 'PinFriendlyName=.*?"true".*?LinkedTo=\(K2Node_CallFunction_7 ' 'A valid camera must execute PossessDroneCamera.'
+Assert-GraphMatch $switchBranch 'PinFriendlyName=.*?"true".*?LinkedTo=\(K2Node_CallFunction_2 ' 'A valid camera must switch the local view target directly.'
 Assert-GraphMatch $switchBranch 'PinFriendlyName=.*?"false".*?LinkedTo=\(K2Node_Knot_0 ' 'An invalid camera must take the skipped-diagnostic reroute.'
 Assert-GraphMatch $switchReroute 'PinName="InputPin"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_0 ' 'Switch failure reroute must originate from the invalid branch.'
 Assert-GraphMatch $switchReroute 'PinName="OutputPin"[^\r\n]*LinkedTo=\(K2Node_CallFunction_4 ' 'Switch failure reroute must execute the skipped diagnostic.'
 Assert-GraphMatch $switchController 'MemberName="GetPlayerController"' 'Switch-to-drone-view must resolve a local player controller.'
 Assert-GraphMatch $switchController 'PinName="PlayerIndex"[^\r\n]*DefaultValue="0"' 'Switch-to-drone-view must use local Player Controller 0.'
 Assert-GraphMatch $switchController 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_2 ' 'Local Player Controller must be SetViewTargetWithBlend Target.'
-Assert-GraphMatch $switchPossess 'FunctionReference=\(MemberName="PossessDroneCamera"' 'Switch-to-drone-view must possess the drone before switching the view target.'
-Assert-GraphMatch $switchPossess 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_2 ' 'Possession must complete before SetViewTargetWithBlend.'
+if ($switch -match 'PossessDroneCamera|MemberName="Possess"') {
+    throw 'Switch-to-drone-view must remain client-local presentation state and must not possess the drone.'
+}
 Assert-GraphMatch $switchSetView 'MemberName="SetViewTargetWithBlend"' 'Switch-to-drone-view must use the engine view-target API.'
 Assert-GraphMatch $switchSetView 'PinName="NewViewTarget"[^\r\n]*LinkedTo=\(K2Node_VariableGet_0 ' 'SetViewTargetWithBlend must target DroneCameraRef.'
 Assert-GraphMatch $switchSetView 'PinName="BlendTime"[^\r\n]*DefaultValue="0\.000000"' 'Initial drone switching must be immediate and deterministic.'
@@ -301,8 +303,8 @@ Assert-GraphMatch $switchSkipped 'PinName="bPrintToLog"[^\r\n]*DefaultValue="tru
 
 $exit = [IO.File]::ReadAllText($exitPath)
 $exitNodes = [regex]::Matches($exit, '(?m)^Begin Object Class=').Count
-if ($exitNodes -ne 10) {
-    throw "Exit-drone-mode contract expected 10 nodes; found $exitNodes."
+if ($exitNodes -ne 9) {
+    throw "Exit-drone-mode contract expected 9 nodes; found $exitNodes."
 }
 
 $exitEntry = Get-NodeBlock $exit 'K2Node_FunctionEntry_1'
@@ -314,12 +316,12 @@ $exitSetView = Get-NodeBlock $exit 'K2Node_CallFunction_2'
 $exitSuccess = Get-NodeBlock $exit 'K2Node_CallFunction_3'
 $exitSkipped = Get-NodeBlock $exit 'K2Node_CallFunction_4'
 $exitReroute = Get-NodeBlock $exit 'K2Node_Knot_0'
-$restoreOriginalPossession = Get-NodeBlock $exit 'K2Node_CallFunction_5'
 
 Assert-GraphMatch $exitEntry 'FunctionReference=\(MemberName="ExitDroneMode"\)' 'Exit-drone-mode must implement the named function contract.'
-Assert-GraphMatch $exitEntry 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_5 ' 'ExitDroneMode entry must restore original possession first.'
-Assert-GraphMatch $restoreOriginalPossession 'FunctionReference=\(MemberName="RestoreOriginalPossession"' 'ExitDroneMode must delegate controller restoration to RestoreOriginalPossession.'
-Assert-GraphMatch $restoreOriginalPossession 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_0 ' 'Possession restoration must complete before the original-view guard.'
+Assert-GraphMatch $exitEntry 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_0 ' 'ExitDroneMode entry must execute the original-view guard directly.'
+if ($exit -match 'RestoreOriginalPossession|MemberName="Possess"|MemberName="UnPossess"') {
+    throw 'ExitDroneMode must restore only the cached local view target and must not change possession.'
+}
 Assert-GraphMatch $exitOriginalGet 'VariableReference=\(MemberName="OriginalViewTargetRef"' 'Exit-drone-mode must read the cached original target.'
 Assert-GraphMatch $exitOriginalGet 'PinName="OriginalViewTargetRef"[^\r\n]*LinkedTo=\(K2Node_CallFunction_0 ' 'OriginalViewTargetRef must feed the exit validity check.'
 Assert-GraphMatch $exitOriginalGet 'PinName="OriginalViewTargetRef"[^\r\n]*K2Node_CallFunction_2 ' 'OriginalViewTargetRef must feed the restoration NewViewTarget.'
@@ -412,18 +414,42 @@ foreach ($key in @('W', 'S', 'D', 'A', 'E', 'Q')) {
 if ([regex]::Matches($movement, 'MemberName="Subtract_DoubleDouble"').Count -ne 3) {
     throw 'ApplyTranslationInput must construct exactly three signed axis values.'
 }
-foreach ($axisFunction in @('GetActorForwardVector', 'GetActorRightVector', 'GetActorUpVector')) {
-    Assert-GraphMatch $movement ('MemberName="{0}"' -f $axisFunction) "ApplyTranslationInput must resolve $axisFunction."
+Assert-GraphMatch $movement 'MemberName="MakeVector"' 'ApplyTranslationInput must assemble the three signed local axes into one vector.'
+Assert-GraphMatch $movement 'VariableReference=\(MemberName="BaseMoveSpeed"' 'ApplyTranslationInput must scale by the configurable BaseMoveSpeed.'
+Assert-GraphMatch $movement 'MemberName="GetWorldDeltaSeconds"' 'ApplyTranslationInput must be frame-rate independent.'
+if ([regex]::Matches($movement, 'OperationName="Multiply"').Count -ne 2) {
+    throw 'ApplyTranslationInput must multiply once by speed and once by DeltaSeconds.'
 }
-if ([regex]::Matches($movement, 'MemberName="AddMovementInput"').Count -ne 3) {
-    throw 'ApplyTranslationInput must issue exactly three movement-input calls.'
-}
-if ([regex]::Matches($movement, 'PinName="bForce"[^\r\n]*DefaultValue="true"').Count -ne 3) {
-    throw 'All ApplyTranslationInput axes must force movement input through controller-side ignore state.'
+$movementSpeedScale = Get-NodeBlock $movement 'K2Node_PromotableOperator_3'
+$movementDeltaScale = Get-NodeBlock $movement 'K2Node_PromotableOperator_4'
+Assert-GraphMatch $movementSpeedScale 'PinName="B"[^\r\n]*PinType\.PinCategory="real"[^\r\n]*PinType\.PinSubCategory="double"' 'The speed multiplier must use a scalar double-valued B pin.'
+Assert-GraphMatch $movementDeltaScale 'PinName="B"[^\r\n]*PinType\.PinCategory="real"[^\r\n]*PinType\.PinSubCategory="double"' 'The DeltaSeconds multiplier must use a scalar double-valued B pin.'
+if ([regex]::Matches($movement, 'MemberName="K2_AddActorLocalOffset"').Count -ne 1) {
+    throw 'ApplyTranslationInput must issue exactly one local transform integration call.'
 }
 $movementEntry = Get-NodeBlock $movement 'K2Node_FunctionEntry_2'
+$movementOffset = Get-NodeBlock $movement 'K2Node_CallFunction_15'
 Assert-GraphMatch $movementEntry 'FunctionReference=\(MemberName="ApplyTranslationInput"\)' 'Movement must implement the named ApplyTranslationInput contract.'
-Assert-GraphMatch $movementEntry 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_3 ' 'ApplyTranslationInput entry must execute the first axis movement call.'
+Assert-GraphMatch $movementEntry 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_15 ' 'ApplyTranslationInput entry must execute AddActorLocalOffset.'
+Assert-GraphMatch $movementOffset 'PinName="DeltaLocation"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_4 ' 'AddActorLocalOffset must consume the speed-and-delta-scaled vector.'
+Assert-GraphMatch $movementOffset 'PinName="bSweep"[^\r\n]*DefaultValue="false"' 'Freecam translation must not sweep against gameplay collision.'
+Assert-GraphMatch $movementOffset 'PinName="bTeleport"[^\r\n]*DefaultValue="false"' 'Freecam translation must use ordinary local offsets.'
+
+$droneEvent = [IO.File]::ReadAllText($droneEventPath)
+$droneEventNodes = [regex]::Matches($droneEvent, '(?m)^Begin Object Class=').Count
+if ($droneEventNodes -ne 3) {
+    throw "Drone-camera EventGraph contract expected 3 nodes; found $droneEventNodes."
+}
+$droneBeginPlay = Get-NodeBlock $droneEvent 'K2Node_Event_3'
+$droneSetReplicates = Get-NodeBlock $droneEvent 'K2Node_CallFunction_0'
+$droneSetReplicateMovement = Get-NodeBlock $droneEvent 'K2Node_CallFunction_1'
+Assert-GraphMatch $droneBeginPlay 'MemberName="ReceiveBeginPlay"' 'The drone must enforce local-only state at BeginPlay.'
+Assert-GraphMatch $droneBeginPlay 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_0 ' 'Drone BeginPlay must disable actor replication first.'
+Assert-GraphMatch $droneSetReplicates 'MemberName="SetReplicates"' 'The drone must explicitly disable inherited SpectatorPawn replication.'
+Assert-GraphMatch $droneSetReplicates 'PinName="bInReplicates"[^\r\n]*DefaultValue="false"' 'Drone actor replication must be false.'
+Assert-GraphMatch $droneSetReplicates 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_1 ' 'Actor replication disablement must precede movement replication disablement.'
+Assert-GraphMatch $droneSetReplicateMovement 'MemberName="SetReplicateMovement"' 'The drone must explicitly disable inherited movement replication.'
+Assert-GraphMatch $droneSetReplicateMovement 'PinName="bInReplicateMovement"[^\r\n]*DefaultValue="false"' 'Drone movement replication must be false.'
 
 $emergency = [IO.File]::ReadAllText($emergencyPath)
 $emergencyNodes = [regex]::Matches($emergency, '(?m)^Begin Object Class=').Count
@@ -449,8 +475,8 @@ Assert-GraphMatch $emergencyPrint 'PinName="bPrintToLog"[^\r\n]*DefaultValue="tr
 
 $eventGraph = [IO.File]::ReadAllText($eventGraphPath)
 $eventGraphNodes = [regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/BlueprintGraph\.').Count
-if ($eventGraphNodes -ne 25) {
-    throw "Client-director EventGraph contract expected 25 executable nodes; found $eventGraphNodes."
+if ($eventGraphNodes -ne 29) {
+    throw "Client-director EventGraph contract expected 29 executable nodes; found $eventGraphNodes."
 }
 if ([regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/UnrealEd\.EdGraphNode_Comment').Count -ne 1) {
     throw 'Client-director EventGraph must retain exactly one design comment node.'
@@ -475,9 +501,23 @@ $cameraGet = Get-NodeBlock $eventGraph 'K2Node_VariableGet_2'
 $cameraValid = Get-NodeBlock $eventGraph 'K2Node_CallFunction_10'
 $invalidEmergency = Get-NodeBlock $eventGraph 'K2Node_CallFunction_11'
 $translationInput = Get-NodeBlock $eventGraph 'K2Node_CallFunction_12'
+$ownerGet = Get-NodeBlock $eventGraph 'K2Node_CallFunction_14'
+$localControllerGet = Get-NodeBlock $eventGraph 'K2Node_CallFunction_15'
+$ownerEquals = Get-NodeBlock $eventGraph 'K2Node_CallFunction_16'
+$ownerGate = Get-NodeBlock $eventGraph 'K2Node_IfThenElse_5'
 
 Assert-GraphMatch $tickEvent 'EventReference=.*MemberName="ReceiveTick"' 'Emergency polling must run from the component tick.'
-Assert-GraphMatch $tickEvent 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_0 ' 'ReceiveTick must enter the F10 branch first.'
+Assert-GraphMatch $tickEvent 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_5 ' 'ReceiveTick must enter the owning-local-controller gate first.'
+Assert-GraphMatch $ownerGet 'MemberName="GetOwner"' 'The locality gate must resolve the component owner.'
+Assert-GraphMatch $localControllerGet 'MemberName="GetPlayerController"' 'The locality gate must resolve local Player Controller 0.'
+Assert-GraphMatch $localControllerGet 'PinName="PlayerIndex"[^\r\n]*DefaultValue="0"' 'The locality gate must compare against local player index 0.'
+Assert-GraphMatch $ownerEquals 'MemberName="ObjectEquals"' 'The locality gate must compare owner identity exactly.'
+Assert-GraphMatch $ownerEquals 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_5 ' 'Owner equality must drive the locality branch.'
+Assert-GraphMatch $ownerGate 'PinFriendlyName=.*?"true".*?LinkedTo=\(K2Node_IfThenElse_0 ' 'Only the owning local controller may enter F10/F9 polling.'
+$ownerFalse = [regex]::Match($ownerGate, '(?m)^\s*CustomProperties Pin \([^\r\n]*PinName="else"[^\r\n]*$')
+if (-not $ownerFalse.Success -or $ownerFalse.Value -match 'LinkedTo=') {
+    throw 'Non-local director components must terminate without side effects.'
+}
 Assert-GraphMatch $f10Poll 'MemberName="WasInputKeyJustPressed"' 'F10 entry must use edge-triggered polling.'
 Assert-GraphMatch $f10Poll 'PinName="Key"[^\r\n]*DefaultValue="F10"' 'The normal-mode hotkey must remain F10.'
 Assert-GraphMatch $f10Poll 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_0 ' 'F10 polling must drive the normal-mode branch.'
@@ -511,10 +551,10 @@ foreach ($emergencyGraph in @($emergency, $eventGraph)) {
     }
 }
 
-foreach ($viewGraph in @($place, $activate, $switch, $exit, $cachePawn, $possessDrone, $restorePawn, $movement)) {
+foreach ($viewGraph in @($place, $activate, $switch, $exit, $movement, $droneEvent)) {
     if ($viewGraph -match '(?m)^\s*Error(Type|Msg)=') {
         throw 'View-lifecycle graph source must not retain stale compiler error metadata.'
     }
 }
 
-Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, client-director-event-graph, apply-translation-input, cache-original-pawn, possess-drone-camera, restore-original-possession'
+Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, client-director-event-graph, apply-translation-input, drone-camera-event-graph (legacy possession helpers also remain structurally validated)'

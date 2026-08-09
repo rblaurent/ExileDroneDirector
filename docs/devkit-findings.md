@@ -308,7 +308,8 @@ This proved exact placement, reuse, activation, and normal restoration at that
 stage. The character-creation phase reports `get_controlled_pawn() = None`, so a
 same-character restore still requires a gameplay map. Later movement work added
 explicit drone possession and a guarded no-original-pawn fallback, documented
-below. Cooked behavior and multiplayer isolation remain pending.
+below. That possession experiment was later rejected; the accepted multiplayer
+backend and its remaining cooked-runtime gate are documented further below.
 
 ## Verified manual and invalid-camera emergency recovery
 
@@ -372,7 +373,7 @@ hook in PIE. It does not yet prove restoration from death, pawn replacement,
 teleport, disconnect, UI close, component end-play, a cooked build, or a second
 network client.
 
-## Verified native movement, possession, and restoration
+## Superseded native-movement and possession experiment
 
 The first six-axis translation slice uses one named 17-node
 `ApplyTranslationInput` function on `BP_EDD_DroneCamera`:
@@ -422,12 +423,144 @@ go`, and saved. A focused PIE run on 2026-08-09 then proved:
   restored cleanly.
 
 No Blueprint runtime error or `Accessed None` occurred. This proves the native
-movement backend and the no-original-pawn lifecycle in single-player PIE. It
-does not yet prove that possession is permitted and isolated on a listen server
-or dedicated client. Those tests decide whether this adapter remains native
-SpectatorPawn movement or changes to manual local transform integration. A
-gameplay-map test must also prove that a real original pawn is restored with the
-same identity and unchanged transform.
+movement backend and the no-original-pawn lifecycle in authoritative
+single-player PIE. The multiplayer test below supersedes native possession as
+the production movement architecture. A gameplay-character test must still
+cover Conan's concrete player pawn class.
+
+### Valid-pawn identity and transform restoration proof
+
+A second focused PIE run supplied the `AlmostEmpty` controller with a runtime
+`DefaultPawn_0` surrogate at location `(1300, 200, 700)` and rotation
+`(pitch=37, yaw=0, roll=5)`, then possessed it before entering Drone Mode. This
+turns the normally unpossessed character-creation map into a deterministic
+lifecycle fixture without modifying the map.
+
+The observed state sequence was:
+
+1. Before F10, `DefaultPawn_0` was the controlled pawn.
+2. After F10, `BP_EDD_DroneCamera_C_0` was the controlled pawn and both actors
+   still began at `(1300, 200, 700)`.
+3. Holding W moved the drone to approximately
+   `(1856.328, 200, 1119.224)` while `DefaultPawn_0` remained at its original
+   transform.
+4. After F9, the controller again reported the exact same `DefaultPawn_0`
+   object (`SAME_OBJECT True`), still at its original location and rotation.
+
+There was no Blueprint runtime error or `Accessed None`. This proves the valid
+pawn branch preserves object identity and does not disturb the original pawn's
+transform in authoritative single-player PIE. The Player Controller reported
+`AUTH True`; remote-client possession and a concrete Conan character remain
+separate acceptance gates.
+
+For repeatable PIE fixtures, use
+`SystemLibrary.execute_console_command(..., "summon /Script/Engine.DefaultPawn")`
+and then filter `GameplayStatics.get_all_actors_of_class` by exact class. The
+result set also contains SpectatorPawn subclasses. In this DevKit,
+`EditorLevelLibrary.spawn_actor_from_class` refuses to run during PIE and the
+Python binding does not expose
+`GameplayStatics.begin_deferred_actor_spawn_from_class`.
+
+### Two-player listen-server authority proof
+
+PIE was configured for two players, `PIE_ListenServer`, one process, and no
+separate server. This produced:
+
+- `UEDPIE_0`: a listen-server world with one local authoritative controller and
+  one remote authoritative controller;
+- `UEDPIE_1`: a client world with one local non-authoritative controller and a
+  separate `Client 1` preview window.
+
+Two isolated inputs exposed both failure modes of possession-based camera
+movement:
+
+1. F10 in the listen-host viewport made both server-side director components
+   react. The server spawned `BP_EDD_DroneCamera_C_0` and `_C_1`, and only the
+   local listen-host controller possessed `_C_1`; the remote server controller
+   remained unpossessed. Component instances are incorrectly sharing global
+   Player Controller 0 instead of resolving their owning local controller.
+2. After a clean restart, F10 in the dedicated `Client 1` preview invoked only
+   the `Client 1` director. It spawned one drone in `UEDPIE_1`; `UEDPIE_0` had
+   no drone, proving the actor was correctly client-local. However, the client
+   controller remained unpossessed because `PlayerController.Possess` requires
+   authority.
+
+This is an architectural acceptance result, not an intermittent bug. Cinematic
+camera state is local presentation state and should not be server-authoritative
+or replicated. Production movement therefore uses explicit delta-time actor
+transform integration and local view-target switching, without possessing the
+drone. Director logic must resolve its owning Player Controller and execute
+only when that owner is local; it must not call global Player Controller 0 from
+every server-side component instance.
+
+For repeatable testing, the PIE settings persisted as:
+
+```ini
+bLaunchSeparateServer=False
+PlayNetMode=PIE_ListenServer
+RunUnderOneProcess=True
+PlayNumberOfClients=2
+```
+
+The remote client is a separate top-level window titled
+`Conan Exiles Enhanced Preview [NetMode: Client 1]`; focus that window before
+sending F10/F9.
+
+### Accepted two-player local-view and transform backend
+
+The possession failure above was replaced and retested in the same two-player
+listen-server topology. To remove Conan's character-creation flow as a source of
+camera, input, and pawn ambiguity, the acceptance fixture spawned two exact
+`/Script/Engine.DefaultPawn` instances in the server world and possessed one with
+each authoritative controller:
+
+- server Player Controller 0: `DefaultPawn_0` at `(1000, 0, 700)`;
+- server Player Controller 1: `DefaultPawn_1` at `(1500, 500, 800)`;
+- remote client: replicated `DefaultPawn_0` as its controlled pawn and initial
+  view target.
+
+The accepted Blueprint backend makes four contracts explicit:
+
+1. Every client-director Tick first checks
+   `GetOwner() == GetPlayerController(0)`. False terminates with no input or
+   lifecycle work; true continues into F10/F9 and movement dispatch.
+2. `SwitchToDroneView` and `ExitDroneMode` change only the local view target.
+   Neither path calls `Possess`, `UnPossess`, or a possession helper.
+3. `ApplyTranslationInput` forms `(W-S, D-A, E-Q)`, scales that local vector by
+   `BaseMoveSpeed`, scales again by `GetWorldDeltaSeconds`, and performs one
+   `AddActorLocalOffset` with sweep and teleport both false.
+4. `BP_EDD_DroneCamera.ReceiveBeginPlay` calls `SetReplicates(false)` followed by
+   `SetReplicateMovement(false)`. This is required even when the intended class
+   defaults are false: spawned `SpectatorPawn` instances otherwise reported both
+   inherited replication flags as true.
+
+The focused acceptance sequence then proved:
+
+- Host F10 produced exactly one server enter sequence. Player Controller 0 kept
+  controlling `DefaultPawn_0` while viewing its local drone; Player Controller 1
+  kept controlling and viewing `DefaultPawn_1`. The remote client stayed on
+  `DefaultPawn_0`. The server contained one drone with `replicates=False` and
+  `replicate_movement=False`; the client contained zero drones.
+- In the immediately preceding run, holding host W for approximately 1.2 seconds
+  moved the authoritative drone by approximately 721.8 units, consistent with
+  the configured 600 units/second. It also moved the inherited client replica,
+  exposing the replication-default defect that the BeginPlay override fixed.
+  Host F9 restored the exact `DefaultPawn_0` view target and left its controlled
+  pawn unchanged.
+- Client 1 F10 produced exactly one client enter sequence. The client created one
+  local non-replicated drone at `(1500, 500, 800)` while the server retained only
+  its inactive host-local drone. Both server controllers remained on their own
+  `DefaultPawn` instances.
+- Holding client W for approximately 1.2 seconds moved the client drone from
+  X `1500` to `2221.485720`; the host drone remained exactly at `(1000, 0, 700)`.
+- Client F9 restored `DefaultPawn_0` as both controlled pawn and view target.
+
+No Blueprint runtime error or `Accessed None` occurred. Taken together, the
+pre-fix speed probe and final post-fix isolation run prove host/client input
+isolation, non-replicated local cameras, frame-rate-independent movement on the
+non-authority client, unchanged possession, and exact view restoration. It
+does not replace the remaining dedicated-server, cooked-runtime, concrete Conan
+character, or abnormal-lifecycle acceptance gates.
 
 ## Blueprint graph automation boundary
 
@@ -443,9 +576,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 
 ## Pending local reconnaissance
 
-- Original-pawn identity/transform restoration in a gameplay-map PIE run
+- Concrete Conan-character view restoration in a gameplay-map PIE run
 - Mouse look, speed trim, precision, boost, and horizon-lock movement layers
-- Listen-server and dedicated-client possession authority/isolation
 - Remaining death, teleport, disconnect, UI-close, and component-end-play hooks
 - Emergency camera restoration and the view lifecycle in cooked runtime
 - PIE and cook commands/output locations

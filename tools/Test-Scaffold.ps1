@@ -42,6 +42,7 @@ $requiredFiles = @(
     'tools\blueprint\snippets\emergency-exit-drone-mode.eddgraph',
     'tools\blueprint\snippets\client-director-event-graph.eddgraph',
     'tools\blueprint\snippets\apply-translation-input.eddgraph',
+    'tools\blueprint\snippets\drone-camera-event-graph.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph'

@@ -29,27 +29,30 @@ Validated snippets:
 - `place-drone-at-current-view.eddgraph` guards `DroneCameraRef`, samples local
   Player Camera Manager 0, and atomically copies its evaluated world location
   and rotation to the drone before view activation.
-- `cache-original-pawn.eddgraph` captures typed `OriginalPawnRef` from local
-  Player Pawn 0 before Drone Mode changes controller ownership.
-- `possess-drone-camera.eddgraph` guards `DroneCameraRef` and possesses it with
-  local Player Controller 0.
-- `restore-original-possession.eddgraph` restores a valid `OriginalPawnRef`, or
-  safely calls `UnPossess` when the entry context had no pawn.
-- `activate-drone-view.eddgraph` caches the original pawn, caches the original
-  local view target once, and delegates both view-cache outcomes to the switch.
-- `switch-to-drone-view.eddgraph` guards and possesses `DroneCameraRef` before
-  switching local Player Controller 0 through `SetViewTargetWithBlend`.
-- `exit-drone-mode.eddgraph` restores controller possession first, then guards
-  `OriginalViewTargetRef` and restores the same local view through the paired
-  engine API.
+- `cache-original-pawn.eddgraph`, `possess-drone-camera.eddgraph`, and
+  `restore-original-possession.eddgraph` preserve the rejected native-movement
+  experiment for auditability. They remain structurally validated but are not
+  called by the production switch/exit path.
+- `activate-drone-view.eddgraph` caches the original local view target once and
+  delegates both view-cache outcomes to the switch. Its legacy pawn-cache call
+  is inert with respect to controller ownership and will be removed during the
+  next lifecycle cleanup.
+- `switch-to-drone-view.eddgraph` guards `DroneCameraRef` and switches local
+  Player Controller 0 through `SetViewTargetWithBlend` without possession.
+- `exit-drone-mode.eddgraph` guards `OriginalViewTargetRef` and restores that
+  exact local view without changing possession.
 - `emergency-exit-drone-mode.eddgraph` idempotently delegates normal view
   restoration, forces `DroneModeActive` false, then logs completion.
 - `client-director-event-graph.eddgraph` owns the complete executable client
-  dispatch: F10 normal entry/exit, F9 manual emergency exit, and automatic
-  emergency restoration when an active drone camera becomes invalid. A valid
-  active drone delegates translation to `ApplyTranslationInput`.
+  dispatch behind an owning-local-controller identity gate: F10 normal
+  entry/exit, F9 manual emergency exit, and automatic restoration when an active
+  drone camera becomes invalid. A valid active drone delegates translation to
+  `ApplyTranslationInput`.
 - `apply-translation-input.eddgraph` samples W/S, D/A, and E/Q, constructs three
-  signed local axes, and chains forced forward/right/up movement input.
+  signed local axes, scales one vector by `BaseMoveSpeed` and world delta time,
+  and applies one local actor offset.
+- `drone-camera-event-graph.eddgraph` explicitly disables actor and movement
+  replication at BeginPlay to override `SpectatorPawn`'s inherited runtime state.
 
 Design comment nodes exported by Unreal use
 `/Script/UnrealEd.EdGraphNode_Comment`; the snippet validator permits that one

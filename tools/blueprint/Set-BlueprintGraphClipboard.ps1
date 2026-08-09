@@ -5,6 +5,8 @@ param(
 
     [hashtable]$Token = @{},
 
+    [switch]$AllowExternalFunctionEntry,
+
     [switch]$PassThru
 )
 
@@ -13,7 +15,7 @@ $ErrorActionPreference = 'Stop'
 
 $resolvedSnippet = (Resolve-Path -LiteralPath $SnippetPath).Path
 $validator = Join-Path $PSScriptRoot 'Test-BlueprintGraphSnippet.ps1'
-& $validator -Path $resolvedSnippet -AllowTokens | Write-Verbose
+& $validator -Path $resolvedSnippet -AllowTokens -AllowExternalFunctionEntry:$AllowExternalFunctionEntry | Write-Verbose
 
 $text = [IO.File]::ReadAllText($resolvedSnippet)
 foreach ($key in $Token.Keys) {

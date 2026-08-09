@@ -24,6 +24,7 @@ TARGET_ASSET = (
     "BPC_EDD_ClientDirector.BPC_EDD_ClientDirector"
 )
 TARGET_GRAPH = "CaptureCurrentWaypoint"
+SELECTED_INDEX_GUID = "23B9561944904F583A9AAE8770F8810B"
 
 
 _id_counter = 0
@@ -171,6 +172,22 @@ def set_array_add_element_type(node: Node, kind: str) -> None:
         raise RuntimeError(f"Unsupported array element type: {kind}")
 
 
+def retarget_variable(
+    node: Node,
+    old_name: str,
+    new_name: str,
+    new_guid: str,
+) -> None:
+    node.text = re.sub(
+        rf'MemberName="{re.escape(old_name)}",MemberGuid=[0-9A-F]{{32}}',
+        f'MemberName="{new_name}",MemberGuid={new_guid}',
+        node.text,
+        count=1,
+    )
+    node.text = node.text.replace(f'PinName="{old_name}"', f'PinName="{new_name}"')
+    node.pins[new_name] = node.pins.pop(old_name)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--project-root", type=Path, required=True)
@@ -264,8 +281,17 @@ def main() -> None:
 
     int_add = add("int_add", "int_add", "K2Node_PromotableOperator_0", 2832, 336)
     set_pin_default(int_add, "B", "1")
-    next_set = add("next_set", "next_set", "K2Node_VariableSet_0", 3264, 0)
-    print_node = add("print", "print", "K2Node_CallFunction_2", 3648, 0)
+    selected_set = add(
+        "selected_set", "next_set", "K2Node_VariableSet_0", 3264, 0
+    )
+    retarget_variable(
+        selected_set,
+        "NextWaypointId",
+        "SelectedWaypointIndex",
+        SELECTED_INDEX_GUID,
+    )
+    next_set = add("next_set", "next_set", "K2Node_VariableSet_1", 3504, 0)
+    print_node = add("print", "print", "K2Node_CallFunction_2", 3888, 0)
     set_pin_default(print_node, "InString", "[EDD] Waypoint captured")
 
     connect(entry, "then", branch, "execute")
@@ -280,6 +306,7 @@ def main() -> None:
         add_aperture,
         add_focus,
         add_hold,
+        selected_set,
         next_set,
         print_node,
     ]
@@ -291,6 +318,7 @@ def main() -> None:
     connect(next_get, "NextWaypointId", add_id, "NewItem")
     connect(next_get, "NextWaypointId", int_add, "A")
     connect(int_add, "ReturnValue", next_set, "NextWaypointId")
+    connect(add_id, "ReturnValue", selected_set, "SelectedWaypointIndex")
 
     connect(transforms, "DraftWaypointTransforms", add_transform, "TargetArray")
     connect(drone, "DroneCameraRef", transform, "self")
@@ -315,12 +343,6 @@ def main() -> None:
     args.output.write_text(full_text, encoding="utf-8")
     if args.paste_output:
         paste_text = "\n".join(node.text for node in ordered if node.key != "entry") + "\n"
-        paste_text = re.sub(
-            r",LinkedTo=\(K2Node_FunctionEntry_0 [0-9A-F]{32},\)",
-            "",
-            paste_text,
-            count=1,
-        )
         args.paste_output.parent.mkdir(parents=True, exist_ok=True)
         args.paste_output.write_text(paste_text, encoding="utf-8")
 

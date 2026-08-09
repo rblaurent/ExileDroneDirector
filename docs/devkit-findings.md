@@ -781,6 +781,35 @@ Reusable tools added with this slice:
 - `Test-WaypointCaptureContracts.py` for exact data/exec topology;
 - `Validate-WaypointCapturePIE.py` for phased deterministic runtime inspection.
 
+## Selected-waypoint replace/delete slice (2026-08-09)
+
+`BPC_EDD_ClientDirector` now owns `SelectedWaypointIndex`, defaulting to `-1`.
+Capture assigns the exact index returned by the ID-array append before advancing
+`NextWaypointId`. Replacement first validates both `DroneCameraRef` and the
+selected ID index, then writes transform, focal length, aperture, and manual
+focus distance with `Array_Set` and `bSizeToFit=false`; stable ID and hold are
+unchanged. Deletion removes the selected element from all six arrays in one exec
+chain, then preserves the old index if it still exists or selects
+`Length(IDs)-1`, which naturally becomes `-1` when the draft is empty.
+
+The first runtime attempt exposed an important clipboard boundary: a pasted
+body can retain a textual link to `K2Node_FunctionEntry_0` while the native
+entry's own `then` pin remains unlinked. The graph looks connected when the
+nodes overlap and compiles without an error, but calling the function is a
+no-op. Each live function was rebuilt with the native entry moved clear and
+manually wired. The copied live graphs then passed contracts that require the
+reciprocal link and the exact native entry pin identifiers.
+
+The corrected deterministic two-player edit cycle reported all of the
+following as true: replacement values, deletion with a survivor, deletion to an
+empty draft, invalid-index no-op, remote-client isolation, original pawn/view
+restoration, and restoration of the temporary drone class lens defaults. No EDD
+Blueprint runtime error appeared. The live EventGraph remains at the proven
+37-node K-capture slice for this checkpoint. A deterministic 43-node extension
+for R replace and Delete removal is generated and contract-valid offline; live
+paste/compile and physical-input acceptance are intentionally deferred to the
+next DevKit session.
+
 ## Blueprint graph automation boundary
 
 The editor Python API can locate the component Event Graph, but the graph object

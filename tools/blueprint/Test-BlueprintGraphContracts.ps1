@@ -37,6 +37,8 @@ $exitPath = Join-Path $snippetRoot 'exit-drone-mode.eddgraph'
 $emergencyPath = Join-Path $snippetRoot 'emergency-exit-drone-mode.eddgraph'
 $eventGraphPath = Join-Path $snippetRoot 'client-director-event-graph.eddgraph'
 $waypointCapturePath = Join-Path $snippetRoot 'capture-current-waypoint.eddgraph'
+$waypointReplacePath = Join-Path $snippetRoot 'replace-selected-waypoint.eddgraph'
+$waypointDeletePath = Join-Path $snippetRoot 'delete-selected-waypoint.eddgraph'
 $movementPath = Join-Path $snippetRoot 'apply-translation-input.eddgraph'
 $rotationPath = Join-Path $snippetRoot 'apply-rotation-input.eddgraph'
 $rollPath = Join-Path $snippetRoot 'apply-roll-and-horizon-input.eddgraph'
@@ -58,6 +60,8 @@ $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.
     $emergencyPath,
     $eventGraphPath,
     $waypointCapturePath,
+    $waypointReplacePath,
+    $waypointDeletePath,
     $movementPath,
     $rotationPath,
     $rollPath,
@@ -72,6 +76,12 @@ $waypointContractTester = Join-Path $ProjectRoot 'tools\blueprint\Test-WaypointC
 & python $waypointContractTester --capture $waypointCapturePath --event $eventGraphPath
 if ($LASTEXITCODE -ne 0) {
     throw "Waypoint capture semantic contracts failed with exit code $LASTEXITCODE."
+}
+
+$waypointEditContractTester = Join-Path $ProjectRoot 'tools\blueprint\Test-WaypointEditContracts.py'
+& python $waypointEditContractTester --project-root $ProjectRoot --replace $waypointReplacePath --delete $waypointDeletePath
+if ($LASTEXITCODE -ne 0) {
+    throw "Waypoint edit semantic contracts failed with exit code $LASTEXITCODE."
 }
 
 $input = [IO.File]::ReadAllText($inputPath)

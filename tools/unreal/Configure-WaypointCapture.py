@@ -15,7 +15,11 @@ import unreal
 PREFIX = "EDD_WAYPOINT_CAPTURE"
 CLIENT_PATH = "/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector"
 DRONE_PATH = "/Game/Mods/ExileDroneDirector/Core/Camera/BP_EDD_DroneCamera"
-FUNCTION_NAME = "CaptureCurrentWaypoint"
+FUNCTION_NAMES = (
+    "CaptureCurrentWaypoint",
+    "ReplaceSelectedWaypoint",
+    "DeleteSelectedWaypoint",
+)
 ARRAY_VARIABLES = (
     ("DraftWaypointIds", "int", None),
     ("DraftWaypointTransforms", None, "/Script/CoreUObject.Transform"),
@@ -26,6 +30,7 @@ ARRAY_VARIABLES = (
 )
 SCALAR_DEFAULTS = {
     "NextWaypointId": 1,
+    "SelectedWaypointIndex": -1,
 }
 DRONE_LENS_DEFAULTS = {
     "FocalLength": 35.0,
@@ -160,7 +165,8 @@ for variable_name, basic_type_name, struct_path in ARRAY_VARIABLES:
     )
 for variable_name in SCALAR_DEFAULTS:
     ensure_scalar_variable(client_blueprint, variable_name, "int")
-ensure_function_graph(client_blueprint, FUNCTION_NAME)
+for function_name in FUNCTION_NAMES:
+    ensure_function_graph(client_blueprint, function_name)
 
 unreal.BlueprintEditorLibrary.compile_blueprint(client_blueprint)
 for variable_name, expected in SCALAR_DEFAULTS.items():
@@ -175,14 +181,16 @@ for variable_name, _, _ in ARRAY_VARIABLES:
     if len(value) != 0:
         raise RuntimeError(f"{variable_name} default must be empty, received {len(value)} items")
     emit("EMPTY_ARRAY_VERIFIED", variable_name)
-if unreal.BlueprintEditorLibrary.find_graph(
-    client_blueprint,
-    unreal.Name(FUNCTION_NAME),
-) is None:
-    raise RuntimeError(f"Blueprint is missing function: {FUNCTION_NAME}")
+for function_name in FUNCTION_NAMES:
+    if unreal.BlueprintEditorLibrary.find_graph(
+        client_blueprint,
+        unreal.Name(function_name),
+    ) is None:
+        raise RuntimeError(f"Blueprint is missing function: {function_name}")
 
 unreal.BlueprintEditorLibrary.refresh_open_editors_for_blueprint(client_blueprint)
-emit("FUNCTION_VERIFIED", FUNCTION_NAME)
+for function_name in FUNCTION_NAMES:
+    emit("FUNCTION_VERIFIED", function_name)
 
 drone_blueprint = require_asset(DRONE_PATH)
 for variable_name, expected in DRONE_LENS_DEFAULTS.items():

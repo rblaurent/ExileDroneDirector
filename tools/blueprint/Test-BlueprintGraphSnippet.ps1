@@ -3,7 +3,9 @@ param(
     [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
     [string[]]$Path,
 
-    [switch]$AllowTokens
+    [switch]$AllowTokens,
+
+    [switch]$AllowExternalFunctionEntry
 )
 
 begin {
@@ -85,7 +87,15 @@ process {
                 Select-Object -Unique
         )
         $unknownLinks = @($linkedNodeNames | Where-Object { $_ -notin $nodeNames })
-        if ($unknownLinks.Count -gt 0) {
+        $disallowedUnknownLinks = @(
+            if ($AllowExternalFunctionEntry) {
+                $unknownLinks | Where-Object { $_ -ne 'K2Node_FunctionEntry_0' }
+            }
+            else {
+                $unknownLinks
+            }
+        )
+        if ($disallowedUnknownLinks.Count -gt 0) {
             throw "LinkedTo references unknown nodes in $resolvedPath`: $($unknownLinks -join ', ')"
         }
 

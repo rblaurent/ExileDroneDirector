@@ -200,19 +200,24 @@ Create an in-memory private Flypath and edit intentional waypoints.
 9. Keep draft model independent from preview actor components.
 
 Current vertical-slice progress: task 1 now has a stable monotonic waypoint ID
-source, and the first append portion of task 2 is implemented and runtime-
-proven. `CaptureCurrentWaypoint` snapshots the local drone transform plus focal
-length, aperture, manual focus distance, and zero hold time into six temporary
-lockstep arrays owned only by `BPC_EDD_ClientDirector`; it advances the ID only
-after every channel append completes. These arrays are an explicit transitional
-model while the DevKit-authored `ST_EDD_Waypoint` fields are still empty, not a
-replacement for the final document struct. The function and K-edge dispatch
-have semantic graph contracts. Two deterministic host captures produced IDs
-`[1,2]`, preserved the first snapshot after the second, left the remote client's
-draft empty, leaked no host drone into the remote world, and restored the exact
-host view target. A physical K press after completing character creation remains
-the input acceptance gate because the active creation widget consumes synthetic
-Windows key injection.
+source, and the append/replace/delete core is implemented and runtime-proven.
+`CaptureCurrentWaypoint` snapshots the local drone transform plus focal length,
+aperture, manual focus distance, and zero hold time into six temporary lockstep
+arrays owned only by `BPC_EDD_ClientDirector`; it selects the appended index and
+advances the ID only after every channel append completes.
+`ReplaceSelectedWaypoint` preserves the stable ID and hold while replacing the
+five camera-state channels at a valid selection. `DeleteSelectedWaypoint`
+removes all six channels atomically and clamps selection to the surviving item
+or `-1`. These arrays are an explicit transitional model while the DevKit-
+authored `ST_EDD_Waypoint` fields are still empty, not a replacement for the
+final document struct. All three live graphs have semantic pin-level contracts.
+A deterministic two-player edit cycle proved two captures, lens/transform
+replacement, middle/end/empty deletion behavior, invalid-index no-op behavior,
+remote-client isolation, exact pawn/view restoration, and restoration of the
+drone class defaults. The reviewed K capture dispatch remains live. A generated
+R/Delete edit-dispatch extension passes offline graph contracts but has not yet
+been pasted into the live EventGraph; physical shortcut acceptance follows the
+one-time PIE character-creation flow.
 
 ### Verification
 

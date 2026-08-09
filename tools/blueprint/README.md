@@ -28,8 +28,15 @@ The tools in this directory never launch Unreal:
 - `Build-ClientWaypointDispatch.py` appends the guarded K-edge capture call
   after roll/horizon processing and is byte-for-byte deterministic and
   idempotent.
+- `Build-WaypointEditGraphs.py` composes guarded replace and six-channel atomic
+  delete functions from live-harvested node forms.
+- `Build-ClientWaypointEditDispatch.py` extends the proven K capture tail with
+  mutually exclusive R replace and Delete removal edge polls.
 - `Test-WaypointCaptureContracts.py` verifies exact array types, data sources,
-  append order, ID increment, and EventGraph dispatch semantics.
+  append order, selected-index assignment, ID increment, and available
+  EventGraph dispatch semantics.
+- `Test-WaypointEditContracts.py` verifies guarded replacement, stable ID/hold,
+  ordered six-channel removal, and deterministic post-delete selection.
 
 Validated snippets:
 
@@ -68,8 +75,12 @@ Validated snippets:
   tick.
 - `capture-current-waypoint.eddgraph` validates `DroneCameraRef`, appends the
   current ID, transform, focal length, aperture, focus distance, and zero hold
-  time atomically, advances `NextWaypointId`, and emits its development
-  diagnostic.
+  time atomically, selects the appended index, advances `NextWaypointId`, and
+  emits its development diagnostic.
+- `replace-selected-waypoint.eddgraph` validates camera and selected ID index,
+  then replaces transform and lens channels without changing stable ID or hold.
+- `delete-selected-waypoint.eddgraph` removes the selected item from all six
+  arrays and preserves or clamps selection after the mutation.
 - `apply-translation-input.eddgraph` samples W/S, D/A, and E/Q, constructs three
   signed local axes, scales one vector by the smoothed `CurrentMoveSpeed` and
   world delta time, and applies one local actor offset.

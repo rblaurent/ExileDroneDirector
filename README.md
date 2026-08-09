@@ -126,20 +126,20 @@ interpolates toward a level frame built from its current forward direction and
 explicit world up. The corrected two-player proof held about 74 degrees of bank
 with lock off, visibly eased it toward zero after H, preserved seeded pitch 20
 and yaw 45, isolated host/client state, and restored exact prior view targets.
-The first waypoint data slice is now live. `CaptureCurrentWaypoint` creates an
-atomic client-local draft snapshot containing a monotonic ID, drone transform,
-focal length, aperture, manual focus distance, and zero hold time. The guarded
-active-mode EventGraph polls `K` by key edge after all camera movement layers.
-Its 24-node function and 37-node EventGraph both round-trip through Unreal and
-pass semantic pin-level contracts. A deterministic two-player PIE run captured
-two distinct transforms as IDs `[1,2]`, kept every channel length equal,
-preserved both lens snapshots, left the remote draft empty, leaked no drone, and
-restored the exact original pawn/view. Conan's character-creation widget consumed
-synthetic keyboard injection, so a physical `K` press after finishing that flow
-remains the honest hands-on input gate. The next milestone is append/edit/delete
-operations and promotion from transitional lockstep arrays into the authored
-waypoint/flypath document structs, alongside the remaining death, teleport,
-disconnect, UI-close, and component-end-play restoration hooks.
+The first waypoint authoring core is now live. `CaptureCurrentWaypoint` creates
+an atomic client-local draft snapshot and selects it;
+`ReplaceSelectedWaypoint` updates its camera state without changing stable ID or
+hold; `DeleteSelectedWaypoint` removes all six lockstep channels and repairs the
+selection. The three live functions round-trip through Unreal and pass semantic
+pin-level contracts. A deterministic two-player PIE edit cycle proved two
+captures, exact replacement, survivor/empty deletion, invalid-index no-ops,
+remote isolation, exact original pawn/view restoration, and restoration of lens
+class defaults. The guarded active-mode EventGraph still exposes the proven `K`
+capture edge. A contract-valid R/Delete extension is prepared offline; applying
+it and completing physical shortcut acceptance after the one-time PIE character
+flow is the next checkpoint, followed by promotion from transitional arrays into
+the authored waypoint/flypath document structs and the remaining lifecycle
+restoration hooks.
 
 ## Repository layout
 

@@ -86,8 +86,9 @@ def require_link(left: Node, left_pin: str, right: Node, right_pin: str, message
 
 
 def assert_capture(nodes: dict[str, Node]) -> None:
-    require(len(nodes) == 24, f"CaptureCurrentWaypoint expected 24 nodes; found {len(nodes)}")
-    entry = one(nodes, 'FunctionReference=(MemberName="CaptureCurrentWaypoint")')
+    require(len(nodes) in {24, 25}, f"CaptureCurrentWaypoint expected 24 or 25 nodes; found {len(nodes)}")
+    entries = [node for node in nodes.values() if 'FunctionReference=(MemberName="CaptureCurrentWaypoint")' in node.text]
+    require(len(entries) <= 1, "Capture may contain at most one function entry")
     branch = one(nodes, "/Script/BlueprintGraph.K2Node_IfThenElse")
     camera = one(nodes, 'VariableReference=(MemberName="DroneCameraRef"')
     valid = one(nodes, 'MemberName="IsValid"')
@@ -98,6 +99,15 @@ def assert_capture(nodes: dict[str, Node]) -> None:
     require(len(next_nodes) == 2, "NextWaypointId must have exactly one getter and one setter")
     next_get = one({n.name: n for n in next_nodes}, "K2Node_VariableGet")
     next_set = one({n.name: n for n in next_nodes}, "K2Node_VariableSet")
+    selected_set = one(
+        nodes,
+        'K2Node_VariableSet Name="K2Node_VariableSet_0"',
+    )
+    require(
+        'MemberName="SelectedWaypointIndex",MemberGuid=23B9561944904F583A9AAE8770F8810B'
+        in selected_set.text,
+        "Capture must commit the newly appended index to SelectedWaypointIndex",
+    )
     print_node = one(nodes, 'MemberName="PrintString"')
     require('DefaultValue="[EDD] Waypoint captured"' in print_node.text, "Capture diagnostic text changed")
 
@@ -106,11 +116,18 @@ def assert_capture(nodes: dict[str, Node]) -> None:
         key=lambda node: int(node.name.rsplit("_", 1)[1]),
     )
     require(len(array_adds) == 6, f"Capture must append six lockstep channels; found {len(array_adds)}")
-    require_link(entry, "then", branch, "execute", "Function entry must reach the validity branch")
+    if entries:
+        require_link(entries[0], "then", branch, "execute", "Function entry must reach the validity branch")
+    else:
+        require(
+            ("K2Node_FunctionEntry_0", "279859644842DE772AC782B3D54B3ACB")
+            in pin(branch, "execute").links,
+            "Paste graph must retain the exact live CaptureCurrentWaypoint entry link",
+        )
     require_link(camera, "DroneCameraRef", valid, "Object", "DroneCameraRef must drive IsValid")
     require_link(valid, "ReturnValue", branch, "Condition", "IsValid must guard every append")
 
-    exec_chain = [branch, *array_adds, next_set, print_node]
+    exec_chain = [branch, *array_adds, selected_set, next_set, print_node]
     for left, right in zip(exec_chain, exec_chain[1:]):
         left_pin = "then"
         right_pin = "execute"
@@ -154,38 +171,82 @@ def assert_capture(nodes: dict[str, Node]) -> None:
         require_link(camera, "DroneCameraRef", source, "self", f"{value_pin} must come from DroneCameraRef")
     require_link(next_get, "NextWaypointId", increment, "A", "Waypoint ID must feed increment input A")
     require('DefaultValue="1"' in pin(increment, "B").body, "Waypoint ID increment must be exactly one")
+    require_link(
+        array_adds[0],
+        "ReturnValue",
+        selected_set,
+        "SelectedWaypointIndex",
+        "Capture must select the exact index returned by the ID append",
+    )
     require_link(increment, "ReturnValue", next_set, "NextWaypointId", "Incremented ID must be committed after all appends")
 
 
 def assert_dispatch(nodes: dict[str, Node]) -> None:
-    require(len(nodes) == 37, f"Client EventGraph expected 37 total nodes; found {len(nodes)}")
+    require(len(nodes) in {37, 43}, f"Client EventGraph expected 37 or 43 total nodes; found {len(nodes)}")
     roll = one(nodes, 'MemberName="ApplyRollAndHorizonInput"')
     capture = one(nodes, 'MemberName="CaptureCurrentWaypoint"')
-    key_nodes = [
-        node for node in nodes.values()
-        if 'MemberName="WasInputKeyJustPressed"' in node.text
-        and 'PinName="Key"' in node.text
-        and 'DefaultValue="K"' in node.text
-    ]
-    require(len(key_nodes) == 1, f"Expected one K edge poll; found {len(key_nodes)}")
-    key = key_nodes[0]
-    branches = [
-        node for node in nodes.values()
-        if node.node_class.endswith("K2Node_IfThenElse") and linked(key, "ReturnValue", node, "Condition")
-    ]
-    require(len(branches) == 1, "K edge result must drive exactly one branch")
-    branch = branches[0]
+
+    def key_poll(default_value: str) -> Node:
+        matches = [
+            node
+            for node in nodes.values()
+            if 'MemberName="WasInputKeyJustPressed"' in node.text
+            and 'PinName="Key"' in node.text
+            and f'DefaultValue="{default_value}"' in node.text
+        ]
+        require(len(matches) == 1, f"Expected one {default_value} edge poll; found {len(matches)}")
+        return matches[0]
+
+    def driven_branch(key: Node, label: str) -> Node:
+        matches = [
+            node
+            for node in nodes.values()
+            if node.node_class.endswith("K2Node_IfThenElse")
+            and linked(key, "ReturnValue", node, "Condition")
+        ]
+        require(len(matches) == 1, f"{label} edge result must drive exactly one branch")
+        return matches[0]
+
+    key_k = key_poll("K")
+    branch_k = driven_branch(key_k, "K")
     controllers = [
         node for node in nodes.values()
-        if 'MemberName="GetPlayerController"' in node.text and linked(node, "ReturnValue", key, "self")
+        if 'MemberName="GetPlayerController"' in node.text
+        and linked(node, "ReturnValue", key_k, "self")
     ]
     require(len(controllers) == 1, "Waypoint polling must use local Player Controller 0")
     require('DefaultValue="0"' in pin(controllers[0], "PlayerIndex").body, "Waypoint poll controller index must remain zero")
-    require_link(roll, "then", branch, "execute", "Capture polling must run after roll/horizon processing")
-    require_link(key, "ReturnValue", branch, "Condition", "K must use edge-triggered branch gating")
-    require_link(branch, "then", capture, "execute", "Only the true K edge may capture a waypoint")
-    require(not pin(branch, "else").links, "A tick without K must terminate without mutation")
+    require_link(roll, "then", branch_k, "execute", "Capture polling must run after roll/horizon processing")
+    require_link(key_k, "ReturnValue", branch_k, "Condition", "K must use edge-triggered branch gating")
+    require_link(branch_k, "then", capture, "execute", "Only the true K edge may capture a waypoint")
     require(not pin(capture, "then").links, "Waypoint capture must terminate the active-input tick")
+
+    replace_nodes = [node for node in nodes.values() if 'MemberName="ReplaceSelectedWaypoint"' in node.text]
+    delete_nodes = [node for node in nodes.values() if 'MemberName="DeleteSelectedWaypoint"' in node.text]
+    if len(nodes) == 37:
+        require(not replace_nodes and not delete_nodes, "The 37-node capture slice must not contain a partial edit dispatch")
+        require(not pin(branch_k, "else").links, "A tick without K must terminate without mutation")
+        require('ErrorType=' not in "".join(node.text for node in nodes.values()), "EventGraph retains compiler error metadata")
+        return
+
+    require(len(replace_nodes) == 1 and len(delete_nodes) == 1, "The 43-node edit slice needs one replace and one delete call")
+    replace = replace_nodes[0]
+    delete = delete_nodes[0]
+    key_r = key_poll("R")
+    key_delete = key_poll("Delete")
+    branch_r = driven_branch(key_r, "R")
+    branch_delete = driven_branch(key_delete, "Delete")
+    require_link(controllers[0], "ReturnValue", key_r, "self", "R polling must share local Player Controller 0")
+    require_link(controllers[0], "ReturnValue", key_delete, "self", "Delete polling must share local Player Controller 0")
+    require_link(branch_k, "else", branch_r, "execute", "A tick without K must continue to replace polling")
+    require_link(key_r, "ReturnValue", branch_r, "Condition", "R must use edge-triggered branch gating")
+    require_link(branch_r, "then", replace, "execute", "Only the true R edge may replace the selection")
+    require_link(branch_r, "else", branch_delete, "execute", "A tick without R must continue to delete polling")
+    require_link(key_delete, "ReturnValue", branch_delete, "Condition", "Delete must use edge-triggered branch gating")
+    require_link(branch_delete, "then", delete, "execute", "Only the true Delete edge may remove the selection")
+    require(not pin(branch_delete, "else").links, "A tick without an authoring key must terminate without mutation")
+    require(not pin(replace, "then").links, "Waypoint replacement must terminate the active-input tick")
+    require(not pin(delete, "then").links, "Waypoint deletion must terminate the active-input tick")
     require('ErrorType=' not in "".join(node.text for node in nodes.values()), "EventGraph retains compiler error metadata")
 
 
@@ -196,7 +257,7 @@ def main() -> None:
     args = parser.parse_args()
     assert_capture(parse_graph(args.capture))
     assert_dispatch(parse_graph(args.event))
-    print("Waypoint capture contracts valid: atomic six-channel snapshot and guarded K-edge dispatch")
+    print("Waypoint authoring contracts valid: atomic capture and guarded available shortcut dispatch")
 
 
 if __name__ == "__main__":

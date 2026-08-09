@@ -107,6 +107,15 @@ Ctrl targets 0.25x cruise speed, Shift targets 3x, and precision wins if both ar
 held. `FInterpTo` with a default response of 6 interpolates current toward target
 before translation, keeping trim, precision, and boost changes continuous.
 
+Free-flight roll and leveling remain a separate orientation layer. Z/C select a
+signed manual-roll target, `CurrentRollSpeed` eases toward that target, and its
+delta-time-scaled value is applied locally. H toggles `HorizonLockEnabled`.
+When enabled and no raw roll command is present, only world roll interpolates
+toward zero; current pitch and yaw are preserved. Manual input temporarily wins,
+and disabling the lock preserves bank. This actor-level free-flight behavior is
+later superseded by the separate airframe/gimbal evaluator during Flypath
+playback.
+
 ### 3.5 `BP_EDD_PathPreview`
 
 Local non-replicated visualization actor. It renders waypoint markers, segment

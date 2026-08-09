@@ -252,6 +252,12 @@ pitch, optional roll, and mouse-wheel speed trim. Precision modifiers are:
 - Optional local-space or world-space translation
 - Optional horizon lock
 
+Free-flight roll uses Z/C by default and eases toward a configurable angular
+rate instead of snapping. H toggles horizon lock. While roll input is held the
+operator has direct bank control; after release, enabled horizon lock smoothly
+returns world roll to level. With horizon lock disabled, authored roll persists.
+These bindings are provisional and become remappable with the input-settings UI.
+
 Mouse-wheel trim changes cruise speed in proportional 1.25x steps rather than
 fixed world-unit increments, so it remains useful at both room scale and long
 travel distances. Cruise speed is clamped to 30-6000 units/second. Trim,

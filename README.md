@@ -108,7 +108,21 @@ approximately 1800 boost and 150 precision targets, normal/boost/precision
 movement-distance ordering, local client isolation, and exact F9 restoration.
 Synthetic wheel events did not reach Conan's mouse-input channel, so physical
 wheel feel remains a manual check while its complete pin topology is enforced
-offline. The next technical milestone is horizon behavior, followed by the
+offline. `ApplyRollAndHorizonInput` now adds smooth manual bank after mouse
+rotation on the same guarded active tick. C-minus-Z selects a signed target of
+up to 90 degrees/second, `CurrentRollSpeed` eases with response 8, and the
+post-write speed is integrated with world delta time into one roll-only local
+rotation. In the deterministic two-player PIE fixture, C moved host roll from
+0 to +71.77 degrees and released at 9.30 degrees/second before decaying to
+0.00018; Z then drove the opposite direction at -10.30 degrees/second and
+returned the bank near level. Client 1 independently reached +71.27 degrees
+while the host remained exactly at 1.195 degrees, and both F9 exits restored
+their exact original pawn and view target. The C/Z fixture triggers known
+`FunCombat_PlayerController` null-character errors because the deliberately
+minimal `DefaultPawn` has no Conan character; neither EDD Blueprint emitted a
+runtime error. Horizon-lock variables and design contracts exist, but automatic
+recentering is not yet implemented or claimed. The next technical milestone is
+horizon behavior, followed by the
 remaining death, teleport,
 disconnect, UI-close, and component-end-play restoration hooks.
 

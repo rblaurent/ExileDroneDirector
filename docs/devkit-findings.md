@@ -642,6 +642,48 @@ look testing. Wheel behavior is therefore structurally validated—including the
 clamp link and multiplicative inverse topology—but physical wheel feel remains a
 hands-on acceptance item.
 
+## Smooth manual-roll slice
+
+`BP_EDD_DroneCamera.ApplyRollAndHorizonInput` currently implements the manual
+bank half of its intended contract:
+
+1. Sample analog-compatible C and Z values from local Player Controller 0.
+2. Form the signed axis as `C - Z` and multiply by `ManualRollSpeed` (default
+   90 degrees/second).
+3. Ease persisted `CurrentRollSpeed` toward that target with `FInterpTo`, world
+   delta seconds, and `RollInputResponse` (default 8).
+4. Multiply the post-write speed by the same world delta seconds and apply one
+   roll-only actor-local rotation with sweep and teleport false.
+
+The first live paste compiled but a round-trip inspection found that the
+existing function entry had no reciprocal execution link into the pasted body.
+After connecting entry to the `CurrentRollSpeed` setter, the complete graph
+compiled and saved again. Its accepted export contains 15 nodes and 52 pins;
+offline contracts now require both sides of that entry link as well as every
+input, interpolation, integration, and local-rotation edge.
+
+The corrected deterministic two-player PIE run proved:
+
+- host baseline roll and current speed were exactly `0/0`;
+- 800 ms of C produced roll `+71.774486` and release speed `+9.297104`, then
+  decayed to `0.000179` while the bank remained at `+72.808385`;
+- 800 ms of Z produced the opposite speed `-10.302718` and returned roll to
+  `+2.337553`, then decayed to `-0.000198` at roll `+1.195201`;
+- Client 1 independently reached roll `+71.267128` and speed `+13.433919`
+  while the host drone remained exactly at roll `+1.195201` and speed `0`;
+- host and client F9 each restored `DefaultPawn_0` as both controlled pawn and
+  exact view target.
+
+Pressing C/Z also exercises Conan's base `FunCombat_PlayerController`, which
+reports `Accessed None` when the test controller possesses a minimal
+`DefaultPawn` with no Conan character. The logged source is the base controller,
+not `BP_EDD_DroneCamera` or `BPC_EDD_ClientDirector`; this is known synthetic
+fixture contamination. A concrete created-character pass remains required.
+
+`HorizonLockEnabled` and `HorizonLockResponse` now exist with defaults `true`
+and `4`, but the current 15-node graph does not read them. Automatic world-roll
+recentering and the H toggle are therefore not implemented or claimed yet.
+
 ## Blueprint graph automation boundary
 
 The editor Python API can locate the component Event Graph, but the graph object
@@ -657,8 +699,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 ## Pending local reconnaissance
 
 - Concrete Conan-character view restoration in a gameplay-map PIE run
-- Hands-on remote-client pitch/yaw and physical-wheel feel; horizon-lock
-  movement layer
+- Hands-on remote-client pitch/yaw and physical-wheel feel; automatic
+  horizon-lock recentering and H toggle
 - Remaining death, teleport, disconnect, UI-close, and component-end-play hooks
 - Emergency camera restoration and the view lifecycle in cooked runtime
 - PIE and cook commands/output locations

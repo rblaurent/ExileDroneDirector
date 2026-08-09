@@ -4,7 +4,7 @@
   "target": "Conan Exiles Enhanced",
   "engine": "Unreal Engine 5.6.1",
   "implementation": "Blueprint-only",
-  "version": "0.8.0-smooth-speed-controls",
+  "version": "0.9.0-smooth-manual-roll",
   "mvpAssets": [
     "Local/BP_EDD_ModController.uasset",
     "Local/Core/Client/BPC_EDD_ClientDirector.uasset",

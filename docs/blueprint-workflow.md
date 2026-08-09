@@ -63,6 +63,10 @@ Blueprint automation will report that valid mod assets cannot be loaded.
 - Never hand-edit `NodeGuid`, `PinId`, or `LinkedTo` relationships casually.
 - Do not paste a snippet twice unless it is explicitly designed to be repeated.
 - Compile after every paste; do not accumulate multiple unverified graph batches.
+- If a paste intentionally excludes an existing function-entry node, reconnect
+  that entry in the live graph and export the complete graph again. A one-sided
+  serialized external link can compile green while leaving the function body
+  unreachable; the checked-in contract must require both reciprocal exec links.
 - Runtime state machines live in named Blueprint functions or components, not a
   monolithic Event Graph.
 - PIE evidence is recorded in `docs/devkit-findings.md` before a diagnostic node
@@ -126,6 +130,14 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
     exactly unchanged. Mouse-wheel topology and proportional inverse math are
     structurally checked; synthetic Windows wheel messages do not enter Conan's
     mouse-input channel, so physical-wheel feel remains a manual gate.**
+11. Smooth manual roll. **Proven in the deterministic two-player fixture: C
+    banked the host from 0 to +71.77 degrees, release speed decayed from 9.30 to
+    approximately zero, and Z produced the opposite signed speed and returned
+    bank near level. The remote client then banked independently to +71.27
+    degrees while the host remained exactly unchanged. Both F9 exits restored
+    the original pawn/view target. The 15-node/52-pin function and 33-node
+    client Event Graph are exported with reciprocal-link contracts. Automatic
+    horizon recentering remains the next slice.**
 
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.

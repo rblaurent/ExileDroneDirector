@@ -196,11 +196,16 @@ for variable_name, type_name in (
     ("MaxMoveSpeed", "real"),
     ("SpeedResponse", "real"),
     ("LookSensitivity", "real"),
+    ("ManualRollSpeed", "real"),
+    ("CurrentRollSpeed", "real"),
+    ("RollInputResponse", "real"),
+    ("HorizonLockResponse", "real"),
     ("FocalLength", "real"),
     ("Aperture", "real"),
     ("ManualFocusDistance", "real"),
 ):
     add_variable(drone_camera, variable_name, type_name)
+add_variable(drone_camera, "HorizonLockEnabled", "bool")
 
 add_variable(path_preview, "PreviewEnabled", "bool")
 add_component(drone_camera, unreal.CineCameraComponent, "DroneCamera")

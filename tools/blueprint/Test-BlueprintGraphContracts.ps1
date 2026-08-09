@@ -38,6 +38,7 @@ $emergencyPath = Join-Path $snippetRoot 'emergency-exit-drone-mode.eddgraph'
 $eventGraphPath = Join-Path $snippetRoot 'client-director-event-graph.eddgraph'
 $movementPath = Join-Path $snippetRoot 'apply-translation-input.eddgraph'
 $rotationPath = Join-Path $snippetRoot 'apply-rotation-input.eddgraph'
+$rollPath = Join-Path $snippetRoot 'apply-roll-and-horizon-input.eddgraph'
 $speedPath = Join-Path $snippetRoot 'update-speed-controls.eddgraph'
 $droneEventPath = Join-Path $snippetRoot 'drone-camera-event-graph.eddgraph'
 $cachePawnPath = Join-Path $snippetRoot 'cache-original-pawn.eddgraph'
@@ -57,6 +58,7 @@ $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.
     $eventGraphPath,
     $movementPath,
     $rotationPath,
+    $rollPath,
     $speedPath,
     $droneEventPath,
     $cachePawnPath,
@@ -531,6 +533,80 @@ Assert-GraphMatch $rotationApply 'MemberName="K2_AddActorLocalRotation"' 'Mouse 
 Assert-GraphMatch $rotationApply 'PinName="bSweep"[^\r\n]*DefaultValue="false"' 'Freecam rotation must not sweep.'
 Assert-GraphMatch $rotationApply 'PinName="bTeleport"[^\r\n]*DefaultValue="false"' 'Freecam rotation must use ordinary local rotation.'
 
+$roll = [IO.File]::ReadAllText($rollPath)
+$rollNodes = [regex]::Matches($roll, '(?m)^Begin Object Class=').Count
+if ($rollNodes -ne 15) {
+    throw "Apply-roll-and-horizon-input contract expected 15 nodes; found $rollNodes."
+}
+$rollEntry = Get-NodeBlock $roll 'K2Node_FunctionEntry_0'
+$rollSet = Get-NodeBlock $roll 'K2Node_VariableSet_0'
+$rollController = Get-NodeBlock $roll 'K2Node_CallFunction_0'
+$rollC = Get-NodeBlock $roll 'K2Node_CallFunction_1'
+$rollZ = Get-NodeBlock $roll 'K2Node_CallFunction_2'
+$rollSubtract = Get-NodeBlock $roll 'K2Node_PromotableOperator_0'
+$rollManualSpeed = Get-NodeBlock $roll 'K2Node_VariableGet_0'
+$rollTarget = Get-NodeBlock $roll 'K2Node_PromotableOperator_1'
+$rollCurrentSpeed = Get-NodeBlock $roll 'K2Node_VariableGet_1'
+$rollDeltaSeconds = Get-NodeBlock $roll 'K2Node_CallFunction_3'
+$rollResponse = Get-NodeBlock $roll 'K2Node_VariableGet_2'
+$rollInterp = Get-NodeBlock $roll 'K2Node_CallFunction_4'
+$rollDelta = Get-NodeBlock $roll 'K2Node_PromotableOperator_2'
+$rollMake = Get-NodeBlock $roll 'K2Node_CallFunction_5'
+$rollApply = Get-NodeBlock $roll 'K2Node_CallFunction_6'
+
+Assert-GraphMatch $rollEntry 'FunctionReference=\(MemberName="ApplyRollAndHorizonInput"\)' 'Roll must implement the named ApplyRollAndHorizonInput contract.'
+Assert-GraphMatch $rollEntry 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_VariableSet_0 ' 'Roll function entry must execute the CurrentRollSpeed write.'
+Assert-GraphMatch $rollSet 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_FunctionEntry_0 ' 'The roll speed setter must retain the reciprocal entry link.'
+Assert-GraphMatch $rollSet 'VariableReference=\(MemberName="CurrentRollSpeed"' 'Roll must persist its smoothed angular speed.'
+Assert-GraphMatch $rollSet 'PinName="CurrentRollSpeed"[^\r\n]*LinkedTo=\(K2Node_CallFunction_4 ' 'CurrentRollSpeed must receive the interpolated value.'
+Assert-GraphMatch $rollSet 'PinName="Output_Get"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_2 ' 'Per-frame roll must use the post-write speed value.'
+Assert-GraphMatch $rollSet 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_6 ' 'The roll speed write must precede exactly one actor-local rotation.'
+Assert-GraphMatch $rollController 'MemberName="GetPlayerController"' 'Roll input must resolve the local player controller.'
+Assert-GraphMatch $rollController 'PinName="PlayerIndex"[^\r\n]*DefaultValue="0"' 'Roll input must sample Player Controller 0.'
+Assert-GraphMatch $rollController 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_1 [^,]+,K2Node_CallFunction_2 ' 'The same local controller must feed both roll keys.'
+Assert-GraphMatch $rollC 'MemberName="GetInputAnalogKeyState"' 'C roll must use analog-compatible key sampling.'
+Assert-GraphMatch $rollC 'PinName="Key"[^\r\n]*DefaultValue="C"' 'Positive manual roll must use C.'
+Assert-GraphMatch $rollC 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_0 ' 'C must feed the positive side of the signed roll axis.'
+Assert-GraphMatch $rollZ 'MemberName="GetInputAnalogKeyState"' 'Z roll must use analog-compatible key sampling.'
+Assert-GraphMatch $rollZ 'PinName="Key"[^\r\n]*DefaultValue="Z"' 'Negative manual roll must use Z.'
+Assert-GraphMatch $rollZ 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_0 ' 'Z must feed the negative side of the signed roll axis.'
+Assert-GraphMatch $rollSubtract 'OperationName="Subtract"' 'Manual roll must form the signed C-minus-Z input axis.'
+Assert-GraphMatch $rollSubtract 'PinName="A"[^\r\n]*LinkedTo=\(K2Node_CallFunction_1 ' 'C must be the positive roll operand.'
+Assert-GraphMatch $rollSubtract 'PinName="B"[^\r\n]*LinkedTo=\(K2Node_CallFunction_2 ' 'Z must be the negative roll operand.'
+Assert-GraphMatch $rollSubtract 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_1 ' 'The signed input axis must feed target angular speed.'
+Assert-GraphMatch $rollManualSpeed 'VariableReference=\(MemberName="ManualRollSpeed"' 'Target angular speed must use the configurable ManualRollSpeed.'
+Assert-GraphMatch $rollManualSpeed 'PinName="ManualRollSpeed"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_1 ' 'ManualRollSpeed must scale the signed input axis.'
+Assert-GraphMatch $rollTarget 'OperationName="Multiply"' 'Target roll speed must be axis times ManualRollSpeed.'
+Assert-GraphMatch $rollTarget 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_4 ' 'Target roll speed must feed FInterpTo.'
+Assert-GraphMatch $rollCurrentSpeed 'VariableReference=\(MemberName="CurrentRollSpeed"' 'Roll easing must start from persisted CurrentRollSpeed.'
+Assert-GraphMatch $rollCurrentSpeed 'PinName="CurrentRollSpeed"[^\r\n]*LinkedTo=\(K2Node_CallFunction_4 ' 'Persisted CurrentRollSpeed must feed FInterpTo Current.'
+Assert-GraphMatch $rollDeltaSeconds 'MemberName="GetWorldDeltaSeconds"' 'Roll easing and integration must share world delta seconds.'
+Assert-GraphMatch $rollDeltaSeconds 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_4 [^,]+,K2Node_PromotableOperator_2 ' 'World delta seconds must feed both FInterpTo and angular integration.'
+Assert-GraphMatch $rollResponse 'VariableReference=\(MemberName="RollInputResponse"' 'Roll easing must use the configurable RollInputResponse.'
+Assert-GraphMatch $rollResponse 'PinName="RollInputResponse"[^\r\n]*LinkedTo=\(K2Node_CallFunction_4 ' 'RollInputResponse must feed FInterpTo InterpSpeed.'
+Assert-GraphMatch $rollInterp 'MemberName="FInterpTo"' 'CurrentRollSpeed must ease toward the signed target.'
+Assert-GraphMatch $rollInterp 'PinName="Current"[^\r\n]*LinkedTo=\(K2Node_VariableGet_1 ' 'FInterpTo Current must consume CurrentRollSpeed.'
+Assert-GraphMatch $rollInterp 'PinName="Target"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_1 ' 'FInterpTo Target must consume the signed target angular speed.'
+Assert-GraphMatch $rollInterp 'PinName="DeltaTime"[^\r\n]*LinkedTo=\(K2Node_CallFunction_3 ' 'FInterpTo must use world delta seconds.'
+Assert-GraphMatch $rollInterp 'PinName="InterpSpeed"[^\r\n]*LinkedTo=\(K2Node_VariableGet_2 ' 'FInterpTo must use RollInputResponse.'
+Assert-GraphMatch $rollInterp 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_VariableSet_0 ' 'FInterpTo must persist the new CurrentRollSpeed.'
+Assert-GraphMatch $rollDelta 'OperationName="Multiply"' 'Roll integration must multiply speed by delta seconds.'
+Assert-GraphMatch $rollDelta 'PinName="A"[^\r\n]*LinkedTo=\(K2Node_VariableSet_0 ' 'Roll integration must consume the post-write speed.'
+Assert-GraphMatch $rollDelta 'PinName="B"[^\r\n]*LinkedTo=\(K2Node_CallFunction_3 ' 'Roll integration must consume world delta seconds.'
+Assert-GraphMatch $rollDelta 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_5 ' 'The integrated angle must feed MakeRotator Roll.'
+Assert-GraphMatch $rollMake 'MemberName="MakeRotator"' 'Roll input must construct one explicit delta rotator.'
+Assert-GraphMatch $rollMake 'PinName="Roll"[^\r\n]*LinkedTo=\(K2Node_PromotableOperator_2 ' 'MakeRotator Roll must consume integrated angular speed.'
+Assert-GraphMatch $rollMake 'PinName="Pitch"[^\r\n]*DefaultValue="0\.0"' 'Manual bank must not introduce pitch.'
+Assert-GraphMatch $rollMake 'PinName="Yaw"[^\r\n]*DefaultValue="0\.0"' 'Manual bank must not introduce yaw.'
+Assert-GraphMatch $rollMake 'PinName="ReturnValue"[^\r\n]*LinkedTo=\(K2Node_CallFunction_6 ' 'The roll-only delta rotator must feed AddActorLocalRotation.'
+Assert-GraphMatch $rollApply 'MemberName="K2_AddActorLocalRotation"' 'Manual bank must use actor-local rotation.'
+Assert-GraphMatch $rollApply 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_VariableSet_0 ' 'The actor-local rotation must retain the reciprocal execution link.'
+Assert-GraphMatch $rollApply 'PinName="bSweep"[^\r\n]*DefaultValue="false"' 'Manual bank must not sweep.'
+Assert-GraphMatch $rollApply 'PinName="bTeleport"[^\r\n]*DefaultValue="false"' 'Manual bank must use ordinary local rotation.'
+if ($roll -match '(?m)^\s*Error(Type|Msg)=') {
+    throw 'Apply-roll-and-horizon-input source must not retain stale compiler error metadata.'
+}
+
 $droneEvent = [IO.File]::ReadAllText($droneEventPath)
 $droneEventNodes = [regex]::Matches($droneEvent, '(?m)^Begin Object Class=').Count
 if ($droneEventNodes -ne 3) {
@@ -571,8 +647,8 @@ Assert-GraphMatch $emergencyPrint 'PinName="bPrintToLog"[^\r\n]*DefaultValue="tr
 
 $eventGraph = [IO.File]::ReadAllText($eventGraphPath)
 $eventGraphNodes = [regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/BlueprintGraph\.').Count
-if ($eventGraphNodes -ne 31) {
-    throw "Client-director EventGraph contract expected 31 executable nodes; found $eventGraphNodes."
+if ($eventGraphNodes -ne 32) {
+    throw "Client-director EventGraph contract expected 32 executable nodes; found $eventGraphNodes."
 }
 if ([regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/UnrealEd\.EdGraphNode_Comment').Count -ne 1) {
     throw 'Client-director EventGraph must retain exactly one design comment node.'
@@ -598,6 +674,7 @@ $cameraValid = Get-NodeBlock $eventGraph 'K2Node_CallFunction_10'
 $invalidEmergency = Get-NodeBlock $eventGraph 'K2Node_CallFunction_11'
 $translationInput = Get-NodeBlock $eventGraph 'K2Node_CallFunction_12'
 $rotationInput = Get-NodeBlock $eventGraph 'K2Node_CallFunction_13'
+$rollInput = Get-NodeBlock $eventGraph 'K2Node_CallFunction_39'
 $speedInput = Get-NodeBlock $eventGraph 'K2Node_CallFunction_17'
 $ownerGet = Get-NodeBlock $eventGraph 'K2Node_CallFunction_14'
 $localControllerGet = Get-NodeBlock $eventGraph 'K2Node_CallFunction_15'
@@ -645,6 +722,10 @@ Assert-GraphMatch $translationInput 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_Cal
 Assert-GraphMatch $rotationInput 'FunctionReference=.*MemberName="ApplyRotationInput"' 'Active-mode look must delegate to BP_EDD_DroneCamera.ApplyRotationInput.'
 Assert-GraphMatch $rotationInput 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_CallFunction_12 ' 'Rotation input must execute after translation on the same active tick.'
 Assert-GraphMatch $rotationInput 'PinName="self"[^\r\n]*LinkedTo=\(K2Node_VariableGet_2 ' 'Rotation input must target the validated DroneCameraRef.'
+Assert-GraphMatch $rotationInput 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_39 ' 'Rotation input must complete before manual roll executes.'
+Assert-GraphMatch $rollInput 'FunctionReference=.*MemberName="ApplyRollAndHorizonInput"' 'Active-mode bank must delegate to BP_EDD_DroneCamera.ApplyRollAndHorizonInput.'
+Assert-GraphMatch $rollInput 'PinName="execute"[^\r\n]*LinkedTo=\(K2Node_CallFunction_13 ' 'Roll input must execute after mouse rotation on the same active tick.'
+Assert-GraphMatch $rollInput 'PinName="self"[^\r\n]*LinkedTo=\(K2Node_VariableGet_2 ' 'Roll input must target the validated DroneCameraRef.'
 
 $inactivePath = [regex]::Match($activeBranch, '(?m)^\s*CustomProperties Pin \([^\r\n]*PinName="else"[^\r\n]*$')
 if (-not $inactivePath.Success -or $inactivePath.Value -match 'LinkedTo=') {
@@ -656,10 +737,10 @@ foreach ($emergencyGraph in @($emergency, $eventGraph)) {
     }
 }
 
-foreach ($viewGraph in @($place, $activate, $switch, $exit, $movement, $rotation, $speed, $droneEvent)) {
+foreach ($viewGraph in @($place, $activate, $switch, $exit, $movement, $rotation, $roll, $speed, $droneEvent)) {
     if ($viewGraph -match '(?m)^\s*Error(Type|Msg)=') {
         throw 'View-lifecycle graph source must not retain stale compiler error metadata.'
     }
 }
 
-Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, client-director-event-graph, apply-translation-input, apply-rotation-input, update-speed-controls, drone-camera-event-graph (legacy possession helpers also remain structurally validated)'
+Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, client-director-event-graph, apply-translation-input, apply-rotation-input, apply-roll-and-horizon-input, update-speed-controls, drone-camera-event-graph (legacy possession helpers also remain structurally validated)'

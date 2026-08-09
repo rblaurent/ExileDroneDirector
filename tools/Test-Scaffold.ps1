@@ -32,6 +32,8 @@ $requiredFiles = @(
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Test-BlueprintGraphSnippet.ps1',
     'tools\blueprint\Test-BlueprintGraphContracts.ps1',
+    'tools\blueprint\Build-RollInputGraph.py',
+    'tools\blueprint\Build-ClientRollDispatch.py',
     'tools\blueprint\snippets\toggle-input.eddgraph',
     'tools\blueprint\snippets\toggle-state.eddgraph',
     'tools\blueprint\snippets\enter-drone-mode.eddgraph',
@@ -43,6 +45,7 @@ $requiredFiles = @(
     'tools\blueprint\snippets\client-director-event-graph.eddgraph',
     'tools\blueprint\snippets\apply-translation-input.eddgraph',
     'tools\blueprint\snippets\apply-rotation-input.eddgraph',
+    'tools\blueprint\snippets\apply-roll-and-horizon-input.eddgraph',
     'tools\blueprint\snippets\update-speed-controls.eddgraph',
     'tools\blueprint\snippets\drone-camera-event-graph.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
@@ -79,6 +82,10 @@ $expectedMovementDefaults = [ordered]@{
     MaxMoveSpeed = '6000.0'
     SpeedResponse = '6.0'
     LookSensitivity = '0.12'
+    ManualRollSpeed = '90.0'
+    CurrentRollSpeed = '0.0'
+    RollInputResponse = '8.0'
+    HorizonLockResponse = '4.0'
 }
 foreach ($entry in $expectedMovementDefaults.GetEnumerator()) {
     $pattern = '"{0}"\s*:\s*{1}' -f [regex]::Escape($entry.Key), [regex]::Escape($entry.Value)
@@ -86,10 +93,13 @@ foreach ($entry in $expectedMovementDefaults.GetEnumerator()) {
         throw "Missing movement default contract: $($entry.Key)=$($entry.Value)"
     }
 }
-foreach ($functionName in @('ApplyTranslationInput', 'ApplyRotationInput', 'UpdateSpeedControls')) {
+foreach ($functionName in @('ApplyTranslationInput', 'ApplyRotationInput', 'UpdateSpeedControls', 'ApplyRollAndHorizonInput')) {
     if ($movementConfig -notmatch ('"{0}"' -f [regex]::Escape($functionName))) {
         throw "Missing movement function contract: $functionName"
     }
+}
+if ($movementConfig -notmatch '"HorizonLockEnabled"\s*:\s*True') {
+    throw 'Missing movement default contract: HorizonLockEnabled=True'
 }
 $trimRatio = [double]$expectedMovementDefaults.SpeedTrimRatio
 $trimUp = [Math]::Exp([Math]::Log($trimRatio))

@@ -15,6 +15,12 @@ The tools in this directory never launch Unreal:
   every checked-in snippet, including execution order and diagnostic source.
 - `Set-BlueprintGraphClipboard.ps1` resolves explicit `{{TOKEN}}` placeholders
   and places the graph on the Windows clipboard for pasting in Unreal.
+- `Build-RollInputGraph.py` composes the manual-bank function from reviewed
+  mod-owned node forms. Its paste output deliberately leaves the first exec pin
+  unlinked so the existing live function entry must be connected explicitly.
+- `Build-ClientRollDispatch.py` appends the ordered camera call to a pre-roll
+  client graph and is byte-for-byte idempotent once exactly one roll dispatch
+  already exists.
 
 Validated snippets:
 
@@ -48,7 +54,8 @@ Validated snippets:
   entry/exit, F9 manual emergency exit, and automatic restoration when an active
   drone camera becomes invalid. A valid active drone delegates speed evaluation
   to `UpdateSpeedControls`, translation to `ApplyTranslationInput`, then
-  rotation to `ApplyRotationInput` on the same guarded tick.
+  mouse rotation to `ApplyRotationInput`, then manual bank to
+  `ApplyRollAndHorizonInput` on the same guarded tick.
 - `apply-translation-input.eddgraph` samples W/S, D/A, and E/Q, constructs three
   signed local axes, scales one vector by the smoothed `CurrentMoveSpeed` and
   world delta time, and applies one local actor offset.
@@ -56,6 +63,11 @@ Validated snippets:
   scales yaw by `LookSensitivity`, scales pitch by the negated sensitivity,
   preserves zero roll, and applies one local actor rotation without sweep or
   teleport.
+- `apply-roll-and-horizon-input.eddgraph` samples C-minus-Z as a signed bank
+  axis, eases `CurrentRollSpeed` toward `ManualRollSpeed * axis`, integrates the
+  post-write speed over world delta time, and applies one roll-only local actor
+  rotation. The current milestone proves manual bank; horizon recentering is
+  deliberately not claimed by this graph yet.
 - `update-speed-controls.eddgraph` applies proportional mouse-wheel cruise trim,
   clamps it to the configured speed range, gives Ctrl precision precedence over
   Shift boost, and eases `CurrentMoveSpeed` toward the selected target with

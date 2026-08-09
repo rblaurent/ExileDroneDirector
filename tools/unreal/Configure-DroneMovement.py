@@ -11,6 +11,7 @@ REQUIRED_FUNCTIONS = (
     "ApplyTranslationInput",
     "ApplyRotationInput",
     "UpdateSpeedControls",
+    "ApplyRollAndHorizonInput",
 )
 DEFAULTS = {
     "BaseMoveSpeed": 600.0,
@@ -23,6 +24,13 @@ DEFAULTS = {
     "MaxMoveSpeed": 6000.0,
     "SpeedResponse": 6.0,
     "LookSensitivity": 0.12,
+    "ManualRollSpeed": 90.0,
+    "CurrentRollSpeed": 0.0,
+    "RollInputResponse": 8.0,
+    "HorizonLockResponse": 4.0,
+}
+BOOL_DEFAULTS = {
+    "HorizonLockEnabled": True,
 }
 MOVEMENT_COMPONENT_DEFAULTS = {
     "max_speed": DEFAULTS["BaseMoveSpeed"],
@@ -124,16 +132,34 @@ def ensure_real_variable(blueprint, variable_name: str) -> None:
     emit("VARIABLE_CREATED", variable_name)
 
 
+def ensure_bool_variable(blueprint, variable_name: str) -> None:
+    if has_generated_property(variable_name):
+        emit("VARIABLE_ALREADY_PRESENT", variable_name)
+        return
+    pin_type = unreal.BlueprintEditorLibrary.get_basic_type_by_name("bool")
+    if not unreal.BlueprintEditorLibrary.add_member_variable(
+        blueprint,
+        variable_name,
+        pin_type,
+    ):
+        raise RuntimeError(f"Failed to add Blueprint variable: {variable_name}")
+    emit("VARIABLE_CREATED", variable_name)
+
+
 drone_blueprint = require_asset(DRONE_PATH)
 for required_function in REQUIRED_FUNCTIONS:
     ensure_function_graph(drone_blueprint, required_function)
 for required_variable in DEFAULTS:
     ensure_real_variable(drone_blueprint, required_variable)
+for required_variable in BOOL_DEFAULTS:
+    ensure_bool_variable(drone_blueprint, required_variable)
 
 unreal.BlueprintEditorLibrary.compile_blueprint(drone_blueprint)
 drone_class = require_class(DRONE_PATH)
 drone_default = unreal.get_default_object(drone_class)
 for variable_name, value in DEFAULTS.items():
+    set_and_verify_default(drone_default, variable_name, value)
+for variable_name, value in BOOL_DEFAULTS.items():
     set_and_verify_default(drone_default, variable_name, value)
 for property_name, value in MOVEMENT_COMPONENT_DEFAULTS.items():
     set_and_verify_component_default(drone_default, property_name, value)

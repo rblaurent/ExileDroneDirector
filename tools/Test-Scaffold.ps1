@@ -30,6 +30,8 @@ $requiredFiles = @(
     'tools\unreal\Configure-WaypointCapture.py',
     'tools\unreal\Probe-WaypointTypes.py',
     'tools\unreal\Validate-WaypointCapturePIE.py',
+    'tools\playback\linear_reference.py',
+    'tools\playback\test_linear_reference.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -149,3 +151,8 @@ if (-not $RequireMvpAssets) {
 
 & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphContracts.ps1') `
     -ProjectRoot $ProjectRoot
+
+& python (Join-Path $ProjectRoot 'tools\playback\test_linear_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Linear playback reference contracts failed with exit code $LASTEXITCODE."
+}

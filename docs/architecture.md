@@ -71,6 +71,32 @@ One per owning client. Responsibilities:
 - Enforce emergency exit on death, teleport, region transition, disconnect, or
   component end-play
 
+#### Current waypoint-authoring bridge
+
+The `0.12.0-waypoint-edit` implementation deliberately precedes the final
+document structs. `BPC_EDD_ClientDirector` currently owns six client-local,
+transient lockstep arrays:
+
+- stable integer ID;
+- world transform;
+- focal length;
+- aperture;
+- manual focus distance;
+- hold seconds.
+
+`SelectedWaypointIndex` is `-1` when empty. Capture appends all channels,
+selects the index returned by the ID append, then advances the monotonic ID.
+Replace validates camera plus selected ID index and changes only transform and
+lens channels; ID and hold remain stable. Delete removes the same index from all
+six channels and preserves that index when a successor exists or clamps to the
+last survivor/`-1`.
+
+This bridge is not a persistence or networking model. It exists to prove
+atomic edit semantics and camera capture before `ST_EDD_Waypoint`,
+`ST_EDD_FlypathDocument`, undo commands, serialization, and server DTOs are
+authored. No other client may read these arrays, and no UI or playback system
+should bind directly to them once the document model is promoted.
+
 ### 3.3 `BPC_EDD_ServerService`
 
 Server-authoritative request handler attached to a stable server-owned class. It

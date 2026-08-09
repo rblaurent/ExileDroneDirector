@@ -63,6 +63,10 @@ Blueprint automation will report that valid mod assets cannot be loaded.
 - Never hand-edit `NodeGuid`, `PinId`, or `LinkedTo` relationships casually.
 - Do not paste a snippet twice unless it is explicitly designed to be repeated.
 - Compile after every paste; do not accumulate multiple unverified graph batches.
+- Never sync `.uasset` files while Unreal is open. For repository promotion,
+  stop PIE, compile/save, close every DevKit window, wait for
+  `LogExit: Exiting.`, then sync `FromDevKit`. Sync `ToDevKit` only before the
+  next editor launch.
 - If a paste intentionally excludes an existing function-entry node, reconnect
   that entry in the live graph and export the complete graph again. A one-sided
   serialized external link can compile green while leaving the function body

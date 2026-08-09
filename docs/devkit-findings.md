@@ -734,13 +734,16 @@ component-owned lockstep arrays:
 - `DraftWaypointFocusDistances` (`Float[]`, real/double)
 - `DraftWaypointHoldSeconds` (`Float[]`, real/double)
 
-`NextWaypointId` begins at 1. The 24-node/86-pin function validates the typed
-`DroneCameraRef`, appends every channel through one uninterrupted exec chain,
-sets the incremented ID only after all six appends, and then emits
+`NextWaypointId` begins at 1. The initial 24-node/86-pin capture function
+validated the typed `DroneCameraRef`, appended every channel through one
+uninterrupted exec chain, set the incremented ID only after all six appends, and
+then emitted
 `[EDD] Waypoint captured`. Hold time defaults to zero. Focal length, aperture,
 and manual focus distance currently come from authored drone variables whose
 verified class defaults are 35, 2.8, and 1000. The final lens-control slice must
-keep those values synchronized with the CineCamera component.
+keep those values synchronized with the CineCamera component. The subsequent
+selected-waypoint slice added one setter, making the current copied live graph
+25 nodes/91 pins and selecting the exact index returned by the ID append.
 
 The client EventGraph now has 37 total nodes/131 pins. After the existing local
 owner, Drone Mode active, valid camera, speed, translation, mouse rotation, and
@@ -791,6 +794,8 @@ focus distance with `Array_Set` and `bSizeToFit=false`; stable ID and hold are
 unchanged. Deletion removes the selected element from all six arrays in one exec
 chain, then preserves the old index if it still exists or selects
 `Length(IDs)-1`, which naturally becomes `-1` when the draft is empty.
+The copied live graphs are capture 25 nodes/91 pins, replace 21 nodes/76 pins,
+and delete 21 nodes/72 pins.
 
 The first runtime attempt exposed an important clipboard boundary: a pasted
 body can retain a textual link to `K2Node_FunctionEntry_0` while the native
@@ -810,6 +815,50 @@ for R replace and Delete removal is generated and contract-valid offline; live
 paste/compile and physical-input acceptance are intentionally deferred to the
 next DevKit session.
 
+The PIE Python bridge could read the authored lens values but would not write
+those exposed properties reliably on the spawned drone instance. The accepted
+replacement fixture therefore exits Drone Mode, temporarily changes the drone
+Blueprint class defaults, re-enters to spawn a camera with those values, calls
+replace, and restores the original `(35, 2.8, 1000)` defaults in `finally`.
+Runtime tests that touch class defaults must always log the restored values and
+must not leave an editor package dirty with temporary test data.
+
+Operationally, only one DevKit editor instance may own these assets. Never sync
+`.uasset` files into or out of the content tree while Unreal is open. After a
+verified slice: stop PIE, compile/save, close Unreal, wait for
+`LogExit: Exiting.`, then run `Sync-DevKitContent.ps1 -Direction FromDevKit`.
+This ordering is part of the asset-integrity contract, not housekeeping.
+
+## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
+
+The installed `DreamworldMods` plugin declares editor support for cooking,
+packaging, and uploading mods. Its bundled change log also states that a mod's
+Steam Workshop ID is included on the first cook. That proves the supported GUI
+path exists, but it does not yet prove a stable headless commandlet, output
+layout, or unattended authentication flow. Those remain bounded next-session
+reconnaissance items.
+
+Steam's official Workshop integration supports updates with `steamcmd` and a
+VDF containing the application ID, persistent published-file ID, content
+folder, preview, visibility, and change note. Initial creation/legal-agreement
+acceptance and Steam Guard may remain manual. The intended automation is a
+self-hosted Windows GitHub Actions runner that keeps the very large Enhanced
+DevKit installed locally, validates the small Git repository, cooks/packages,
+and updates an existing test Workshop item. Credentials never enter Git.
+
+G-Portal's Enhanced servers install mods from Steam Workshop. GitHub source is
+therefore not directly deployable. The safe first deployment keeps G-Portal
+restart as an explicit human approval: publish the test item, back up the
+server, install the exact Workshop version/load order, then deliberately
+restart. Initial server acceptance covers only local Drone Mode and transient
+authoring; shared/persistent Flypaths require the later server-repository phases.
+
+References:
+
+- <https://partner.steamgames.com/doc/features/workshop/implementation>
+- <https://www.g-portal.com/wiki/en/how-do-i-install-conan-exiles-mods/>
+- <https://www.g-portal.com/en/gameserver/conan-exiles-server-hosting>
+
 ## Blueprint graph automation boundary
 
 The editor Python API can locate the component Event Graph, but the graph object
@@ -828,5 +877,6 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Hands-on remote-client raw-mouse pitch/yaw and physical-wheel feel
 - Remaining death, teleport, disconnect, UI-close, and component-end-play hooks
 - Emergency camera restoration and the view lifecycle in cooked runtime
-- PIE and cook commands/output locations
+- Exact Enhanced cook command/commandlet, output layout, and Workshop metadata
+- First normal-game `.pak` load and controlled Workshop update
 - Authenticated server identity and persistence APIs

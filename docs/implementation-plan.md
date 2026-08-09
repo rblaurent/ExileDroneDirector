@@ -3,6 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
+Current internal build: `0.12.0-waypoint-edit`
 
 ## 1. Delivery strategy
 
@@ -17,6 +18,121 @@ That loop establishes the camera boundary, client/server attachment, durable
 identity, persistence, authorization, network transport, immutable publication,
 local evaluation, and cloning. Subsequent phases improve trajectory quality,
 editor depth, camera visuals, and release hardening without replacing the core.
+
+## 1.1 Current implementation checkpoint
+
+This section is the authoritative handoff. Detailed evidence remains in
+`devkit-findings.md`; exact clipboard procedure remains in
+`blueprint-workflow.md`.
+
+### Live in the Enhanced DevKit
+
+- Project source is `T:\Projects\ExileDroneDirector`; the installed Enhanced
+  DevKit root is `F:\CEUE5Devkit` (Unreal Engine 5.6.1).
+- `BP_EDD_ModController`, `BPC_EDD_ClientDirector`, and
+  `BP_EDD_DroneCamera` provide the current runtime slice.
+- F10 enters/exits local Drone Mode; F9 performs idempotent emergency exit.
+- The camera is a non-replicated local view target. It never possesses or moves
+  the player pawn.
+- W/S, D/A, and E/Q fly; mouse controls pitch/yaw; wheel trims cruise speed;
+  Ctrl is precision; Shift is boost; C/Z bank; H toggles horizon lock.
+- `CaptureCurrentWaypoint`, `ReplaceSelectedWaypoint`, and
+  `DeleteSelectedWaypoint` are compiled live functions with reciprocal native
+  entry links.
+- The live 37-node client EventGraph exposes K capture. Replace and delete are
+  callable and runtime-proven but do not yet have live physical shortcuts.
+
+### Runtime and structural evidence
+
+- Two-player listen-server fixtures prove owning-client isolation, one local
+  drone per client, unchanged controlled pawns, and exact view restoration.
+- The selected-waypoint edit cycle proves two atomic captures, exact transform
+  and lens replacement, survivor and empty deletion behavior, invalid-index
+  no-ops, remote-client isolation, and restored drone class defaults.
+- Reviewed live graph snippets cover capture, replace, and delete. Their tests
+  validate pin types, execution order, stable ID/hold behavior, all six array
+  mutations, selection repair, and exact native function-entry linkage.
+- Repository scaffold, semantic graph contracts, Python syntax, and the 1 GiB
+  repository budget pass. Tracked source is only a few MiB; DevKit and cooked
+  outputs are never committed.
+
+### Prepared but deliberately not live yet
+
+- `Build-ClientWaypointEditDispatch.py` deterministically extends the proven K
+  tail with mutually exclusive R replace and Delete removal polling.
+- The generated extension is 43 nodes/151 pins and passes generic reciprocal-
+  link plus semantic K/R/Delete contracts offline.
+- It was not pasted before the current pause. Documentation must never describe
+  R/Delete as live until a copied post-compile EventGraph passes those same
+  contracts and physical input is accepted in PIE.
+
+### Not implemented yet
+
+- No polished editor UI, visible waypoint/path preview, timeline, trajectory
+  playback, save/load, server repository, sharing, permissions, cloning, or
+  event execution exists yet.
+- Draft waypoint data is client-local and transient. Other server members
+  cannot see or play it.
+- No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
+  directly to G-Portal.
+
+### Exact next DevKit session
+
+1. Confirm the Git working tree is clean and only one DevKit editor instance is
+   running. Sync repository assets `ToDevKit` only while Unreal is closed.
+2. Export the current live client EventGraph, generate the K/R/Delete extension
+   with `Build-ClientWaypointEditDispatch.py`, and run both the generic snippet
+   validator and `Test-WaypointCaptureContracts.py` before paste.
+3. Paste the reviewed 43-node EventGraph, compile, save, copy the live graph
+   back out, and re-run the same contracts against the round-trip. Do not trust
+   compile success alone.
+4. Start two-player PIE and rerun `Validate-WaypointCapturePIE.py` with
+   `EDD_PHASE='edit_cycle'` before testing input.
+5. Complete one disposable character in PIE. The creation widget consumes
+   synthetic key injection; this is a one-time test-state step, not a blocker to
+   direct deterministic fixtures.
+6. Physically accept F10, flight controls, K capture, R replace, Delete removal,
+   and F9 restoration. Add minimal visible/log feedback sufficient to identify
+   selected index and draft count.
+7. Stop PIE, compile/save, close Unreal, wait for `LogExit: Exiting.`, sync
+   `FromDevKit`, run the full repository tests, then commit and push.
+8. Perform the first cook/package reconnaissance immediately afterward. Record
+   the actual output layout and whether Funcom's cook/upload plugin exposes a
+   usable commandlet.
+
+The shortcut-extension preparation sequence, run from the repository root after
+copying the complete live EventGraph, is:
+
+```powershell
+$liveEvent = Join-Path $env:REDLEAF_SCRATCH_DIR 'client-event-live.eddgraph'
+$editEvent = Join-Path $env:REDLEAF_SCRATCH_DIR 'client-event-k-r-delete.eddgraph'
+
+.\tools\blueprint\Export-BlueprintGraphClipboard.ps1 `
+  -DestinationPath $liveEvent
+python .\tools\blueprint\Build-ClientWaypointEditDispatch.py `
+  --input $liveEvent --output $editEvent
+.\tools\blueprint\Test-BlueprintGraphSnippet.ps1 -Path $editEvent
+python .\tools\blueprint\Test-WaypointCaptureContracts.py `
+  --capture .\tools\blueprint\snippets\capture-current-waypoint.eddgraph `
+  --event $editEvent
+.\tools\blueprint\Set-BlueprintGraphClipboard.ps1 -SnippetPath $editEvent
+```
+
+After paste/compile/save, copy the complete live EventGraph again and substitute
+that round-trip export for `$editEvent` in both validators. The generated file
+passing before paste is necessary but not sufficient.
+
+### Near-term test gates
+
+- **Hands-on PIE gate:** Laurent can fly for several minutes, capture at least
+  three points, replace/delete the selection, and exit with the original camera
+  and pawn intact.
+- **Cooked local gate:** the same slice loads from a packaged mod in normal
+  Conan Enhanced, survives relaunch, and restores safely outside PIE.
+- **G-Portal gate:** publish a test Workshop item, install it on an Enhanced
+  backup/staging server, use identical client/server mod version and load order,
+  and repeat the camera-restoration test. This gate initially tests only local
+  camera/authoring behavior; server-shared Flypaths arrive in Phases 7-8.
 
 ## 2. Engineering rules
 
@@ -616,6 +732,8 @@ utility tests and golden sampled outputs that can be run before cooking.
 | Public Flypaths enable PvP scouting | High | Admin/creative defaults, range/region policy, explicit warnings |
 | Large revisions overload RPC/storage | High | Limits, on-demand fetch, hashes, full-document measurement before deltas |
 | DevKit update moves private base members | Medium | Attachment adapters, minimal base coupling, version diagnostics |
+| Enhanced cook/upload has no stable headless entry point | High | Prove the Funcom plugin commandlet; otherwise use a self-hosted Windows runner with a narrowly automated editor cook step |
+| Workshop credentials or Steam Guard make unattended CI fragile | High | Create and accept the first item manually; keep secrets off Git; prefer an authenticated self-hosted runner and deliberate release approval |
 | Direct video output unavailable | Low | External recording is the supported baseline |
 | World events become a remote-control/PvP exploit | Critical | Typed adapters, server policy, revision validation, target binding, rate limits, clone rebind |
 | Stateful event rollback overwrites concurrent changes | High | Adapter conflict detection, bounded leases, conservative yield, explicit persistent actions |
@@ -676,22 +794,25 @@ Content/Mods/ExileDroneDirector/
 
 Version numbers describe capability gates, not calendar promises.
 
-## 18. Immediate actions once installation completes
+Internal checkpoint versions such as `0.12.0-waypoint-edit` count validated
+development slices. They do not claim that the public **0.1 Camera Spike** gate
+is complete; that gate still requires cooked multiplayer acceptance.
 
-1. Verify Epic manifest and final DevKit path.
-2. Launch DevKit and record engine/build version.
-3. Create `ExileDroneDirector` through the official mod menu.
-4. Implement `BP_EDD_ModController` and diagnostic client/server components.
-5. Identify the owning local player and authenticated server identity paths.
-6. Verify UMG custom painting, input focus, theme assets, and component styling.
-7. Inspect persistent object identity and door interaction interfaces for the
-   event-binding adapter.
-8. Spawn a local camera, switch view target, and restore it.
-9. Cook and test that slice before building waypoint UI.
-10. Sync assets to Git and record the exact integration findings.
+## 18. Immediate execution priority
 
-The first technical milestone is not “the camera moved in PIE.” It is “the cooked
-mod entered and exited Drone Mode safely on a dedicated server client.”
+The installation and initial camera reconnaissance are complete. Follow the
+exact session runbook in section 1.1. The immediate sequence is:
+
+1. Live K/R/Delete dispatch and physical PIE acceptance.
+2. Minimal waypoint count/selection feedback.
+3. First cook/package proof in normal Conan Enhanced.
+4. Test Workshop item and controlled G-Portal deployment.
+5. Only then expand the local draft into visible path preview, document structs,
+   serialization, undo/redo, and trajectory playback.
+
+The first public capability milestone is not “the camera moved in PIE.” It is
+“the cooked mod entered, flew, authored a small draft, and exited safely on a
+dedicated-server client.”
 
 ## 19. Definition of done for 1.0
 

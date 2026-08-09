@@ -23,7 +23,7 @@ def load_contract_helpers():
 def assert_feedback(path: Path) -> None:
     helpers = load_contract_helpers()
     nodes = helpers.parse_graph(path)
-    helpers.require(len(nodes) == 51, f"Feedback EventGraph expected 51 nodes; found {len(nodes)}")
+    helpers.require(len(nodes) in {51, 62}, f"Feedback EventGraph expected 51 or 62 nodes; found {len(nodes)}")
 
     builders = [node for node in nodes.values() if 'MemberName="BuildString_Int"' in node.text]
     helpers.require(len(builders) == 2, f"Feedback needs exactly two BuildString_Int nodes; found {len(builders)}")

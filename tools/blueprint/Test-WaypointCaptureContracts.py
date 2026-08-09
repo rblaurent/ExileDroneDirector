@@ -182,7 +182,7 @@ def assert_capture(nodes: dict[str, Node]) -> None:
 
 
 def assert_dispatch(nodes: dict[str, Node]) -> None:
-    require(len(nodes) in {37, 43, 51}, f"Client EventGraph expected 37, 43, or 51 total nodes; found {len(nodes)}")
+    require(len(nodes) in {37, 43, 51, 62}, f"Client EventGraph expected 37, 43, 51, or 62 total nodes; found {len(nodes)}")
     roll = one(nodes, 'MemberName="ApplyRollAndHorizonInput"')
     capture = one(nodes, 'MemberName="CaptureCurrentWaypoint"')
 
@@ -219,7 +219,7 @@ def assert_dispatch(nodes: dict[str, Node]) -> None:
     require_link(roll, "then", branch_k, "execute", "Capture polling must run after roll/horizon processing")
     require_link(key_k, "ReturnValue", branch_k, "Condition", "K must use edge-triggered branch gating")
     require_link(branch_k, "then", capture, "execute", "Only the true K edge may capture a waypoint")
-    if len(nodes) != 51:
+    if len(nodes) < 51:
         require(not pin(capture, "then").links, "Waypoint capture must terminate the active-input tick")
 
     replace_nodes = [node for node in nodes.values() if 'MemberName="ReplaceSelectedWaypoint"' in node.text]

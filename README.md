@@ -161,9 +161,13 @@ capture/edit channels. The exact version-1 `ST_EDD_Segment` and
 `ST_EDD_FlypathDocument` schemas are now authored and compiled as well, and the
 client owns empty typed `DraftSegmentsV1` plus default-constructed
 `DraftDocumentV1` bridge members. Their checked-in schema contract and
-configurator are deterministic and idempotent. The next autonomous slice
-transactionally populates those members from `DraftWaypointsV1`, followed by
-visible path preview and undo/redo.
+configurator are deterministic and idempotent. `SyncDraftDocumentV1` now
+transactionally reconciles those members from `DraftWaypointsV1` in a compiled,
+saved 124-node/552-pin live graph. Structural contracts prove valid pin
+directions, monotonic ID fan-out, preserved-segment selection, three-second new
+segment defaults, duration accumulation, metadata preservation, and atomic
+publication. Runtime PIE parity is the next gate, followed by visible path
+preview and undo/redo.
 Cooked-package validation remains required but is explicitly deferred until an
 attended session.
 

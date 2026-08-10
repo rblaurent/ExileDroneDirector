@@ -182,3 +182,15 @@ the native entry once, compile, export the complete live function, and run
 
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.
+
+`Export-BlueprintGraphClipboard.ps1` reads and validates the clipboard; it does
+not drive Unreal or refresh the clipboard itself. Before every export, focus the
+intended graph, select all nodes, and copy again. A successful export message
+only proves that the clipboard held a syntactically valid graph, so semantic
+contracts must also confirm the expected current function and links. This
+avoids accidentally validating a stale but valid earlier copy.
+
+Treat numeric defaults semantically rather than matching one textual spelling.
+UE 5.6 can round-trip an authored `3.0` as `3.000000`. Validators should parse
+the serialized scalar, compare it within a strict tolerance, and still require
+the pin to be unlinked when the default is meant to drive execution.

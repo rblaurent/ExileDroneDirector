@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.21.0-flypath-schema-bridge`
+Current internal build: `0.22.0-document-sync`
 
 ## 1. Delivery strategy
 
@@ -96,20 +96,22 @@ This section is the authoritative handoff. Detailed evidence remains in
   `DraftSegmentsV1` and default-constructed `DraftDocumentV1` members. The
   schema/configurator contract is deterministic, executable, and idempotent;
   document population is deliberately the next transactional slice.
-- `SyncDraftDocumentV1` now exists as a compiled empty live function with all
-  private scratch state required for an atomic implementation. Its pure oracle
-  fixes reconciliation semantics: preserve a surviving adjacency's complete
-  authored segment, allocate new IDs above the highest reusable prior ID,
-  reject exhaustion, recompute duration, preserve editable metadata, clear the
-  stale content hash, and replace `DraftSegmentsV1` plus `DraftDocumentV1` only
-  after every guard succeeds. Nine executable cases cover these invariants.
+- `SyncDraftDocumentV1` is now a compiled, saved 124-node/552-pin live function.
+  It invokes the typed waypoint preflight, reconciles surviving adjacencies by
+  exact endpoint IDs, preserves every authored field of the first valid unused
+  prior segment, allocates new monotonic segment IDs, rejects integer
+  exhaustion, recomputes total duration, preserves editable document metadata,
+  clears the stale content hash, and publishes `DraftSegmentsV1` plus
+  `DraftDocumentV1` only after every guard succeeds. Nine pure executable cases
+  cover the same transaction contract; live PIE parity is the next acceptance
+  gate and is not claimed yet.
 - The exact native UE 5.6 Make/Break serialization for `ST_EDD_Segment` and
   `ST_EDD_FlypathDocument` is checked in and contract-tested. The generated pin
   suffixes, nested array element types, defaults, directions, and the native
   omission of explicit empty-string defaults are now stable inputs to the
   deterministic graph builder rather than undocumented editor knowledge.
-- The generated 84-node/362-pin sync graph and copied post-compile Unreal
-  round-trip both pass reciprocal-link and semantic contracts. A production-path
+- The generated 84-node/362-pin waypoint sync graph and copied post-compile
+  Unreal round-trip both pass reciprocal-link and semantic contracts. A production-path
   PIE run
   proved empty rebuild, two exact captured struct values, repeat-sync
   idempotence, and clean camera restoration, ending in
@@ -153,9 +155,10 @@ This section is the authoritative handoff. Detailed evidence remains in
 The user explicitly deferred the attended cook/Workshop step for the night. The
 next autonomous implementation slice is therefore:
 
-1. Populate `DraftSegmentsV1` and `DraftDocumentV1` transactionally from the
-   authoritative `DraftWaypointsV1` snapshot, with deterministic segment IDs,
-   endpoint references, duration totals, and preserve-prior-on-invalid behavior.
+1. Add and run deterministic production-path PIE validation for
+   `SyncDraftDocumentV1`: empty/single/two-waypoint rebuilds, exact endpoint
+   references, monotonic IDs, repeat-sync idempotence, preserved surviving
+   segment edits, invalid-input rollback, and clean camera restoration.
 2. Add visible waypoint/path preview and undo/redo as bounded, independently
    validated vertical slices.
 3. Preserve the physical F10/K/P/P/F9 route as the regression acceptance path

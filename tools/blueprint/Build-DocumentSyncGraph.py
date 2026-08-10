@@ -534,7 +534,20 @@ def main() -> None:
     connect(match_loop, "Completed", match_result, "execute")
     connect(match_result_get, "DocumentMatchFoundV1", match_result, "Condition")
 
-    def append_segment(prefix: str, exec_node, exec_pin: str, value_node, value_pin: str, duration_node, duration_pin: str, id_node, id_pin: str, x: int):
+    def append_segment(
+        prefix: str,
+        exec_node,
+        exec_pin: str,
+        value_node,
+        value_pin: str,
+        duration_node,
+        duration_pin: str,
+        id_node,
+        id_pin: str,
+        x: int,
+        *,
+        duration_default: str | None = None,
+    ):
         scratch_get = array_getter(f"{prefix}_scratch_get", "DocumentSegmentsScratchV1", "segment", x, 320)
         add_segment = array_add(f"{prefix}_add_segment", "segment", x + 224, 0)
         connect(exec_node, exec_pin, add_segment, "execute")
@@ -548,7 +561,12 @@ def main() -> None:
         total_get = var_get(f"{prefix}_total_get", "DocumentTotalDurationV1", "real", x + 896, 320)
         total_add = math(f"{prefix}_total_add", "Add_DoubleDouble", "real", "real", x + 1120, 256)
         connect(total_get, "DocumentTotalDurationV1", total_add, "A")
-        connect(duration_node, duration_pin, total_add, "B")
+        if duration_node is None:
+            if duration_default is None:
+                raise RuntimeError(f"{prefix} append needs a duration source or default")
+            set_default(total_add, "B", duration_default)
+        else:
+            connect(duration_node, duration_pin, total_add, "B")
         total_set = var_set(f"{prefix}_total_set", "DocumentTotalDurationV1", "real", x + 1344, 0)
         connect(add_used, "then", total_set, "execute")
         connect(total_add, "ReturnValue", total_set, "DocumentTotalDurationV1")
@@ -580,7 +598,19 @@ def main() -> None:
     connect(increment_id, "ReturnValue", make_new, SEG_ID)
     connect(current_break, WP_ID, make_new, SEG_FROM)
     connect(next_break, WP_ID, make_new, SEG_TO)
-    append_segment("new", next_set_new, "then", make_new, "ST_EDD_Segment", make_new, SEG_DURATION, make_new, SEG_ID, 12240)
+    append_segment(
+        "new",
+        next_set_new,
+        "then",
+        make_new,
+        "ST_EDD_Segment",
+        None,
+        "",
+        increment_id,
+        "ReturnValue",
+        12240,
+        duration_default="3.0",
+    )
 
     # Final validation and atomic publication.
     valid_final_get = var_get("valid_final_get", "DocumentSyncValidV1", "bool", 13760, 240)

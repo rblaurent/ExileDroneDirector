@@ -47,6 +47,33 @@ def assert_contract(graph: Path, project_root: Path, has_entry: bool) -> None:
     nodes = c.parse(graph)
     c.require(len(nodes) == (124 if has_entry else 123), f"Unexpected node count: {len(nodes)}")
 
+    pins_by_id = {
+        (node.name, pin.pin_id): (node, pin_name, pin)
+        for node in nodes.values()
+        for pin_name, pin in node.pins.items()
+    }
+    checked_edges = set()
+    for node in nodes.values():
+        for pin_name, pin in node.pins.items():
+            is_output = 'Direction="EGPD_Output"' in pin.body
+            if not is_output:
+                c.require(
+                    len(pin.links) <= 1,
+                    f"Input pin has multiple links: {node.name}.{pin_name}",
+                )
+            for target_name, target_pin_id in pin.links:
+                edge = tuple(sorted(((node.name, pin.pin_id), (target_name, target_pin_id))))
+                if edge in checked_edges or (target_name, target_pin_id) not in pins_by_id:
+                    continue
+                checked_edges.add(edge)
+                target_node, target_pin_name, target_pin = pins_by_id[(target_name, target_pin_id)]
+                target_is_output = 'Direction="EGPD_Output"' in target_pin.body
+                c.require(
+                    is_output != target_is_output,
+                    "Pin direction mismatch: "
+                    f"{node.name}.{pin_name} -> {target_node.name}.{target_pin_name}",
+                )
+
     entries = [node for node in nodes.values() if 'MemberName="SyncDraftDocumentV1"' in node.text]
     c.require(len(entries) == (1 if has_entry else 0), "Function entry inclusion changed")
     if not has_entry:
@@ -60,7 +87,10 @@ def assert_contract(graph: Path, project_root: Path, has_entry: bool) -> None:
         node
         for node in nodes.values()
         if node.node_class.endswith("K2Node_CallFunction")
-        and 'FunctionReference=(MemberName="SyncDraftWaypointsV1",bSelfContext=True)' in node.text
+        and re.search(
+            r'FunctionReference=\([^)]*MemberName="SyncDraftWaypointsV1"[^)]*bSelfContext=True[^)]*\)',
+            node.text,
+        )
     ]
     c.require(len(sync_calls) == 1, "Document sync must invoke typed waypoint preflight once")
     sync = sync_calls[0]
@@ -102,8 +132,30 @@ def assert_contract(graph: Path, project_root: Path, has_entry: bool) -> None:
     c.require(len(break_waypoints) == 2, "Current and next waypoint breaks are required")
     c.require(len(break_documents) == 1, "Prior document metadata must be read once")
 
+    max_nodes = [
+        node
+        for node in nodes.values()
+        if (
+            node.node_class.endswith("K2Node_CallFunction")
+            and 'MemberName="Max_IntInt"' in node.text
+        )
+        or (
+            node.node_class.endswith("K2Node_CommutativeAssociativeBinaryOperator")
+            and 'MemberName="Max"' in node.text
+        )
+    ]
+    c.require(len(max_nodes) == 1, f"Integer Max representation changed: {len(max_nodes)}")
+    max_id = max_nodes[0]
+    c.require(
+        all(pin in max_id.pins for pin in ("A", "B", "ReturnValue")),
+        "Integer Max pins changed",
+    )
+    c.require(
+        all('PinType.PinCategory="int"' in max_id.pins[pin].body for pin in ("A", "B", "ReturnValue")),
+        "Monotonic ID Max must remain integer-typed",
+    )
+
     for marker, count in (
-        ('MemberName="Max_IntInt"', 1),
         ('MemberName="Less_IntInt"', 1),
         ('MemberName="Array_Find"', 1),
         ('MemberName="EqualEqual_StrStr"', 5),
@@ -130,6 +182,30 @@ def assert_contract(graph: Path, project_root: Path, has_entry: bool) -> None:
     c.require(len(invalid_setters) == 1, "Exhaustion must own the only runtime invalidation setter")
     c.require_link(invalid_setters[0], "then", exhausted_message, "execute", "ID exhaustion needs an explicit diagnostic")
 
+    next_id_getters = [
+        node
+        for node in nodes.values()
+        if node.node_class.endswith("K2Node_VariableGet")
+        and 'MemberName="DocumentNextSegmentIdV1"' in node.text
+        and (max_id.name, max_id.pins["A"].pin_id) in node.pins["DocumentNextSegmentIdV1"].links
+    ]
+    c.require(len(next_id_getters) == 1, "Monotonic ID Max must read the current next ID")
+    prior_id_breaks = [
+        node
+        for node in break_segments
+        if (max_id.name, max_id.pins["B"].pin_id) in node.pins[SEG_ID].links
+    ]
+    c.require(len(prior_id_breaks) == 1, "Monotonic ID Max must read each prior segment ID")
+    next_id_setters = [
+        node
+        for node in nodes.values()
+        if node.node_class.endswith("K2Node_VariableSet")
+        and 'MemberName="DocumentNextSegmentIdV1"' in node.text
+        and (max_id.name, max_id.pins["ReturnValue"].pin_id)
+        in node.pins["DocumentNextSegmentIdV1"].links
+    ]
+    c.require(len(next_id_setters) == 1, "Monotonic ID Max must update the next-ID floor")
+
     make_segment = make_segments[0]
     increment = next(
         node
@@ -139,6 +215,26 @@ def assert_contract(graph: Path, project_root: Path, has_entry: bool) -> None:
         and (make_segment.name, make_segment.pins[SEG_ID].pin_id) in node.pins["ReturnValue"].links
     )
     c.require_link(increment, "ReturnValue", make_segment, SEG_ID, "New segment must use monotonic next ID")
+    new_id_adds = [
+        node
+        for node in nodes.values()
+        if 'MemberName="Array_Add"' in node.text
+        and 'PinType.PinCategory="int"' in node.pins["NewItem"].body
+        and (node.name, node.pins["NewItem"].pin_id) in increment.pins["ReturnValue"].links
+    ]
+    c.require(len(new_id_adds) == 1, "New segment ID must append from the increment output")
+    default_duration_adds = [
+        node
+        for node in nodes.values()
+        if 'MemberName="Add_DoubleDouble"' in node.text
+        and (
+            (match := re.search(r'DefaultValue="([+-]?(?:\d+(?:\.\d*)?|\.\d+))"', node.pins["B"].body))
+            is not None
+            and abs(float(match.group(1)) - 3.0) < 1e-9
+        )
+        and not node.pins["B"].links
+    ]
+    c.require(len(default_duration_adds) == 1, "New segment duration total must use the 3-second default")
     current_break, next_break = break_waypoints
     c.require(
         any((make_segment.name, make_segment.pins[SEG_FROM].pin_id) in node.pins[WP_ID].links for node in break_waypoints),

@@ -1194,6 +1194,48 @@ The next bounded implementation step is the deterministic graph builder and
 semantic graph test. Only after that generated graph matches the oracle will it
 be pasted into the live function, compiled, copied back out, and PIE-tested.
 
+## Live transactional document sync compile (2026-08-10)
+
+`Build-DocumentSyncGraph.py` now emits a 124-node/552-pin complete function and
+a 123-node/551-pin paste body. The semantic contract validates reciprocal
+links, every input's single-source invariant, output-to-input direction on all
+internal edges, typed waypoint preflight, prior-segment matching, integer ID
+exhaustion, monotonic ID allocation, duration accumulation, metadata carryover,
+and the final atomic publication boundary.
+
+The first live paste exposed three UE 5.6 integration details that source-only
+shape checks did not catch:
+
+- integer Max reconstructs as a native
+  `K2Node_CommutativeAssociativeBinaryOperator` with `MemberName="Max"`, not
+  necessarily the legacy `Max_IntInt` call-function form;
+- the new segment's ID must fan out from the increment output to both the Make
+  Segment node and the used-ID array append; connecting the Make node's input
+  pin to the append input creates an illegal input-to-input edge;
+- the new segment duration accumulator must consume its own unlinked
+  three-second default. Connecting the Make node's duration input to that input
+  creates the same illegal direction error. UE serializes the corrected `3.0`
+  value as `3.000000`.
+
+The generator and validator were corrected first, then the same two links were
+repaired in the live function. A freshly copied live export passes generic
+validation at exactly 124 nodes/552 pins and the complete semantic contract.
+Unreal compiled `BPC_EDD_ClientDirector` successfully in 140 ms with `Good to
+go`; the asset was saved, the editor closed normally through
+`LogExit: Exiting.`, and the 1,223,325-byte component was synced back into Git.
+
+One tooling boundary is now explicit: `Export-BlueprintGraphClipboard.ps1`
+only reads the current Windows clipboard. It does not focus Unreal or issue
+Select All/Copy. During repair, a syntactically valid stale copy initially made
+an already-broken pin appear unchanged in the exported evidence. The safe loop
+is graph focus, Ctrl+A, Ctrl+C, export, generic validation, semantic validation,
+then compile/save. Visual appearance alone is not acceptance evidence.
+
+This milestone is compile/round-trip proof, not runtime proof. The next bounded
+gate is a deterministic production-path PIE validator covering empty, single,
+and multi-waypoint documents, stable repeat sync, preserved authored segments,
+rollback on invalid input, and camera cleanup.
+
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 
 The installed `DreamworldMods` plugin declares editor support for cooking,

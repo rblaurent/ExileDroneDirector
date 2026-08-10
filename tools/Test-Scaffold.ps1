@@ -56,6 +56,8 @@ $requiredFiles = @(
     'tools\history\test_draft_history.py',
     'tools\document\flypath_document.py',
     'tools\document\test_flypath_document.py',
+    'tools\document\flypath_repository.py',
+    'tools\document\test_flypath_repository.py',
     'tools\document\waypoint_bridge.py',
     'tools\document\test_waypoint_bridge.py',
     'tools\document\blueprint_v1_schema.json',
@@ -481,6 +483,11 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\document\test_flypath_document.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Flypath document contracts failed with exit code $LASTEXITCODE."
+}
+
+& python (Join-Path $ProjectRoot 'tools\document\test_flypath_repository.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Flypath repository contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\document\test_waypoint_bridge.py')

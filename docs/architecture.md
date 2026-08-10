@@ -345,8 +345,10 @@ quaternions and enforces shortest-arc/sign consistency.
 
 ### 5.6 Executable version-1 document contract
 
-`tools/document/flypath_document.py` is the engine-independent oracle for the
-first Blueprint and persistence implementation. Version 1 fixes these rules:
+`tools/document/flypath_document.py` and
+`tools/document/flypath_repository.py` are the engine-independent oracles for
+the first Blueprint repository and persistence implementation. Version 1 fixes
+these rules:
 
 - serialized revision documents use canonical UTF-8 JSON with sorted keys,
   compact separators, finite numbers only, and a SHA-256 content hash calculated
@@ -363,10 +365,25 @@ first Blueprint and persistence implementation. Version 1 fixes these rules:
 - new Flypaths and clones are private, only published snapshots are cloneable,
   clones preserve document-scoped waypoint IDs and source attribution, and have
   no live link to their source.
+- complete Flypath records use a versioned canonical envelope with a full-record
+  SHA-256 hash and validate canonical UTC timestamps, revision ordering,
+  optional-payload flags, and every nested document hash;
+- repository requests return stable typed result codes and never mutate the
+  authoritative in-memory record when persistence fails;
+- metadata queries are bounded, paged, sorted, and do not carry full revision
+  payloads;
+- storage uses staged copy-on-write generations, explicit commit, activation,
+  committed tombstones, and newest-valid recovery. Incomplete candidates are
+  ignored, a committed candidate survives a missing pointer update, corrupt
+  latest payloads fall back to the previous valid generation, and a committed
+  tombstone prevents deleted data from resurrecting.
 
-The Python oracle is not shipped runtime code. Blueprint structs, Blueprint
-validation, server DTOs, and persistence adapters must produce the same fields
-and pass the same fixtures before replacing the transient six-array bridge.
+The Python oracle is not shipped runtime code. `blueprint_v1_schema.json` fixes
+the Blueprint-facing record, metadata, result, policy, attribution, and persisted
+generation seams; nullable published/attribution values use explicit `Has...`
+flags. Blueprint structs, Blueprint validation, server DTOs, and persistence
+adapters must produce the same fields and pass the same fixtures before replacing
+the transient six-array bridge.
 
 ## 6. Ownership, visibility, and identity
 
@@ -468,6 +485,10 @@ Where the storage adapter lacks transactions, use copy-on-write records:
 
 On load, ignore uncommitted candidates and fall back to the latest valid hash.
 The exact mechanism is adjusted to storage primitives available in Blueprint.
+Committed deletion is represented by a tombstone generation. Recovery stops at
+the newest committed tombstone rather than falling through to older valid data.
+The repository only replaces its authoritative memory entry after the storage
+adapter reports Stage, Commit, and Activate success.
 
 ### 8.4 Limits
 

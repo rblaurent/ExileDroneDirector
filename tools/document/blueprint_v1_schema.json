@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "repositorySchemaVersion": 1,
   "structs": {
     "ST_EDD_Waypoint": {
       "asset": "Local/Data/Structs/ST_EDD_Waypoint.uasset",
@@ -39,8 +40,99 @@
         { "name": "Segments", "type": "ST_EDD_Segment", "container": "Array" },
         { "name": "ContentHash", "type": "String", "container": "None", "default": "" }
       ]
+    },
+    "ST_EDD_SourceAttribution": {
+      "asset": "Local/Data/Structs/ST_EDD_SourceAttribution.uasset",
+      "purpose": "Immutable provenance copied into a private clone.",
+      "fields": [
+        { "name": "FlypathId", "type": "String", "container": "None", "default": "" },
+        { "name": "RevisionNumber", "type": "Integer", "container": "None", "default": 0 },
+        { "name": "Title", "type": "String", "container": "None", "default": "" },
+        { "name": "CreatorDisplayName", "type": "String", "container": "None", "default": "" }
+      ]
+    },
+    "ST_EDD_FlypathRecord": {
+      "asset": "Local/Data/Structs/ST_EDD_FlypathRecord.uasset",
+      "purpose": "Complete server-owned record persisted atomically by the storage adapter.",
+      "fields": [
+        { "name": "FlypathId", "type": "String", "container": "None", "default": "" },
+        { "name": "OwnerAccountId", "type": "String", "container": "None", "default": "" },
+        { "name": "OwnerDisplayName", "type": "String", "container": "None", "default": "" },
+        { "name": "Title", "type": "String", "container": "None", "default": "" },
+        { "name": "Description", "type": "String", "container": "None", "default": "" },
+        { "name": "Visibility", "type": "String", "container": "None", "default": "private" },
+        { "name": "RegionId", "type": "String", "container": "None", "default": "" },
+        { "name": "CreatedUtc", "type": "String", "container": "None", "default": "" },
+        { "name": "UpdatedUtc", "type": "String", "container": "None", "default": "" },
+        { "name": "DraftRevisionNumber", "type": "Integer", "container": "None", "default": 0 },
+        { "name": "Draft", "type": "ST_EDD_FlypathDocument", "container": "None" },
+        { "name": "HasPublishedRevision", "type": "Boolean", "container": "None", "default": false },
+        { "name": "PublishedRevisionNumber", "type": "Integer", "container": "None", "default": 0 },
+        { "name": "Published", "type": "ST_EDD_FlypathDocument", "container": "None" },
+        { "name": "HasSourceAttribution", "type": "Boolean", "container": "None", "default": false },
+        { "name": "SourceAttribution", "type": "ST_EDD_SourceAttribution", "container": "None" }
+      ]
+    },
+    "ST_EDD_FlypathMetadata": {
+      "asset": "Local/Data/Structs/ST_EDD_FlypathMetadata.uasset",
+      "purpose": "Bounded library row that never carries a full revision payload.",
+      "fields": [
+        { "name": "FlypathId", "type": "String", "container": "None", "default": "" },
+        { "name": "OwnerDisplayName", "type": "String", "container": "None", "default": "" },
+        { "name": "Title", "type": "String", "container": "None", "default": "" },
+        { "name": "Visibility", "type": "String", "container": "None", "default": "private" },
+        { "name": "RegionId", "type": "String", "container": "None", "default": "" },
+        { "name": "UpdatedUtc", "type": "String", "container": "None", "default": "" },
+        { "name": "DraftRevisionNumber", "type": "Integer", "container": "None", "default": 0 },
+        { "name": "HasPublishedRevision", "type": "Boolean", "container": "None", "default": false },
+        { "name": "PublishedRevisionNumber", "type": "Integer", "container": "None", "default": 0 }
+      ]
+    },
+    "ST_EDD_RepositoryResult": {
+      "asset": "Local/Data/Structs/ST_EDD_RepositoryResult.uasset",
+      "purpose": "Stable typed command/query result shared by service, debug adapter, and later UI.",
+      "fields": [
+        { "name": "Code", "type": "String", "container": "None", "default": "Success" },
+        { "name": "Detail", "type": "String", "container": "None", "default": "" },
+        { "name": "HasCurrentRevision", "type": "Boolean", "container": "None", "default": false },
+        { "name": "CurrentRevision", "type": "Integer", "container": "None", "default": 0 }
+      ]
+    },
+    "ST_EDD_ServerPolicy": {
+      "asset": "Local/Data/Structs/ST_EDD_ServerPolicy.uasset",
+      "purpose": "Server-enforced bounded repository policy exposed read-only to clients.",
+      "fields": [
+        { "name": "MaxPathsPerOwner", "type": "Integer", "container": "None", "default": 64 },
+        { "name": "MaxWaypointsPerPath", "type": "Integer", "container": "None", "default": 512 },
+        { "name": "MaxSerializedBytes", "type": "Integer", "container": "None", "default": 2000000 },
+        { "name": "MaxTitleChars", "type": "Integer", "container": "None", "default": 96 },
+        { "name": "AllowedRegions", "type": "String", "container": "Array" }
+      ]
+    },
+    "ST_EDD_PersistedGeneration": {
+      "asset": "Local/Data/Structs/ST_EDD_PersistedGeneration.uasset",
+      "purpose": "Copy-on-write storage candidate; committed tombstones prevent deleted-record resurrection.",
+      "fields": [
+        { "name": "FlypathId", "type": "String", "container": "None", "default": "" },
+        { "name": "Generation", "type": "Integer", "container": "None", "default": 0 },
+        { "name": "Committed", "type": "Boolean", "container": "None", "default": false },
+        { "name": "Tombstone", "type": "Boolean", "container": "None", "default": false },
+        { "name": "RecordContentHash", "type": "String", "container": "None", "default": "" },
+        { "name": "CanonicalPayload", "type": "String", "container": "None", "default": "" }
+      ]
     }
   },
+  "repositoryResultCodes": [
+    "Success",
+    "NotFound",
+    "Forbidden",
+    "RevisionConflict",
+    "ValidationFailed",
+    "LimitExceeded",
+    "RegionForbidden",
+    "PersistenceUnavailable",
+    "AlreadyExists"
+  ],
   "clientVariables": [
     { "name": "DraftWaypointsV1", "type": "ST_EDD_Waypoint", "container": "Array" },
     { "name": "DraftSegmentsV1", "type": "ST_EDD_Segment", "container": "Array" },

@@ -7,7 +7,8 @@ import json
 from pathlib import Path
 import unittest
 
-from flypath_document import RevisionDocument, Segment
+from flypath_document import FlypathRecord, RevisionDocument, Segment, SourceAttribution
+from flypath_repository import FlypathMetadata, RepositoryLimits, ResultCode
 
 
 ROOT = Path(__file__).resolve().parent
@@ -28,9 +29,20 @@ class BlueprintV1SchemaContracts(unittest.TestCase):
 
     def test_schema_and_struct_order_are_fixed(self) -> None:
         self.assertEqual(self.schema["schemaVersion"], 1)
+        self.assertEqual(self.schema["repositorySchemaVersion"], 1)
         self.assertEqual(
             list(self.structs),
-            ["ST_EDD_Waypoint", "ST_EDD_Segment", "ST_EDD_FlypathDocument"],
+            [
+                "ST_EDD_Waypoint",
+                "ST_EDD_Segment",
+                "ST_EDD_FlypathDocument",
+                "ST_EDD_SourceAttribution",
+                "ST_EDD_FlypathRecord",
+                "ST_EDD_FlypathMetadata",
+                "ST_EDD_RepositoryResult",
+                "ST_EDD_ServerPolicy",
+                "ST_EDD_PersistedGeneration",
+            ],
         )
         for name, definition in self.structs.items():
             names = [field["name"] for field in definition["fields"]]
@@ -131,15 +143,96 @@ class BlueprintV1SchemaContracts(unittest.TestCase):
         supported = {
             "Integer",
             "Float",
+            "Boolean",
             "String",
             "Transform",
             "ST_EDD_Waypoint",
             "ST_EDD_Segment",
+            "ST_EDD_FlypathDocument",
+            "ST_EDD_SourceAttribution",
         }
         for definition in self.structs.values():
             for field in definition["fields"]:
                 self.assertIn(field["type"], supported)
                 self.assertIn(field["container"], {"None", "Array"})
+
+    def test_repository_structs_map_oracle_seams_without_nullable_fields(self) -> None:
+        self.assertEqual(
+            [field.name for field in fields(SourceAttribution)],
+            ["flypath_id", "revision_number", "title", "creator_display_name"],
+        )
+        self.assertEqual(
+            [field.name for field in fields(FlypathRecord)],
+            [
+                "flypath_id",
+                "owner_account_id",
+                "owner_display_name",
+                "title",
+                "description",
+                "visibility",
+                "region_id",
+                "created_utc",
+                "updated_utc",
+                "draft_revision_number",
+                "draft",
+                "published_revision_number",
+                "published",
+                "source_attribution",
+            ],
+        )
+        record_fields = self.field_names("ST_EDD_FlypathRecord")
+        self.assertEqual(
+            record_fields,
+            [
+                "FlypathId",
+                "OwnerAccountId",
+                "OwnerDisplayName",
+                "Title",
+                "Description",
+                "Visibility",
+                "RegionId",
+                "CreatedUtc",
+                "UpdatedUtc",
+                "DraftRevisionNumber",
+                "Draft",
+                "HasPublishedRevision",
+                "PublishedRevisionNumber",
+                "Published",
+                "HasSourceAttribution",
+                "SourceAttribution",
+            ],
+        )
+        self.assertLess(record_fields.index("HasPublishedRevision"), record_fields.index("Published"))
+        self.assertLess(record_fields.index("HasSourceAttribution"), record_fields.index("SourceAttribution"))
+
+    def test_metadata_policy_and_result_code_contracts_are_exact(self) -> None:
+        self.assertEqual(
+            [field.name for field in fields(FlypathMetadata)],
+            [
+                "flypath_id",
+                "owner_display_name",
+                "title",
+                "visibility",
+                "region_id",
+                "updated_utc",
+                "draft_revision_number",
+                "published_revision_number",
+            ],
+        )
+        self.assertEqual(
+            self.schema["repositoryResultCodes"],
+            [code.value for code in ResultCode],
+        )
+        policy = RepositoryLimits()
+        policy_fields = {field["name"]: field for field in self.structs["ST_EDD_ServerPolicy"]["fields"]}
+        self.assertEqual(policy_fields["MaxPathsPerOwner"]["default"], policy.max_paths_per_owner)
+        self.assertEqual(policy_fields["MaxWaypointsPerPath"]["default"], policy.max_waypoints_per_path)
+        self.assertEqual(policy_fields["MaxSerializedBytes"]["default"], policy.max_serialized_bytes)
+        self.assertEqual(policy_fields["MaxTitleChars"]["default"], policy.max_title_chars)
+
+    def test_metadata_struct_carries_no_revision_payload(self) -> None:
+        field_types = [field["type"] for field in self.structs["ST_EDD_FlypathMetadata"]["fields"]]
+        self.assertNotIn("ST_EDD_FlypathDocument", field_types)
 
     def test_segment_field_types_containers_and_defaults_are_exact(self) -> None:
         self.assertEqual(

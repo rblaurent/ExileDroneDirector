@@ -216,8 +216,9 @@ events—passes programmatic PIE plus an attended keyboard/debug dogfood workflo
   first-slice Unreal assets.
 - `tools/blueprint/` — validates, exports, and prepares native Blueprint graph
   clipboard snippets without launching the DevKit.
-- `tools/document/` — executable Flypath serialization, revision, publication,
-  ownership, and clone contracts for the Blueprint/server implementation.
+- `tools/document/` — executable Flypath serialization, repository, copy-on-write
+  recovery, revision, publication, ownership, and clone contracts for the
+  Blueprint/server implementation.
 
 ## DevKit setup
 

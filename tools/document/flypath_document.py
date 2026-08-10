@@ -18,6 +18,7 @@ from typing import Any, Iterable, Literal
 
 SCHEMA_VERSION = 1
 TRAJECTORY_ENGINE_VERSION = 1
+REPOSITORY_SCHEMA_VERSION = 1
 Visibility = Literal["private", "public"]
 Vector3 = tuple[float, float, float]
 Quaternion = tuple[float, float, float, float]
@@ -118,6 +119,19 @@ def _validate_quaternion(value: Quaternion, field: str) -> None:
         raise DocumentValidationError(f"{field} must be normalized")
 
 
+def _parse_utc_text(value: str, field: str) -> datetime:
+    _require_text(value, field)
+    if not value.endswith("Z"):
+        raise DocumentValidationError(f"{field} must be canonical UTC text")
+    try:
+        parsed = datetime.fromisoformat(value[:-1] + "+00:00")
+    except ValueError as error:
+        raise DocumentValidationError(f"{field} must be canonical UTC text") from error
+    if utc_text(parsed) != value:
+        raise DocumentValidationError(f"{field} must be canonical UTC text")
+    return parsed
+
+
 def validate_document(document: RevisionDocument, *, require_hash: bool = False) -> None:
     if document.schema_version != SCHEMA_VERSION:
         raise DocumentValidationError(f"unsupported schema version {document.schema_version}")
@@ -204,6 +218,10 @@ def validate_record(record: FlypathRecord) -> None:
         _require_text(value, field)
     if record.visibility not in ("private", "public"):
         raise DocumentValidationError(f"unsupported visibility {record.visibility}")
+    created = _parse_utc_text(record.created_utc, "created_utc")
+    updated = _parse_utc_text(record.updated_utc, "updated_utc")
+    if updated < created:
+        raise DocumentValidationError("updated_utc cannot precede created_utc")
     if record.draft.region_id != record.region_id:
         raise DocumentValidationError("draft region does not match its Flypath record")
     if record.draft.revision_number != record.draft_revision_number:
@@ -220,9 +238,12 @@ def validate_record(record: FlypathRecord) -> None:
             raise DocumentValidationError("published region does not match its Flypath record")
         if record.published.revision_number != record.published_revision_number:
             raise DocumentValidationError("published revision does not match its Flypath record")
+        if record.published.revision_number > record.draft_revision_number:
+            raise DocumentValidationError("published revision cannot exceed the draft revision")
         validate_document(record.published, require_hash=True)
     if record.source_attribution is not None:
         _require_text(record.source_attribution.flypath_id, "source_attribution.flypath_id")
+        _require_text(record.source_attribution.title, "source_attribution.title")
         if record.source_attribution.revision_number < 1:
             raise DocumentValidationError("source attribution revision must be positive")
 
@@ -289,6 +310,57 @@ def serialize_document(document: RevisionDocument) -> str:
     return canonical_json(_document_payload(document, include_hash=True))
 
 
+def _attribution_payload(attribution: SourceAttribution) -> dict[str, Any]:
+    return {
+        "flypathId": attribution.flypath_id,
+        "revisionNumber": attribution.revision_number,
+        "title": attribution.title,
+        "creatorDisplayName": attribution.creator_display_name,
+    }
+
+
+def _record_payload(record: FlypathRecord) -> dict[str, Any]:
+    return {
+        "flypathId": record.flypath_id,
+        "ownerAccountId": record.owner_account_id,
+        "ownerDisplayName": record.owner_display_name,
+        "title": record.title,
+        "description": record.description,
+        "visibility": record.visibility,
+        "regionId": record.region_id,
+        "createdUtc": record.created_utc,
+        "updatedUtc": record.updated_utc,
+        "draftRevisionNumber": record.draft_revision_number,
+        "draft": _document_payload(record.draft, include_hash=True),
+        "publishedRevisionNumber": record.published_revision_number,
+        "published": (
+            _document_payload(record.published, include_hash=True)
+            if record.published is not None
+            else None
+        ),
+        "sourceAttribution": (
+            _attribution_payload(record.source_attribution)
+            if record.source_attribution is not None
+            else None
+        ),
+    }
+
+
+def serialize_record(record: FlypathRecord) -> str:
+    """Serialize one complete repository record in canonical form."""
+
+    validate_record(record)
+    payload = _record_payload(record)
+    payload_hash = sha256(canonical_json(payload).encode("utf-8")).hexdigest()
+    return canonical_json(
+        {
+            "repositorySchemaVersion": REPOSITORY_SCHEMA_VERSION,
+            "record": payload,
+            "recordContentHash": payload_hash,
+        }
+    )
+
+
 def deserialize_document(text: str) -> RevisionDocument:
     try:
         payload = json.loads(text)
@@ -335,6 +407,74 @@ def deserialize_document(text: str) -> RevisionDocument:
         raise DocumentValidationError(f"invalid serialized Flypath document: {error}") from error
     validate_document(document, require_hash=True)
     return document
+
+
+def _document_from_payload(payload: dict[str, Any]) -> RevisionDocument:
+    return deserialize_document(canonical_json(payload))
+
+
+def deserialize_record(text: str) -> FlypathRecord:
+    """Parse and validate one complete repository record."""
+
+    try:
+        envelope = json.loads(text)
+        if not isinstance(envelope, dict):
+            raise TypeError("record root must be an object")
+        if envelope["repositorySchemaVersion"] != REPOSITORY_SCHEMA_VERSION:
+            raise ValueError(
+                f"unsupported repository schema version {envelope['repositorySchemaVersion']}"
+            )
+        payload = envelope["record"]
+        if not isinstance(payload, dict):
+            raise TypeError("record must be an object")
+        stored_hash = envelope["recordContentHash"]
+        if not isinstance(stored_hash, str) or len(stored_hash) != 64:
+            raise ValueError("recordContentHash must be a SHA-256 hex digest")
+        try:
+            int(stored_hash, 16)
+        except ValueError as error:
+            raise ValueError("recordContentHash must be a SHA-256 hex digest") from error
+        expected_hash = sha256(canonical_json(payload).encode("utf-8")).hexdigest()
+        if stored_hash != expected_hash:
+            raise ValueError("recordContentHash does not match the record payload")
+        attribution_payload = payload.get("sourceAttribution")
+        if attribution_payload is not None and not isinstance(attribution_payload, dict):
+            raise TypeError("sourceAttribution must be an object or null")
+        attribution = (
+            SourceAttribution(
+                flypath_id=attribution_payload["flypathId"],
+                revision_number=attribution_payload["revisionNumber"],
+                title=attribution_payload["title"],
+                creator_display_name=attribution_payload["creatorDisplayName"],
+            )
+            if attribution_payload is not None
+            else None
+        )
+        published_payload = payload.get("published")
+        record = FlypathRecord(
+            flypath_id=payload["flypathId"],
+            owner_account_id=payload["ownerAccountId"],
+            owner_display_name=payload["ownerDisplayName"],
+            title=payload["title"],
+            description=payload["description"],
+            visibility=payload["visibility"],
+            region_id=payload["regionId"],
+            created_utc=payload["createdUtc"],
+            updated_utc=payload["updatedUtc"],
+            draft_revision_number=payload["draftRevisionNumber"],
+            draft=_document_from_payload(payload["draft"]),
+            published_revision_number=payload.get("publishedRevisionNumber"),
+            published=(
+                _document_from_payload(published_payload)
+                if published_payload is not None
+                else None
+            ),
+            source_attribution=attribution,
+        )
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+        raise DocumentValidationError(f"invalid serialized Flypath record: {error}") from error
+    validate_record(record)
+    return record
 
 
 def utc_text(value: datetime) -> str:

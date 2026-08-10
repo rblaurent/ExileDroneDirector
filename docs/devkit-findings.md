@@ -1504,6 +1504,40 @@ seconds, then requires exactly one remote director when the second world exists.
 No direct-refresh fallback remains: the accepted run proves the production Enter
 function itself creates the preview.
 
+## Bounded draft history and mutation transactions (2026-08-10)
+
+`Configure-DraftHistory.py` adds bounded undo/redo storage to the live client
+component. The checked six-function implementation is `PushCurrentToUndoV1`,
+`PushCurrentToRedoV1`, `RecordUndoSnapshotV1`, `ApplyHistorySnapshotV1`,
+`UndoDraftV1`, and `RedoDraftV1`. A snapshot preserves the exact
+`DraftDocumentV1`, selected index, and next waypoint ID. Restore republishes the
+typed document, projects it back into all six transitional arrays, repairs the
+selection/ID state, and refreshes the owned preview. The stack cap is 64;
+recording a new edit clears redo; empty undo/redo is a no-op. Six pure state
+tests plus generated full/paste/live Blueprint contracts pass.
+
+`Build-DraftHistoryIntegrationGraphs.py` composes from the deterministic
+production mutation sources, applies document/preview integration, and inserts
+one `RecordUndoSnapshotV1` after the last precondition guard and before the first
+array mutation. Capture, replace, and delete compile and save live. Their fresh
+Unreal exports prove exactly one snapshot, terminal false branches, and the
+expected snapshot-to-`Array_Add`/`Array_Set`/`Array_Remove` edge.
+
+Two contract failures materially improved the workflow. First,
+`ApplyHistorySnapshotV1` initially compiled while its native entry drove the
+second array clear instead of the first; the root-edge contract rejected it.
+Second, the pre-existing live replace graph bypassed its camera-validity guard;
+strengthening the mutation contract exposed and corrected that route. During
+capture/delete installation, a missed manual entry connection likewise compiled
+successfully but failed the live round-trip contract. The rule is now explicit:
+compiler green is necessary but never sufficient, and every function contract
+must name the exact native-entry successor as well as its internal paths.
+
+The next runtime slice is intentionally UI-free: wire Ctrl+Z/Ctrl+Y, add stable
+diagnostic logs, and prove the complete shortcut route in PIE, a cooked normal
+client, and the controlled G-Portal environment. Timeline/editor UI design is
+deferred until those tests reveal the minimum workflow that is actually useful.
+
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 
 The installed `DreamworldMods` plugin declares editor support for cooking,

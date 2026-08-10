@@ -93,6 +93,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-PathPreviewIntegrationContracts.py',
     'tools\blueprint\Build-DraftHistoryGraphs.py',
     'tools\blueprint\Test-DraftHistoryContracts.py',
+    'tools\blueprint\Build-DraftHistoryIntegrationGraphs.py',
+    'tools\blueprint\Test-DraftHistoryIntegrationContracts.py',
     'tools\blueprint\templates\waypoint-capture-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-struct-sync-node-forms.eddgraph',
     'tools\blueprint\templates\document-sync-struct-node-forms.eddgraph',
@@ -139,7 +141,10 @@ $requiredFiles = @(
     'tools\blueprint\snippets\record-undo-snapshot-v1.eddgraph',
     'tools\blueprint\snippets\apply-history-snapshot-v1.eddgraph',
     'tools\blueprint\snippets\undo-draft-v1.eddgraph',
-    'tools\blueprint\snippets\redo-draft-v1.eddgraph'
+    'tools\blueprint\snippets\redo-draft-v1.eddgraph',
+    'tools\blueprint\snippets\capture-current-waypoint-history-v1.eddgraph',
+    'tools\blueprint\snippets\replace-selected-waypoint-history-v1.eddgraph',
+    'tools\blueprint\snippets\delete-selected-waypoint-history-v1.eddgraph'
 )
 
 $missing = @(
@@ -552,4 +557,49 @@ if ($LASTEXITCODE -ne 0) {
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')
 if ($LASTEXITCODE -ne 0) {
     throw "Checked draft history contracts failed with exit code $LASTEXITCODE."
+}
+
+$historyIntegrationNonce = [guid]::NewGuid().ToString('N')
+$generatedHistoryIntegrationDir = Join-Path $scratchRoot "edd-history-integration-$historyIntegrationNonce"
+$generatedHistoryIntegrationRepeatDir = Join-Path $scratchRoot "edd-history-integration-$historyIntegrationNonce-repeat"
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-DraftHistoryIntegrationGraphs.py') `
+    --project-root $ProjectRoot --output-dir $generatedHistoryIntegrationDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Draft history integration graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-DraftHistoryIntegrationGraphs.py') `
+    --project-root $ProjectRoot --output-dir $generatedHistoryIntegrationRepeatDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Repeated draft history integration graph generation failed with exit code $LASTEXITCODE."
+}
+$historyIntegrationFiles = @(
+    'capture-current-waypoint-history-v1.eddgraph',
+    'capture-current-waypoint-history-v1-paste.eddgraph',
+    'replace-selected-waypoint-history-v1.eddgraph',
+    'replace-selected-waypoint-history-v1-paste.eddgraph',
+    'delete-selected-waypoint-history-v1.eddgraph',
+    'delete-selected-waypoint-history-v1-paste.eddgraph'
+)
+foreach ($file in $historyIntegrationFiles) {
+    $first = Join-Path $generatedHistoryIntegrationDir $file
+    $second = Join-Path $generatedHistoryIntegrationRepeatDir $file
+    if ((Get-FileHash -Algorithm SHA256 $first).Hash -ne (Get-FileHash -Algorithm SHA256 $second).Hash) {
+        throw "Draft history integration graph generation is not deterministic: $file"
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $first
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-DraftHistoryIntegrationContracts.py') `
+    --project-root $ProjectRoot --input-dir $generatedHistoryIntegrationDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated draft history integration contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-DraftHistoryIntegrationContracts.py') `
+    --project-root $ProjectRoot --input-dir $generatedHistoryIntegrationDir --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated draft history integration paste contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-DraftHistoryIntegrationContracts.py') `
+    --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')
+if ($LASTEXITCODE -ne 0) {
+    throw "Checked draft history integration contracts failed with exit code $LASTEXITCODE."
 }

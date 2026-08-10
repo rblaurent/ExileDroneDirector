@@ -170,6 +170,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   real capture path, playback coexistence, idempotent exit/destroy, fresh re-entry,
   final cleanup, and remote-world isolation. It ended in
   `EDD_PATH_PREVIEW_LIFECYCLE_PIE:AUTOMATIC_RESULT:PASS`.
+- Bounded draft history now exists in the live client component. Six compiled
+  functions implement capped undo/redo stacks, exact document/selection/next-ID
+  snapshots, redo-branch invalidation, and transactional restore through the
+  typed document plus all six transitional authoring arrays. The cap is 64 and
+  empty-stack operations are no-ops.
+- Capture, replace, and delete now call `RecordUndoSnapshotV1` exactly once after
+  their last validity guard and before their first array mutation. Invalid
+  camera/index attempts remain terminal and consume no history. Deterministic
+  full/paste generation, fresh live Unreal exports, compiler results, reciprocal
+  links, and semantic contracts all pass for the three mutation paths.
 
 ### Reproducible graph evidence
 
@@ -184,8 +194,8 @@ This section is the authoritative handoff. Detailed evidence remains in
 
 ### Not implemented yet
 
-- No polished editor UI, undo/redo, timeline, cinematic curves, lens playback,
-  save/load, server repository,
+- No polished editor UI, user-facing undo/redo bindings, timeline, cinematic
+  curves, lens playback, save/load, server repository,
   sharing, permissions, cloning, or event execution exists yet. The client-owned
   preview actor renders validated markers and linear segments, while current
   playback remains deliberately limited to equal-duration transform interpolation
@@ -197,24 +207,36 @@ This section is the authoritative handoff. Detailed evidence remains in
 
 ### Exact next autonomous slice
 
-The attended cook/Workshop step remains deliberately separate. The next
-autonomous implementation slice is:
+The next implementation slice deliberately proves the product through keyboard
+controls and explicit logs before any editor UI is built:
 
-1. Complete `RebuildPreviewV1` as a bounded, independently validated projection
-   from the accepted typed document: clear both pools, add ordered waypoint
-   sphere instances, add one oriented/scaled cube for each non-degenerate
-   adjacency, and prove exact instance counts/transforms in PIE.
-2. Add draft undo/redo with explicit transaction boundaries for capture,
-   replace, delete, and later segment edits.
-3. Preserve the physical F10/K/P/P/F9 route and the three-phase document-sync
-   validator as regression acceptance paths
-   for every change that touches playback or authoring.
-4. Close, sync, run the complete repository suite, commit, and push after each
+1. Wire Ctrl+Z/Ctrl+Y to the validated undo/redo functions without disturbing
+   text input or the existing F10/K/R/Delete/P/F9 arbitration.
+2. Emit explicit, stable logs for accepted mutations, rejected no-ops, undo,
+   redo, current waypoint count/selection, and camera restoration.
+3. Run deterministic PIE acceptance through the real shortcut route, proving
+   document/preview parity, history cap/branch behavior, and invalid-attempt
+   no-ops.
+4. Cook/package and run the same small slice in normal Conan Enhanced, then on
+   the controlled G-Portal server with identical client/server Workshop build.
+5. Only after those gates pass, specify the smallest useful authoring UI from
+   observed workflow friction. A custom timeline is not assumed to be necessary.
+6. Close, sync, run the complete repository suite, commit, and push after each
    meaningful compiled milestone.
 
 The first supported cook/package and normal-client test remain mandatory before
 any public release or Workshop/G-Portal deployment; they resume in an attended
 session without invalidating the implementation work above.
+
+### UX investment gate
+
+The current product surface is intentionally shortcuts, path-preview geometry,
+and diagnostic logs. No timeline, inspector, curve editor, or flypath library UI
+is authorized by implementation momentum alone. UX work begins only after the
+same camera/authoring/history slice passes structural contracts, PIE, a cooked
+normal client, and the controlled G-Portal environment. The first UX prototype
+must solve problems observed during those tests and stay small enough to discard
+or reshape cheaply.
 
 The shortcut-extension preparation sequence, run from the repository root after
 copying the complete live EventGraph, is:
@@ -427,7 +449,9 @@ Create an in-memory private Flypath and edit intentional waypoints.
 4. Jump the editor camera to a selected waypoint without moving the pawn.
 5. Provide exact numeric transform editing plus WASD/mouse fine adjustment.
 6. Render numbered markers and a linear path preview.
-7. Implement transactional undo/redo for all waypoint operations.
+7. Implement transactional undo/redo for all waypoint operations. The bounded
+   history core and capture/replace/delete transaction boundaries are complete;
+   physical shortcuts, logs, and runtime acceptance remain.
 8. Implement structural validation and clear diagnostics.
 9. Keep draft model independent from preview actor components.
 
@@ -950,17 +974,19 @@ is complete; that gate still requires cooked multiplayer acceptance.
 ## 18. Immediate execution priority
 
 The installation, camera foundation, typed draft/document sync, linear playback,
-and client-owned marker/linear-segment preview are complete. Follow the exact session
-runbook in section 1.1. The immediate sequence is:
+client-owned marker/linear-segment preview, and bounded history transaction core
+are complete. Follow the exact session runbook in section 1.1. The immediate
+sequence is:
 
-1. Add bounded draft undo/redo transactions and prove document/preview parity.
-2. Add local serialization and restore validation for authored drafts.
-3. Build cinematic interpolation profiles on the validated absolute-time kernel.
-4. Begin the editor HUD around the validated authoring, selection, playback, and
-   preview contracts without coupling presentation state to the document model.
-5. Run the first cook/package proof in normal Conan Enhanced during an attended
-   session, then create the controlled test Workshop/G-Portal path only after the
-   cooked build passes locally.
+1. Wire and log Ctrl+Z/Ctrl+Y, then prove history/document/preview parity and
+   invalid-attempt no-ops through the physical shortcut route in PIE.
+2. Run the first cook/package proof in normal Conan Enhanced during an attended
+   session, then repeat the validated slice through the controlled
+   Workshop/G-Portal path.
+3. Add local serialization and restore validation for authored drafts.
+4. Build cinematic interpolation profiles on the validated absolute-time kernel.
+5. Design the minimum editor HUD only from validated real-environment needs;
+   defer the custom timeline until testing demonstrates that it earns its cost.
 
 The first public capability milestone is not “the camera moved in PIE.” It is
 “the cooked mod entered, flew, authored a small draft, and exited safely on a

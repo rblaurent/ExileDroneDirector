@@ -183,9 +183,12 @@ rebuilds it, playback preserves it, and exit destroys it idempotently. A
 two-client PIE acceptance produced 2 markers plus 1 segment through the real
 capture path, created a fresh actor on re-entry, left the remote client isolated,
 and ended in `EDD_PATH_PREVIEW_LIFECYCLE_PIE:AUTOMATIC_RESULT:PASS`. Bounded draft
-undo/redo is the next local-authoring slice.
-Cooked-package validation remains required but is explicitly deferred until an
-attended session.
+undo/redo now has a compiled six-function history core plus one guarded,
+pre-mutation snapshot on each capture/replace/delete path. The generated and live
+round-trips pass semantic contracts; Ctrl+Z/Ctrl+Y, explicit runtime logs, and PIE
+acceptance are the next local-authoring slice.
+Polished UI and timeline work are deliberately deferred until this shortcut/log
+slice passes PIE, a cooked normal client, and the controlled G-Portal environment.
 
 ## Repository layout
 

@@ -44,6 +44,8 @@ $requiredFiles = @(
     'tools\document\test_waypoint_bridge.py',
     'tools\document\blueprint_v1_schema.json',
     'tools\document\test_blueprint_v1_schema.py',
+    'tools\document\document_bridge.py',
+    'tools\document\test_document_bridge.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -220,4 +222,9 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\document\test_blueprint_v1_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Blueprint version-1 schema contracts failed with exit code $LASTEXITCODE."
+}
+
+& python (Join-Path $ProjectRoot 'tools\document\test_document_bridge.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Typed document bridge contracts failed with exit code $LASTEXITCODE."
 }

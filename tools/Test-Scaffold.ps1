@@ -31,6 +31,7 @@ $requiredFiles = @(
     'tools\unreal\Configure-WaypointDocumentBridge.py',
     'tools\unreal\Configure-WaypointStructSync.py',
     'tools\unreal\Configure-FlypathDocumentBridge.py',
+    'tools\unreal\Configure-DocumentSync.py',
     'tools\unreal\Configure-LinearPlayback.py',
     'tools\unreal\Probe-WaypointTypes.py',
     'tools\unreal\Validate-WaypointCapturePIE.py',

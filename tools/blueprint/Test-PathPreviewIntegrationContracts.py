@@ -92,6 +92,41 @@ def assert_mutation(c, nodes, entry_name: str, expected_paths: int, *, paste: bo
         entry = next(node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class)
         entry_branch = c.linked_target(nodes, entry, "then", "execute", "K2Node_IfThenElse")
         c.require(entry_branch in branches, f"{entry_name} entry must drive a branch")
+    if entry_name in {"CaptureCurrentWaypoint", "ReplaceSelectedWaypoint"}:
+        validity_calls = calls(nodes, "IsValid")
+        c.require(len(validity_calls) == 1, f"{entry_name} camera-validity call count changed")
+        validity_call = validity_calls[0]
+        validity_guards = [
+            branch
+            for branch in branches
+            if any(target == validity_call.name for target, _ in branch.pins["Condition"].links)
+        ]
+        c.require(len(validity_guards) == 1, f"{entry_name} camera-validity guard changed")
+        validity_guard = validity_guards[0]
+        if paste:
+            c.require(
+                not validity_guard.pins["execute"].links,
+                f"{entry_name} paste entry must expose the camera-validity guard",
+            )
+        else:
+            entry = next(node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class)
+            c.require_link(
+                entry,
+                "then",
+                validity_guard,
+                "execute",
+                f"{entry_name} entry must evaluate camera validity first",
+            )
+        if entry_name == "ReplaceSelectedWaypoint":
+            index_guards = [branch for branch in branches if branch is not validity_guard]
+            c.require(len(index_guards) == 1, "Replace must retain exactly one selected-index guard")
+            c.require_link(
+                validity_guard,
+                "then",
+                index_guards[0],
+                "execute",
+                "Replace must evaluate selected-index validity only after camera validity",
+            )
     c.require(not calls(nodes, "SyncDraftWaypointsV1"), f"{entry_name} must not leave the document stale")
     syncs = calls(nodes, "SyncDraftDocumentV1")
     refreshes = calls(nodes, "RefreshPathPreviewV1")

@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.20.0-waypoint-preflight`
+Current internal build: `0.21.0-flypath-schema-bridge`
 
 ## 1. Delivery strategy
 
@@ -91,6 +91,11 @@ This section is the authoritative handoff. Detailed evidence remains in
   matches that complete preflight contract. `DraftWaypointsV1` is the validated
   authoritative read-side snapshot; the legacy arrays remain transitional
   write-side mutation channels until the authoring functions are migrated.
+- `ST_EDD_Segment` and `ST_EDD_FlypathDocument` now contain the exact checked-in
+  version-1 Blueprint schema. The client component compiles with empty
+  `DraftSegmentsV1` and default-constructed `DraftDocumentV1` members. The
+  schema/configurator contract is deterministic, executable, and idempotent;
+  document population is deliberately the next transactional slice.
 - The generated 84-node/362-pin sync graph and copied post-compile Unreal
   round-trip both pass reciprocal-link and semantic contracts. A production-path
   PIE run
@@ -136,8 +141,9 @@ This section is the authoritative handoff. Detailed evidence remains in
 The user explicitly deferred the attended cook/Workshop step for the night. The
 next autonomous implementation slice is therefore:
 
-1. Author and validate the segment/Flypath document bridge on top of the now
-   authoritative typed waypoint snapshot.
+1. Populate `DraftSegmentsV1` and `DraftDocumentV1` transactionally from the
+   authoritative `DraftWaypointsV1` snapshot, with deterministic segment IDs,
+   endpoint references, duration totals, and preserve-prior-on-invalid behavior.
 2. Add visible waypoint/path preview and undo/redo as bounded, independently
    validated vertical slices.
 3. Preserve the physical F10/K/P/P/F9 route as the regression acceptance path
@@ -865,7 +871,7 @@ Content/Mods/ExileDroneDirector/
 
 Version numbers describe capability gates, not calendar promises.
 
-Internal checkpoint versions such as `0.20.0-waypoint-preflight` count validated
+Internal checkpoint versions such as `0.21.0-flypath-schema-bridge` count validated
 development slices. They do not claim that the public **0.1 Camera Spike** gate
 is complete; that gate still requires cooked multiplayer acceptance.
 
@@ -874,7 +880,8 @@ is complete; that gate still requires cooked multiplayer acceptance.
 The installation and initial camera reconnaissance are complete. Follow the
 exact session runbook in section 1.1. The immediate sequence is:
 
-1. Visible path preview, document structs, serialization, and undo/redo.
+1. Transactional document population, visible path preview, serialization, and
+   undo/redo.
 2. Cinematic interpolation profiles built on the validated absolute-time kernel.
 3. First cook/package proof in normal Conan Enhanced when an attended session is
    available.

@@ -157,8 +157,13 @@ rebuild, exact two-waypoint mapping, idempotence, exact typed parity after both
 captures/replacement/survivor and empty deletion, invalid-edit no-ops, and
 restoration. `DraftWaypointsV1` is now the validated authoritative read-side
 snapshot; the six legacy arrays remain only the transitional write-side
-capture/edit channels. The next autonomous slice starts the segment and Flypath
-document assets, visible path preview, and undo/redo.
+capture/edit channels. The exact version-1 `ST_EDD_Segment` and
+`ST_EDD_FlypathDocument` schemas are now authored and compiled as well, and the
+client owns empty typed `DraftSegmentsV1` plus default-constructed
+`DraftDocumentV1` bridge members. Their checked-in schema contract and
+configurator are deterministic and idempotent. The next autonomous slice
+transactionally populates those members from `DraftWaypointsV1`, followed by
+visible path preview and undo/redo.
 Cooked-package validation remains required but is explicitly deferred until an
 attended session.
 

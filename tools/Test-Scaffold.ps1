@@ -30,6 +30,7 @@ $requiredFiles = @(
     'tools\unreal\Configure-WaypointCapture.py',
     'tools\unreal\Configure-WaypointDocumentBridge.py',
     'tools\unreal\Configure-WaypointStructSync.py',
+    'tools\unreal\Configure-FlypathDocumentBridge.py',
     'tools\unreal\Configure-LinearPlayback.py',
     'tools\unreal\Probe-WaypointTypes.py',
     'tools\unreal\Validate-WaypointCapturePIE.py',
@@ -41,6 +42,8 @@ $requiredFiles = @(
     'tools\document\test_flypath_document.py',
     'tools\document\waypoint_bridge.py',
     'tools\document\test_waypoint_bridge.py',
+    'tools\document\blueprint_v1_schema.json',
+    'tools\document\test_blueprint_v1_schema.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -212,4 +215,9 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\document\test_waypoint_bridge.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Waypoint bridge contracts failed with exit code $LASTEXITCODE."
+}
+
+& python (Join-Path $ProjectRoot 'tools\document\test_blueprint_v1_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Blueprint version-1 schema contracts failed with exit code $LASTEXITCODE."
 }

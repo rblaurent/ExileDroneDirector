@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "structs": {
+    "ST_EDD_Waypoint": {
+      "asset": "Local/Data/Structs/ST_EDD_Waypoint.uasset",
+      "purpose": "Lossless typed snapshot of the six proven authoring channels.",
+      "fields": [
+        { "name": "WaypointId", "type": "Integer", "container": "None", "default": 0 },
+        { "name": "CameraTransform", "type": "Transform", "container": "None" },
+        { "name": "FocalLength", "type": "Float", "container": "None", "default": 35.0 },
+        { "name": "Aperture", "type": "Float", "container": "None", "default": 2.8 },
+        { "name": "ManualFocusDistance", "type": "Float", "container": "None", "default": 1000.0 },
+        { "name": "HoldSeconds", "type": "Float", "container": "None", "default": 0.0 }
+      ]
+    },
+    "ST_EDD_Segment": {
+      "asset": "Local/Data/Structs/ST_EDD_Segment.uasset",
+      "purpose": "Version-1 authored transition between adjacent waypoint IDs.",
+      "fields": [
+        { "name": "SegmentId", "type": "Integer", "container": "None", "default": 0 },
+        { "name": "FromWaypointId", "type": "Integer", "container": "None", "default": 0 },
+        { "name": "ToWaypointId", "type": "Integer", "container": "None", "default": 0 },
+        { "name": "DurationSeconds", "type": "Float", "container": "None", "default": 3.0 },
+        { "name": "SpatialCurveType", "type": "String", "container": "None", "default": "linear" },
+        { "name": "TimeProfile", "type": "String", "container": "None", "default": "linear" }
+      ]
+    },
+    "ST_EDD_FlypathDocument": {
+      "asset": "Local/Data/Structs/ST_EDD_FlypathDocument.uasset",
+      "purpose": "Version-1 editable revision payload shared by local authoring and persistence adapters.",
+      "fields": [
+        { "name": "SchemaVersion", "type": "Integer", "container": "None", "default": 1 },
+        { "name": "TrajectoryEngineVersion", "type": "Integer", "container": "None", "default": 1 },
+        { "name": "RevisionNumber", "type": "Integer", "container": "None", "default": 0 },
+        { "name": "RegionId", "type": "String", "container": "None", "default": "" },
+        { "name": "DurationSeconds", "type": "Float", "container": "None", "default": 0.0 },
+        { "name": "DefaultFlightProfile", "type": "String", "container": "None", "default": "cinematic_drone" },
+        { "name": "Waypoints", "type": "ST_EDD_Waypoint", "container": "Array" },
+        { "name": "Segments", "type": "ST_EDD_Segment", "container": "Array" },
+        { "name": "ContentHash", "type": "String", "container": "None", "default": "" }
+      ]
+    }
+  },
+  "clientVariables": [
+    { "name": "DraftWaypointsV1", "type": "ST_EDD_Waypoint", "container": "Array" },
+    { "name": "DraftSegmentsV1", "type": "ST_EDD_Segment", "container": "Array" },
+    { "name": "DraftDocumentV1", "type": "ST_EDD_FlypathDocument", "container": "None" }
+  ]
+}

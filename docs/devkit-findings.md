@@ -1101,6 +1101,55 @@ authoritative read-side waypoint snapshot after each successful authoring
 mutation; the six arrays remain transitional write-side channels until direct
 typed mutation replaces them.
 
+## Typed segment and Flypath document schema bridge (2026-08-10)
+
+The version-1 Blueprint document boundary is now authored in the Enhanced
+DevKit and mirrored in source control. `ST_EDD_Segment` has these exact ordered
+fields and defaults:
+
+- `SegmentId` — Integer, `0`
+- `FromWaypointId` — Integer, `0`
+- `ToWaypointId` — Integer, `0`
+- `DurationSeconds` — Float, `3.0`
+- `SpatialCurveType` — String, `linear`
+- `TimeProfile` — String, `linear`
+
+`ST_EDD_FlypathDocument` has these exact ordered fields and defaults:
+
+- `SchemaVersion` — Integer, `1`
+- `TrajectoryEngineVersion` — Integer, `1`
+- `RevisionNumber` — Integer, `0`
+- `RegionId` — String, empty
+- `DurationSeconds` — Float, `0.0`
+- `DefaultFlightProfile` — String, `cinematic_drone`
+- `Waypoints` — Array of `ST_EDD_Waypoint`
+- `Segments` — Array of `ST_EDD_Segment`
+- `ContentHash` — String, empty
+
+`tools/document/blueprint_v1_schema.json` is the deterministic source-side
+contract. Its test locks the field order, names, types, containers, defaults,
+and the two client bridge variables against the executable document oracle.
+`Configure-FlypathDocumentBridge.py` adds `DraftSegmentsV1` and
+`DraftDocumentV1` to `BPC_EDD_ClientDirector`, compiles and saves the Blueprint,
+verifies safe empty/default construction, and is idempotent. A second run found
+both variables already present and completed successfully.
+
+The user-defined-struct editor has a dangerous row-selection trap: the type
+picker overlays later rows, and clicking near its left-side search box can also
+activate the type control underneath. The reliable procedure is to open the
+picker, focus the far-right side of its search field, filter, click the result
+text rather than its blue struct icon, and immediately verify the selected row
+before changing the container. All eighteen authored field/type/container
+choices and the non-empty defaults were visually rechecked before saving.
+Binary token checks then confirmed the field names, nested struct references,
+array/property metadata, and `linear`/`cinematic_drone` defaults in the synced
+assets.
+
+This milestone proves the typed storage boundary, not document population.
+`DraftSegmentsV1` is empty and `DraftDocumentV1` is default-constructed by
+design. The next function must build both transactionally from the validated
+`DraftWaypointsV1` snapshot and preserve the prior document on rejection.
+
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 
 The installed `DreamworldMods` plugin declares editor support for cooking,

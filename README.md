@@ -171,8 +171,13 @@ two-waypoint rebuilds, authored-segment and metadata preservation, idempotence,
 malformed-input rollback, and exact class-default restoration.
 `BP_EDD_PathPreview` now owns typed document input plus pooled sphere/cube HISM
 components. Its first live body, `ClearPreviewV1`, compiles and clears both pools
-in a contract-tested order. The visible document-to-instance rebuild and PIE
-transform proof are next, followed by client lifecycle integration and undo/redo.
+in a contract-tested order. `RebuildPreviewV1` now clears stale state, honors
+`PreviewEnabled`, and projects every typed waypoint into one world-space sphere
+instance while preserving camera location/rotation and applying uniform marker
+scale. A three-phase production-path PIE gate proves exact one/two-marker counts,
+transforms, empty segment ownership, clear-to-zero behavior, default restoration,
+and temporary-actor cleanup. Linear segment instances are the next preview slice,
+followed by client lifecycle integration and undo/redo.
 Cooked-package validation remains required but is explicitly deferred until an
 attended session.
 

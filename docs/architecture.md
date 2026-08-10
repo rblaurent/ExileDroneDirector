@@ -193,7 +193,12 @@ flow.
 waypoint pool first and the segment pool second, is safe on already-empty pools,
 and does not mutate `PreviewDocumentV1`. `RebuildPreviewV1` must begin through
 that function before projecting any document state; callers never clear or add
-instances directly.
+instances directly. Its first compiled slice exits immediately when
+`PreviewEnabled` is false. Otherwise it iterates the typed document's ordered
+`ST_EDD_Waypoint` array and adds one world-space sphere instance per authored
+`CameraTransform`, preserving location and rotation while replacing scale with
+uniform `MarkerScaleV1`. Segment projection remains a separate follow-up slice,
+so the marker loop never writes to `SegmentLinesV1`.
 
 ### 3.6 `BP_EDD_FlypathRepository`
 

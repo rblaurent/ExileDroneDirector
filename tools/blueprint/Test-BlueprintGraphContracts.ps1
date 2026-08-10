@@ -52,6 +52,7 @@ $cachePawnPath = Join-Path $snippetRoot 'cache-original-pawn.eddgraph'
 $possessDronePath = Join-Path $snippetRoot 'possess-drone-camera.eddgraph'
 $restorePawnPath = Join-Path $snippetRoot 'restore-original-possession.eddgraph'
 $clearPathPreviewPath = Join-Path $snippetRoot 'clear-path-preview-v1.eddgraph'
+$rebuildPathPreviewPath = Join-Path $snippetRoot 'rebuild-path-preview-markers-v1.eddgraph'
 $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1'
 
 & $validator -Path @(
@@ -79,11 +80,12 @@ $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.
     $cachePawnPath,
     $possessDronePath,
     $restorePawnPath,
-    $clearPathPreviewPath
+    $clearPathPreviewPath,
+    $rebuildPathPreviewPath
 ) -AllowTokens | Write-Verbose
 
 $pathPreviewContractTester = Join-Path $ProjectRoot 'tools\blueprint\Test-PathPreviewContracts.py'
-& python $pathPreviewContractTester --clear $clearPathPreviewPath
+& python $pathPreviewContractTester --clear $clearPathPreviewPath --rebuild $rebuildPathPreviewPath
 if ($LASTEXITCODE -ne 0) {
     throw "Path-preview semantic contracts failed with exit code $LASTEXITCODE."
 }
@@ -889,4 +891,4 @@ foreach ($viewGraph in @($place, $activate, $switch, $exit, $movement, $rotation
     }
 }
 
-Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, capture-current-waypoint, client-director-event-graph, apply-translation-input, apply-rotation-input, apply-roll-and-horizon-input, update-speed-controls, drone-camera-event-graph (legacy possession helpers also remain structurally validated)'
+Write-Output 'Blueprint graph contracts valid: toggle-input, toggle-state, enter-drone-mode, place-drone-at-current-view, activate-drone-view, switch-to-drone-view, exit-drone-mode, emergency-exit-drone-mode, capture-current-waypoint, client-director-event-graph, apply-translation-input, apply-rotation-input, apply-roll-and-horizon-input, update-speed-controls, drone-camera-event-graph, clear-path-preview-v1, rebuild-path-preview-markers-v1 (legacy possession helpers also remain structurally validated)'

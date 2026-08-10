@@ -1332,6 +1332,53 @@ This is clear-path structural proof, not visible runtime proof. The next bounded
 gate is the `RebuildPreviewV1` body, followed by direct PIE instance-count and
 transform validation before any client-director lifecycle integration.
 
+### Typed waypoint marker rebuild and runtime proof
+
+`RebuildPreviewV1` now contains a compiled and saved 14-node/60-pin first
+rendering slice. Its execution contract is clear, then enabled guard, then typed
+waypoint loop. `PreviewDocumentV1` feeds the native
+`ST_EDD_FlypathDocument` break; its waypoint array feeds `ForEachLoop`; each
+native `ST_EDD_Waypoint` break supplies `CameraTransform` to `BreakTransform`.
+Location and rotation pass through unchanged, while `MarkerScaleV1` drives all
+three axes of a replacement scale vector. `AddInstance` targets
+`WaypointMarkersV1` with `bWorldSpace=true`. The marker-only slice contains no
+`SegmentLinesV1` reference.
+
+The deterministic builder, generated full/paste forms, fresh Unreal round-trip,
+generic reciprocal-link validator, and dedicated semantic validator all agree.
+Unreal's round-trip inserted resolved `MemberGuid` values before
+`bSelfContext=True` on same-Blueprint function/variable references. Contracts
+therefore match the stable member identity and prove exact data/exec links rather
+than rejecting valid native serialization normalization.
+
+`Validate-PathPreviewMarkersPIE.py` provides the runtime gate. Phase one uses the
+production drone, capture, waypoint sync, and document sync path to author two
+typed waypoints. Phases two and three construct fresh preview actors with one and
+two waypoints respectively. They proved exact HISM instance counts, authored
+world locations/rotations, uniform `MarkerScaleV1`, an untouched zero-instance
+segment pool, and one-to-zero plus two-to-zero clears. The final evidence ended in:
+
+- `1_MARKER_TRANSFORMS_VALID:True`
+- `1_TO_ZERO_CLEAR_VALID:True`
+- `2_MARKER_TRANSFORMS_VALID:True`
+- `2_TO_ZERO_CLEAR_VALID:True`
+- `DEFAULTS_RESTORED:True`
+- `EDITOR_ACTOR_CLEANED:True`
+- `AUTOMATIC_RESULT:PASS`
+
+This DevKit exposes no generic world-specific actor spawn through Python, and
+its editor actor API refuses calls while PIE is active. The validated harness
+pattern is to place one temporary non-transient actor before PIE so Unreal
+duplicates it into the PIE world, require exactly one duplicated class instance,
+then destroy the editor source after PIE. The test never saves the dirty level or
+restored CDO state. Unreal exited through `LogExit: Exiting.` before the saved
+package was synced; live and repository SHA-256 are both
+`7E366E3CC26B37CD5949265C5255D110091EB210D692613978DF77FEDB10F69B`.
+
+The next bounded gate is linear `SegmentLinesV1` projection using the already
+tested midpoint/orientation/length geometry contract, followed by client
+lifecycle integration.
+
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 
 The installed `DreamworldMods` plugin declares editor support for cooking,

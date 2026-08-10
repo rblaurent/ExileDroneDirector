@@ -136,13 +136,20 @@ This section is the authoritative handoff. Detailed evidence remains in
   sphere and cube meshes. `ClearPreviewV1` is a compiled and saved five-node
   live function that clears `WaypointMarkersV1` before `SegmentLinesV1`; its
   fresh Unreal export has 11 pins and passes reciprocal-link plus dedicated
-  semantic contracts. `RebuildPreviewV1` remains an empty verified seam. A
-  seven-case pure geometry oracle locks ordered marker placement,
+  semantic contracts. `RebuildPreviewV1` now has a compiled 14-node/60-pin
+  marker slice: clear both pools, guard on `PreviewEnabled`, break the typed
+  document, iterate ordered typed waypoints, preserve each camera location and
+  rotation, replace scale with uniform `MarkerScaleV1`, and add one world-space
+  sphere instance. The checked live export and deterministic generator both pass
+  structural and semantic contracts. A three-phase production-path PIE gate
+  proved exact one/two-marker counts and transforms, zero segment instances,
+  clear-to-zero behavior, class-default restoration, and temporary-actor cleanup.
+  A seven-case pure geometry oracle also locks ordered marker placement,
   midpoint/orientation/length scaling for linear segments, vertical paths,
   degenerate adjacency suppression, invalid-value rejection, and history
-  independence. The rebuild body, direct PIE instance-count/transform proof,
-  and client lifecycle wiring are the next gates; visible runtime output is not
-  claimed yet.
+  independence. Linear segment projection is the next bounded preview gate;
+  client lifecycle wiring follows it. Visible marker runtime output is now
+  claimed, while visible segment output is not.
 
 ### Reproducible graph evidence
 
@@ -443,6 +450,17 @@ and passed production-path PIE for empty, exact two-waypoint, idempotent, and
 restoration behavior. Capture/edit dispatch calls it on every successful
 mutation, making the typed array the authoritative read-side document snapshot
 while the legacy arrays remain temporary write-side channels.
+
+The first visible preview slice is also live. `RebuildPreviewV1` consumes the
+accepted `ST_EDD_FlypathDocument` directly, clears both HISM pools before every
+evaluation, stops cleanly when preview is disabled, and adds one ordered
+world-space marker for every typed waypoint. A three-phase PIE harness uses the
+real capture/document pipeline to seed one and then two waypoints into fresh
+preview actors. It proves exact instance transforms and counts, confirms the
+segment pool stays empty in the marker-only slice, exercises one-to-zero and two-to-zero
+clears, restores class defaults, and removes every temporary editor actor. The
+next step is the independently contract-tested linear segment loop, followed by
+client-owned spawn/update/teardown wiring.
 
 ### Verification
 

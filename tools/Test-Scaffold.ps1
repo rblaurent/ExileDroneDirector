@@ -39,6 +39,7 @@ $requiredFiles = @(
     'tools\unreal\Validate-WaypointStructSyncPIE.py',
     'tools\unreal\Validate-DocumentSyncPIE.py',
     'tools\unreal\Validate-LinearPlaybackPIE.py',
+    'tools\unreal\Validate-PathPreviewMarkersPIE.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
     'tools\preview\linear_preview.py',
@@ -77,11 +78,13 @@ $requiredFiles = @(
     'tools\blueprint\Test-LinearPlaybackContracts.py',
     'tools\blueprint\Test-LinearPlaybackDispatchContracts.py',
     'tools\blueprint\Test-PathPreviewContracts.py',
+    'tools\blueprint\Build-PathPreviewMarkerGraph.py',
     'tools\blueprint\templates\waypoint-capture-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-struct-sync-node-forms.eddgraph',
     'tools\blueprint\templates\document-sync-struct-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-edit-node-forms.eddgraph',
     'tools\blueprint\templates\linear-playback-node-forms.eddgraph',
+    'tools\blueprint\templates\path-preview-marker-node-forms.eddgraph',
     'tools\blueprint\snippets\toggle-input.eddgraph',
     'tools\blueprint\snippets\toggle-state.eddgraph',
     'tools\blueprint\snippets\enter-drone-mode.eddgraph',
@@ -105,8 +108,9 @@ $requiredFiles = @(
     'tools\blueprint\snippets\drone-camera-event-graph.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
-    'tools\blueprint\snippets\restore-original-possession.eddgraph'
-    'tools\blueprint\snippets\clear-path-preview-v1.eddgraph'
+    'tools\blueprint\snippets\restore-original-possession.eddgraph',
+    'tools\blueprint\snippets\clear-path-preview-v1.eddgraph',
+    'tools\blueprint\snippets\rebuild-path-preview-markers-v1.eddgraph'
 )
 
 $missing = @(
@@ -223,6 +227,42 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Linear path-preview contracts failed with exit code $LASTEXITCODE."
+}
+
+$pathPreviewNonce = [guid]::NewGuid().ToString('N')
+$generatedPathPreview = Join-Path $scratchRoot "edd-path-preview-$pathPreviewNonce.eddgraph"
+$generatedPathPreviewPaste = Join-Path $scratchRoot "edd-path-preview-$pathPreviewNonce-paste.eddgraph"
+$generatedPathPreviewRepeat = Join-Path $scratchRoot "edd-path-preview-$pathPreviewNonce-repeat.eddgraph"
+$generatedPathPreviewRepeatPaste = Join-Path $scratchRoot "edd-path-preview-$pathPreviewNonce-repeat-paste.eddgraph"
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-PathPreviewMarkerGraph.py') `
+    --project-root $ProjectRoot `
+    --output $generatedPathPreview `
+    --paste-output $generatedPathPreviewPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Path-preview marker graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-PathPreviewMarkerGraph.py') `
+    --project-root $ProjectRoot `
+    --output $generatedPathPreviewRepeat `
+    --paste-output $generatedPathPreviewRepeatPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repeated path-preview marker graph generation failed with exit code $LASTEXITCODE."
+}
+if ((Get-FileHash -Algorithm SHA256 $generatedPathPreview).Hash -ne (Get-FileHash -Algorithm SHA256 $generatedPathPreviewRepeat).Hash) {
+    throw 'Path-preview marker full-graph generation is not deterministic.'
+}
+if ((Get-FileHash -Algorithm SHA256 $generatedPathPreviewPaste).Hash -ne (Get-FileHash -Algorithm SHA256 $generatedPathPreviewRepeatPaste).Hash) {
+    throw 'Path-preview marker paste-graph generation is not deterministic.'
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path $generatedPathPreview
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path $generatedPathPreviewPaste
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-PathPreviewContracts.py') `
+    --clear (Join-Path $ProjectRoot 'tools\blueprint\snippets\clear-path-preview-v1.eddgraph') `
+    --rebuild $generatedPathPreview
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated path-preview marker contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\document\test_flypath_document.py')

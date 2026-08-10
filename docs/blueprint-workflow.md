@@ -71,6 +71,16 @@ Blueprint automation will report that valid mod assets cannot be loaded.
   that entry in the live graph and export the complete graph again. A one-sided
   serialized external link can compile green while leaving the function body
   unreachable; the checked-in contract must require both reciprocal exec links.
+- Unreal may insert `MemberGuid` between a Blueprint function/variable name and
+  `bSelfContext=True` during paste/compile round-trip. Semantic tests match the
+  stable member identity and then prove exact reciprocal links; they do not
+  require a fragile byte sequence that rejects this valid native normalization.
+- This DevKit's Python surface has no world-specific generic actor-spawn call,
+  and editor actor spawning is rejected while PIE is active. Runtime harnesses
+  that need a standalone actor must place a temporary non-transient actor before
+  PIE, verify exactly one duplicated actor in the PIE world, destroy the editor
+  source after PIE, restore all seeded class defaults, and never save the dirty
+  test level/package.
 - Runtime state machines live in named Blueprint functions or components, not a
   monolithic Event Graph.
 - PIE evidence is recorded in `docs/devkit-findings.md` before a diagnostic node

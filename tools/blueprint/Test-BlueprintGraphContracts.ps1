@@ -51,6 +51,7 @@ $droneEventPath = Join-Path $snippetRoot 'drone-camera-event-graph.eddgraph'
 $cachePawnPath = Join-Path $snippetRoot 'cache-original-pawn.eddgraph'
 $possessDronePath = Join-Path $snippetRoot 'possess-drone-camera.eddgraph'
 $restorePawnPath = Join-Path $snippetRoot 'restore-original-possession.eddgraph'
+$clearPathPreviewPath = Join-Path $snippetRoot 'clear-path-preview-v1.eddgraph'
 $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1'
 
 & $validator -Path @(
@@ -77,8 +78,15 @@ $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.
     $droneEventPath,
     $cachePawnPath,
     $possessDronePath,
-    $restorePawnPath
+    $restorePawnPath,
+    $clearPathPreviewPath
 ) -AllowTokens | Write-Verbose
+
+$pathPreviewContractTester = Join-Path $ProjectRoot 'tools\blueprint\Test-PathPreviewContracts.py'
+& python $pathPreviewContractTester --clear $clearPathPreviewPath
+if ($LASTEXITCODE -ne 0) {
+    throw "Path-preview semantic contracts failed with exit code $LASTEXITCODE."
+}
 
 $waypointContractTester = Join-Path $ProjectRoot 'tools\blueprint\Test-WaypointCaptureContracts.py'
 & python $waypointContractTester --capture $waypointCapturePath --event $eventGraphPath

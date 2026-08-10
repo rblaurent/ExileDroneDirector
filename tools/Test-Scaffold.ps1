@@ -76,6 +76,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-WaypointFeedbackContracts.py',
     'tools\blueprint\Test-LinearPlaybackContracts.py',
     'tools\blueprint\Test-LinearPlaybackDispatchContracts.py',
+    'tools\blueprint\Test-PathPreviewContracts.py',
     'tools\blueprint\templates\waypoint-capture-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-struct-sync-node-forms.eddgraph',
     'tools\blueprint\templates\document-sync-struct-node-forms.eddgraph',
@@ -105,6 +106,7 @@ $requiredFiles = @(
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph'
+    'tools\blueprint\snippets\clear-path-preview-v1.eddgraph'
 )
 
 $missing = @(

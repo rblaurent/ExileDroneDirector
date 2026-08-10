@@ -166,8 +166,13 @@ transactionally reconciles those members from `DraftWaypointsV1` in a compiled,
 saved 124-node/552-pin live graph. Structural contracts prove valid pin
 directions, monotonic ID fan-out, preserved-segment selection, three-second new
 segment defaults, duration accumulation, metadata preservation, and atomic
-publication. Runtime PIE parity is the next gate, followed by visible path
-preview and undo/redo.
+publication. A three-phase runtime PIE gate now also proves empty, single, and
+two-waypoint rebuilds, authored-segment and metadata preservation, idempotence,
+malformed-input rollback, and exact class-default restoration.
+`BP_EDD_PathPreview` now owns typed document input plus pooled sphere/cube HISM
+components. Its first live body, `ClearPreviewV1`, compiles and clears both pools
+in a contract-tested order. The visible document-to-instance rebuild and PIE
+transform proof are next, followed by client lifecycle integration and undo/redo.
 Cooked-package validation remains required but is explicitly deferred until an
 attended session.
 

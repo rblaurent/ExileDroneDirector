@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.23.0-path-preview-seam`
+Current internal build: `0.23.1-path-preview-clear`
 
 ## 1. Delivery strategy
 
@@ -132,13 +132,17 @@ This section is the authoritative handoff. Detailed evidence remains in
   repository budget pass. Tracked source is only a few MiB; DevKit and cooked
   outputs are never committed.
 - `BP_EDD_PathPreview` now has a typed `PreviewDocumentV1` seam, explicit marker
-  and line-scale defaults, empty verified `ClearPreviewV1`/`RebuildPreviewV1`
-  functions, and two non-colliding movable HISM pools using Engine sphere and
-  cube meshes. A seven-case pure geometry oracle locks ordered marker placement,
+  and line-scale defaults, and two non-colliding movable HISM pools using Engine
+  sphere and cube meshes. `ClearPreviewV1` is a compiled and saved five-node
+  live function that clears `WaypointMarkersV1` before `SegmentLinesV1`; its
+  fresh Unreal export has 11 pins and passes reciprocal-link plus dedicated
+  semantic contracts. `RebuildPreviewV1` remains an empty verified seam. A
+  seven-case pure geometry oracle locks ordered marker placement,
   midpoint/orientation/length scaling for linear segments, vertical paths,
   degenerate adjacency suppression, invalid-value rejection, and history
-  independence. The live Blueprint graph bodies and client lifecycle wiring are
-  the next gate; visible runtime output is not claimed yet.
+  independence. The rebuild body, direct PIE instance-count/transform proof,
+  and client lifecycle wiring are the next gates; visible runtime output is not
+  claimed yet.
 
 ### Reproducible graph evidence
 
@@ -167,9 +171,10 @@ This section is the authoritative handoff. Detailed evidence remains in
 The attended cook/Workshop step remains deliberately separate. The next
 autonomous implementation slice is:
 
-1. Add visible waypoint/path preview as a bounded, independently validated
-   vertical slice, driven from the accepted typed document rather than the
-   legacy capture arrays.
+1. Complete `RebuildPreviewV1` as a bounded, independently validated projection
+   from the accepted typed document: clear both pools, add ordered waypoint
+   sphere instances, add one oriented/scaled cube for each non-degenerate
+   adjacency, and prove exact instance counts/transforms in PIE.
 2. Add draft undo/redo with explicit transaction boundaries for capture,
    replace, delete, and later segment edits.
 3. Preserve the physical F10/K/P/P/F9 route and the three-phase document-sync

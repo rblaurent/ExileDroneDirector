@@ -1307,10 +1307,30 @@ thickness. Degenerate adjacencies keep their waypoint markers but emit no line.
 Seven tests cover empty/single/multi-point paths, vertical orientation,
 determinism, zero-length suppression, and invalid geometry/style values.
 
-This is a compiled storage/component seam, not visible runtime proof. The next
-bounded gate is the native Blueprint graph body for clear/rebuild, followed by
-direct PIE instance-count/transform validation before any client-director
-lifecycle integration.
+`ClearPreviewV1` is now a compiled and saved native Blueprint body. Its exact
+execution contract is:
+
+1. clear every instance from `WaypointMarkersV1`;
+2. then clear every instance from `SegmentLinesV1`;
+3. return without changing the typed preview document.
+
+The fresh live export contains five nodes and 11 pins. It passed the generic
+reciprocal-link validator and a dedicated semantic contract that binds each
+`ClearInstances` target to the correct HISM getter and requires the exact
+entry-to-waypoint-to-segment execution chain. The asset compiled `Good to go`,
+saved without a dirty marker, the editor exited through `LogExit: Exiting.`, and
+the DevKit mirror was synced only after that clean exit.
+
+Desktop graph automation on the 4K editor must explicitly opt into DPI-aware
+coordinates. A first unsaved drag landed on `PathSpline` instead of
+`WaypointMarkersV1`; immediate visual inspection caught it, the node was undone,
+and no incorrect graph was saved. Every subsequent node and wire was verified by
+screenshot and finally by a fresh clipboard export. This is now the required
+procedure for attended native-node authoring.
+
+This is clear-path structural proof, not visible runtime proof. The next bounded
+gate is the `RebuildPreviewV1` body, followed by direct PIE instance-count and
+transform validation before any client-director lifecycle integration.
 
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 

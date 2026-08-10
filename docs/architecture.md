@@ -189,6 +189,12 @@ collision or shadows and remain independent from the document model. Later
 curve modes may replace segment transforms without changing ownership or data
 flow.
 
+`ClearPreviewV1` owns the stale-instance invariant. It always clears the
+waypoint pool first and the segment pool second, is safe on already-empty pools,
+and does not mutate `PreviewDocumentV1`. `RebuildPreviewV1` must begin through
+that function before projecting any document state; callers never clear or add
+instances directly.
+
 ### 3.6 `BP_EDD_FlypathRepository`
 
 Logical server repository. Its physical form depends on the persistence API

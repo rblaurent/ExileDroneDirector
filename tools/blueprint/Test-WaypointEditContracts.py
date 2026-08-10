@@ -20,7 +20,7 @@ def load_contract_helpers(project_root: Path):
 
 
 def assert_replace(c, nodes) -> None:
-    c.require(len(nodes) in {20, 21}, f"ReplaceSelectedWaypoint expected 20 or 21 nodes; found {len(nodes)}")
+    c.require(len(nodes) in {21, 22}, f"ReplaceSelectedWaypoint expected 21 or 22 nodes; found {len(nodes)}")
     entries = [node for node in nodes.values() if 'FunctionReference=(MemberName="ReplaceSelectedWaypoint")' in node.text]
     c.require(len(entries) <= 1, "Replace may contain at most one function entry")
     camera = c.one(nodes, 'VariableReference=(MemberName="DroneCameraRef"')
@@ -45,11 +45,7 @@ def assert_replace(c, nodes) -> None:
     if entries:
         c.require_link(entries[0], "then", camera_branch, "execute", "Replace entry must validate camera")
     else:
-        c.require(
-            ("K2Node_FunctionEntry_0", "111F89B1473FE6CA0E8F79BAD3C77596")
-            in c.pin(camera_branch, "execute").links,
-            "Paste graph must retain the exact live ReplaceSelectedWaypoint entry link",
-        )
+        c.require(not c.pin(camera_branch, "execute").links, "Replace paste entry pin must be intentionally unwired")
     c.require_link(camera, "DroneCameraRef", valid_object, "Object", "Replace must validate DroneCameraRef")
     c.require_link(camera_branch, "then", index_branch, "execute", "Index validation must follow camera validation")
     c.require_link(ids, "DraftWaypointIds", valid_index, "TargetArray", "Stable-ID array must define valid indices")
@@ -66,7 +62,8 @@ def assert_replace(c, nodes) -> None:
         ("DraftWaypointApertures", "real", "double", c.one(nodes, 'MemberName="Aperture",MemberGuid='), "Aperture"),
         ("DraftWaypointFocusDistances", "real", "double", c.one(nodes, 'MemberName="ManualFocusDistance",MemberGuid='), "ManualFocusDistance"),
     )
-    exec_chain = [index_branch, *setters, c.one(nodes, 'MemberName="PrintString"')]
+    sync = c.one(nodes, 'MemberName="SyncDraftWaypointsV1"')
+    exec_chain = [index_branch, *setters, sync, c.one(nodes, 'MemberName="PrintString"')]
     for before, after in zip(exec_chain, exec_chain[1:]):
         c.require_link(before, "then", after, "execute", "Replace mutation chain must be ordered and atomic")
     for (variable, category, subcategory, source, source_pin), setter in zip(channels, setters):
@@ -86,7 +83,7 @@ def assert_replace(c, nodes) -> None:
 
 
 def assert_delete(c, nodes) -> None:
-    c.require(len(nodes) in {20, 21}, f"DeleteSelectedWaypoint expected 20 or 21 nodes; found {len(nodes)}")
+    c.require(len(nodes) in {22, 23}, f"DeleteSelectedWaypoint expected 22 or 23 nodes; found {len(nodes)}")
     entries = [node for node in nodes.values() if 'FunctionReference=(MemberName="DeleteSelectedWaypoint")' in node.text]
     c.require(len(entries) <= 1, "Delete may contain at most one function entry")
     selected_nodes = [
@@ -116,11 +113,7 @@ def assert_delete(c, nodes) -> None:
     if entries:
         c.require_link(entries[0], "then", before_branch, "execute", "Delete entry must reach pre-validation")
     else:
-        c.require(
-            ("K2Node_FunctionEntry_0", "CA70052643B7E8D2362F3DAD07B8A2F5")
-            in c.pin(before_branch, "execute").links,
-            "Paste graph must retain the exact live DeleteSelectedWaypoint entry link",
-        )
+        c.require(not c.pin(before_branch, "execute").links, "Delete paste entry pin must be intentionally unwired")
     c.require_link(ids, "DraftWaypointIds", before_valid, "TargetArray", "Delete must validate against stable IDs")
     c.require_link(selected, "SelectedWaypointIndex", before_valid, "IndexToTest", "Delete must validate the selected index")
 
@@ -151,7 +144,10 @@ def assert_delete(c, nodes) -> None:
 
     c.require_link(ids, "DraftWaypointIds", after_valid, "TargetArray", "Delete must test whether the old index survived")
     c.require_link(selected, "SelectedWaypointIndex", after_valid, "IndexToTest", "Post-delete validation must test the old index")
-    c.require(not c.pin(after_branch, "then").links, "A surviving selected index must remain unchanged")
+    sync_nodes = [node for node in nodes.values() if 'MemberName="SyncDraftWaypointsV1"' in node.text]
+    c.require(len(sync_nodes) == 2, "Delete needs one sync call for each successful selection-repair path")
+    sync_keep = next(node for node in sync_nodes if c.linked(after_branch, "then", node, "execute"))
+    c.require_link(after_branch, "then", sync_keep, "execute", "A surviving selected index must sync directly")
     c.require_link(after_branch, "else", selected_set, "execute", "Only an invalidated index may be repaired")
     length = c.one(nodes, 'MemberName="Array_Length"')
     subtract = c.one(nodes, 'MemberName="Subtract_IntInt"')
@@ -159,6 +155,8 @@ def assert_delete(c, nodes) -> None:
     c.require_link(length, "ReturnValue", subtract, "A", "Selection repair must start from array length")
     c.require('DefaultValue="1"' in c.pin(subtract, "B").body, "Selection repair must compute Length - 1")
     c.require_link(subtract, "ReturnValue", selected_set, "SelectedWaypointIndex", "Length - 1 must become the repaired selection")
+    sync_repair = next(node for node in sync_nodes if node is not sync_keep)
+    c.require_link(selected_set, "then", sync_repair, "execute", "A repaired selection must sync after the setter")
     c.require(not any('MemberName="Array_Set"' in node.text for node in nodes.values()), "Delete must not overwrite elements")
 
 

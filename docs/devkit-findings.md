@@ -1028,6 +1028,35 @@ finite/scalar-domain checks are not claimed yet. The legacy arrays remain the
 runtime authority until mutation functions call sync and those remaining
 preflight checks land.
 
+## Mutation-integrated typed waypoint parity (2026-08-10)
+
+`CaptureCurrentWaypoint`, `ReplaceSelectedWaypoint`, and
+`DeleteSelectedWaypoint` now call `SyncDraftWaypointsV1` on every successful
+mutation path before emitting feedback. Delete has two successful outcomes, so
+its surviving-selection and repaired-selection branches each own an explicit
+sync call. Invalid index paths remain mutation-free no-ops.
+
+The three graph builders now clone and retarget a native self-call form, and
+their semantic tests assert exact execution placement. Paste artifacts omit the
+native function entry deliberately; after paste, the single entry wire is drawn
+in the editor. Each live function compiled `Good to go`, was saved, copied back
+from Unreal, and passed the same capture/edit contracts as its generated source.
+
+`Validate-WaypointCapturePIE.py` now has an automatic `arm_edit_cycle` phase and
+field-resilient typed parity checks. The real Blueprint path captured two drone
+states, replaced the selected state, deleted to one survivor, deleted to empty,
+and exercised invalid delete/replace calls. After every step it compared typed
+ID, transform, focal length, aperture, focus distance, and hold time against the
+six legacy channels. All assertions passed and the run ended with
+`EDD_WAYPOINT_PIE:AUTOMATIC_RESULT:PASS`. This editor session exposed one PIE
+world, so the optional client-isolation branch reported `SKIPPED`; prior
+two-player authoring acceptance remains the isolation evidence.
+
+The typed array is therefore a validated synchronized projection of every live
+authoring mutation. The legacy channels remain authoritative until the live
+sync preflight also enforces positive unique IDs and finite camera scalar
+domains, matching the complete document oracle.
+
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 
 The installed `DreamworldMods` plugin declares editor support for cooking,

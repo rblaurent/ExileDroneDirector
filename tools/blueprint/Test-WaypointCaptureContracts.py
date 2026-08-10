@@ -86,7 +86,7 @@ def require_link(left: Node, left_pin: str, right: Node, right_pin: str, message
 
 
 def assert_capture(nodes: dict[str, Node]) -> None:
-    require(len(nodes) in {24, 25}, f"CaptureCurrentWaypoint expected 24 or 25 nodes; found {len(nodes)}")
+    require(len(nodes) in {25, 26}, f"CaptureCurrentWaypoint expected 25 or 26 nodes; found {len(nodes)}")
     entries = [node for node in nodes.values() if 'FunctionReference=(MemberName="CaptureCurrentWaypoint")' in node.text]
     require(len(entries) <= 1, "Capture may contain at most one function entry")
     branch = one(nodes, "/Script/BlueprintGraph.K2Node_IfThenElse")
@@ -109,6 +109,7 @@ def assert_capture(nodes: dict[str, Node]) -> None:
         "Capture must commit the newly appended index to SelectedWaypointIndex",
     )
     print_node = one(nodes, 'MemberName="PrintString"')
+    sync = one(nodes, 'MemberName="SyncDraftWaypointsV1"')
     require('DefaultValue="[EDD] Waypoint captured"' in print_node.text, "Capture diagnostic text changed")
 
     array_adds = sorted(
@@ -119,15 +120,11 @@ def assert_capture(nodes: dict[str, Node]) -> None:
     if entries:
         require_link(entries[0], "then", branch, "execute", "Function entry must reach the validity branch")
     else:
-        require(
-            ("K2Node_FunctionEntry_0", "279859644842DE772AC782B3D54B3ACB")
-            in pin(branch, "execute").links,
-            "Paste graph must retain the exact live CaptureCurrentWaypoint entry link",
-        )
+        require(not pin(branch, "execute").links, "Paste graph entry pin must be intentionally unwired")
     require_link(camera, "DroneCameraRef", valid, "Object", "DroneCameraRef must drive IsValid")
     require_link(valid, "ReturnValue", branch, "Condition", "IsValid must guard every append")
 
-    exec_chain = [branch, *array_adds, selected_set, next_set, print_node]
+    exec_chain = [branch, *array_adds, selected_set, next_set, sync, print_node]
     for left, right in zip(exec_chain, exec_chain[1:]):
         left_pin = "then"
         right_pin = "execute"

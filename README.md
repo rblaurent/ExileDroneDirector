@@ -151,9 +151,13 @@ cloning, attribution, and structural camera/path validation. The compiled
 mutation and rebuilds the typed array in stable source order. Its generated and
 live round-trip graphs pass semantic contracts, while production-path PIE proved
 empty rebuild, exact two-waypoint mapping, idempotence, and restoration. The
-next autonomous gate invokes that bridge after successful capture/replace/delete
-and completes scalar-domain preflight before typed data becomes authoritative;
-path preview follows.
+capture, replace, and delete functions now invoke that bridge on every
+successful mutation. Their generated graphs and copied live Unreal round-trips
+pass semantic contracts, and production-path PIE proved exact typed parity
+after both captures, replacement, survivor/empty deletion, and invalid-edit
+no-ops. The next autonomous gate completes positive-ID, uniqueness, finite, and
+camera-scalar preflight before typed data becomes authoritative; path preview
+follows.
 Cooked-package validation remains required but is explicitly deferred until an
 attended session.
 

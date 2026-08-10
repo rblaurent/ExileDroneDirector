@@ -188,6 +188,15 @@ def retarget_variable(
     node.pins[new_name] = node.pins.pop(old_name)
 
 
+def retarget_self_call(node: Node, function_name: str) -> None:
+    node.text = re.sub(
+        r"FunctionReference=\([^)]*\)",
+        f'FunctionReference=(MemberName="{function_name}",bSelfContext=True)',
+        node.text,
+        count=1,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--project-root", type=Path, required=True)
@@ -204,6 +213,7 @@ def main() -> None:
         / "waypoint-capture-node-forms.eddgraph"
     )
     enter = read_blocks(snippets / "enter-drone-mode.eddgraph")
+    event = read_blocks(snippets / "client-director-event-graph.eddgraph")
 
     templates = {
         "entry": find_block(forms, r"K2Node_FunctionEntry"),
@@ -232,6 +242,7 @@ def main() -> None:
             r"^Begin Object Class=/Script/BlueprintGraph\.K2Node_IfThenElse\b",
         ),
         "print": find_block(enter, r'MemberName="PrintString"'),
+        "sync": find_block(event, r'MemberName="StopLinearPlayback"'),
     }
 
     nodes: dict[str, Node] = {}
@@ -291,7 +302,9 @@ def main() -> None:
         SELECTED_INDEX_GUID,
     )
     next_set = add("next_set", "next_set", "K2Node_VariableSet_1", 3504, 0)
-    print_node = add("print", "print", "K2Node_CallFunction_2", 3888, 0)
+    sync = add("sync", "sync", "K2Node_CallFunction_2", 3888, 0)
+    retarget_self_call(sync, "SyncDraftWaypointsV1")
+    print_node = add("print", "print", "K2Node_CallFunction_3", 4208, 0)
     set_pin_default(print_node, "InString", "[EDD] Waypoint captured")
 
     connect(entry, "then", branch, "execute")
@@ -308,6 +321,7 @@ def main() -> None:
         add_hold,
         selected_set,
         next_set,
+        sync,
         print_node,
     ]
     connect(exec_chain[0], "then", exec_chain[1], "execute")
@@ -342,7 +356,18 @@ def main() -> None:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(full_text, encoding="utf-8")
     if args.paste_output:
-        paste_text = "\n".join(node.text for node in ordered if node.key != "entry") + "\n"
+        paste_blocks = []
+        for node in ordered:
+            if node.key == "entry":
+                continue
+            paste_blocks.append(
+                re.sub(
+                    r",LinkedTo=\(K2Node_FunctionEntry_0 [0-9A-F]{32},\)",
+                    "",
+                    node.text,
+                )
+            )
+        paste_text = "\n".join(paste_blocks) + "\n"
         args.paste_output.parent.mkdir(parents=True, exist_ok=True)
         args.paste_output.write_text(paste_text, encoding="utf-8")
 

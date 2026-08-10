@@ -16,6 +16,9 @@ The checked-in EventGraph contract separately proves the K-edge dispatch.
 
 from __future__ import annotations
 
+import time
+import traceback
+
 import unreal
 
 
@@ -35,6 +38,14 @@ CHANNELS = (
     "DraftWaypointFocusDistances",
     "DraftWaypointHoldSeconds",
 )
+FIELD_CANDIDATES = {
+    "id": ("WaypointId", "waypoint_id", "WaypointId_2_0654FE3F4542AC31B6E13BBB55C34DAE", "waypoint_id_2_0654fe3f4542ac31b6e13bbb55c34dae"),
+    "transform": ("CameraTransform", "camera_transform", "CameraTransform_5_6A923AA84DB46D9EE28DF38943321FC9", "camera_transform_5_6a923aa84db46d9ee28df38943321fc9"),
+    "focal": ("FocalLength", "focal_length", "FocalLength_8_C703B5A74B2AD4D6061535A85504FB8B", "focal_length_8_c703b5a74b2ad4d6061535a85504fb8b"),
+    "aperture": ("Aperture", "aperture", "Aperture_10_949C579344F8DFA750F1948051A417B2", "aperture_10_949c579344f8dfa750f1948051a417b2"),
+    "focus": ("ManualFocusDistance", "manual_focus_distance", "ManualFocusDistance_12_FDAA24BB4FD409CE159361B97904885F", "manual_focus_distance_12_fdaa24bb4fd409ce159361b97904885f"),
+    "hold": ("HoldSeconds", "hold_seconds", "HoldSeconds_14_09EDC66D4C9D2D3AF6C4D2A7871843EB", "hold_seconds_14_09edc66d4c9d2d3af6c4d2a7871843eb"),
+}
 FIRST_LOCATION = unreal.Vector(1111.0, 222.0, 888.0)
 FIRST_ROTATION = unreal.Rotator(pitch=34.0, yaw=5.0, roll=12.0)
 FIRST_LENS = (35.0, 2.8, 1000.0)
@@ -96,6 +107,22 @@ def channels(component) -> dict[str, list]:
     return {name: list(get_value(component, name)) for name in CHANNELS}
 
 
+def typed_field(value, logical_name: str):
+    errors = []
+    for candidate in FIELD_CANDIDATES[logical_name]:
+        try:
+            return value.get_editor_property(candidate)
+        except Exception as error:
+            errors.append(f"{candidate}:{error}")
+    raise RuntimeError(
+        f"{PREFIX}:could not resolve typed field {logical_name} on {value}; errors={errors}"
+    )
+
+
+def typed_waypoints(component) -> list:
+    return list(get_value(component, "DraftWaypointsV1"))
+
+
 def require_lengths(values: dict[str, list], expected: int) -> None:
     lengths = {name: len(value) for name, value in values.items()}
     require(all(length == expected for length in lengths.values()), f"lockstep lengths expected {expected}, received {lengths}")
@@ -130,6 +157,25 @@ def require_transform(actual, location, rotation) -> None:
     require_rotation(actual.rotation.rotator(), rotation)
 
 
+def require_transform_equal(actual, expected) -> None:
+    require_vector(actual.translation, expected.translation)
+    require_rotation(actual.rotation.rotator(), expected.rotation.rotator())
+    require_vector(actual.scale3d, expected.scale3d)
+
+
+def require_typed_parity(component, values: dict[str, list], label: str) -> None:
+    typed = typed_waypoints(component)
+    require(len(typed) == len(values["DraftWaypointIds"]), f"{label} typed length mismatch")
+    for index, value in enumerate(typed):
+        require(int(typed_field(value, "id")) == int(values["DraftWaypointIds"][index]), f"{label} typed ID mismatch at {index}")
+        require_transform_equal(typed_field(value, "transform"), values["DraftWaypointTransforms"][index])
+        close_number(typed_field(value, "focal"), values["DraftWaypointFocalLengths"][index])
+        close_number(typed_field(value, "aperture"), values["DraftWaypointApertures"][index])
+        close_number(typed_field(value, "focus"), values["DraftWaypointFocusDistances"][index])
+        close_number(typed_field(value, "hold"), values["DraftWaypointHoldSeconds"][index])
+    emit("TYPED_PARITY", f"{label}:{len(typed)}")
+
+
 def seed_camera(drone, location, rotation, lens) -> None:
     require(drone.set_actor_location(location, False, False), "failed to set drone location")
     require(drone.set_actor_rotation(rotation, False), "failed to set drone rotation")
@@ -153,8 +199,12 @@ def set_drone_class_defaults(lens) -> None:
 def prepare_fixture():
     server_world = world(0)
     default_class = load_class(DEFAULT_PAWN_CLASS_PATH)
+    controllers = [controller(server_world, 0)]
+    second_controller = unreal.GameplayStatics.get_player_controller(server_world, 1)
+    if second_controller is not None:
+        controllers.append(second_controller)
     pawns = exact_actors(server_world, default_class)
-    while len(pawns) < 2:
+    while len(pawns) < len(controllers):
         unreal.SystemLibrary.execute_console_command(server_world, "summon /Script/Engine.DefaultPawn")
         pawns = exact_actors(server_world, default_class)
     pawns.sort(key=lambda actor: actor.get_path_name())
@@ -162,11 +212,12 @@ def prepare_fixture():
         (unreal.Vector(1000.0, 0.0, 700.0), unreal.Rotator(0.0, 0.0, 0.0)),
         (unreal.Vector(1500.0, 500.0, 800.0), unreal.Rotator(0.0, 90.0, 0.0)),
     )
-    for index, (location, rotation) in enumerate(placements):
+    for index, player_controller in enumerate(controllers):
+        location, rotation = placements[index]
         pawns[index].set_actor_location(location, False, False)
         pawns[index].set_actor_rotation(rotation, False)
-        controller(server_world, index).possess(pawns[index])
-    emit("FIXTURE", "server controllers possess exact DefaultPawn instances")
+        player_controller.possess(pawns[index])
+    emit("FIXTURE", f"{len(controllers)} server controller(s) possess exact DefaultPawn instances")
 
 
 def force_game_input(player_controller) -> None:
@@ -280,6 +331,7 @@ def edit_cycle() -> None:
     require_lengths(first, 1)
     require(first["DraftWaypointIds"] == [1], "first capture ID changed")
     require(int(get_value(component, "SelectedWaypointIndex")) == 0, "first capture selection incorrect")
+    require_typed_parity(component, first, "capture-1")
 
     seed_camera(drone, SECOND_LOCATION, SECOND_ROTATION, SECOND_LENS)
     component.call_method("CaptureCurrentWaypoint")
@@ -288,6 +340,7 @@ def edit_cycle() -> None:
     require(captured["DraftWaypointIds"] == [1, 2], "captured IDs incorrect")
     require(int(get_value(component, "SelectedWaypointIndex")) == 1, "newest waypoint was not selected")
     require(int(get_value(component, "NextWaypointId")) == 3, "capture ID counter incorrect")
+    require_typed_parity(component, captured, "capture-2")
 
     original = host.get_controlled_pawn()
     component.call_method("ExitDroneMode")
@@ -311,6 +364,7 @@ def edit_cycle() -> None:
         close_number(replaced["DraftWaypointFocusDistances"][1], REPLACED_LENS[2])
         require(int(get_value(component, "NextWaypointId")) == 3, "replace mutated stable ID counter")
         require(int(get_value(component, "SelectedWaypointIndex")) == 1, "replace changed selection")
+        require_typed_parity(component, replaced, "replace")
         emit("REPLACE_VALID", True)
 
         component.call_method("DeleteSelectedWaypoint")
@@ -324,6 +378,7 @@ def edit_cycle() -> None:
         require(remaining["DraftWaypointHoldSeconds"] == [0.0], "delete desynchronized hold timing")
         require(int(get_value(component, "SelectedWaypointIndex")) == 0, "surviving index 0 should stay selected")
         require(int(get_value(component, "NextWaypointId")) == 3, "delete mutated stable ID counter")
+        require_typed_parity(component, remaining, "delete-survivor")
         emit("DELETE_SURVIVOR_VALID", True)
 
         component.call_method("DeleteSelectedWaypoint")
@@ -331,20 +386,28 @@ def edit_cycle() -> None:
         require_lengths(empty, 0)
         require(int(get_value(component, "SelectedWaypointIndex")) == -1, "empty draft must select -1")
         require(int(get_value(component, "NextWaypointId")) == 3, "last delete mutated stable ID counter")
+        require_typed_parity(component, empty, "delete-empty")
         emit("DELETE_EMPTY_VALID", True)
 
         component.call_method("DeleteSelectedWaypoint")
         component.call_method("ReplaceSelectedWaypoint")
-        require_lengths(channels(component), 0)
+        invalid = channels(component)
+        require_lengths(invalid, 0)
         require(int(get_value(component, "SelectedWaypointIndex")) == -1, "invalid edits must be no-ops")
+        require_typed_parity(component, invalid, "invalid-edit-noop")
         emit("INVALID_EDIT_NOOP_VALID", True)
 
-        client_world = world(1)
-        client_component = director(controller(client_world, 0))
-        require_lengths(channels(client_component), 0)
-        require(int(get_value(client_component, "SelectedWaypointIndex")) == -1, "host selection leaked to client")
-        require(len(exact_actors(client_world, load_class(DRONE_CLASS_PATH))) == 0, "host drone leaked into client world")
-        emit("CLIENT_ISOLATION_VALID", True)
+        client_world = unreal.find_object(None, WORLD_PATHS[1])
+        if client_world is not None:
+            client_component = director(controller(client_world, 0))
+            client_values = channels(client_component)
+            require_lengths(client_values, 0)
+            require_typed_parity(client_component, client_values, "client-isolation")
+            require(int(get_value(client_component, "SelectedWaypointIndex")) == -1, "host selection leaked to client")
+            require(len(exact_actors(client_world, load_class(DRONE_CLASS_PATH))) == 0, "host drone leaked into client world")
+            emit("CLIENT_ISOLATION_VALID", True)
+        else:
+            emit("CLIENT_ISOLATION_SKIPPED", "second PIE world unavailable")
 
         component.call_method("ExitDroneMode")
         require(host.get_controlled_pawn() == original, "exit changed controlled pawn")
@@ -464,6 +527,41 @@ def physical_after_exit() -> None:
     emit("PHYSICAL_SHORTCUT_SEQUENCE_COMPLETE", True)
 
 
+def finish_automatic_edit_cycle() -> None:
+    state = globals().get("_EDD_WAYPOINT_EDIT_CYCLE_STATE")
+    if state and state.get("callback") is not None:
+        unreal.unregister_slate_post_tick_callback(state["callback"])
+        state["callback"] = None
+    unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).editor_request_end_play()
+
+
+def automatic_edit_cycle_tick(_delta_seconds: float) -> None:
+    state = globals()["_EDD_WAYPOINT_EDIT_CYCLE_STATE"]
+    try:
+        try:
+            director(controller(world(0), 0))
+        except Exception:
+            if time.monotonic() - state["armed_at"] > 45.0:
+                raise RuntimeError(f"{PREFIX}:PIE did not become ready within 45 seconds")
+            return
+        edit_cycle()
+        emit("AUTOMATIC_RESULT", "PASS")
+        finish_automatic_edit_cycle()
+    except Exception as error:
+        unreal.log_error(f"{PREFIX}:AUTOMATIC_RESULT:FAIL:{error}\n{traceback.format_exc()}")
+        finish_automatic_edit_cycle()
+
+
+def arm_edit_cycle() -> None:
+    existing = globals().get("_EDD_WAYPOINT_EDIT_CYCLE_STATE")
+    if existing and existing.get("callback") is not None:
+        unreal.unregister_slate_post_tick_callback(existing["callback"])
+    state = {"armed_at": time.monotonic(), "callback": None}
+    globals()["_EDD_WAYPOINT_EDIT_CYCLE_STATE"] = state
+    state["callback"] = unreal.register_slate_post_tick_callback(automatic_edit_cycle_tick)
+    emit("AUTOMATIC_ARMED", True)
+
+
 phase = globals().get("EDD_PHASE", "")
 phases = {
     "prepare": prepare,
@@ -472,6 +570,7 @@ phases = {
     "capture1": capture_first_direct,
     "capture2": capture_second_direct,
     "edit_cycle": edit_cycle,
+    "arm_edit_cycle": arm_edit_cycle,
     "physical_status": physical_status,
     "physical_prepare": physical_prepare,
     "physical_after_enter": physical_after_enter,

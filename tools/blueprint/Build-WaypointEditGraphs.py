@@ -78,6 +78,9 @@ def make_templates(bp, project_root: Path) -> dict[str, str]:
         blueprint_root / "templates" / "waypoint-edit-node-forms.eddgraph"
     )
     enter = bp.read_blocks(blueprint_root / "snippets" / "enter-drone-mode.eddgraph")
+    event = bp.read_blocks(
+        blueprint_root / "snippets" / "client-director-event-graph.eddgraph"
+    )
     return {
         "entry": bp.find_block(capture, r"K2Node_FunctionEntry"),
         "ids": bp.find_block(capture, r'MemberName="DraftWaypointIds"'),
@@ -107,6 +110,7 @@ def make_templates(bp, project_root: Path) -> dict[str, str]:
             enter, r"^Begin Object Class=/Script/BlueprintGraph\.K2Node_IfThenElse\b"
         ),
         "print": bp.find_block(enter, r'MemberName="PrintString"'),
+        "sync": bp.find_block(event, r'MemberName="StopLinearPlayback"'),
     }
 
 
@@ -154,7 +158,9 @@ def build_replace(bp, templates: dict[str, str]):
     focus = add("focus", "focus", "K2Node_VariableGet_9", 2272, 400)
     set_focus = add("set_focus", "set_array", "K2Node_CallArrayFunction_4", 2560, 0)
     set_array_element_type(set_focus, ("TargetArray", "Item"), "real")
-    print_node = add("print", "print", "K2Node_CallFunction_2", 2912, 0)
+    sync = add("sync", "sync", "K2Node_CallFunction_2", 2912, 0)
+    bp.retarget_self_call(sync, "SyncDraftWaypointsV1")
+    print_node = add("print", "print", "K2Node_CallFunction_3", 3232, 0)
     bp.set_pin_default(print_node, "InString", "[EDD] Selected waypoint replaced")
 
     bp.connect(entry, "then", camera_branch, "execute")
@@ -165,7 +171,15 @@ def build_replace(bp, templates: dict[str, str]):
     bp.connect(selected, "SelectedWaypointIndex", valid_index, "IndexToTest")
     bp.connect(valid_index, "ReturnValue", index_branch, "Condition")
 
-    exec_chain = [index_branch, set_transform, set_focal, set_aperture, set_focus, print_node]
+    exec_chain = [
+        index_branch,
+        set_transform,
+        set_focal,
+        set_aperture,
+        set_focus,
+        sync,
+        print_node,
+    ]
     for before, after in zip(exec_chain, exec_chain[1:]):
         bp.connect(before, "then", after, "execute")
 
@@ -248,6 +262,10 @@ def build_delete(bp, templates: dict[str, str]):
     bp.retarget_variable(
         selected_set, "NextWaypointId", "SelectedWaypointIndex", SELECTED_INDEX_GUID
     )
+    sync_keep = add("sync_keep", "sync", "K2Node_CallFunction_0", 3360, -128)
+    bp.retarget_self_call(sync_keep, "SyncDraftWaypointsV1")
+    sync_repair = add("sync_repair", "sync", "K2Node_CallFunction_1", 3840, 128)
+    bp.retarget_self_call(sync_repair, "SyncDraftWaypointsV1")
 
     bp.connect(entry, "then", branch_before, "execute")
     bp.connect(getters["ids"], "DraftWaypointIds", valid_before, "TargetArray")
@@ -261,10 +279,12 @@ def build_delete(bp, templates: dict[str, str]):
     bp.connect(getters["ids"], "DraftWaypointIds", valid_after, "TargetArray")
     bp.connect(selected, "SelectedWaypointIndex", valid_after, "IndexToTest")
     bp.connect(valid_after, "ReturnValue", branch_after, "Condition")
+    bp.connect(branch_after, "then", sync_keep, "execute")
     bp.connect(branch_after, "else", selected_set, "execute")
     bp.connect(getters["ids"], "DraftWaypointIds", length, "TargetArray")
     bp.connect(length, "ReturnValue", subtract, "A")
     bp.connect(subtract, "ReturnValue", selected_set, "SelectedWaypointIndex")
+    bp.connect(selected_set, "then", sync_repair, "execute")
     return list(nodes.values())
 
 
@@ -274,7 +294,15 @@ def write_graph(bp, nodes, output: Path, paste_output: Path | None) -> None:
     output.write_text(full, encoding="utf-8")
     if paste_output is None:
         return
-    paste = "\n".join(node.text for node in nodes if node.key != "entry") + "\n"
+    paste = "\n".join(
+        re.sub(
+            r",LinkedTo=\(K2Node_FunctionEntry_0 [0-9A-F]{32},\)",
+            "",
+            node.text,
+        )
+        for node in nodes
+        if node.key != "entry"
+    ) + "\n"
     paste_output.parent.mkdir(parents=True, exist_ok=True)
     paste_output.write_text(paste, encoding="utf-8")
 

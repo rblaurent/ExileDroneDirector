@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.18.0-typed-waypoint-sync`
+Current internal build: `0.19.0-waypoint-sync-integration`
 
 ## 1. Delivery strategy
 
@@ -38,7 +38,9 @@ This section is the authoritative handoff. Detailed evidence remains in
   Ctrl is precision; Shift is boost; C/Z bank; H toggles horizon lock.
 - `CaptureCurrentWaypoint`, `ReplaceSelectedWaypoint`, and
   `DeleteSelectedWaypoint` are compiled live functions with reciprocal native
-  entry links.
+  entry links. Every successful mutation now invokes `SyncDraftWaypointsV1`
+  before feedback, so the typed waypoint document is updated atomically with
+  the six proven legacy channels.
 - `StartLinearPlayback`, `UpdateLinearPlayback`, and `StopLinearPlayback` are
   compiled absolute-time functions. P toggles playback; active playback ticks
   suppress manual flight and waypoint edits. Completion holds the exact final
@@ -92,6 +94,14 @@ This section is the authoritative handoff. Detailed evidence remains in
   proved empty rebuild, two exact captured struct values, repeat-sync
   idempotence, and clean camera restoration, ending in
   `EDD_WAYPOINT_STRUCT_PIE:AUTOMATIC_RESULT:PASS`.
+- The generated capture/replace/delete bodies and their copied live Unreal
+  round-trips now require the sync call on every successful execution path.
+  An adaptive production-path PIE edit cycle proved exact typed parity after
+  capture 1, capture 2, replacement, survivor deletion, empty deletion, and
+  invalid-edit no-ops. It ended in
+  `EDD_WAYPOINT_PIE:AUTOMATIC_RESULT:PASS`; the optional second-world isolation
+  branch was explicitly skipped in that one-player run and remains covered by
+  the earlier two-player authoring acceptance.
 - Repository scaffold, semantic graph contracts, Python syntax, and the 1 GiB
   repository budget pass. Tracked source is only a few MiB; DevKit and cooked
   outputs are never committed.
@@ -123,15 +133,13 @@ This section is the authoritative handoff. Detailed evidence remains in
 The user explicitly deferred the attended cook/Workshop step for the night. The
 next autonomous implementation slice is therefore:
 
-1. Call `SyncDraftWaypointsV1` after successful capture, replace, and delete;
-   validate typed parity across the complete edit cycle.
-2. Add positive-ID, uniqueness, finite-number, and camera-scalar preflight so
+1. Add positive-ID, uniqueness, finite-number, and camera-scalar preflight so
    the live function reaches full parity with the document oracle.
-3. Author the segment/Flypath structs, then add visible waypoint/path preview
+2. Author the segment/Flypath structs, then add visible waypoint/path preview
    and undo/redo as bounded, independently validated vertical slices.
-4. Preserve the physical F10/K/P/P/F9 route as the regression acceptance path
+3. Preserve the physical F10/K/P/P/F9 route as the regression acceptance path
    for every change that touches playback or authoring.
-5. Close, sync, run the complete repository suite, commit, and push after each
+4. Close, sync, run the complete repository suite, commit, and push after each
    meaningful compiled milestone.
 
 The first supported cook/package and normal-client test remain mandatory before

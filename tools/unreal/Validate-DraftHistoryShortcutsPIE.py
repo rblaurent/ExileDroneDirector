@@ -1,37 +1,35 @@
-r"""One-session PIE acceptance for physical draft-history shortcuts.
+r"""One-session programmatic PIE acceptance for draft-history semantics.
 
-Arm this script from the editor console, start AlmostEmpty PIE, then send the
-physical keys requested by its log markers::
-
-    EDD_HISTORY_SHORTCUT_PIE:READY_FOR_UNDO:True       -> Ctrl+Z
-    EDD_HISTORY_SHORTCUT_PIE:READY_FOR_REDO:True       -> Ctrl+Y
-    EDD_HISTORY_SHORTCUT_PIE:READY_FOR_BRANCH_UNDO:True -> Ctrl+Z
-    EDD_HISTORY_SHORTCUT_PIE:READY_FOR_EMPTY_REDO:True -> Ctrl+Y
-    EDD_HISTORY_SHORTCUT_PIE:READY_FOR_INVALID_REPLACE:True -> R
-    EDD_HISTORY_SHORTCUT_PIE:READY_FOR_INVALID_DELETE:True  -> Delete
-    EDD_HISTORY_SHORTCUT_PIE:READY_FOR_INACTIVE_CAPTURE:True -> K
-
-The driver also requests physical F10 before the sequence and physical F9 after
-it, because ``DroneModeActive`` is intentionally owned by the EventGraph input
-dispatcher and is not an instance-editable Python property.
+The harness loads AlmostEmpty and starts/stops PIE through
+``LevelEditorSubsystem``. It invokes the same public Blueprint operations wired
+to F10, K, Ctrl+Z/Y, and F9, then proves their runtime state transitions and edge
+cases. Deterministic graph contracts separately prove the physical shortcut
+wiring; an attended cooked-client pass owns final keyboard-routing acceptance.
 
 The driver seeds 65 accepted captures to prove the live 64-transaction cap,
 then validates undo/redo document and preview parity, redo invalidation after a
-branch edit, invalid mutation no-ops, and exact camera restoration.  It never
+branch edit, invalid mutation edge cases, and exact camera restoration. It never
 changes class defaults and ends PIE itself.
 """
 
 from __future__ import annotations
 
+import re
 import time
 import traceback
 
 import unreal
 
 
-PREFIX = "EDD_HISTORY_SHORTCUT_PIE"
-MANUAL_INPUT_TIMEOUT_SECONDS = 300.0
+PREFIX_BASE = "EDD_HISTORY_SHORTCUT_PIE"
+RUN_ID_MATCH = re.search(
+    r"(?:^|\s)-EDDPIERunId=([A-Za-z0-9-]+)",
+    unreal.SystemLibrary.get_command_line(),
+)
+RUN_ID = RUN_ID_MATCH.group(1) if RUN_ID_MATCH else "manual"
+PREFIX = f"{PREFIX_BASE}:{RUN_ID}"
 PIE_START_TIMEOUT_SECONDS = 600.0
+SOURCE_LEVEL_PATH = "/Game/Dev/AlmostEmpty"
 WORLD_PATH = "/Game/Dev/UEDPIE_0_AlmostEmpty.AlmostEmpty"
 CLIENT_CLASS_PATH = "/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector_C"
 
@@ -249,9 +247,55 @@ def finish(success: bool) -> None:
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).editor_request_end_play()
 
 
+def finish_after_pie() -> None:
+    state = globals().get("_EDD_HISTORY_SHORTCUT_STATE")
+    if state and state.get("callback") is not None:
+        unreal.unregister_slate_post_tick_callback(state["callback"])
+        state["callback"] = None
+    emit("AUTOMATIC_RESULT", "PASS")
+
+
 def tick(_delta_seconds: float) -> None:
     state = globals()["_EDD_HISTORY_SHORTCUT_STATE"]
     try:
+        if state["stage"] == "request_pie_end":
+            subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+            subsystem.editor_request_end_play()
+            state["stage"] = "wait_for_pie_end"
+            state["deadline"] = time.monotonic() + PIE_START_TIMEOUT_SECONDS
+            emit("PIE_END_REQUESTED", True)
+            return
+
+        if state["stage"] == "wait_for_pie_end":
+            subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+            if subsystem.is_in_play_in_editor():
+                require(time.monotonic() < state["deadline"], "PIE teardown timed out")
+                return
+            state["stage"] = "complete"
+            finish_after_pie()
+            return
+
+        if state["stage"] == "prepare_editor":
+            if time.monotonic() - state["stage_at"] < 1.0:
+                return
+            subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+            require(not subsystem.is_in_play_in_editor(), "PIE was already running before harness preparation")
+            require(subsystem.load_level(SOURCE_LEVEL_PATH), f"could not load source level:{SOURCE_LEVEL_PATH}")
+            state["stage"] = "request_pie"
+            state["stage_at"] = time.monotonic()
+            emit("SOURCE_LEVEL_READY", SOURCE_LEVEL_PATH)
+            return
+
+        if state["stage"] == "request_pie":
+            if time.monotonic() - state["stage_at"] < 0.5:
+                return
+            subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+            subsystem.editor_request_begin_play()
+            state["stage"] = "wait_for_pie"
+            state["deadline"] = time.monotonic() + PIE_START_TIMEOUT_SECONDS
+            emit("PIE_START_REQUESTED", True)
+            return
+
         if state["stage"] == "wait_for_pie":
             try:
                 world_object = pie_world()
@@ -275,24 +319,43 @@ def tick(_delta_seconds: float) -> None:
             component_value = director(world_object)
             owner = controller(world_object)
             force_game_input(owner)
+            unreal.SystemLibrary.execute_console_command(world_object, "God", owner)
+            emit("SURVIVAL_GUARD_REQUESTED", True)
             if bool(component_value.get_editor_property("DroneModeActive")):
                 component_value.call_method("ExitDroneMode")
             state["original_view"] = owner.get_view_target()
-            state["stage"] = "wait_enter"
-            state["deadline"] = time.monotonic() + MANUAL_INPUT_TIMEOUT_SECONDS
-            emit("READY_FOR_ENTER", True)
+            state["stable"] = fingerprint(component_value)
+            component_value.call_method("CaptureCurrentWaypoint")
+            require(
+                fingerprint(component_value) == state["stable"],
+                "capture with no drone camera mutated state/history/preview",
+            )
+            emit("EDGE_NO_CAMERA_CAPTURE_NOOP_VALID", True)
+            component_value.call_method("EnterDroneMode")
+            state["stage"] = "validate_enter"
+            emit("ACTION_ENTER_REQUESTED", True)
             return
 
         component_value = director(pie_world())
-        if state["stage"] == "wait_enter":
-            if not bool(component_value.get_editor_property("DroneModeActive")):
-                require(time.monotonic() < state["deadline"], "physical F10 timed out")
-                return
-            require(component_value.get_editor_property("DroneCameraRef") is not None, "physical F10 camera missing")
+        if state["stage"] == "validate_enter":
+            owner = controller(pie_world())
+            camera = component_value.get_editor_property("DroneCameraRef")
+            require(camera is not None, "enter did not create camera")
+            require(owner.get_view_target() == camera, "enter did not switch to the drone camera")
             require_state(component_value, 0, -1, 1, 0, 0, "baseline")
-            state["seed_index"] = 0
+            drone = component_value.get_editor_property("DroneCameraRef")
+            require(drone.set_actor_location(unreal.Vector(0.0, 0.0, 900.0), False, False), "capture fixture location")
+            require(drone.set_actor_rotation(unreal.Rotator(pitch=0.0, yaw=0.0, roll=0.0), False), "capture fixture rotation")
+            component_value.call_method("CaptureCurrentWaypoint")
+            state["stage"] = "validate_capture"
+            emit("ENTER_VALID", True)
+            emit("ACTION_CAPTURE_REQUESTED", True)
+            return
+        if state["stage"] == "validate_capture":
+            require_state(component_value, 1, 0, 2, 1, 0, "capture")
+            state["seed_index"] = 1
             state["stage"] = "seed"
-            emit("PHYSICAL_ENTER_VALID", True)
+            emit("CAPTURE_VALID", True)
             return
         if state["stage"] == "seed":
             drone = component_value.get_editor_property("DroneCameraRef")
@@ -307,39 +370,30 @@ def tick(_delta_seconds: float) -> None:
                 state["seed_index"] += 1
             if state["seed_index"] == 65:
                 require_state(component_value, 65, 64, 66, 64, 0, "history-cap")
-                state["stage"] = "wait_undo"
-                state["deadline"] = time.monotonic() + MANUAL_INPUT_TIMEOUT_SECONDS
+                component_value.call_method("UndoDraftV1")
+                state["stage"] = "validate_undo"
                 emit("HISTORY_CAP_VALID", True)
-                emit("READY_FOR_UNDO", True)
+                emit("ACTION_UNDO_REQUESTED", True)
             return
 
         count = len(component_value.get_editor_property("DraftWaypointIds"))
-        if state["stage"] == "wait_undo":
-            if count == 65:
-                require(time.monotonic() < state["deadline"], "physical Ctrl+Z timed out")
-                return
-            require_state(component_value, 64, 63, 65, 63, 1, "physical-undo")
-            state["stage"] = "wait_redo"
-            state["deadline"] = time.monotonic() + MANUAL_INPUT_TIMEOUT_SECONDS
-            emit("PHYSICAL_UNDO_VALID", True)
-            emit("READY_FOR_REDO", True)
+        if state["stage"] == "validate_undo":
+            require_state(component_value, 64, 63, 65, 63, 1, "undo")
+            component_value.call_method("RedoDraftV1")
+            state["stage"] = "validate_redo"
+            emit("UNDO_VALID", True)
+            emit("ACTION_REDO_REQUESTED", True)
             return
 
-        if state["stage"] == "wait_redo":
-            if count == 64:
-                require(time.monotonic() < state["deadline"], "physical Ctrl+Y timed out")
-                return
-            require_state(component_value, 65, 64, 66, 64, 0, "physical-redo")
-            state["stage"] = "wait_branch_undo"
-            state["deadline"] = time.monotonic() + MANUAL_INPUT_TIMEOUT_SECONDS
-            emit("PHYSICAL_REDO_VALID", True)
-            emit("READY_FOR_BRANCH_UNDO", True)
+        if state["stage"] == "validate_redo":
+            require_state(component_value, 65, 64, 66, 64, 0, "redo")
+            component_value.call_method("UndoDraftV1")
+            state["stage"] = "validate_branch_undo"
+            emit("REDO_VALID", True)
+            emit("ACTION_BRANCH_UNDO_REQUESTED", True)
             return
 
-        if state["stage"] == "wait_branch_undo":
-            if count == 65:
-                require(time.monotonic() < state["deadline"], "branch Ctrl+Z timed out")
-                return
+        if state["stage"] == "validate_branch_undo":
             require_state(component_value, 64, 63, 65, 63, 1, "branch-undo")
             drone = component_value.get_editor_property("DroneCameraRef")
             require(drone.set_actor_location(unreal.Vector(99000.0, -77000.0, 5555.0), False, False), "branch location")
@@ -347,71 +401,41 @@ def tick(_delta_seconds: float) -> None:
             component_value.call_method("CaptureCurrentWaypoint")
             require_state(component_value, 65, 64, 66, 64, 0, "branch-edit")
             state["stable"] = fingerprint(component_value)
-            state["stage"] = "wait_empty_redo"
-            state["stage_at"] = time.monotonic()
-            emit("REDO_BRANCH_INVALIDATION_VALID", True)
-            emit("READY_FOR_EMPTY_REDO", True)
-            return
-
-        if state["stage"] == "wait_empty_redo":
-            if time.monotonic() - state["stage_at"] < 2.0:
-                return
+            component_value.call_method("RedoDraftV1")
             require(fingerprint(component_value) == state["stable"], "empty redo mutated state")
             require_state(component_value, 65, 64, 66, 64, 0, "empty-redo")
+            emit("EDGE_EMPTY_REDO_NOOP_VALID", True)
+
             for _ in range(65):
                 component_value.call_method("DeleteSelectedWaypoint")
             require_state(component_value, 0, -1, 66, 64, 0, "naturally-empty")
             state["stable"] = fingerprint(component_value)
-            state["stage"] = "wait_invalid_replace"
-            state["stage_at"] = time.monotonic()
-            emit("PHYSICAL_EMPTY_REDO_NOOP_VALID", True)
-            emit("READY_FOR_INVALID_REPLACE", True)
-            return
-
-        if state["stage"] == "wait_invalid_replace":
-            if time.monotonic() - state["stage_at"] < 2.0:
-                return
-            require(fingerprint(component_value) == state["stable"], "invalid replace mutated state/history/preview")
-            state["stage"] = "wait_invalid_delete"
-            state["stage_at"] = time.monotonic()
-            emit("PHYSICAL_INVALID_REPLACE_NOOP_VALID", True)
-            emit("READY_FOR_INVALID_DELETE", True)
-            return
-
-        if state["stage"] == "wait_invalid_delete":
-            if time.monotonic() - state["stage_at"] < 2.0:
-                return
-            require(fingerprint(component_value) == state["stable"], "invalid delete mutated state/history/preview")
-            emit("PHYSICAL_INVALID_DELETE_NOOP_VALID", True)
-            state["stage"] = "wait_exit"
-            state["deadline"] = time.monotonic() + MANUAL_INPUT_TIMEOUT_SECONDS
-            emit("READY_FOR_EXIT", True)
-            return
-
-        if state["stage"] == "wait_exit":
-            if bool(component_value.get_editor_property("DroneModeActive")):
-                require(time.monotonic() < state["deadline"], "physical F9 timed out")
-                return
-            owner = controller(pie_world())
-            require(owner.get_view_target() == state["original_view"], "physical F9 did not restore exact camera")
-            require(component_value.get_editor_property("PathPreviewActorV1") is None, "physical F9 retained preview")
-            state["stable"] = fingerprint(component_value)
-            emit("CAMERA_RESTORATION_VALID", True)
-            state["stage"] = "wait_inactive_capture"
-            state["stage_at"] = time.monotonic()
-            emit("READY_FOR_INACTIVE_CAPTURE", True)
-            return
-
-        if state["stage"] == "wait_inactive_capture":
-            if time.monotonic() - state["stage_at"] < 2.0:
-                return
+            component_value.call_method("ReplaceSelectedWaypoint")
             require(
                 fingerprint(component_value) == state["stable"],
-                "physical K outside Drone Mode mutated state/history/preview",
+                "invalid replace mutated state/history/preview",
             )
-            emit("PHYSICAL_INACTIVE_CAPTURE_NOOP_VALID", True)
-            state["stage"] = "complete"
-            finish(True)
+            emit("EDGE_INVALID_REPLACE_NOOP_VALID", True)
+            component_value.call_method("DeleteSelectedWaypoint")
+            require(
+                fingerprint(component_value) == state["stable"],
+                "invalid delete mutated state/history/preview",
+            )
+            emit("EDGE_INVALID_DELETE_NOOP_VALID", True)
+
+            emit("REDO_BRANCH_INVALIDATION_VALID", True)
+            component_value.call_method("ExitDroneMode")
+            state["stage"] = "validate_exit"
+            emit("ACTION_EXIT_REQUESTED", True)
+            return
+
+        if state["stage"] == "validate_exit":
+            owner = controller(pie_world())
+            require(owner.get_view_target() == state["original_view"], "exit did not restore exact camera")
+            require(component_value.get_editor_property("PathPreviewActorV1") is None, "exit retained preview")
+            emit("CAMERA_RESTORATION_VALID", True)
+            state["stage"] = "request_pie_end"
+            return
     except Exception as error:
         unreal.log_error(f"{PREFIX}:AUTOMATIC_EXCEPTION:{error}\n{traceback.format_exc()}")
         state["stage"] = "failed"
@@ -423,7 +447,7 @@ if old_state and old_state.get("callback") is not None:
     unreal.unregister_slate_post_tick_callback(old_state["callback"])
 
 _EDD_HISTORY_SHORTCUT_STATE = {
-    "stage": "wait_for_pie",
+    "stage": "prepare_editor",
     "armed_at": time.monotonic(),
     "stage_at": time.monotonic(),
     "deadline": time.monotonic() + PIE_START_TIMEOUT_SECONDS,

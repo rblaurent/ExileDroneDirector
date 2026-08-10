@@ -190,14 +190,17 @@ This section is the authoritative handoff. Detailed evidence remains in
   terminate the tick. The 86-node/355-pin EventGraph compiled live, saved,
   round-tripped from Unreal, and passes authoring, feedback, playback, history,
   deterministic-generation, and idempotence contracts in the full scaffold.
-- The physical shortcut runtime gate now passes end to end. One focused PIE run
-  captured 65 waypoints, proved the live 64-transaction cap, restored exact
-  typed documents/source arrays/preview instances through Ctrl+Z and Ctrl+Y,
-  proved a second undo followed by branch-edit redo invalidation, and verified
-  empty redo plus invalid replace/delete as strict no-ops. F9 restored the exact
-  original view and a physical K press outside Drone Mode left the entire draft,
-  history, and preview fingerprint unchanged. The final marker was
-  `EDD_HISTORY_SHORTCUT_PIE:AUTOMATIC_RESULT:PASS`.
+- The isolated draft-history PIE gate is now a single deterministic command:
+  `tools\Run-DraftHistoryPIE.ps1`. It launches one mod-aware editor, loads
+  AlmostEmpty, starts PIE through `LevelEditorSubsystem`, applies the survival
+  guard, and executes the public Enter/Capture/Undo/Redo/Exit operations. One
+  run captured 65 waypoints, proved the live 64-transaction cap, restored exact
+  typed documents/source arrays/preview instances through undo and redo, proved
+  branch-edit redo invalidation, verified no-camera capture, empty redo, invalid
+  replace, and invalid delete through full before/after fingerprints, restored
+  the exact original view, ended PIE, emitted a run-scoped PASS, and closed the
+  editor. Deterministic graph contracts prove the F10/K/Ctrl+Z/Y/F9 wiring;
+  final physical routing belongs to the attended cooked-client gate.
 - Clean Frame is now a compiled client-local presentation primitive. F7 is
   polled after owner, Drone Mode, and camera-validity guards but before playback
   arbitration, so it remains available during free flight, authoring, and
@@ -251,22 +254,17 @@ This section is the authoritative handoff. Detailed evidence remains in
 The next implementation slice deliberately proves the product through keyboard
 controls and explicit logs before any editor UI is built:
 
-1. Sync the accepted mutation-diagnostic Blueprint round-trips from the closed
-   DevKit and preserve their structural contracts in Git.
-2. Run attended deterministic PIE acceptance through the real F10,
-   Ctrl+Z/Ctrl+Y, R, Delete, and F9 shortcut
-   route, proving
-   document/preview parity, history cap/branch behavior, and invalid-attempt
-   no-ops.
-3. Cook/package and run the same small slice in a normal local Conan Enhanced
-   **single-player game**. This is the first real-client gate and requires no
-   Workshop publication or hosted server.
-4. Only after local single-player passes, publish an explicitly test-only
+1. Preserve the repeatable PIE-runner evidence, run the scaffold/cold-load
+   gates, and commit and push the tooling checkpoint.
+2. Cook/package the current small slice and run it in a normal local Conan
+   Enhanced **single-player game**. This is the attended physical-input and
+   visual-behaviour gate; it requires no Workshop publication or hosted server.
+3. Only after local single-player passes, publish an explicitly test-only
    Workshop build and repeat the safe subset on the controlled G-Portal server
    with identical client/server version and load order.
-5. Only after those gates pass, specify the smallest useful authoring UI from
+4. Only after those gates pass, specify the smallest useful authoring UI from
    observed workflow friction. A custom timeline is not assumed to be necessary.
-6. In the first cooked-client recording acceptance, visually prove that the
+5. In the first cooked-client recording acceptance, visually prove that the
    implemented F7 `Toggle Clean Frame` action hides/restores Conan's complete
    native HUD and every mod-owned overlay without destroying the preview,
    mutating the draft, stopping playback, or disabling Emergency Exit.
@@ -1033,10 +1031,10 @@ client-owned marker/linear-segment preview, and bounded history transaction core
 are complete. Follow the exact session runbook in section 1.1. The immediate
 sequence is:
 
-1. Close/sync the completed stable mutation/no-op diagnostics, then prove
-   Ctrl+Z/Ctrl+Y
-   history/document/preview parity and invalid-attempt no-ops through the
-   physical shortcut route in PIE.
+1. Keep `tools\Run-DraftHistoryPIE.ps1`, the full scaffold, and the cold asset
+   gate green after every relevant change. Graph contracts own shortcut wiring;
+   the isolated PIE runner owns runtime history/document/preview semantics and
+   edge cases without desktop automation.
 2. Run the first cook/package proof in a normal local Conan Enhanced
    single-player save during an attended session. Include physical F7 and
    visual native-HUD Clean Frame acceptance in that real-client pass.

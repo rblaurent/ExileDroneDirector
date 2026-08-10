@@ -1633,28 +1633,33 @@ rejected path terminates before history capture, mutation, document sync, or
 preview refresh. Successful paths retain the existing dynamic count/selection
 feedback owned by the EventGraph.
 
-`Validate-DraftHistoryShortcutsPIE.py` is the focused runtime harness for the
-next gate. It seeds 65 accepted edits to prove the live 64-transaction cap,
-checks typed-document/source-array/preview parity after undo and redo, proves
-redo invalidation after a branch edit, reaches an invalid selection naturally
-by deleting the draft, checks invalid replace/delete no-ops, tests invalid
-capture through a physical K press after F9, and verifies exact original view
-restoration. Exit intentionally retains the reusable `DroneCameraRef`; the
-public EventGraph's inactive-mode guard, rather than a direct internal function
-call, is the correct user-facing no-op boundary. The harness never edits
-Blueprint class defaults or instance-locked properties.
+`Validate-DraftHistoryShortcutsPIE.py` is the focused runtime semantic harness.
+`tools\Run-DraftHistoryPIE.ps1` gives it one isolated, repeatable entry point.
+The runner launches the editor with `-ModDevKit` and a unique run ID; the Python
+state machine loads `/Game/Dev/AlmostEmpty`, requests PIE through
+`LevelEditorSubsystem`, applies `God` as a survival guard, executes the public
+Enter/Capture/Undo/Redo/Exit operations, requests teardown, and emits PASS only
+after `is_in_play_in_editor()` becomes false. The PowerShell runner accepts only
+markers containing its own run ID and then closes the exact editor process it
+created. It does not edit Blueprint defaults or require an unlocked desktop.
 
-The complete physical-input run now passes. Windows key injection must first
-focus the PIE viewport and hold each key/chord long enough to cross at least one
-game tick; instantaneous modifier down/key down/key up/modifier up sequences can
-be swallowed by the editor. With explicit holds, the run proved F10 entry, 65
-captures, the 64-entry cap, Ctrl+Z, Ctrl+Y, a second undo, branch-edit redo
-invalidation, empty redo, invalid replace/delete, F9 restoration, and inactive
-K rejection. Typed document, all six source arrays, selection, next stable ID,
-both history stacks, preview document, marker count, and segment count remained
-in parity at every checkpoint. It ended in
-`EDD_HISTORY_SHORTCUT_PIE:AUTOMATIC_RESULT:PASS`. Focus-stealing automation still
-must not run while Laurent is using the computer.
+The accepted runs `415b7ce7438e41d7994171928e9b7f6f` and
+`d8a991a262e44212bb44e42bf1aa97f1` each captured 65 waypoints,
+proved the 64-entry cap, undo, redo, branch-edit redo invalidation, full typed
+document/source-array/preview parity, exact view restoration, and no-camera
+capture, empty redo, invalid replace, and invalid delete edge cases through
+complete before/after fingerprints. It requested PIE teardown and ended in a
+run-scoped `AUTOMATIC_RESULT:PASS`; the editor then closed cleanly. Total wall
+time was 89 seconds per run, dominated by DevKit startup. The second run used
+the exact files prepared for commit and proves the command is repeatable.
+
+The separation of proof is deliberate. Deterministic `.eddgraph` contracts
+prove F10/K/Ctrl+Z/Y/F9 routing and arbitration. Programmatic PIE proves the
+called Blueprint functions' runtime semantics. A single attended cooked-client
+dogfood pass owns physical keyboard feel and final end-to-end routing. Unreal
+Python exposes input queries but no raw-key injection, and Windows can silently
+drop synthetic keys on a locked desktop, so unattended OS-key automation is not
+a release gate.
 
 ## History pop repair and cold-load package gate (2026-08-10)
 

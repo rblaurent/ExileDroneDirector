@@ -32,6 +32,7 @@ $requiredFiles = @(
     'tools\unreal\Configure-WaypointStructSync.py',
     'tools\unreal\Configure-FlypathDocumentBridge.py',
     'tools\unreal\Configure-DocumentSync.py',
+    'tools\unreal\Configure-PathPreview.py',
     'tools\unreal\Configure-LinearPlayback.py',
     'tools\unreal\Probe-WaypointTypes.py',
     'tools\unreal\Validate-WaypointCapturePIE.py',
@@ -40,6 +41,8 @@ $requiredFiles = @(
     'tools\unreal\Validate-LinearPlaybackPIE.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
+    'tools\preview\linear_preview.py',
+    'tools\preview\test_linear_preview.py',
     'tools\document\flypath_document.py',
     'tools\document\test_flypath_document.py',
     'tools\document\waypoint_bridge.py',
@@ -213,6 +216,11 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\playback\test_linear_reference.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Linear playback reference contracts failed with exit code $LASTEXITCODE."
+}
+
+& python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Linear path-preview contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\document\test_flypath_document.py')

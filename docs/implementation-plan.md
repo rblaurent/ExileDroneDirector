@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.22.1-document-sync-runtime`
+Current internal build: `0.23.0-path-preview-seam`
 
 ## 1. Delivery strategy
 
@@ -131,6 +131,14 @@ This section is the authoritative handoff. Detailed evidence remains in
 - Repository scaffold, semantic graph contracts, Python syntax, and the 1 GiB
   repository budget pass. Tracked source is only a few MiB; DevKit and cooked
   outputs are never committed.
+- `BP_EDD_PathPreview` now has a typed `PreviewDocumentV1` seam, explicit marker
+  and line-scale defaults, empty verified `ClearPreviewV1`/`RebuildPreviewV1`
+  functions, and two non-colliding movable HISM pools using Engine sphere and
+  cube meshes. A seven-case pure geometry oracle locks ordered marker placement,
+  midpoint/orientation/length scaling for linear segments, vertical paths,
+  degenerate adjacency suppression, invalid-value rejection, and history
+  independence. The live Blueprint graph bodies and client lifecycle wiring are
+  the next gate; visible runtime output is not claimed yet.
 
 ### Reproducible graph evidence
 

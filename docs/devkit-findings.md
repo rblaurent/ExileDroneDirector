@@ -1283,6 +1283,35 @@ asset rather than any temporary test defaults. The next autonomous product slice
 is visible path preview from the accepted typed document, followed by draft
 undo/redo; cook/Workshop remains an attended release gate.
 
+## Pooled path-preview seam (2026-08-10)
+
+The pre-existing `BP_EDD_PathPreview` was a non-replicated shell containing only
+`PreviewEnabled`, an empty EventGraph, and a `PathSpline` component. A spline
+component alone does not provide reliable in-game rendering, and development
+debug-draw nodes are not an acceptable cooked-product dependency.
+
+`Configure-PathPreview.py` now creates and verifies a typed
+`PreviewDocumentV1`, `MarkerScaleV1=0.20`, `LineThicknessV1=0.03`, and
+`SourceCubeExtentV1=100.0`, plus empty `ClearPreviewV1` and `RebuildPreviewV1`
+function seams. It adds exactly one movable, shadowless, no-collision HISM sphere
+pool (`WaypointMarkersV1`) and one equivalent cube pool (`SegmentLinesV1`) using
+the Engine basic-shape meshes. The actor remains non-replicated and cannot be
+damaged. A second commandlet execution reused every variable, function, and
+component and completed successfully, proving idempotence.
+
+`tools/preview/linear_preview.py` defines the source-side geometry contract.
+Markers retain document order and world position. Each non-degenerate linear
+adjacency becomes one cube centered at the midpoint, rotated from local +X to
+the segment direction, scaled along X by `length / 100`, and given the fixed Y/Z
+thickness. Degenerate adjacencies keep their waypoint markers but emit no line.
+Seven tests cover empty/single/multi-point paths, vertical orientation,
+determinism, zero-length suppression, and invalid geometry/style values.
+
+This is a compiled storage/component seam, not visible runtime proof. The next
+bounded gate is the native Blueprint graph body for clear/rebuild, followed by
+direct PIE instance-count/transform validation before any client-director
+lifecycle integration.
+
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 
 The installed `DreamworldMods` plugin declares editor support for cooking,

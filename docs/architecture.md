@@ -182,6 +182,13 @@ Local non-replicated visualization actor. It renders waypoint markers, segment
 curves, body/gimbal axes, focus targets, focal plane, spatial bounds, collision
 samples, and warnings. It never becomes the data source.
 
+The first implemented rendering seam projects `PreviewDocumentV1` into pooled
+Hierarchical Instanced Static Mesh components: a sphere pool for ordered
+waypoints and a thin cube pool for linear adjacencies. Components have no
+collision or shadows and remain independent from the document model. Later
+curve modes may replace segment transforms without changing ownership or data
+flow.
+
 ### 3.6 `BP_EDD_FlypathRepository`
 
 Logical server repository. Its physical form depends on the persistence API

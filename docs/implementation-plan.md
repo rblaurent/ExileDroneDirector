@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.29.0-savegame-adapter`
+Current internal build: `0.30.0-repository-service-seam`
 
 ## 1. Delivery strategy
 
@@ -253,6 +253,12 @@ This section is the authoritative handoff. Detailed evidence remains in
   generation tooling and passed exact Unicode/array round trips across two fresh
   Enhanced DevKit processes. Repository command graphs and client/server routing
   are not implemented yet, so this proves the adapter boundary, not end-user save.
+- The server-only `BP_EDD_FlypathRepository` actor now compiles with versioned
+  active state, request/result staging, bounded policy, typed draft-document
+  exchange, JSON scratch objects, and separate codec/validation/storage/CRUD
+  function seams. The bundled PlayFab JSON object passed a nested Unicode round
+  trip. Those function bodies remain intentionally empty until their complete
+  graph sources and semantic contracts are generated and accepted.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
   directly to G-Portal.
 

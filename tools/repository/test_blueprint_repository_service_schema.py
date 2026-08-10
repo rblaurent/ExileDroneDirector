@@ -1,0 +1,88 @@
+"""Contracts for the staged-input Blueprint repository service seam."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import unittest
+
+
+ROOT = Path(__file__).resolve().parent
+SCHEMA = json.loads((ROOT / "blueprint_repository_service_schema.json").read_text(encoding="utf-8"))
+
+
+class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
+    def test_asset_and_runtime_dependencies_are_fixed(self) -> None:
+        self.assertEqual(SCHEMA["schemaVersion"], 1)
+        self.assertEqual(SCHEMA["parentClass"], "Actor")
+        self.assertEqual(SCHEMA["jsonObjectClass"], "PlayFabJsonObject")
+        self.assertEqual(
+            SCHEMA["virtualPath"],
+            "/Game/Mods/ExileDroneDirector/Server/Repository/BP_EDD_FlypathRepository",
+        )
+        self.assertIn("ST_EDD_FlypathDocument", " ".join(SCHEMA["dependencies"]))
+        self.assertIn("SG_EDD_RepositoryStorage", " ".join(SCHEMA["dependencies"]))
+
+    def test_state_request_result_scratch_and_policy_names_do_not_overlap(self) -> None:
+        names = [field["name"] for field in SCHEMA["variables"]]
+        self.assertEqual(len(names), len(set(names)))
+        for prefix in ("Request", "Result", "Scratch"):
+            self.assertTrue(any(name.startswith(prefix) for name in names))
+        self.assertIn("ActiveRecordEnvelopesV1", names)
+        self.assertIn("ActiveTombstoneFlypathIdsV1", names)
+        self.assertIn("RequestDraftDocumentV1", names)
+        self.assertIn("ResultDraftDocumentV1", names)
+
+    def test_only_automatable_variable_types_are_used(self) -> None:
+        supported = {"Boolean", "Integer", "String", "ST_EDD_FlypathDocument", "PlayFabJsonObject"}
+        for field in SCHEMA["variables"]:
+            self.assertIn(field["type"], supported)
+            self.assertIn(field["container"], {"None", "Array"})
+            if field["container"] == "Array":
+                self.assertNotIn("default", field)
+
+    def test_crud_and_codec_function_boundaries_are_explicit(self) -> None:
+        functions = SCHEMA["functions"]
+        self.assertEqual(len(functions), len(set(functions)))
+        for required in (
+            "LoadRepositoryV1",
+            "PersistRepositoryV1",
+            "EncodeDocumentV1",
+            "DecodeDocumentV1",
+            "EncodeRecordV1",
+            "DecodeRecordV1",
+            "CreatePrivateFlypathV1",
+            "SaveDraftV1",
+            "LoadDraftV1",
+            "ListMineV1",
+            "DeleteFlypathV1",
+        ):
+            self.assertIn(required, functions)
+
+    def test_server_policy_defaults_are_bounded(self) -> None:
+        by_name = {field["name"]: field for field in SCHEMA["variables"]}
+        self.assertEqual(by_name["MaxPathsPerOwnerV1"]["default"], 64)
+        self.assertEqual(by_name["MaxWaypointsPerPathV1"]["default"], 512)
+        self.assertEqual(by_name["MaxSerializedBytesV1"]["default"], 2_000_000)
+        self.assertEqual(by_name["MaxTitleCharsV1"]["default"], 96)
+        self.assertEqual(SCHEMA["arrayDefaults"]["AllowedRegionsV1"], ["ExiledLands", "Siptah"])
+
+    def test_result_codes_match_the_repository_oracle(self) -> None:
+        self.assertEqual(
+            SCHEMA["resultCodes"],
+            [
+                "Success",
+                "NotFound",
+                "Forbidden",
+                "RevisionConflict",
+                "ValidationFailed",
+                "LimitExceeded",
+                "RegionForbidden",
+                "PersistenceUnavailable",
+                "AlreadyExists",
+            ],
+        )
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

@@ -1793,6 +1793,33 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   variables for automatable runtime seams or treat a UDS edit as an explicit
   one-time attended step.
 
+## Repository service and JSON codec seam (2026-08-10)
+
+- Enhanced exposes `PlayFabJsonObject` to Blueprint/Python with object, object
+  array, generic array, string, boolean, and number get/set operations plus
+  `EncodeJson` and `DecodeJson`. `PlayFabJsonValue` supplies typed JSON values.
+- A fresh commandlet proved nested object, boolean, string array, numeric values
+  encoded as strings, and exact Unicode (`Unicode flight — 北風`) survive an
+  encode/decode round trip.
+- Deliberately decoding malformed JSON returns false but logs a PlayFab engine
+  error, which makes an otherwise successful Python commandlet exit nonzero.
+  Do not poison a commandlet acceptance log with expected malformed input;
+  exercise malformed-record rejection through repository validation fixtures.
+- No Blueprint/Python SHA-256, MD5, digest, or general string-hash helper was
+  exposed by this build. Do not substitute an undocumented weak checksum while
+  claiming the canonical SHA-256 contract; content hashing remains an explicit
+  codec graph gate.
+- `BP_EDD_FlypathRepository` is generated idempotently as a non-replicated Actor
+  with active snapshot state, request/result staging, policy values, typed
+  `ST_EDD_FlypathDocument` exchange, PlayFab JSON scratch references, and named
+  codec/validation/storage/private-CRUD function seams. The asset compiles, but
+  empty function seams are not runtime CRUD evidence.
+- The repository actor cold-loaded and compiled in a fresh commandlet. Its
+  synchronized live/repository SHA-256 is
+  `19E8BC241C48A45473A0C826FD22B4D6E7A884542F9D035FB393E0DCE416EE4A`.
+- `Test-RepositoryService.ps1` is the focused seam gate: schema contracts,
+  idempotent asset configuration, and the runtime JSON dependency round trip.
+
 ## Pending local reconnaissance
 
 - Concrete Conan-character view restoration in a gameplay-map PIE run

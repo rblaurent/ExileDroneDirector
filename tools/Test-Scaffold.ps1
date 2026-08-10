@@ -23,6 +23,7 @@ $requiredFiles = @(
     'tools\Test-RepositoryBudget.ps1',
     'tools\Invoke-UnrealPython.ps1',
     'tools\Test-RepositorySaveGame.ps1',
+    'tools\Test-RepositoryService.ps1',
     'tools\unreal\Probe-EnhancedApi.py',
     'tools\unreal\Inspect-BlueprintApi.py',
     'tools\unreal\Inspect-GraphApi.py',
@@ -52,6 +53,8 @@ $requiredFiles = @(
     'tools\unreal\Configure-RepositorySaveGame.py',
     'tools\unreal\Write-RepositorySaveGameProbe.py',
     'tools\unreal\Read-RepositorySaveGameProbe.py',
+    'tools\unreal\Configure-RepositoryService.py',
+    'tools\unreal\Validate-RepositoryJsonCodec.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
     'tools\preview\linear_preview.py',
@@ -70,6 +73,8 @@ $requiredFiles = @(
     'tools\document\test_document_bridge.py',
     'tools\persistence\repository_savegame_schema.json',
     'tools\persistence\test_repository_savegame_schema.py',
+    'tools\repository\blueprint_repository_service_schema.json',
+    'tools\repository\test_blueprint_repository_service_schema.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -514,6 +519,11 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\persistence\test_repository_savegame_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Repository SaveGame schema contracts failed with exit code $LASTEXITCODE."
+}
+
+& python (Join-Path $ProjectRoot 'tools\repository\test_blueprint_repository_service_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Blueprint repository service schema contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-DocumentSyncStructForms.py') `

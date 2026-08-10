@@ -484,6 +484,18 @@ authority: only the server service may call the adapter. Conan's native
 `PersistenceComponent` remains a possible later adapter after its undocumented
 world-actor/database lifecycle is proven on a dedicated server.
 
+The compiled repository boundary is `BP_EDD_FlypathRepository`, a non-replicated
+server actor. Because Enhanced Python cannot author User Defined Struct members
+or Blueprint function parameters, its first automatable contract uses explicit
+versioned request/result staging members and no-parameter named functions. The
+later server RPC adapter derives identity, fills one request transaction, invokes
+one repository function, and copies its typed result; clients never access the
+actor directly. Record envelopes are decoded and encoded with the bundled
+`PlayFabJsonObject` Blueprint API, whose nested object, array, boolean,
+numeric-text, and Unicode round trip has been proven locally. No Blueprint SHA-256
+helper was exposed; cryptographic content hashing remains a codec implementation
+gate rather than being silently replaced by a weaker hash.
+
 ### 8.3 Atomicity and recovery
 
 Where the storage adapter lacks transactions, use copy-on-write records:

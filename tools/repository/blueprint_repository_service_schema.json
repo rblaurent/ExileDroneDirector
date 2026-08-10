@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Server/Repository/BP_EDD_FlypathRepository.uasset",
+  "virtualPath": "/Game/Mods/ExileDroneDirector/Server/Repository/BP_EDD_FlypathRepository",
+  "parentClass": "Actor",
+  "jsonObjectClass": "PlayFabJsonObject",
+  "dependencies": [
+    "/Game/Mods/ExileDroneDirector/Data/Structs/ST_EDD_FlypathDocument",
+    "/Game/Mods/ExileDroneDirector/Server/Persistence/SG_EDD_RepositoryStorage"
+  ],
+  "variables": [
+    { "name": "RepositoryLoadedV1", "type": "Boolean", "container": "None", "default": false },
+    { "name": "ActiveGenerationV1", "type": "Integer", "container": "None", "default": 0 },
+    { "name": "ActiveSlotV1", "type": "String", "container": "None", "default": "" },
+    { "name": "ActiveRecordEnvelopesV1", "type": "String", "container": "Array" },
+    { "name": "ActiveTombstoneFlypathIdsV1", "type": "String", "container": "Array" },
+
+    { "name": "RequestRequesterAccountIdV1", "type": "String", "container": "None", "default": "" },
+    { "name": "RequestRequesterDisplayNameV1", "type": "String", "container": "None", "default": "" },
+    { "name": "RequestFlypathIdV1", "type": "String", "container": "None", "default": "" },
+    { "name": "RequestTitleV1", "type": "String", "container": "None", "default": "" },
+    { "name": "RequestDescriptionV1", "type": "String", "container": "None", "default": "" },
+    { "name": "RequestRegionIdV1", "type": "String", "container": "None", "default": "" },
+    { "name": "RequestExpectedRevisionV1", "type": "Integer", "container": "None", "default": 0 },
+    { "name": "RequestOffsetV1", "type": "Integer", "container": "None", "default": 0 },
+    { "name": "RequestLimitV1", "type": "Integer", "container": "None", "default": 20 },
+    { "name": "RequestNowUtcV1", "type": "String", "container": "None", "default": "" },
+    { "name": "RequestDraftDocumentV1", "type": "ST_EDD_FlypathDocument", "container": "None" },
+
+    { "name": "ResultCodeV1", "type": "String", "container": "None", "default": "Success" },
+    { "name": "ResultDetailV1", "type": "String", "container": "None", "default": "" },
+    { "name": "ResultHasCurrentRevisionV1", "type": "Boolean", "container": "None", "default": false },
+    { "name": "ResultCurrentRevisionV1", "type": "Integer", "container": "None", "default": 0 },
+    { "name": "ResultRecordIndexV1", "type": "Integer", "container": "None", "default": -1 },
+    { "name": "ResultRecordEnvelopeV1", "type": "String", "container": "None", "default": "" },
+    { "name": "ResultMetadataEnvelopesV1", "type": "String", "container": "Array" },
+    { "name": "ResultDraftDocumentV1", "type": "ST_EDD_FlypathDocument", "container": "None" },
+
+    { "name": "ScratchRootJsonV1", "type": "PlayFabJsonObject", "container": "None" },
+    { "name": "ScratchNestedJsonV1", "type": "PlayFabJsonObject", "container": "None" },
+    { "name": "ScratchJsonObjectsV1", "type": "PlayFabJsonObject", "container": "Array" },
+    { "name": "ScratchStringArrayV1", "type": "String", "container": "Array" },
+    { "name": "ScratchIndexV1", "type": "Integer", "container": "None", "default": -1 },
+    { "name": "ScratchValidV1", "type": "Boolean", "container": "None", "default": false },
+
+    { "name": "MaxPathsPerOwnerV1", "type": "Integer", "container": "None", "default": 64 },
+    { "name": "MaxWaypointsPerPathV1", "type": "Integer", "container": "None", "default": 512 },
+    { "name": "MaxSerializedBytesV1", "type": "Integer", "container": "None", "default": 2000000 },
+    { "name": "MaxTitleCharsV1", "type": "Integer", "container": "None", "default": 96 },
+    { "name": "AllowedRegionsV1", "type": "String", "container": "Array" }
+  ],
+  "arrayDefaults": {
+    "AllowedRegionsV1": ["ExiledLands", "Siptah"]
+  },
+  "functions": [
+    "ResetRepositoryResultV1",
+    "InitializeRepositoryV1",
+    "LoadRepositoryV1",
+    "PersistRepositoryV1",
+    "FindRecordIndexV1",
+    "EncodeDocumentV1",
+    "DecodeDocumentV1",
+    "EncodeRecordV1",
+    "DecodeRecordV1",
+    "ValidateDocumentV1",
+    "ValidateRecordV1",
+    "CreatePrivateFlypathV1",
+    "SaveDraftV1",
+    "LoadDraftV1",
+    "ListMineV1",
+    "DeleteFlypathV1"
+  ],
+  "resultCodes": [
+    "Success",
+    "NotFound",
+    "Forbidden",
+    "RevisionConflict",
+    "ValidationFailed",
+    "LimitExceeded",
+    "RegionForbidden",
+    "PersistenceUnavailable",
+    "AlreadyExists"
+  ]
+}

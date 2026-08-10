@@ -209,7 +209,15 @@ The first persistence adapter now exists as
 commit, hash, opaque-record, and tombstone channels. An automated writer and a
 separate fresh DevKit reader proved exact cross-process persistence for scalars,
 arrays, canonical payload text, and Unicode, then removed the probe slot. This is
-the verified storage seam; server repository command graphs are the next layer.
+the verified storage seam.
+
+`BP_EDD_FlypathRepository` now supplies the compiled server-only repository
+boundary: active snapshot state, explicit request/result staging, policy limits,
+typed draft-document exchange, JSON scratch state, and separate codec,
+validation, storage, and CRUD function graphs. Enhanced's bundled PlayFab JSON
+object has also passed nested-object, array, boolean, numeric-text, and Unicode
+round trips. The functions are deliberately still empty seams; checked-in graph
+sources and runtime CRUD acceptance are the next milestone.
 
 ## Repository layout
 
@@ -228,6 +236,8 @@ the verified storage seam; server repository command graphs are the next layer.
   Blueprint/server implementation.
 - `tools/persistence/` and `tools/Test-RepositorySaveGame.ps1` — source schema
   plus cross-process acceptance for the alternating repository storage slots.
+- `tools/repository/` and `tools/Test-RepositoryService.ps1` — the compiled
+  repository service seam and its Blueprint JSON dependency acceptance.
 
 ## DevKit setup
 

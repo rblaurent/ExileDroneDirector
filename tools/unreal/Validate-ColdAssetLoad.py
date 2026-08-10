@@ -21,6 +21,7 @@ ASSET_PATHS = (
     "/Game/Mods/ExileDroneDirector/Trajectory/BP_EDD_PathPreview",
     "/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector",
     "/Game/Mods/ExileDroneDirector/Server/Persistence/SG_EDD_RepositoryStorage",
+    "/Game/Mods/ExileDroneDirector/Server/Repository/BP_EDD_FlypathRepository",
 )
 
 

@@ -1,10 +1,10 @@
 """Add and verify the first client-local waypoint draft-storage contract.
 
 The Enhanced DevKit exposes typed Blueprint arrays but does not expose user-
-defined-struct field editing to Python. Until ST_EDD_Waypoint receives its
-authored fields, the local draft uses lockstep arrays with one element per
-waypoint. CaptureCurrentWaypoint is responsible for appending every channel
-atomically; no other graph should mutate these arrays during this milestone.
+defined-struct field editing to Python. The local draft therefore continues to
+use the runtime-proven lockstep arrays until the separately validated
+``DraftWaypointsV1`` adapter is wired. CaptureCurrentWaypoint is responsible for
+appending every legacy channel atomically during this migration.
 """
 
 from __future__ import annotations

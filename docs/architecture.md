@@ -91,6 +91,14 @@ lens channels; ID and hold remain stable. Delete removes the same index from all
 six channels and preserves that index when a successor exists or clamps to the
 last survivor/`-1`.
 
+`ST_EDD_Waypoint` now mirrors this lossless migration subset with `WaypointId`
+(Integer), `CameraTransform` (Transform), and Float `FocalLength`, `Aperture`,
+`ManualFocusDistance`, and `HoldSeconds` fields. The client owns an empty typed
+`DraftWaypointsV1` array and compiles cleanly against that struct. The six legacy
+arrays remain runtime-authoritative until `SyncDraftWaypointsV1` is implemented
+and mutation/runtime contracts prove exact parity; the typed seam is not yet a
+second independently editable source of truth.
+
 Linear playback evaluates this bridge from absolute game time rather than
 integrating frame delta. It uses quaternion transform interpolation and keeps
 ownership of the exact final authored transform until an explicit stop. That

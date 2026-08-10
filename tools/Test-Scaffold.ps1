@@ -28,6 +28,7 @@ $requiredFiles = @(
     'tools\unreal\Configure-ClientDirectorVariables.py',
     'tools\unreal\Configure-DroneMovement.py',
     'tools\unreal\Configure-WaypointCapture.py',
+    'tools\unreal\Configure-WaypointDocumentBridge.py',
     'tools\unreal\Configure-LinearPlayback.py',
     'tools\unreal\Probe-WaypointTypes.py',
     'tools\unreal\Validate-WaypointCapturePIE.py',

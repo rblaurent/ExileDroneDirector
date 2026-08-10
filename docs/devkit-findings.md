@@ -723,8 +723,9 @@ directly seeded rotation and completed without that fixture contamination.
 The first authoring-data slice is implemented in
 `BPC_EDD_ClientDirector.CaptureCurrentWaypoint`. The Enhanced editor Python API
 can create typed Blueprint arrays, including native `Transform[]`, but does not
-expose user-defined-struct field authoring. `ST_EDD_Waypoint` therefore remains
-an empty scaffold for now. The accepted transitional draft contract uses six
+expose user-defined-struct field authoring. `ST_EDD_Waypoint` therefore remained
+an empty scaffold at this checkpoint; its later authored bridge is recorded
+below. The accepted transitional draft contract uses six
 component-owned lockstep arrays:
 
 - `DraftWaypointIds` (`Integer[]`)
@@ -956,6 +957,40 @@ The deterministic PIE gate recorded above is complete. The next autonomous
 gate is promotion of transient waypoint storage toward explicit document
 structures plus visible path preview, serialization, and undo/redo. Cook and
 Workshop remain deferred to an attended session.
+
+## First authored waypoint struct bridge (2026-08-10)
+
+The Enhanced 5.6 Python API can create a `UserDefinedStruct` and obtain its
+`EdGraphPinType`, but it exposes neither `FStructureEditorUtils` nor the struct's
+editor data/variable descriptions. The earlier symbol probe was therefore
+correct: field authoring requires the User Defined Structure editor UI. The
+reliable UI sequence is select the member row, rename inline, open the pin-type
+picker, filter, and click the filtered result; pressing Enter in the filter does
+not consistently choose the result.
+
+`ST_EDD_Waypoint` now contains the lossless migration subset matching the six
+runtime-proven channels:
+
+- `WaypointId` — Integer
+- `CameraTransform` — Transform
+- `FocalLength` — Float
+- `Aperture` — Float
+- `ManualFocusDistance` — Float
+- `HoldSeconds` — Float
+
+`Configure-WaypointDocumentBridge.py` then added `DraftWaypointsV1` as an array
+of that exact user-defined struct on `BPC_EDD_ClientDirector`. Unreal compiled
+and saved the client asset, verified the generated array default is empty, and
+a second run logged `VARIABLE_ALREADY_PRESENT`, `EMPTY_TYPED_ARRAY_VERIFIED:0`,
+and `COMPLETE:True`. This proves the authored struct is a valid Blueprint member
+type and the configurator is idempotent.
+
+The typed array is intentionally unwritten. Capture, replacement, deletion, and
+playback still use the validated legacy arrays, so there is one authoritative
+runtime model and no silent divergence. The next gate is a bounded
+`SyncDraftWaypointsV1` function that clears and rebuilds the typed array from all
+six channels, followed by mutation and round-trip parity tests. Only after that
+passes may later code read the struct array as document state.
 
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 

@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.15.0-document-contract`
+Current internal build: `0.16.0-waypoint-struct-bridge`
 
 ## 1. Delivery strategy
 
@@ -76,6 +76,11 @@ This section is the authoritative handoff. Detailed evidence remains in
   optimistic revision conflicts, immutable published snapshots, owner-only
   editing, private-by-default creation/cloning, and clone attribution plus
   independence. Blueprint and server implementations must conform to it.
+- `ST_EDD_Waypoint` now contains the exact six-field lossless bridge and
+  `BPC_EDD_ClientDirector` compiles with an empty typed `DraftWaypointsV1` array.
+  Its idempotent configurator proves create/reopen/compile/save behavior. The
+  legacy arrays intentionally remain authoritative until an explicit sync
+  function passes parity tests.
 - Repository scaffold, semantic graph contracts, Python syntax, and the 1 GiB
   repository budget pass. Tracked source is only a few MiB; DevKit and cooked
   outputs are never committed.
@@ -109,10 +114,10 @@ next autonomous implementation slice is therefore:
 
 1. Commit and push the compiled, deterministic-runtime-validated linear
    playback checkpoint.
-2. Map the now-validated version-1 document oracle into explicit waypoint,
-   segment, and Flypath Blueprint structs without weakening the camera boundary.
-3. Add the first document/array adapter, visible waypoint/path preview, and
-   undo/redo as bounded, independently validated vertical slices.
+2. Implement and validate `SyncDraftWaypointsV1`, rebuilding the typed waypoint
+   array atomically from the runtime-proven six-array bridge after mutations.
+3. Author the segment/Flypath structs, then add visible waypoint/path preview
+   and undo/redo as bounded, independently validated vertical slices.
 4. Preserve the physical F10/K/P/P/F9 route as the regression acceptance path
    for every change that touches playback or authoring.
 5. Close, sync, run the complete repository suite, commit, and push after each
@@ -346,9 +351,9 @@ advances the ID only after every channel append completes.
 `ReplaceSelectedWaypoint` preserves the stable ID and hold while replacing the
 five camera-state channels at a valid selection. `DeleteSelectedWaypoint`
 removes all six channels atomically and clamps selection to the surviving item
-or `-1`. These arrays are an explicit transitional model while the DevKit-
-authored `ST_EDD_Waypoint` fields are still empty, not a replacement for the
-final document struct. All three live graphs have semantic pin-level contracts.
+or `-1`. These arrays remain the explicit transitional runtime model while the
+new typed bridge is integrated; they are not the final server document. All
+three live graphs have semantic pin-level contracts.
 A deterministic two-player edit cycle proved two captures, lens/transform
 replacement, middle/end/empty deletion behavior, invalid-index no-op behavior,
 remote-client isolation, exact pawn/view restoration, and restoration of the
@@ -358,14 +363,20 @@ passed after the one-time PIE character was saved, and the complete compiled
 graph now round-trips into the checked-in textual source with capture, edit, and
 feedback contracts.
 
-The version-1 document oracle is also complete. It gives the still-empty
-`ST_EDD_Waypoint`, `ST_EDD_Segment`, and `ST_EDD_FlypathDocument` assets a tested
-target contract before their Blueprint fields are authored. Nine executable
+The version-1 document oracle is also complete. It gives the Blueprint data
+assets a tested target contract before runtime migration. Nine executable
 tests cover canonical round-trip serialization, content-integrity rejection,
 finite and normalized camera state, ID/topology validation, private creation,
 optimistic saves, immutable publication, private deep clones, attribution, and
 owner/viewer access. Runtime save/load is not claimed until the Blueprint
 adapter and server persistence layer consume this contract.
+
+The first mapping step is live: `ST_EDD_Waypoint` has Integer `WaypointId`,
+Transform `CameraTransform`, and Float `FocalLength`, `Aperture`,
+`ManualFocusDistance`, and `HoldSeconds`. `DraftWaypointsV1` is an empty typed
+array on the client component, compiled/saved twice through an idempotent
+configurator. No graph writes it yet, so validated capture/edit/playback behavior
+is unchanged and there is no dual-source ambiguity.
 
 ### Verification
 
@@ -826,7 +837,7 @@ Content/Mods/ExileDroneDirector/
 
 Version numbers describe capability gates, not calendar promises.
 
-Internal checkpoint versions such as `0.15.0-document-contract` count validated
+Internal checkpoint versions such as `0.16.0-waypoint-struct-bridge` count validated
 development slices. They do not claim that the public **0.1 Camera Spike** gate
 is complete; that gate still requires cooked multiplayer acceptance.
 

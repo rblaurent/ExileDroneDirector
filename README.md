@@ -147,7 +147,7 @@ restart, explicit stop, isolation, and possession/view restoration. An
 engine-independent Flypath document oracle now locks down canonical JSON,
 content hashes, revision conflicts, immutable publication, private creation and
 cloning, attribution, and structural camera/path validation. The next autonomous
-gate maps that contract into the authored Blueprint structs and path preview.
+gate completes the legacy-array-to-struct adapter, then adds the path preview.
 Cooked-package validation remains required but is explicitly deferred until an
 attended session.
 

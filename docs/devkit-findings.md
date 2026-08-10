@@ -1375,9 +1375,59 @@ restored CDO state. Unreal exited through `LogExit: Exiting.` before the saved
 package was synced; live and repository SHA-256 are both
 `7E366E3CC26B37CD5949265C5255D110091EB210D692613978DF77FEDB10F69B`.
 
-The next bounded gate is linear `SegmentLinesV1` projection using the already
-tested midpoint/orientation/length geometry contract, followed by client
-lifecycle integration.
+That marker-only checkpoint was then extended by the linear `SegmentLinesV1`
+projection below. Client lifecycle integration follows the completed isolated
+preview proof.
+
+### Linear segment rebuild and runtime proof
+
+`RebuildPreviewV1` now contains the compiled and saved combined 34-node/143-pin
+marker-and-linear-segment graph. The marker loop continues through an adjacent
+index bounds check. For every in-bounds pair, a typed array lookup and native
+`ST_EDD_Waypoint` break expose the next `CameraTransform`. The segment midpoint
+comes from `TLerp` at alpha `0.5`; `FindLookAtRotation` aligns the Engine cube's
+local +X axis; `Vector_Distance / SourceCubeExtentV1` drives X scale; and
+`LineThicknessV1` drives Y/Z. A strict `distance > 0.001` branch suppresses
+unstable zero-length instances. Both segment and marker `AddInstance` calls use
+world space.
+
+`Build-PathPreviewSegmentGraph.py` deterministically extends the checked marker
+graph with only captured native UE 5.6 node forms. Two independent generations
+produced identical full and paste hashes. The generated graph, Unreal's fresh
+post-compile round-trip, and the checked 388-line snippet all pass generic
+reciprocal-link validation plus a semantic contract for the exact bounds,
+adjacency, midpoint, orientation, scale, component-target, and execution links.
+The live asset compiled `Good to go`.
+
+`Validate-PathPreviewSegmentsPIE.py` is the runtime gate. It first authors two
+poses through the production drone/capture/document-sync path, then uses fresh
+preplaced preview actors for each projection phase. It proved:
+
+- one typed waypoint -> one exact marker and zero segments;
+- two distinct typed waypoints -> two exact markers and one exact segment;
+- exact segment midpoint, pitch/yaw, zero roll, normalized X scale, and Y/Z
+  thickness;
+- two coincident typed waypoints -> two markers and zero segments;
+- every phase clears both HISM pools back to zero;
+- class defaults restore exactly and all temporary editor actors are destroyed.
+
+The final signals were:
+
+- `1_MARKERS_0_SEGMENTS_VALID:True`
+- `DISTINCT_SEGMENT_TRANSFORM_VALID:True`
+- `2_MARKERS_1_SEGMENTS_VALID:True`
+- `2_MARKERS_0_SEGMENTS_VALID:True`
+- `DEFAULTS_RESTORED:True`
+- `EDITOR_ACTOR_CLEANED:True`
+- `AUTOMATIC_RESULT:PASS`
+
+Two workflow details are now explicit. First, mass graph replacement must be
+followed by an immediate Unreal clipboard export and exact node-count check; this
+caught an unsaved old-plus-new duplicate graph before compilation. Second,
+Blueprint selection persists after clipboard export, so node repositioning must
+first deselect the full graph or every selected node moves together. Neither
+mistake reached compilation or disk. Client ownership and automatic rebuild
+wiring are now the next bounded preview gate.
 
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 

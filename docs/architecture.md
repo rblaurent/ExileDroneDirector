@@ -197,8 +197,13 @@ instances directly. Its first compiled slice exits immediately when
 `PreviewEnabled` is false. Otherwise it iterates the typed document's ordered
 `ST_EDD_Waypoint` array and adds one world-space sphere instance per authored
 `CameraTransform`, preserving location and rotation while replacing scale with
-uniform `MarkerScaleV1`. Segment projection remains a separate follow-up slice,
-so the marker loop never writes to `SegmentLinesV1`.
+uniform `MarkerScaleV1`. After each marker it checks whether `index + 1` is in
+bounds. In-bounds adjacent transforms produce a cube only when their world-space
+distance is greater than `0.001`: transform interpolation at alpha `0.5` supplies
+the midpoint, `FindLookAtRotation` aligns local +X toward the next waypoint, and
+the scale is `(distance / SourceCubeExtentV1, LineThicknessV1,
+LineThicknessV1)`. The last waypoint and degenerate adjacencies deliberately add
+no `SegmentLinesV1` instance.
 
 ### 3.6 `BP_EDD_FlypathRepository`
 

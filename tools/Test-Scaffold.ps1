@@ -40,6 +40,7 @@ $requiredFiles = @(
     'tools\unreal\Validate-DocumentSyncPIE.py',
     'tools\unreal\Validate-LinearPlaybackPIE.py',
     'tools\unreal\Validate-PathPreviewMarkersPIE.py',
+    'tools\unreal\Validate-PathPreviewSegmentsPIE.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
     'tools\preview\linear_preview.py',
@@ -79,12 +80,14 @@ $requiredFiles = @(
     'tools\blueprint\Test-LinearPlaybackDispatchContracts.py',
     'tools\blueprint\Test-PathPreviewContracts.py',
     'tools\blueprint\Build-PathPreviewMarkerGraph.py',
+    'tools\blueprint\Build-PathPreviewSegmentGraph.py',
     'tools\blueprint\templates\waypoint-capture-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-struct-sync-node-forms.eddgraph',
     'tools\blueprint\templates\document-sync-struct-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-edit-node-forms.eddgraph',
     'tools\blueprint\templates\linear-playback-node-forms.eddgraph',
     'tools\blueprint\templates\path-preview-marker-node-forms.eddgraph',
+    'tools\blueprint\templates\path-preview-segment-node-forms.eddgraph',
     'tools\blueprint\snippets\toggle-input.eddgraph',
     'tools\blueprint\snippets\toggle-state.eddgraph',
     'tools\blueprint\snippets\enter-drone-mode.eddgraph',
@@ -110,7 +113,8 @@ $requiredFiles = @(
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
     'tools\blueprint\snippets\clear-path-preview-v1.eddgraph',
-    'tools\blueprint\snippets\rebuild-path-preview-markers-v1.eddgraph'
+    'tools\blueprint\snippets\rebuild-path-preview-markers-v1.eddgraph',
+    'tools\blueprint\snippets\rebuild-path-preview-segments-v1.eddgraph'
 )
 
 $missing = @(
@@ -263,6 +267,50 @@ if ((Get-FileHash -Algorithm SHA256 $generatedPathPreviewPaste).Hash -ne (Get-Fi
     --rebuild $generatedPathPreview
 if ($LASTEXITCODE -ne 0) {
     throw "Generated path-preview marker contracts failed with exit code $LASTEXITCODE."
+}
+
+$pathPreviewSegmentNonce = [guid]::NewGuid().ToString('N')
+$generatedPathPreviewSegments = Join-Path $scratchRoot "edd-path-preview-segments-$pathPreviewSegmentNonce.eddgraph"
+$generatedPathPreviewSegmentsPaste = Join-Path $scratchRoot "edd-path-preview-segments-$pathPreviewSegmentNonce-paste.eddgraph"
+$generatedPathPreviewSegmentsRepeat = Join-Path $scratchRoot "edd-path-preview-segments-$pathPreviewSegmentNonce-repeat.eddgraph"
+$generatedPathPreviewSegmentsRepeatPaste = Join-Path $scratchRoot "edd-path-preview-segments-$pathPreviewSegmentNonce-repeat-paste.eddgraph"
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-PathPreviewSegmentGraph.py') `
+    --project-root $ProjectRoot `
+    --output $generatedPathPreviewSegments `
+    --paste-output $generatedPathPreviewSegmentsPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Path-preview segment graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-PathPreviewSegmentGraph.py') `
+    --project-root $ProjectRoot `
+    --output $generatedPathPreviewSegmentsRepeat `
+    --paste-output $generatedPathPreviewSegmentsRepeatPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repeated path-preview segment graph generation failed with exit code $LASTEXITCODE."
+}
+if ((Get-FileHash -Algorithm SHA256 $generatedPathPreviewSegments).Hash -ne (Get-FileHash -Algorithm SHA256 $generatedPathPreviewSegmentsRepeat).Hash) {
+    throw 'Path-preview segment full-graph generation is not deterministic.'
+}
+if ((Get-FileHash -Algorithm SHA256 $generatedPathPreviewSegmentsPaste).Hash -ne (Get-FileHash -Algorithm SHA256 $generatedPathPreviewSegmentsRepeatPaste).Hash) {
+    throw 'Path-preview segment paste-graph generation is not deterministic.'
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path $generatedPathPreviewSegments
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path $generatedPathPreviewSegmentsPaste
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-PathPreviewContracts.py') `
+    --clear (Join-Path $ProjectRoot 'tools\blueprint\snippets\clear-path-preview-v1.eddgraph') `
+    --segments $generatedPathPreviewSegments
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated path-preview segment contracts failed with exit code $LASTEXITCODE."
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path (Join-Path $ProjectRoot 'tools\blueprint\snippets\rebuild-path-preview-segments-v1.eddgraph')
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-PathPreviewContracts.py') `
+    --clear (Join-Path $ProjectRoot 'tools\blueprint\snippets\clear-path-preview-v1.eddgraph') `
+    --segments (Join-Path $ProjectRoot 'tools\blueprint\snippets\rebuild-path-preview-segments-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Checked path-preview segment contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\document\test_flypath_document.py')

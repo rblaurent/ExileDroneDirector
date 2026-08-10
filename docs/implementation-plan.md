@@ -136,20 +136,26 @@ This section is the authoritative handoff. Detailed evidence remains in
   sphere and cube meshes. `ClearPreviewV1` is a compiled and saved five-node
   live function that clears `WaypointMarkersV1` before `SegmentLinesV1`; its
   fresh Unreal export has 11 pins and passes reciprocal-link plus dedicated
-  semantic contracts. `RebuildPreviewV1` now has a compiled 14-node/60-pin
-  marker slice: clear both pools, guard on `PreviewEnabled`, break the typed
+  semantic contracts. `RebuildPreviewV1` first established a compiled
+  14-node/60-pin marker slice: clear both pools, guard on `PreviewEnabled`, break the typed
   document, iterate ordered typed waypoints, preserve each camera location and
   rotation, replace scale with uniform `MarkerScaleV1`, and add one world-space
-  sphere instance. The checked live export and deterministic generator both pass
-  structural and semantic contracts. A three-phase production-path PIE gate
-  proved exact one/two-marker counts and transforms, zero segment instances,
+  sphere instance. The live function is now the compiled 34-node/143-pin combined
+  marker-and-segment slice. After each marker it bounds-checks `index + 1`, reads
+  the adjacent typed waypoint, rejects distances at or below `0.001`, and adds
+  one world-space cube to `SegmentLinesV1`. The cube is centred with transform
+  interpolation at `0.5`, oriented by `FindLookAtRotation`, scaled on local X by
+  `distance / SourceCubeExtentV1`, and scaled on Y/Z by `LineThicknessV1`.
+  The generated full/paste graphs and checked post-compile Unreal export pass
+  reciprocal-link and dedicated semantic contracts. A four-phase
+  production-path PIE gate proved 1 marker/0 segments, 2 markers/1 exact segment,
+  2 coincident markers/0 segments, exact marker and segment transforms,
   clear-to-zero behavior, class-default restoration, and temporary-actor cleanup.
   A seven-case pure geometry oracle also locks ordered marker placement,
   midpoint/orientation/length scaling for linear segments, vertical paths,
   degenerate adjacency suppression, invalid-value rejection, and history
-  independence. Linear segment projection is the next bounded preview gate;
-  client lifecycle wiring follows it. Visible marker runtime output is now
-  claimed, while visible segment output is not.
+  independence. Visible marker and linear-segment runtime output are now claimed.
+  Client lifecycle ownership/rebuild wiring is the next bounded preview gate.
 
 ### Reproducible graph evidence
 
@@ -164,10 +170,12 @@ This section is the authoritative handoff. Detailed evidence remains in
 
 ### Not implemented yet
 
-- No polished editor UI, visible waypoint/path preview, timeline, cinematic
-  curves, lens playback, save/load, server repository, sharing, permissions,
-  cloning, or event execution exists yet. The current playback is deliberately
-  limited to equal-duration transform interpolation over the transient draft.
+- No polished editor UI, automatic preview lifecycle/rebuild integration,
+  timeline, cinematic curves, lens playback, save/load, server repository,
+  sharing, permissions, cloning, or event execution exists yet. The isolated
+  preview actor can render validated markers and linear segments, while current
+  playback remains deliberately limited to equal-duration transform interpolation
+  over the transient draft.
 - Draft waypoint data is client-local and transient. Other server members
   cannot see or play it.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
@@ -927,18 +935,19 @@ is complete; that gate still requires cooked multiplayer acceptance.
 
 ## 18. Immediate execution priority
 
-The installation and initial camera reconnaissance are complete. Follow the
-exact session runbook in section 1.1. The immediate sequence is:
+The installation, camera foundation, typed draft/document sync, linear playback,
+and isolated marker/linear-segment preview are complete. Follow the exact session
+runbook in section 1.1. The immediate sequence is:
 
-1. Generate, paste, compile, and round-trip `SyncDraftDocumentV1` against its
-   reconciliation oracle; then connect every successful waypoint mutation to
-   it and prove the transaction in PIE.
-2. Visible path preview, serialization, and undo/redo.
-3. Cinematic interpolation profiles built on the validated absolute-time kernel.
-4. First cook/package proof in normal Conan Enhanced when an attended session is
-   available.
-5. Test Workshop item and controlled G-Portal deployment only after that cooked
-   build passes locally.
+1. Give the client director explicit ownership of one local path-preview actor,
+   copy `DraftDocumentV1` into it, and rebuild after every successful mutation;
+   prove enter/edit/play/exit cleanup and no duplicate actors in PIE.
+2. Add bounded draft undo/redo transactions and prove document/preview parity.
+3. Add local serialization and restore validation for authored drafts.
+4. Build cinematic interpolation profiles on the validated absolute-time kernel.
+5. Run the first cook/package proof in normal Conan Enhanced during an attended
+   session, then create the controlled test Workshop/G-Portal path only after the
+   cooked build passes locally.
 
 The first public capability milestone is not “the camera moved in PIE.” It is
 “the cooked mod entered, flew, authored a small draft, and exited safely on a

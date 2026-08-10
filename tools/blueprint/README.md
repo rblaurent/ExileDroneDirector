@@ -38,6 +38,12 @@ The tools in this directory never launch Unreal:
 - `Build-LinearPlaybackGraphs.py` composes guarded start, absolute-time
   equal-duration traversal, exact endpoint completion, and explicit stop graphs
   from Unreal-reconstructed node forms.
+- `Build-PathPreviewLifecycleGraphs.py` composes deterministic refresh/reuse and
+  clear/destroy functions for the client-owned preview reference, including the
+  explicit identity transform required by Enhanced's by-reference spawn pin.
+- `Build-PathPreviewIntegrationGraphs.py` upgrades the reviewed Enter, Exit,
+  Capture, Replace, and Delete baselines with full-document sync and preview
+  lifecycle calls while preserving body-only paste forms.
 - `Test-WaypointCaptureContracts.py` verifies exact array types, data sources,
   append order, selected-index assignment, ID increment, and available
   EventGraph dispatch semantics.
@@ -47,6 +53,12 @@ The tools in this directory never launch Unreal:
   derived from live state and displayed after capture, replace, and delete.
 - `Test-LinearPlaybackContracts.py` verifies the time source, segment math,
   quaternion transform lerp, exact final endpoint, selection, and stop state.
+- `Test-PathPreviewLifecycleContracts.py` verifies create/reuse symmetry,
+  document projection, explicit spawn input, clear-before-destroy, stale
+  reference cleanup, and native function-entry reachability.
+- `Test-PathPreviewIntegrationContracts.py` verifies all five production roots,
+  every success-path refresh, full-document sync, feedback ordering, and
+  destroy-before-view-restoration.
 
 Validated snippets:
 
@@ -113,6 +125,11 @@ Validated snippets:
   `MinMoveSpeed` at runtime.
 - `drone-camera-event-graph.eddgraph` explicitly disables actor and movement
   replication at BeginPlay to override `SpectatorPawn`'s inherited runtime state.
+- `refresh-path-preview-v1.eddgraph` and `destroy-path-preview-v1.eddgraph` are
+  the checked post-compile Unreal lifecycle round-trips.
+- `*-preview.eddgraph` for Enter, Exit, Capture, Replace, and Delete are the
+  checked production round-trips. The unsuffixed versions remain deterministic
+  construction baselines for the integration builder.
 
 Design comment nodes exported by Unreal use
 `/Script/UnrealEd.EdGraphNode_Comment`; the snippet validator permits that one

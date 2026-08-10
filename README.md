@@ -176,8 +176,14 @@ in a contract-tested order. `RebuildPreviewV1` now clears stale state, honors
 instance while preserving camera location/rotation and applying uniform marker
 scale. A three-phase production-path PIE gate proves exact one/two-marker counts,
 transforms, empty segment ownership, clear-to-zero behavior, default restoration,
-and temporary-actor cleanup. Linear segment instances are the next preview slice,
-followed by client lifecycle integration and undo/redo.
+and temporary-actor cleanup. The client now owns one local preview actor through
+`PathPreviewActorV1`: entry creates it, repeated entry/refresh reuses it, every
+successful capture/replace/delete synchronizes the complete typed document and
+rebuilds it, playback preserves it, and exit destroys it idempotently. A
+two-client PIE acceptance produced 2 markers plus 1 segment through the real
+capture path, created a fresh actor on re-entry, left the remote client isolated,
+and ended in `EDD_PATH_PREVIEW_LIFECYCLE_PIE:AUTOMATIC_RESULT:PASS`. Bounded draft
+undo/redo is the next local-authoring slice.
 Cooked-package validation remains required but is explicitly deferred until an
 attended session.
 

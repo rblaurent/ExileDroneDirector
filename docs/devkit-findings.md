@@ -1376,8 +1376,8 @@ package was synced; live and repository SHA-256 are both
 `7E366E3CC26B37CD5949265C5255D110091EB210D692613978DF77FEDB10F69B`.
 
 That marker-only checkpoint was then extended by the linear `SegmentLinesV1`
-projection below. Client lifecycle integration follows the completed isolated
-preview proof.
+projection below, followed by the completed client lifecycle integration in the
+subsequent section.
 
 ### Linear segment rebuild and runtime proof
 
@@ -1426,8 +1426,83 @@ followed by an immediate Unreal clipboard export and exact node-count check; thi
 caught an unsaved old-plus-new duplicate graph before compilation. Second,
 Blueprint selection persists after clipboard export, so node repositioning must
 first deselect the full graph or every selected node moves together. Neither
-mistake reached compilation or disk. Client ownership and automatic rebuild
-wiring are now the next bounded preview gate.
+mistake reached compilation or disk. The client ownership and automatic rebuild
+gate described below now consumes this isolated renderer.
+
+## Client-owned preview lifecycle and production integration (2026-08-10)
+
+`Configure-PathPreviewLifecycle.py` adds one typed nullable
+`PathPreviewActorV1` member to `BPC_EDD_ClientDirector` plus the
+`RefreshPathPreviewV1` and `DestroyPathPreviewV1` function seams. The default is
+verified as `None`; a repeat run reuses the variable and functions. The matching
+read-only metadata probe is `Probe-PathPreviewLifecycleTypes.py`.
+
+`RefreshPathPreviewV1` is a closed 12-node/47-pin graph. It branches on the owned
+reference's validity. The valid path copies `DraftDocumentV1` into the existing
+actor's `PreviewDocumentV1` and calls `RebuildPreviewV1`. The invalid path spawns
+exactly one `BP_EDD_PathPreview` with `AlwaysSpawn`, stores the returned actor,
+copies the same document, and rebuilds. The Enhanced compiler rejects the
+apparently valid serialized default of a by-reference `SpawnTransform` pin; an
+explicit identity `MakeTransform` must be wired into the spawn node. This is a
+compiler requirement, not a style preference.
+
+`DestroyPathPreviewV1` is a closed 8-node/26-pin graph. A valid actor is cleared,
+destroyed, then the member is reset to `None`. The invalid/stale path also resets
+the member, making repeated cleanup and actor-loss recovery idempotent. Both live
+functions compiled `Good to go`, saved, and passed exact reciprocal-link and
+semantic contracts after fresh Unreal exports.
+
+Production integration is deliberately narrow:
+
+- both successful `EnterDroneMode` camera paths terminate in refresh;
+- capture and replace call `SyncDraftDocumentV1`, refresh, then feedback;
+- both successful delete paths call `SyncDraftDocumentV1` then refresh;
+- `ExitDroneMode` destroys the preview before the existing view-restoration
+  branch.
+
+The five generated full graphs and five entryless paste bodies are deterministic.
+Their fresh live round-trips are checked in separately because Unreal normalizes
+member references and IDs after paste. The first semantic draft validated every
+inner execution path but did not require the native function-entry edge. PIE
+therefore exposed an Enter no-op. Strengthening the contract to assert the exact
+root edge also revealed the same omission in Delete. Both were manually wired,
+re-exported, and the complete live suite passed. A graph is not executable merely
+because all nodes below its root are internally closed.
+
+Two more editor boundaries are now recorded. First, deterministic UUID counters
+must not be restarted for fragments pasted into a graph containing earlier output
+from the same sequence; duplicate pin IDs can cause silent link failures. Generate
+the complete body in one pass and paste into an emptied function. Second,
+function navigation requires a double-click and breadcrumb verification; selection
+in My Blueprint alone does not prove the intended graph is active.
+
+`Validate-PathPreviewLifecyclePIE.py` is a self-contained, one-session acceptance
+harness. The accepted two-client run proved:
+
+- Enter created one exact owned preview actor with 0 markers/0 segments;
+- repeated refresh and repeated Enter reused that actor;
+- two real production captures rebuilt it to 2 markers/1 segment;
+- linear playback start/update/stop preserved the preview;
+- Exit plus repeated destroy removed the actor and cleared its reference;
+- re-entry created a fresh actor instance with the same 2-marker/1-segment draft;
+- final exit left zero actors and no owned reference;
+- the second PIE client had neither the host reference nor a leaked preview actor.
+
+The final signals ended in:
+
+- `PRODUCTION_CAPTURE_REFRESHED_TWO_ONE:True`
+- `PLAYBACK_PRESERVED_PREVIEW:True`
+- `REENTER_CREATED_FRESH_ONE:<fresh actor path>`
+- `REMOTE_ISOLATION:PASS`
+- `FINAL_CLEANUP:PASS`
+- `AUTOMATIC_RESULT:PASS`
+
+The remote PIE world appears shortly before its PlayerController component is
+attached, so remote isolation must wait for readiness rather than treating a
+temporarily empty component list as a product failure. The gate waits up to eight
+seconds, then requires exactly one remote director when the second world exists.
+No direct-refresh fallback remains: the accepted run proves the production Enter
+function itself creates the preview.
 
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 

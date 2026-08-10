@@ -205,6 +205,18 @@ the scale is `(distance / SourceCubeExtentV1, LineThicknessV1,
 LineThicknessV1)`. The last waypoint and degenerate adjacencies deliberately add
 no `SegmentLinesV1` instance.
 
+`BPC_EDD_ClientDirector` is the sole runtime owner of this visualization through
+the nullable `PathPreviewActorV1` reference. `RefreshPathPreviewV1` is the only
+creation/update boundary: it reuses the exact valid actor when possible,
+otherwise spawns one collision-independently at an explicit identity transform,
+then copies the complete `DraftDocumentV1` value and invokes `RebuildPreviewV1`
+on either path. `DestroyPathPreviewV1` is the symmetric boundary: it clears
+pooled instances, destroys a valid actor, and clears both valid and stale
+references. Enter and every successful authoring mutation call refresh; normal
+exit calls destroy before camera restoration. The actor and reference are
+client-local and never replicated, so one client's authoring preview cannot
+become server or another client's state.
+
 ### 3.6 `BP_EDD_FlypathRepository`
 
 Logical server repository. Its physical form depends on the persistence API

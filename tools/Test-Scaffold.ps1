@@ -33,14 +33,17 @@ $requiredFiles = @(
     'tools\unreal\Configure-FlypathDocumentBridge.py',
     'tools\unreal\Configure-DocumentSync.py',
     'tools\unreal\Configure-PathPreview.py',
+    'tools\unreal\Configure-PathPreviewLifecycle.py',
     'tools\unreal\Configure-LinearPlayback.py',
     'tools\unreal\Probe-WaypointTypes.py',
+    'tools\unreal\Probe-PathPreviewLifecycleTypes.py',
     'tools\unreal\Validate-WaypointCapturePIE.py',
     'tools\unreal\Validate-WaypointStructSyncPIE.py',
     'tools\unreal\Validate-DocumentSyncPIE.py',
     'tools\unreal\Validate-LinearPlaybackPIE.py',
     'tools\unreal\Validate-PathPreviewMarkersPIE.py',
     'tools\unreal\Validate-PathPreviewSegmentsPIE.py',
+    'tools\unreal\Validate-PathPreviewLifecyclePIE.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
     'tools\preview\linear_preview.py',
@@ -81,6 +84,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-PathPreviewContracts.py',
     'tools\blueprint\Build-PathPreviewMarkerGraph.py',
     'tools\blueprint\Build-PathPreviewSegmentGraph.py',
+    'tools\blueprint\Build-PathPreviewLifecycleGraphs.py',
+    'tools\blueprint\Build-PathPreviewIntegrationGraphs.py',
+    'tools\blueprint\Test-PathPreviewLifecycleContracts.py',
+    'tools\blueprint\Test-PathPreviewIntegrationContracts.py',
     'tools\blueprint\templates\waypoint-capture-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-struct-sync-node-forms.eddgraph',
     'tools\blueprint\templates\document-sync-struct-node-forms.eddgraph',
@@ -114,7 +121,14 @@ $requiredFiles = @(
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
     'tools\blueprint\snippets\clear-path-preview-v1.eddgraph',
     'tools\blueprint\snippets\rebuild-path-preview-markers-v1.eddgraph',
-    'tools\blueprint\snippets\rebuild-path-preview-segments-v1.eddgraph'
+    'tools\blueprint\snippets\rebuild-path-preview-segments-v1.eddgraph',
+    'tools\blueprint\snippets\refresh-path-preview-v1.eddgraph',
+    'tools\blueprint\snippets\destroy-path-preview-v1.eddgraph',
+    'tools\blueprint\snippets\enter-drone-mode-preview.eddgraph',
+    'tools\blueprint\snippets\exit-drone-mode-preview.eddgraph',
+    'tools\blueprint\snippets\capture-current-waypoint-preview.eddgraph',
+    'tools\blueprint\snippets\replace-selected-waypoint-preview.eddgraph',
+    'tools\blueprint\snippets\delete-selected-waypoint-preview.eddgraph'
 )
 
 $missing = @(
@@ -125,6 +139,13 @@ $missing = @(
 
 if ($missing.Count -gt 0) {
     throw "Missing scaffold files: $($missing -join ', ')"
+}
+
+foreach ($pythonFile in Get-ChildItem -LiteralPath (Join-Path $ProjectRoot 'tools') -Recurse -Filter '*.py' -File) {
+    & python -c "import ast,pathlib,sys; p=pathlib.Path(sys.argv[1]); ast.parse(p.read_text(encoding='utf-8-sig'), filename=str(p))" $pythonFile.FullName
+    if ($LASTEXITCODE -ne 0) {
+        throw "Python syntax validation failed: $($pythonFile.FullName)"
+    }
 }
 
 $manifestPath = Join-Path $ProjectRoot 'project.json'
@@ -311,6 +332,113 @@ if ($LASTEXITCODE -ne 0) {
     --segments (Join-Path $ProjectRoot 'tools\blueprint\snippets\rebuild-path-preview-segments-v1.eddgraph')
 if ($LASTEXITCODE -ne 0) {
     throw "Checked path-preview segment contracts failed with exit code $LASTEXITCODE."
+}
+
+$pathPreviewLifecycleNonce = [guid]::NewGuid().ToString('N')
+$generatedRefresh = Join-Path $scratchRoot "edd-preview-refresh-$pathPreviewLifecycleNonce.eddgraph"
+$generatedRefreshPaste = Join-Path $scratchRoot "edd-preview-refresh-$pathPreviewLifecycleNonce-paste.eddgraph"
+$generatedDestroy = Join-Path $scratchRoot "edd-preview-destroy-$pathPreviewLifecycleNonce.eddgraph"
+$generatedDestroyPaste = Join-Path $scratchRoot "edd-preview-destroy-$pathPreviewLifecycleNonce-paste.eddgraph"
+$generatedRefreshRepeat = Join-Path $scratchRoot "edd-preview-refresh-$pathPreviewLifecycleNonce-repeat.eddgraph"
+$generatedRefreshRepeatPaste = Join-Path $scratchRoot "edd-preview-refresh-$pathPreviewLifecycleNonce-repeat-paste.eddgraph"
+$generatedDestroyRepeat = Join-Path $scratchRoot "edd-preview-destroy-$pathPreviewLifecycleNonce-repeat.eddgraph"
+$generatedDestroyRepeatPaste = Join-Path $scratchRoot "edd-preview-destroy-$pathPreviewLifecycleNonce-repeat-paste.eddgraph"
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-PathPreviewLifecycleGraphs.py') `
+    --project-root $ProjectRoot `
+    --refresh-output $generatedRefresh `
+    --refresh-paste-output $generatedRefreshPaste `
+    --destroy-output $generatedDestroy `
+    --destroy-paste-output $generatedDestroyPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Path-preview lifecycle graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-PathPreviewLifecycleGraphs.py') `
+    --project-root $ProjectRoot `
+    --refresh-output $generatedRefreshRepeat `
+    --refresh-paste-output $generatedRefreshRepeatPaste `
+    --destroy-output $generatedDestroyRepeat `
+    --destroy-paste-output $generatedDestroyRepeatPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repeated path-preview lifecycle graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($pair in @(
+    @($generatedRefresh, $generatedRefreshRepeat),
+    @($generatedRefreshPaste, $generatedRefreshRepeatPaste),
+    @($generatedDestroy, $generatedDestroyRepeat),
+    @($generatedDestroyPaste, $generatedDestroyRepeatPaste)
+)) {
+    if ((Get-FileHash -Algorithm SHA256 $pair[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $pair[1]).Hash) {
+        throw "Path-preview lifecycle graph generation is not deterministic: $($pair[0])"
+    }
+}
+foreach ($graph in @($generatedRefresh, $generatedRefreshPaste, $generatedDestroy, $generatedDestroyPaste)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-PathPreviewLifecycleContracts.py') `
+    --project-root $ProjectRoot --refresh $generatedRefresh --destroy $generatedDestroy
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated path-preview lifecycle contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-PathPreviewLifecycleContracts.py') `
+    --project-root $ProjectRoot --refresh $generatedRefreshPaste --destroy $generatedDestroyPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated path-preview lifecycle paste contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-PathPreviewLifecycleContracts.py') `
+    --project-root $ProjectRoot `
+    --refresh (Join-Path $ProjectRoot 'tools\blueprint\snippets\refresh-path-preview-v1.eddgraph') `
+    --destroy (Join-Path $ProjectRoot 'tools\blueprint\snippets\destroy-path-preview-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Checked path-preview lifecycle contracts failed with exit code $LASTEXITCODE."
+}
+
+$pathPreviewIntegrationNonce = [guid]::NewGuid().ToString('N')
+$generatedIntegrationDir = Join-Path $scratchRoot "edd-preview-integration-$pathPreviewIntegrationNonce"
+$generatedIntegrationRepeatDir = Join-Path $scratchRoot "edd-preview-integration-$pathPreviewIntegrationNonce-repeat"
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-PathPreviewIntegrationGraphs.py') `
+    --project-root $ProjectRoot --output-dir $generatedIntegrationDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Path-preview integration graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-PathPreviewIntegrationGraphs.py') `
+    --project-root $ProjectRoot --output-dir $generatedIntegrationRepeatDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Repeated path-preview integration graph generation failed with exit code $LASTEXITCODE."
+}
+$integrationFiles = @(
+    'enter-drone-mode-preview.eddgraph',
+    'enter-drone-mode-preview-paste.eddgraph',
+    'exit-drone-mode-preview.eddgraph',
+    'exit-drone-mode-preview-paste.eddgraph',
+    'capture-current-waypoint-preview.eddgraph',
+    'capture-current-waypoint-preview-paste.eddgraph',
+    'replace-selected-waypoint-preview.eddgraph',
+    'replace-selected-waypoint-preview-paste.eddgraph',
+    'delete-selected-waypoint-preview.eddgraph',
+    'delete-selected-waypoint-preview-paste.eddgraph'
+)
+foreach ($file in $integrationFiles) {
+    $first = Join-Path $generatedIntegrationDir $file
+    $second = Join-Path $generatedIntegrationRepeatDir $file
+    if ((Get-FileHash -Algorithm SHA256 $first).Hash -ne (Get-FileHash -Algorithm SHA256 $second).Hash) {
+        throw "Path-preview integration graph generation is not deterministic: $file"
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $first
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-PathPreviewIntegrationContracts.py') `
+    --project-root $ProjectRoot --input-dir $generatedIntegrationDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated path-preview integration contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-PathPreviewIntegrationContracts.py') `
+    --project-root $ProjectRoot --input-dir $generatedIntegrationDir --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated path-preview integration paste contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-PathPreviewIntegrationContracts.py') `
+    --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')
+if ($LASTEXITCODE -ne 0) {
+    throw "Checked path-preview integration contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\document\test_flypath_document.py')

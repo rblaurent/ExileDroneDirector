@@ -175,6 +175,19 @@ load the Enhanced DevKit and must not run alongside a resource-heavy game.
     live 51-node dispatch reports the dynamic waypoint count and selected index
     after every successful mutation. Its complete compiled graph was copied back
     from Unreal and is enforced by capture, edit, and feedback contracts.**
+13. Client-owned path-preview lifecycle. **Add the typed
+    `PathPreviewActorV1` reference and the empty `RefreshPathPreviewV1` /
+    `DestroyPathPreviewV1` function seams with
+    `Configure-PathPreviewLifecycle.py`. Generate both complete and paste forms
+    with `Build-PathPreviewLifecycleGraphs.py`; the refresh graph must wire an
+    explicit identity `MakeTransform` into the by-reference spawn input. Generate
+    the five production integration graphs with
+    `Build-PathPreviewIntegrationGraphs.py`, paste each body, and manually connect
+    its native function entry. Compile, save, export every complete live graph,
+    and require `Test-PathPreviewLifecycleContracts.py` plus
+    `Test-PathPreviewIntegrationContracts.py` to pass before PIE. The final
+    two-client lifecycle run proved create/reuse, document projection after real
+    capture, playback coexistence, cleanup, fresh re-entry, and client isolation.**
 
 When pasting a function body without its native `K2Node_FunctionEntry`, a
 one-sided `LinkedTo` reference in pasted text is not enough. Unreal does not add
@@ -189,6 +202,23 @@ the first Branch execution input intentionally unlinked. After paste, connect
 the native entry once, compile, export the complete live function, and run
 `Test-WaypointStructSyncContracts.py` against that round-trip. Never use
 `-AllowExternalFunctionEntry` to disguise an unreachable paste body.
+
+The entry check is required for every production function, even when every
+internal execution and data link is correct. During lifecycle integration,
+Enter and Delete initially passed the inner-path contracts but did nothing from
+their native roots because the final manual wire had not serialized. The
+strengthened contracts now assert `FunctionEntry -> first executable node` for
+all five integrated functions and caught both omissions before the accepted PIE
+run.
+
+Do not restart a deterministic Blueprint node-ID generator and paste its output
+into a graph that may already contain nodes produced by the same sequence. The
+resulting `NodeGuid`/`PinId` collisions can make Unreal silently attach or reject
+links. Generate each complete graph in one run, paste only its intentionally
+entryless body into an emptied function, and immediately export the native
+round-trip. Also open functions by double-clicking their My Blueprint entry and
+verify the breadcrumb before selecting or replacing nodes; a single-click can
+leave the previous graph active without an obvious warning.
 
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.

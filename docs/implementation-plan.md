@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.23.1-path-preview-clear`
+Current internal build: `0.24.0-client-preview-lifecycle`
 
 ## 1. Delivery strategy
 
@@ -38,9 +38,10 @@ This section is the authoritative handoff. Detailed evidence remains in
   Ctrl is precision; Shift is boost; C/Z bank; H toggles horizon lock.
 - `CaptureCurrentWaypoint`, `ReplaceSelectedWaypoint`, and
   `DeleteSelectedWaypoint` are compiled live functions with reciprocal native
-  entry links. Every successful mutation now invokes `SyncDraftWaypointsV1`
-  before feedback, so the typed waypoint document is updated atomically with
-  the six proven legacy channels.
+  entry links. Every successful mutation now invokes `SyncDraftDocumentV1`,
+  then `RefreshPathPreviewV1`, before feedback, so the complete typed document
+  and visible path remain transactionally aligned with the six proven legacy
+  channels.
 - `StartLinearPlayback`, `UpdateLinearPlayback`, and `StopLinearPlayback` are
   compiled absolute-time functions. P toggles playback; active playback ticks
   suppress manual flight and waypoint edits. Completion holds the exact final
@@ -155,7 +156,20 @@ This section is the authoritative handoff. Detailed evidence remains in
   midpoint/orientation/length scaling for linear segments, vertical paths,
   degenerate adjacency suppression, invalid-value rejection, and history
   independence. Visible marker and linear-segment runtime output are now claimed.
-  Client lifecycle ownership/rebuild wiring is the next bounded preview gate.
+- `BPC_EDD_ClientDirector` now owns exactly one nullable
+  `PathPreviewActorV1`. `RefreshPathPreviewV1` reuses a valid actor or spawns one
+  collision-independently with an explicitly wired identity transform, copies
+  `DraftDocumentV1`, and rebuilds it. `DestroyPathPreviewV1` clears both pools,
+  destroys the actor, and resets valid or stale references to `None`. Both
+  functions compile, save, round-trip through Unreal, and pass reciprocal-link
+  plus semantic contracts.
+- Enter refreshes on both successful camera paths; capture, replace, and both
+  delete success paths sync the full document then refresh; normal exit destroys
+  the preview before view restoration. A two-client PIE gate proved one actor on
+  entry, reuse across repeated refresh/entry, 2 markers and 1 segment through the
+  real capture path, playback coexistence, idempotent exit/destroy, fresh re-entry,
+  final cleanup, and remote-world isolation. It ended in
+  `EDD_PATH_PREVIEW_LIFECYCLE_PIE:AUTOMATIC_RESULT:PASS`.
 
 ### Reproducible graph evidence
 
@@ -170,10 +184,10 @@ This section is the authoritative handoff. Detailed evidence remains in
 
 ### Not implemented yet
 
-- No polished editor UI, automatic preview lifecycle/rebuild integration,
-  timeline, cinematic curves, lens playback, save/load, server repository,
-  sharing, permissions, cloning, or event execution exists yet. The isolated
-  preview actor can render validated markers and linear segments, while current
+- No polished editor UI, undo/redo, timeline, cinematic curves, lens playback,
+  save/load, server repository,
+  sharing, permissions, cloning, or event execution exists yet. The client-owned
+  preview actor renders validated markers and linear segments, while current
   playback remains deliberately limited to equal-duration transform interpolation
   over the transient draft.
 - Draft waypoint data is client-local and transient. Other server members
@@ -936,15 +950,14 @@ is complete; that gate still requires cooked multiplayer acceptance.
 ## 18. Immediate execution priority
 
 The installation, camera foundation, typed draft/document sync, linear playback,
-and isolated marker/linear-segment preview are complete. Follow the exact session
+and client-owned marker/linear-segment preview are complete. Follow the exact session
 runbook in section 1.1. The immediate sequence is:
 
-1. Give the client director explicit ownership of one local path-preview actor,
-   copy `DraftDocumentV1` into it, and rebuild after every successful mutation;
-   prove enter/edit/play/exit cleanup and no duplicate actors in PIE.
-2. Add bounded draft undo/redo transactions and prove document/preview parity.
-3. Add local serialization and restore validation for authored drafts.
-4. Build cinematic interpolation profiles on the validated absolute-time kernel.
+1. Add bounded draft undo/redo transactions and prove document/preview parity.
+2. Add local serialization and restore validation for authored drafts.
+3. Build cinematic interpolation profiles on the validated absolute-time kernel.
+4. Begin the editor HUD around the validated authoring, selection, playback, and
+   preview contracts without coupling presentation state to the document model.
 5. Run the first cook/package proof in normal Conan Enhanced during an attended
    session, then create the controlled test Workshop/G-Portal path only after the
    cooked build passes locally.

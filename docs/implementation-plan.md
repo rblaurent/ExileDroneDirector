@@ -1,23 +1,26 @@
 # Exile Drone Director — Implementation Plan
 
 Status: execution plan for Conan Exiles Enhanced DevKit development
-Planning rule: every phase ends in a cooked, testable vertical capability
-Release strategy: prove safety and persistence before investing in maximal polish
+Planning rule: every backend phase ends in structural contracts, programmatic
+PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
+Cooking is a later integration gate, not the next implementation milestone.
+Release strategy: complete and prove the backend before investing in polished UI
 Current internal build: `0.28.0-history-acceptance`
 
 ## 1. Delivery strategy
 
-Development proceeds through vertical slices rather than building all UI, all
-math, or all networking in isolation. The first complete loop is intentionally
-small:
+Development proceeds through backend capability slices rather than building all
+UI, all math, or all networking in isolation. The first complete product loop is:
 
 **Create private Flypath → capture two waypoints → save on server → publish →
 second client plays → second client clones privately**
 
 That loop establishes the camera boundary, client/server attachment, durable
 identity, persistence, authorization, network transport, immutable publication,
-local evaluation, and cloning. Subsequent phases improve trajectory quality,
-editor depth, camera visuals, and release hardening without replacing the core.
+local evaluation, and cloning. It is not considered ready for the UI or cook
+gates until cinematic trajectory, rotation, timing, lens, event, restoration,
+and failure semantics are also reachable through shortcuts and explicit debug
+output. Subsequent UI work exposes this proven backend without redefining it.
 
 ## 1.1 Current implementation checkpoint
 
@@ -251,39 +254,43 @@ This section is the authoritative handoff. Detailed evidence remains in
 
 ### Exact next autonomous slice
 
-The next implementation slice deliberately proves the product through keyboard
-controls and explicit logs before any editor UI is built:
+The next implementation sequence deliberately proves the complete backend through
+keyboard controls, debug geometry, typed logs, and direct programmatic PIE calls
+before any polished editor UI or cook is attempted:
 
-1. Preserve the repeatable PIE-runner evidence, run the scaffold/cold-load
-   gates, and commit and push the tooling checkpoint.
-2. Cook/package the current small slice and run it in a normal local Conan
-   Enhanced **single-player game**. This is the attended physical-input and
-   visual-behaviour gate; it requires no Workshop publication or hosted server.
-3. Only after local single-player passes, publish an explicitly test-only
-   Workshop build and repeat the safe subset on the controlled G-Portal server
-   with identical client/server version and load order.
-4. Only after those gates pass, specify the smallest useful authoring UI from
-   observed workflow friction. A custom timeline is not assumed to be necessary.
-5. In the first cooked-client recording acceptance, visually prove that the
-   implemented F7 `Toggle Clean Frame` action hides/restores Conan's complete
-   native HUD and every mod-owned overlay without destroying the preview,
-   mutating the draft, stopping playback, or disabling Emergency Exit.
-7. Close, sync, run the complete repository suite, commit, and push after each
-   meaningful compiled milestone.
-
-The first supported cook/package and normal-client test remain mandatory before
-any public release or Workshop/G-Portal deployment; they resume in an attended
-session without invalidating the implementation work above.
+1. Freeze and version the persistent Flypath envelope, metadata, owner identity,
+   visibility, revision, attribution, published-snapshot, and validation contracts.
+2. Implement modular Blueprint repository and storage seams, beginning with
+   private create/save/load/list/delete and deterministic restart recovery.
+3. Prove optimistic revisions, atomic save behavior, corruption recovery, schema
+   migration hooks, limit validation, and typed failures through executable tests.
+4. Implement server-authoritative ownership, privacy, publication, immutable
+   snapshots, discovery, playback fetch, and private cloning with attribution.
+5. Implement the complete trajectory compiler: linear and cinematic curves,
+   monotonic timing/speed profiles, smooth quaternion rotation, flight profiles,
+   deterministic sampling, and discontinuity diagnostics.
+6. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
+   event tracks with bounded target adapters and authorization.
+7. Expose every backend operation through temporary shortcuts, compact debug
+   displays, path geometry, and stable logs; cover success, rejection, boundary,
+   reconnect, restart, cancellation, and restoration cases in programmatic PIE.
+8. Run an attended end-to-end keyboard/debug dogfood pass. Only after that pass
+   may polished library/editor/timeline UX begin.
+9. Cook/package only after the full backend prototype and its dogfood workflow
+   are accepted. Workshop and G-Portal remain later deployment gates.
+10. Close, sync, run the complete repository suite, commit, and push after every
+    meaningful compiled feature milestone.
 
 ### UX investment gate
 
 The current product surface is intentionally shortcuts, path-preview geometry,
 and diagnostic logs. No timeline, inspector, curve editor, or flypath library UI
 is authorized by implementation momentum alone. UX work begins only after the
-same camera/authoring/history slice passes structural contracts, PIE, a cooked
-normal client, and the controlled G-Portal environment. The first UX prototype
-must solve problems observed during those tests and stay small enough to discard
-or reshape cheaply.
+complete backend described above passes structural contracts, programmatic PIE,
+and an attended keyboard/debug dogfood pass. The first UX prototype must solve
+problems observed during that testing and stay small enough to discard or reshape
+cheaply. Cooked-client and hosted-server gates do not block backend implementation;
+they validate the integrated product after the backend milestone.
 
 The shortcut-extension preparation sequence, run from the repository root after
 copying the complete live EventGraph, is:
@@ -309,17 +316,17 @@ passing before paste is necessary but not sufficient.
 
 ### Near-term test gates
 
-- **Hands-on PIE gate:** Laurent can fly for several minutes, capture at least
-  three points, replace/delete the selection, and exit with the original camera
-  and pawn intact.
-- **Cooked local single-player gate:** the same slice loads from a packaged mod
-  in a normal Conan Enhanced single-player save, survives relaunch, enters and
-  exits Drone Mode safely outside PIE, and visually hides/restores Conan's
-  native HUD through F7.
-- **G-Portal gate:** publish a test Workshop item, install it on an Enhanced
-  backup/staging server, use identical client/server mod version and load order,
-  and repeat the camera-restoration test. This gate initially tests only local
-  camera/authoring behavior; server-shared Flypaths arrive in Phases 7-8.
+- **Automated backend gate:** every module has structural contracts plus
+  programmatic PIE acceptance that proves real state changes and edge cases.
+- **Hands-on backend dogfood gate:** Laurent can create, edit, save, load,
+  publish, discover, play, clone, retime, change curve/lens/event parameters,
+  inspect debug state, hide/restore all HUD, and exit safely using shortcuts.
+- **Polished UX gate:** only the accepted backend workflow is exposed through a
+  coherent library/editor interface; the backend remains independently testable.
+- **Cooked local single-player gate:** the complete accepted backend and UX load
+  from a packaged mod, survive relaunch, and preserve all safety guarantees.
+- **Hosted multiplayer gate:** the cooked build repeats ownership, privacy,
+  snapshot, cloning, authorization, and restoration tests with two real clients.
 
 ## 2. Engineering rules
 
@@ -689,39 +696,7 @@ Turn trajectory playback into authored cinematography.
 A creator can author a smooth lens/focus/effect sequence aligned with movement,
 and another viewer can safely reduce comfort-sensitive effects.
 
-## 9. Phase 6 — Full editor UI
-
-### Objectives
-
-Deliver the library/editor/timeline workflow described by the product design.
-
-### Tasks
-
-1. Implement responsive editor layout with collapsible panels.
-2. Build waypoint list, viewport overlays, and property inspector.
-3. Build timeline travel/hold blocks and draggable playhead.
-4. Add track visibility, key selection, key dragging, box selection, and retime.
-5. Build curve editor with semantic presets and advanced tangent controls.
-6. Add Smooth Selected/Everything with lock-aware transactions.
-7. Add error/warning navigation to exact waypoint/segment/track.
-8. Add remappable controls and prevent bindings while editing text.
-9. Add dirty/saving/conflict/recovery status.
-10. Add keyboard navigation and usable scaling at supported resolutions.
-
-### Verification
-
-- Complete an authoring task using primarily mouse/UI.
-- Repeat using primarily keyboard/drone controls.
-- Undo/redo bulk retime and smoothing as single transactions.
-- Resize/collapse panels without losing selection or active edit.
-- Test input focus, text fields, sliders, curve handles, and Emergency Exit.
-
-### Exit gate
-
-A knowledgeable player can create and fine-tune a polished Flypath without
-opening debug tools or understanding the underlying Blueprint graph.
-
-## 10. Phase 7 — Server repository, identity, and private drafts
+## 9. Phase 6 — Server repository, identity, and private drafts
 
 ### Objectives
 
@@ -755,7 +730,7 @@ Persist owner-editable private Flypaths across dedicated-server restarts.
 Private Flypaths are durable, server-authoritative, owner-protected, and
 recoverable.
 
-## 11. Phase 8 — Publishing, discovery, playback, and cloning
+## 10. Phase 7 — Publishing, discovery, playback, and cloning
 
 ### Objectives
 
@@ -798,7 +773,7 @@ Complete the social Flypath loop.
 The complete create/refine/publish/discover/play/clone/remix loop works on a
 dedicated server with enforced privacy and immutable playback.
 
-## 11.1 Event tracks and world-interaction vertical slice
+## 11. Phase 8 — Event tracks and world-interaction backend
 
 ### Objectives
 
@@ -836,7 +811,43 @@ into an unrestricted remote-control mechanism.
 Local Cues and one narrow door workflow operate predictably on a dedicated server
 with explicit permission, failure, clone, and cleanup behavior.
 
-## 12. Phase 9 — Streaming, capture, and playback polish
+## 12. Phase 9 — Full editor UI
+
+### Objectives
+
+Expose the already-proven backend through the library/editor/timeline workflow
+described by the product design. This phase must not become a second backend.
+
+### Tasks
+
+1. Implement responsive editor layout with collapsible panels.
+2. Build waypoint list, viewport overlays, and property inspector.
+3. Build timeline travel/hold blocks and draggable playhead.
+4. Add track visibility, key selection, key dragging, box selection, and retime.
+5. Build curve editor with semantic presets and advanced tangent controls.
+6. Add Smooth Selected/Everything with lock-aware transactions.
+7. Add error/warning navigation to exact waypoint/segment/track.
+8. Add remappable controls and prevent bindings while editing text.
+9. Add dirty/saving/conflict/recovery status.
+10. Add keyboard navigation and usable scaling at supported resolutions.
+
+### Verification
+
+- Repeat the accepted keyboard/debug workflows through the UI and compare the
+  resulting documents, repository revisions, compiled paths, and typed results.
+- Complete an authoring task using primarily mouse/UI.
+- Repeat using primarily keyboard/drone controls.
+- Undo/redo bulk retime and smoothing as single transactions.
+- Resize/collapse panels without losing selection or active edit.
+- Test input focus, text fields, sliders, curve handles, and Emergency Exit.
+
+### Exit gate
+
+A knowledgeable player can create and fine-tune a polished Flypath without
+opening debug tools, while the independent shortcut/debug acceptance suite still
+passes unchanged.
+
+## 13. Phase 10 — Streaming, capture, and playback polish
 
 ### Objectives
 
@@ -873,7 +884,7 @@ Make real-world server playback and recording dependable.
 Clean external recording is reliable; direct rendering is either verified and
 isolated or explicitly documented as unsupported.
 
-## 13. Phase 10 — Release hardening
+## 14. Phase 11 — Release hardening
 
 ### Objectives
 
@@ -899,9 +910,9 @@ Ship a supportable public Workshop release.
 No critical camera-restoration, ownership, privacy, persistence, or corrupt-save
 defects remain; public documentation matches actual cooked behavior.
 
-## 14. Test strategy
+## 15. Test strategy
 
-### 14.1 Automated/math harnesses
+### 15.1 Automated/math harnesses
 
 Where Blueprint automation is available, build data-driven tests for:
 
@@ -918,7 +929,7 @@ Where Blueprint automation is available, build data-driven tests for:
 If the DevKit lacks a useful automation runner, expose deterministic editor
 utility tests and golden sampled outputs that can be run before cooking.
 
-### 14.2 Manual runtime matrix
+### 15.2 Manual runtime matrix
 
 - Single-player
 - Listen server host/client
@@ -933,7 +944,7 @@ utility tests and golden sampled outputs that can be run before cooking.
 - Long cinematic and high-speed FPV paths
 - Different UI scaling/resolutions and remapped controls
 
-### 14.3 Release-blocking defect classes
+### 15.3 Release-blocking defect classes
 
 - Player camera/input cannot be restored
 - Player pawn moved/teleported unintentionally
@@ -944,7 +955,7 @@ utility tests and golden sampled outputs that can be run before cooking.
 - Non-deterministic published trajectory at different frame rates
 - Unbounded RPC/storage payload
 
-## 15. Risk register and mitigation
+## 16. Risk register and mitigation
 
 | Risk | Impact | Mitigation/spike |
 | --- | --- | --- |
@@ -965,7 +976,7 @@ utility tests and golden sampled outputs that can be run before cooking.
 | Stateful event rollback overwrites concurrent changes | High | Adapter conflict detection, bounded leases, conservative yield, explicit persistent actions |
 | Blueprint UMG timeline becomes slow/incoherent | High | Early production UI spike, batched drawing, pooling/virtualization, token/component enforcement |
 
-## 16. Planned asset organization
+## 17. Planned asset organization
 
 ```text
 Content/Mods/ExileDroneDirector/
@@ -1006,16 +1017,17 @@ Content/Mods/ExileDroneDirector/
   Tests/
 ```
 
-## 17. Version roadmap
+## 18. Version roadmap
 
 - **0.1 Camera Spike:** safe enter/fly/exit in cooked multiplayer.
 - **0.2 Local Authoring:** waypoints, undo, linear and cinematic playback.
 - **0.3 Drone Motion:** quaternion/gimbal, cinematic/hybrid/FPV profiles.
-- **0.4 Camera Suite:** lens, focus, effects, full timeline.
+- **0.4 Camera Suite:** lens, focus, effects, and keyboard/debug editing.
 - **0.5 Server Drafts:** identity, persistence, ownership, conflicts.
 - **0.6 Sharing Alpha:** publish, library, viewer playback, cloning.
 - **0.7 Directing Alpha:** local Cues, State Clips, bindings, and safe door adapter.
-- **0.8 Capture Beta:** streaming/capture polish, admin policy, migrations.
+- **0.8 Editor Beta:** polished library, inspector, timeline, and curve UX.
+- **0.9 Capture Beta:** streaming/capture polish, admin policy, migrations.
 - **1.0 Public Release:** hardened complete loop and documentation.
 
 Version numbers describe capability gates, not calendar promises.
@@ -1024,32 +1036,34 @@ Internal checkpoint versions such as `0.21.0-flypath-schema-bridge` count valida
 development slices. They do not claim that the public **0.1 Camera Spike** gate
 is complete; that gate still requires cooked multiplayer acceptance.
 
-## 18. Immediate execution priority
+## 19. Immediate execution priority
 
 The installation, camera foundation, typed draft/document sync, linear playback,
-client-owned marker/linear-segment preview, and bounded history transaction core
-are complete. Follow the exact session runbook in section 1.1. The immediate
-sequence is:
+client-owned marker/linear-segment preview, bounded history transaction core,
+and repeatable isolated PIE runner are complete. The immediate sequence is:
 
 1. Keep `tools\Run-DraftHistoryPIE.ps1`, the full scaffold, and the cold asset
    gate green after every relevant change. Graph contracts own shortcut wiring;
-   the isolated PIE runner owns runtime history/document/preview semantics and
-   edge cases without desktop automation.
-2. Run the first cook/package proof in a normal local Conan Enhanced
-   single-player save during an attended session. Include physical F7 and
-   visual native-HUD Clean Frame acceptance in that real-client pass.
-3. Only after the local gate passes, repeat the validated subset through the
-   controlled Workshop/G-Portal path.
-4. Add local serialization and restore validation for authored drafts.
-5. Build cinematic interpolation profiles on the validated absolute-time kernel.
-6. Design the minimum editor HUD only from validated real-environment needs;
-   defer the custom timeline until testing demonstrates that it earns its cost.
+   isolated PIE runners own runtime semantics and edge cases.
+2. Freeze the repository/persistence Blueprint contracts and add executable
+   schema, authorization, revision, hash, recovery, and migration oracles.
+3. Implement private create/save/load/list/delete through modular Blueprint
+   service boundaries, then prove reconnect and restart recovery.
+4. Add server identity, ownership, privacy, immutable publication, discovery,
+   playback snapshots, cloning, conflicts, limits, and typed failures.
+5. Complete cinematic position/timing/rotation, flight profiles, lens/focus/
+   effect tracks, free-look carrier modes, and event execution.
+6. Give every operation a shortcut/debug route and run the complete automated
+   and attended backend dogfood matrix.
+7. Only then build the polished UI against those stable contracts.
+8. Cook and deploy only after the complete backend and UI integration passes.
 
-The first public capability milestone is not “the camera moved in PIE.” It is
-“the cooked mod entered, flew, authored a small draft, and exited safely on a
-dedicated-server client.”
+The first backend capability milestone is not “the camera moved in PIE.” It is
+“all planned Flypath operations and cinematic tracks survived automated PIE and
+attended keyboard/debug dogfooding without violating persistence, authority,
+determinism, or restoration contracts.”
 
-## 19. Definition of done for 1.0
+## 20. Definition of done for 1.0
 
 The release is done when the product release criteria in the design specification
 pass on a dedicated server, all release-blocking defect classes are cleared, the

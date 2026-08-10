@@ -199,9 +199,10 @@ path preview. A second press, normal Drone Mode exit, or emergency exit restores
 the captured native category state before preview teardown/view restoration.
 The 89-node EventGraph and three Clean Frame functions compile, survive Unreal
 round-trip contracts, and pass divergent-category/idempotence/normal/emergency
-PIE acceptance. Complete visual native-HUD proof remains a cooked-client gate.
-Polished UI and timeline work are deliberately deferred until this shortcut/log
-slice passes PIE, a cooked normal client, and the controlled G-Portal environment.
+PIE acceptance. Complete visual native-HUD proof remains an eventual cooked-client
+gate. Polished UI and cooking are deliberately deferred until the complete
+backend—persistence, ownership/privacy/cloning, cinematic tracks, lens, and
+events—passes programmatic PIE plus an attended keyboard/debug dogfood workflow.
 
 ## Repository layout
 

@@ -35,6 +35,7 @@ $requiredFiles = @(
     'tools\unreal\Configure-PathPreview.py',
     'tools\unreal\Configure-PathPreviewLifecycle.py',
     'tools\unreal\Configure-DraftHistory.py',
+    'tools\unreal\Configure-CleanFrame.py',
     'tools\unreal\Configure-LinearPlayback.py',
     'tools\unreal\Probe-WaypointTypes.py',
     'tools\unreal\Probe-PathPreviewLifecycleTypes.py',
@@ -45,6 +46,7 @@ $requiredFiles = @(
     'tools\unreal\Validate-PathPreviewMarkersPIE.py',
     'tools\unreal\Validate-PathPreviewSegmentsPIE.py',
     'tools\unreal\Validate-PathPreviewLifecyclePIE.py',
+    'tools\unreal\Validate-CleanFramePIE.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
     'tools\preview\linear_preview.py',
@@ -97,6 +99,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-DraftHistoryIntegrationContracts.py',
     'tools\blueprint\Build-DraftHistoryDispatch.py',
     'tools\blueprint\Test-DraftHistoryDispatchContracts.py',
+    'tools\blueprint\Build-CleanFrameGraphs.py',
+    'tools\blueprint\Test-CleanFrameContracts.py',
+    'tools\blueprint\Build-CleanFrameIntegrationGraphs.py',
+    'tools\blueprint\Test-CleanFrameIntegrationContracts.py',
     'tools\blueprint\templates\waypoint-capture-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-struct-sync-node-forms.eddgraph',
     'tools\blueprint\templates\document-sync-struct-node-forms.eddgraph',
@@ -104,6 +110,7 @@ $requiredFiles = @(
     'tools\blueprint\templates\linear-playback-node-forms.eddgraph',
     'tools\blueprint\templates\path-preview-marker-node-forms.eddgraph',
     'tools\blueprint\templates\path-preview-segment-node-forms.eddgraph',
+    'tools\blueprint\templates\conan-clean-frame-node-forms.eddgraph',
     'tools\blueprint\snippets\toggle-input.eddgraph',
     'tools\blueprint\snippets\toggle-state.eddgraph',
     'tools\blueprint\snippets\enter-drone-mode.eddgraph',
@@ -147,7 +154,12 @@ $requiredFiles = @(
     'tools\blueprint\snippets\redo-draft-v1.eddgraph',
     'tools\blueprint\snippets\capture-current-waypoint-history-v1.eddgraph',
     'tools\blueprint\snippets\replace-selected-waypoint-history-v1.eddgraph',
-    'tools\blueprint\snippets\delete-selected-waypoint-history-v1.eddgraph'
+    'tools\blueprint\snippets\delete-selected-waypoint-history-v1.eddgraph',
+    'tools\blueprint\snippets\enter-clean-frame-v1.eddgraph',
+    'tools\blueprint\snippets\exit-clean-frame-v1.eddgraph',
+    'tools\blueprint\snippets\toggle-clean-frame-v1.eddgraph',
+    'tools\blueprint\snippets\exit-drone-mode-clean-frame.eddgraph',
+    'tools\blueprint\snippets\client-director-event-graph-clean-frame.eddgraph'
 )
 
 $missing = @(
@@ -653,4 +665,106 @@ foreach ($graph in @($generatedHistoryDispatch, $checkedHistoryDispatch)) {
     if ($LASTEXITCODE -ne 0) {
         throw "Draft history dispatch contracts failed with exit code $LASTEXITCODE."
     }
+}
+
+$cleanFrameNonce = [guid]::NewGuid().ToString('N')
+$cleanFrameDir = Join-Path $scratchRoot "edd-clean-frame-$cleanFrameNonce"
+$cleanFramePasteDir = Join-Path $scratchRoot "edd-clean-frame-$cleanFrameNonce-paste"
+$cleanFrameRepeatDir = Join-Path $scratchRoot "edd-clean-frame-$cleanFrameNonce-repeat"
+$cleanFrameRepeatPasteDir = Join-Path $scratchRoot "edd-clean-frame-$cleanFrameNonce-repeat-paste"
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-CleanFrameGraphs.py') `
+    --project-root $ProjectRoot --output-dir $cleanFrameDir --paste-dir $cleanFramePasteDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Clean Frame graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-CleanFrameGraphs.py') `
+    --project-root $ProjectRoot --output-dir $cleanFrameRepeatDir --paste-dir $cleanFrameRepeatPasteDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Repeated Clean Frame graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($directoryPair in @(
+    @($cleanFrameDir, $cleanFrameRepeatDir),
+    @($cleanFramePasteDir, $cleanFrameRepeatPasteDir)
+)) {
+    foreach ($file in Get-ChildItem -LiteralPath $directoryPair[0] -File) {
+        $peer = Join-Path $directoryPair[1] $file.Name
+        if ((Get-FileHash -Algorithm SHA256 $file.FullName).Hash -ne
+            (Get-FileHash -Algorithm SHA256 $peer).Hash) {
+            throw "Clean Frame graph generation is not deterministic: $($file.Name)"
+        }
+        & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $file.FullName
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CleanFrameContracts.py') `
+    --project-root $ProjectRoot `
+    --enter (Join-Path $cleanFrameDir 'enter-clean-frame-v1.eddgraph') `
+    --exit (Join-Path $cleanFrameDir 'exit-clean-frame-v1.eddgraph') `
+    --toggle (Join-Path $cleanFrameDir 'toggle-clean-frame-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated Clean Frame contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CleanFrameContracts.py') `
+    --project-root $ProjectRoot `
+    --enter (Join-Path $cleanFramePasteDir 'enter-clean-frame-v1-paste.eddgraph') `
+    --exit (Join-Path $cleanFramePasteDir 'exit-clean-frame-v1-paste.eddgraph') `
+    --toggle (Join-Path $cleanFramePasteDir 'toggle-clean-frame-v1-paste.eddgraph') `
+    --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated Clean Frame paste contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CleanFrameContracts.py') `
+    --project-root $ProjectRoot `
+    --enter (Join-Path $ProjectRoot 'tools\blueprint\snippets\enter-clean-frame-v1.eddgraph') `
+    --exit (Join-Path $ProjectRoot 'tools\blueprint\snippets\exit-clean-frame-v1.eddgraph') `
+    --toggle (Join-Path $ProjectRoot 'tools\blueprint\snippets\toggle-clean-frame-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Checked live Clean Frame contracts failed with exit code $LASTEXITCODE."
+}
+
+$cleanFrameIntegrationDir = Join-Path $scratchRoot "edd-clean-frame-integration-$cleanFrameNonce"
+$cleanFrameIntegrationRepeatDir = Join-Path $scratchRoot "edd-clean-frame-integration-$cleanFrameNonce-repeat"
+New-Item -ItemType Directory -Path $cleanFrameIntegrationDir -Force | Out-Null
+New-Item -ItemType Directory -Path $cleanFrameIntegrationRepeatDir -Force | Out-Null
+foreach ($directory in @($cleanFrameIntegrationDir, $cleanFrameIntegrationRepeatDir)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CleanFrameIntegrationGraphs.py') `
+        --project-root $ProjectRoot `
+        --exit-output (Join-Path $directory 'exit-drone-mode-clean-frame.eddgraph') `
+        --dispatch-output (Join-Path $directory 'client-director-event-graph-clean-frame.eddgraph')
+    if ($LASTEXITCODE -ne 0) {
+        throw "Clean Frame integration generation failed with exit code $LASTEXITCODE."
+    }
+}
+foreach ($fileName in @(
+    'exit-drone-mode-clean-frame.eddgraph',
+    'exit-drone-mode-clean-frame-paste.eddgraph',
+    'client-director-event-graph-clean-frame.eddgraph'
+)) {
+    $first = Join-Path $cleanFrameIntegrationDir $fileName
+    $second = Join-Path $cleanFrameIntegrationRepeatDir $fileName
+    if ((Get-FileHash -Algorithm SHA256 $first).Hash -ne (Get-FileHash -Algorithm SHA256 $second).Hash) {
+        throw "Clean Frame integration generation is not deterministic: $fileName"
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $first
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CleanFrameIntegrationContracts.py') `
+    --project-root $ProjectRoot `
+    --exit (Join-Path $cleanFrameIntegrationDir 'exit-drone-mode-clean-frame.eddgraph') `
+    --dispatch (Join-Path $cleanFrameIntegrationDir 'client-director-event-graph-clean-frame.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated Clean Frame integration contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CleanFrameIntegrationContracts.py') `
+    --project-root $ProjectRoot `
+    --exit (Join-Path $cleanFrameIntegrationDir 'exit-drone-mode-clean-frame-paste.eddgraph') `
+    --dispatch (Join-Path $cleanFrameIntegrationDir 'client-director-event-graph-clean-frame.eddgraph') `
+    --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated Clean Frame integration paste contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CleanFrameIntegrationContracts.py') `
+    --project-root $ProjectRoot `
+    --exit (Join-Path $ProjectRoot 'tools\blueprint\snippets\exit-drone-mode-clean-frame.eddgraph') `
+    --dispatch (Join-Path $ProjectRoot 'tools\blueprint\snippets\client-director-event-graph-clean-frame.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Checked live Clean Frame integration contracts failed with exit code $LASTEXITCODE."
 }

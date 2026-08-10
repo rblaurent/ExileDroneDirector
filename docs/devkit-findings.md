@@ -1557,6 +1557,75 @@ diagnostics and prove the shortcut route in PIE, a cooked normal client, and the
 controlled G-Portal environment. Timeline/editor UI design is deferred until
 those tests reveal the minimum workflow that is actually useful.
 
+## Conan-native Clean Frame HUD path (2026-08-10)
+
+The Enhanced DevKit exposes a real Conan-owned HUD route; Clean Frame must use
+that route rather than relying on Unreal's generic `AHUD.bShowHUD` alone. The
+player-controller interface `/Game/Systems/FunCombat_PlayerControllerInterface`
+defines `ToggleHUD(bool ShowHud?)`, and the stock
+`/Game/Systems/FunCombat_PlayerController` implementation performs three steps:
+
+1. `GUIModuleController.EnableCategory(Popup, ShowHud?)`;
+2. `GUIModuleController.EnableCategory(HUD, ShowHud?)`;
+3. cast `GetHUD()` to `BaseGameHUD` and call
+   `ConanHUD.SetHUDVisibility`, selecting `Hidden` when false and
+   `SelfHitTestInvisible` when true.
+
+`BaseHUD.SetHUDVisibility` by itself only changes `HudLootLogWidget` and
+`HudGeneralNotificationsWidget`, so it is not an adequate global cinematic
+toggle. Conversely, the interface event combines category suppression with
+those remaining widgets and is the supported native behavior to reproduce.
+
+The mod-owned implementation now follows that exact boundary in three compiled
+client functions. `EnterCleanFrameV1` captures `Popup` and `HUD` independently,
+disables both categories, sets the BaseGameHUD notification layer to `Hidden`
+when the owner/HUD casts succeed, hides the existing preview actor, and only
+then commits `CleanFrameActiveV1=true`. `ExitCleanFrameV1` restores each captured
+category, derives notification visibility from the captured HUD state, reveals
+the same preview actor, and commits false. `ToggleCleanFrameV1` selects the
+appropriate idempotent primitive from the active flag. Their accepted live
+Unreal round-trips contain 25/22/5 nodes and all reciprocal entry links are
+covered by semantic contracts; one missing Exit entry link was caught and
+repaired even though Unreal had compiled the disconnected body green.
+
+The client EventGraph now contains 89 nodes. Its F7 poll occurs after owning
+local controller, `DroneModeActive`, and valid-camera guards, but before the P
+playback branch. Clean Frame therefore remains reachable during playback while
+remaining unavailable outside an active local drone session. The F7 path
+terminates the current tick after toggling. Normal `ExitDroneMode` calls
+`ExitCleanFrameV1` before `DestroyPathPreviewV1`; emergency exit and invalid
+camera recovery inherit that restoration because they delegate to the normal
+exit primitive.
+
+A focused AlmostEmpty PIE run deliberately used divergent starting categories
+(`HUD=false`, `Popup=true`), proved exact capture, suppression, preview hiding,
+repeated-enter non-overwrite, exact restore, and repeated-exit stability, then
+proved separate normal-exit and emergency-exit restoration cases. It ended in
+`EDD_CLEAN_FRAME_PIE:AUTOMATIC_RESULT:PASS` without an EDD Blueprint runtime
+error. The fixture does not create Conan's normal `BaseGameHUD`, so the cast
+failure path was exercised and correctly converged on preview/state handling;
+visual proof that every native notification widget disappears remains a cooked
+normal-client gate. This distinction must remain explicit: category and state
+restoration are runtime-proven now, while complete native-HUD appearance is not
+claimed until the real client test.
+
+After the accepted run, the client asset compiled `Good to go`, saved, and the
+editor closed through `LogExit: Exiting.`. `FromDevKit` copied only
+`BPC_EDD_ClientDirector.uasset`; repository and live source both hash to
+`2A32E93710603AAD7C66EF02F4131C36FBBDA70BB1E3DE1C31DDF9B979BE5E54`.
+
+The native GUI module controller also exposes `IsCategoryEnabled`, so Clean
+Frame can capture the HUD and Popup category states before suppression. Exit
+must call the Conan-native show path and then restore both saved category flags
+explicitly; repeated enter/exit is idempotent, and Drone Mode exit/emergency
+cleanup must always restore the captured state. Mod-owned overlays and preview
+actors are suppressed in the same local presentation transaction without
+destroying or rebuilding Flypath state.
+
+The stock assets were inspected read-only. No Conan source asset is compiled,
+saved, copied, or committed. The exact Enhanced build observed was Unreal
+Editor 5.6.1 CL 370197.
+
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 
 The installed `DreamworldMods` plugin declares editor support for cooking,

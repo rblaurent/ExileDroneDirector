@@ -188,7 +188,15 @@ pre-mutation snapshot on each capture/replace/delete path. The generated and liv
 round-trips pass semantic contracts. Ctrl+Z/Ctrl+Y are now wired through guarded
 local-player dispatch with stable applied/empty-history logs; the 86-node live
 EventGraph compiles and survives exact Unreal copy-back validation. Explicit
-mutation rejection logs and shortcut-route PIE acceptance are next.
+mutation rejection logs and shortcut-route PIE acceptance are next. F7 now
+provides reversible Clean Frame presentation during free flight, authoring, and
+playback: it captures and suppresses Conan's native HUD/Popup categories, hides
+the remaining BaseGameHUD notification layer when present, and hides the intact
+path preview. A second press, normal Drone Mode exit, or emergency exit restores
+the captured native category state before preview teardown/view restoration.
+The 89-node EventGraph and three Clean Frame functions compile, survive Unreal
+round-trip contracts, and pass divergent-category/idempotence/normal/emergency
+PIE acceptance. Complete visual native-HUD proof remains a cooked-client gate.
 Polished UI and timeline work are deliberately deferred until this shortcut/log
 slice passes PIE, a cooked normal client, and the controlled G-Portal environment.
 

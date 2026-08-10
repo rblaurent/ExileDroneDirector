@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.24.0-client-preview-lifecycle`
+Current internal build: `0.26.0-clean-frame`
 
 ## 1. Delivery strategy
 
@@ -187,6 +187,29 @@ This section is the authoritative handoff. Detailed evidence remains in
   terminate the tick. The 86-node/355-pin EventGraph compiled live, saved,
   round-tripped from Unreal, and passes authoring, feedback, playback, history,
   deterministic-generation, and idempotence contracts in the full scaffold.
+- Clean Frame is now a compiled client-local presentation primitive. F7 is
+  polled after owner, Drone Mode, and camera-validity guards but before playback
+  arbitration, so it remains available during free flight, authoring, and
+  playback. Enter captures Conan's independent `Popup` and `HUD` category
+  states, disables both categories, hides the remaining BaseGameHUD
+  notification layer when present, hides the path-preview actor without
+  rebuilding it, and commits `CleanFrameActiveV1`. Exit restores the captured
+  category states exactly, restores notification visibility consistently with
+  the captured HUD state, reveals the intact preview, and clears the active
+  flag. Repeated enter/exit calls are idempotent.
+- Normal `ExitDroneMode` now invokes `ExitCleanFrameV1` before preview teardown
+  and view restoration. `EmergencyExitDroneMode` already delegates to that
+  normal exit primitive, so F9 and invalid-camera recovery share the same HUD
+  restoration boundary. The live 89-node EventGraph and all three Clean Frame
+  functions compile green and pass reciprocal-link plus semantic contracts.
+- Focused PIE acceptance deliberately started with divergent Conan category
+  states and proved exact HUD/Popup capture and restore, preview hide/show,
+  repeated-toggle stability, normal-exit restoration, emergency restoration,
+  and preview destruction. It ended in
+  `EDD_CLEAN_FRAME_PIE:AUTOMATIC_RESULT:PASS`. The synthetic fixture does not
+  instantiate Conan's normal `BaseGameHUD`, so final visual proof of the
+  remaining notification widgets and every native HUD element belongs to the
+  first cooked-client acceptance.
 
 ### Reproducible graph evidence
 
@@ -201,7 +224,7 @@ This section is the authoritative handoff. Detailed evidence remains in
 
 ### Not implemented yet
 
-- No polished editor UI, user-facing undo/redo bindings, timeline, cinematic
+- No polished editor UI, timeline, cinematic
   curves, lens playback, save/load, server repository,
   sharing, permissions, cloning, or event execution exists yet. The client-owned
   preview actor renders validated markers and linear segments, while current
@@ -228,9 +251,10 @@ controls and explicit logs before any editor UI is built:
    the controlled G-Portal server with identical client/server Workshop build.
 4. Only after those gates pass, specify the smallest useful authoring UI from
    observed workflow friction. A custom timeline is not assumed to be necessary.
-5. Before recording acceptance, add the local `Toggle Clean Frame` action and
-   prove that it hides/restores every mod-owned overlay without destroying the
-   preview, mutating the draft, stopping playback, or disabling Emergency Exit.
+5. In the first cooked-client recording acceptance, visually prove that the
+   implemented F7 `Toggle Clean Frame` action hides/restores Conan's complete
+   native HUD and every mod-owned overlay without destroying the preview,
+   mutating the draft, stopping playback, or disabling Emergency Exit.
 6. Close, sync, run the complete repository suite, commit, and push after each
    meaningful compiled milestone.
 
@@ -809,7 +833,8 @@ Make real-world server playback and recording dependable.
 3. Add conservative bounds/speed policy where streaming cannot keep up.
 4. Implement Clean Playback HUD suppression and configurable countdown.
    The suppression path uses the same remappable `Toggle Clean Frame` action as
-   authoring/free flight and restores the exact prior overlay visibility state.
+   authoring/free flight and restores the exact prior native-HUD and overlay
+   visibility state.
 5. Document OBS and Steam Recording workflows.
 6. Add loop, selection playback, and deterministic repeated takes.
 7. Add optional authoring-pass capture that reduces live Free Look/Carrier
@@ -995,7 +1020,8 @@ sequence is:
    physical shortcut route in PIE.
 2. Run the first cook/package proof in normal Conan Enhanced during an attended
    session, then repeat the validated slice through the controlled
-   Workshop/G-Portal path.
+   Workshop/G-Portal path. Include physical F7 and visual native-HUD Clean Frame
+   acceptance in that real-client pass.
 3. Add local serialization and restore validation for authored drafts.
 4. Build cinematic interpolation profiles on the validated absolute-time kernel.
 5. Design the minimum editor HUD only from validated real-environment needs;

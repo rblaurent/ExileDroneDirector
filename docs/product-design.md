@@ -244,11 +244,11 @@ The viewport shows only authoring overlays; clean preview hides them all.
 ### 8.1 Clean Frame toggle
 
 `Toggle Clean Frame` is a dedicated, remappable local shortcut available during
-free flight, authoring, and playback. One press hides every mod-owned visual:
-editor panels, transport, diagnostics, waypoint markers, path lines, focus
-markers, reticles, labels, and gizmos. A second press restores the exact prior
-visibility state without changing Drone Mode, camera transform, selection,
-playhead, playback, or recording state.
+free flight, authoring, and playback. One press hides both Conan's native HUD and
+every mod-owned visual: editor panels, transport, diagnostics, waypoint markers,
+path lines, focus markers, reticles, labels, and gizmos. A second press restores
+the exact prior visibility state without changing Drone Mode, camera transform,
+selection, playhead, playback, or recording state.
 
 Clean Frame is presentation state, never Flypath data and never server-shared.
 The preview actor remains alive with its document/instances intact; its visual
@@ -257,12 +257,13 @@ cannot mutate the draft. Emergency Exit and the Clean Frame shortcut remain
 active while invisible. Activation is written to the diagnostic log; any
 on-screen acknowledgement must disappear before the next captured frame.
 
-The guaranteed contract covers every Exile Drone Director overlay. Hiding the
-base Conan HUD is attempted only through a verified, reversible supported API;
-if Enhanced does not expose one safely, the mod presents the game's own HUD
-binding as a separate recording prerequisite rather than taking ownership of
-unrelated UI. The default key is selected after a Conan/PIE conflict audit and
-remains user-remappable.
+The guaranteed contract covers every Exile Drone Director overlay and Conan's
+native HUD. Implementation must use a verified, client-local, reversible runtime
+path and preserve the native HUD's prior visibility rather than blindly toggling
+it. Clean Frame is not accepted for cinematic recording until both layers pass
+hide, restore, repeated-toggle, Drone Mode exit, and emergency-restoration tests.
+The default key is selected after a Conan/PIE conflict audit and remains
+user-remappable.
 
 ### 8.2 Drone navigation
 

@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.16.0-waypoint-struct-bridge`
+Current internal build: `0.17.0-waypoint-bridge-contract`
 
 ## 1. Delivery strategy
 
@@ -81,6 +81,10 @@ This section is the authoritative handoff. Detailed evidence remains in
   Its idempotent configurator proves create/reopen/compile/save behavior. The
   legacy arrays intentionally remain authoritative until an explicit sync
   function passes parity tests.
+- The pure `SyncDraftWaypointsV1` oracle now proves all-or-nothing lockstep
+  validation, positive unique IDs, finite/valid camera scalars, ordered exact
+  value copies, empty drafts, and snapshot independence. The live Blueprint
+  function must match these contracts before mutation dispatch calls it.
 - Repository scaffold, semantic graph contracts, Python syntax, and the 1 GiB
   repository budget pass. Tracked source is only a few MiB; DevKit and cooked
   outputs are never committed.
@@ -837,7 +841,7 @@ Content/Mods/ExileDroneDirector/
 
 Version numbers describe capability gates, not calendar promises.
 
-Internal checkpoint versions such as `0.16.0-waypoint-struct-bridge` count validated
+Internal checkpoint versions such as `0.17.0-waypoint-bridge-contract` count validated
 development slices. They do not claim that the public **0.1 Camera Spike** gate
 is complete; that gate still requires cooked multiplayer acceptance.
 

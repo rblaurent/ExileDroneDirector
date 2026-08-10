@@ -76,4 +76,3 @@ if not unreal.EditorAssetLibrary.save_asset(CLIENT_PATH, only_if_is_dirty=False)
     raise RuntimeError(f"Failed to save {CLIENT_PATH}")
 unreal.BlueprintEditorLibrary.refresh_open_editors_for_blueprint(client)
 emit("COMPLETE", True)
-

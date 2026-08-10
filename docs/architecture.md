@@ -99,6 +99,11 @@ arrays remain runtime-authoritative until `SyncDraftWaypointsV1` is implemented
 and mutation/runtime contracts prove exact parity; the typed seam is not yet a
 second independently editable source of truth.
 
+`tools/document/waypoint_bridge.py` fixes that sync function's executable
+contract: validate all six channel lengths, IDs, and camera scalars before
+constructing anything; then rebuild an ordered value snapshot, including the
+empty case. Invalid input must leave the previously valid typed array untouched.
+
 Linear playback evaluates this bridge from absolute game time rather than
 integrating frame delta. It uses quaternion transform interpolation and keeps
 ownership of the exact final authored transform until an explicit stop. That

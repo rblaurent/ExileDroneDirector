@@ -37,6 +37,8 @@ $requiredFiles = @(
     'tools\playback\test_linear_reference.py',
     'tools\document\flypath_document.py',
     'tools\document\test_flypath_document.py',
+    'tools\document\waypoint_bridge.py',
+    'tools\document\test_waypoint_bridge.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -173,4 +175,9 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\document\test_flypath_document.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Flypath document contracts failed with exit code $LASTEXITCODE."
+}
+
+& python (Join-Path $ProjectRoot 'tools\document\test_waypoint_bridge.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Waypoint bridge contracts failed with exit code $LASTEXITCODE."
 }

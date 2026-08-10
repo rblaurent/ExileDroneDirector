@@ -59,7 +59,9 @@ $requiredFiles = @(
     'tools\blueprint\Build-ClientWaypointEditDispatch.py',
     'tools\blueprint\Build-WaypointCaptureGraph.py',
     'tools\blueprint\Build-WaypointStructSyncGraph.py',
+    'tools\blueprint\Build-DocumentSyncGraph.py',
     'tools\blueprint\Test-DocumentSyncStructForms.py',
+    'tools\blueprint\Test-DocumentSyncContracts.py',
     'tools\blueprint\Build-WaypointEditGraphs.py',
     'tools\blueprint\Build-WaypointFeedbackDispatch.py',
     'tools\blueprint\Build-LinearPlaybackGraphs.py',
@@ -236,4 +238,26 @@ if ($LASTEXITCODE -ne 0) {
     --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\document-sync-struct-node-forms.eddgraph')
 if ($LASTEXITCODE -ne 0) {
     throw "Document sync native struct-form contracts failed with exit code $LASTEXITCODE."
+}
+
+$documentSyncNonce = [guid]::NewGuid().ToString('N')
+$generatedDocumentSync = Join-Path $scratchRoot "edd-document-sync-$documentSyncNonce.eddgraph"
+$generatedDocumentSyncPaste = Join-Path $scratchRoot "edd-document-sync-$documentSyncNonce-paste.eddgraph"
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-DocumentSyncGraph.py') `
+    --project-root $ProjectRoot `
+    --output $generatedDocumentSync `
+    --paste-output $generatedDocumentSyncPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Document sync graph generation failed with exit code $LASTEXITCODE."
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path $generatedDocumentSync
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path $generatedDocumentSyncPaste
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-DocumentSyncContracts.py') `
+    --project-root $ProjectRoot `
+    --graph $generatedDocumentSync `
+    --paste-graph $generatedDocumentSyncPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Document sync graph contracts failed with exit code $LASTEXITCODE."
 }

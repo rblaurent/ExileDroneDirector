@@ -295,6 +295,31 @@ Quaternion rotations are stored as rotators only at serialization boundaries if
 Blueprint limitations require it; compilation converts them to normalized
 quaternions and enforces shortest-arc/sign consistency.
 
+### 5.6 Executable version-1 document contract
+
+`tools/document/flypath_document.py` is the engine-independent oracle for the
+first Blueprint and persistence implementation. Version 1 fixes these rules:
+
+- serialized revision documents use canonical UTF-8 JSON with sorted keys,
+  compact separators, finite numbers only, and a SHA-256 content hash calculated
+  without the `contentHash` field;
+- waypoint and segment IDs are positive, stable, unique within a document, and
+  segments join adjacent waypoints in authored order;
+- positions and lens/focus/hold values are finite, rotations are normalized
+  quaternions, durations are positive, and the cached total equals segment plus
+  waypoint-hold duration;
+- draft saves use optimistic revision numbers; a stale expected revision fails
+  rather than overwriting newer work;
+- publication captures the complete sealed draft and later draft edits never
+  mutate that published snapshot;
+- new Flypaths and clones are private, only published snapshots are cloneable,
+  clones preserve document-scoped waypoint IDs and source attribution, and have
+  no live link to their source.
+
+The Python oracle is not shipped runtime code. Blueprint structs, Blueprint
+validation, server DTOs, and persistence adapters must produce the same fields
+and pass the same fixtures before replacing the transient six-array bridge.
+
 ## 6. Ownership, visibility, and identity
 
 The server derives `RequesterAccountId` from the authenticated player/controller

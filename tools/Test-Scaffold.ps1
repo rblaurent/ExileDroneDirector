@@ -34,6 +34,8 @@ $requiredFiles = @(
     'tools\unreal\Validate-LinearPlaybackPIE.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
+    'tools\document\flypath_document.py',
+    'tools\document\test_flypath_document.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -165,4 +167,9 @@ if (-not $RequireMvpAssets) {
 & python (Join-Path $ProjectRoot 'tools\playback\test_linear_reference.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Linear playback reference contracts failed with exit code $LASTEXITCODE."
+}
+
+& python (Join-Path $ProjectRoot 'tools\document\test_flypath_document.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Flypath document contracts failed with exit code $LASTEXITCODE."
 }

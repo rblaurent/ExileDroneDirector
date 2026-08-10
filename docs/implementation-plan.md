@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.14.0-linear-playback`
+Current internal build: `0.15.0-document-contract`
 
 ## 1. Delivery strategy
 
@@ -71,6 +71,11 @@ This section is the authoritative handoff. Detailed evidence remains in
 - Reviewed live graph snippets cover capture, replace, and delete. Their tests
   validate pin types, execution order, stable ID/hold behavior, all six array
   mutations, selection repair, and exact native function-entry linkage.
+- The executable version-1 Flypath document oracle proves canonical lossless
+  serialization and content hashes, structural waypoint/segment validation,
+  optimistic revision conflicts, immutable published snapshots, owner-only
+  editing, private-by-default creation/cloning, and clone attribution plus
+  independence. Blueprint and server implementations must conform to it.
 - Repository scaffold, semantic graph contracts, Python syntax, and the 1 GiB
   repository budget pass. Tracked source is only a few MiB; DevKit and cooked
   outputs are never committed.
@@ -104,10 +109,10 @@ next autonomous implementation slice is therefore:
 
 1. Commit and push the compiled, deterministic-runtime-validated linear
    playback checkpoint.
-2. Promote the transient six-array waypoint bridge toward explicit waypoint and
-   Flypath document structs without weakening the validated camera boundary.
-3. Add visible waypoint/path preview, serialization, and undo/redo as bounded,
-   independently validated vertical slices.
+2. Map the now-validated version-1 document oracle into explicit waypoint,
+   segment, and Flypath Blueprint structs without weakening the camera boundary.
+3. Add the first document/array adapter, visible waypoint/path preview, and
+   undo/redo as bounded, independently validated vertical slices.
 4. Preserve the physical F10/K/P/P/F9 route as the regression acceptance path
    for every change that touches playback or authoring.
 5. Close, sync, run the complete repository suite, commit, and push after each
@@ -352,6 +357,15 @@ count/selection feedback are live in the 51-node EventGraph. Real keyboard input
 passed after the one-time PIE character was saved, and the complete compiled
 graph now round-trips into the checked-in textual source with capture, edit, and
 feedback contracts.
+
+The version-1 document oracle is also complete. It gives the still-empty
+`ST_EDD_Waypoint`, `ST_EDD_Segment`, and `ST_EDD_FlypathDocument` assets a tested
+target contract before their Blueprint fields are authored. Nine executable
+tests cover canonical round-trip serialization, content-integrity rejection,
+finite and normalized camera state, ID/topology validation, private creation,
+optimistic saves, immutable publication, private deep clones, attribution, and
+owner/viewer access. Runtime save/load is not claimed until the Blueprint
+adapter and server persistence layer consume this contract.
 
 ### Verification
 
@@ -812,7 +826,7 @@ Content/Mods/ExileDroneDirector/
 
 Version numbers describe capability gates, not calendar promises.
 
-Internal checkpoint versions such as `0.14.0-linear-playback` count validated
+Internal checkpoint versions such as `0.15.0-document-contract` count validated
 development slices. They do not claim that the public **0.1 Camera Spike** gate
 is complete; that gate still requires cooked multiplayer acceptance.
 

@@ -1,0 +1,461 @@
+"""Engine-independent Flypath document, persistence, and ownership contract.
+
+The cooked mod remains Blueprint-only.  This module is the executable oracle
+for the Blueprint structs and server repository that will implement the same
+rules: canonical serialization, immutable publication, optimistic draft saves,
+private-by-default creation/cloning, and document-scoped stable waypoint IDs.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, replace
+from datetime import datetime, timezone
+from hashlib import sha256
+import json
+from math import isfinite, sqrt
+from typing import Any, Iterable, Literal
+
+
+SCHEMA_VERSION = 1
+TRAJECTORY_ENGINE_VERSION = 1
+Visibility = Literal["private", "public"]
+Vector3 = tuple[float, float, float]
+Quaternion = tuple[float, float, float, float]
+
+
+class DocumentValidationError(ValueError):
+    """The document is malformed, unsafe, or internally inconsistent."""
+
+
+class RevisionConflictError(ValueError):
+    """A save was based on a draft revision that is no longer current."""
+
+
+@dataclass(frozen=True)
+class LensState:
+    focal_length_mm: float = 35.0
+    aperture: float = 2.8
+    focus_distance_cm: float = 1000.0
+
+
+@dataclass(frozen=True)
+class Waypoint:
+    waypoint_id: int
+    position: Vector3
+    body_rotation: Quaternion
+    gimbal_rotation: Quaternion
+    lens: LensState = LensState()
+    hold_seconds: float = 0.0
+    corner_mode: str = "glide"
+    annotation: str = ""
+
+
+@dataclass(frozen=True)
+class Segment:
+    segment_id: int
+    from_waypoint_id: int
+    to_waypoint_id: int
+    duration_seconds: float = 3.0
+    spatial_curve_type: str = "linear"
+    time_profile: str = "linear"
+
+
+@dataclass(frozen=True)
+class RevisionDocument:
+    revision_number: int
+    region_id: str
+    waypoints: tuple[Waypoint, ...] = ()
+    segments: tuple[Segment, ...] = ()
+    duration_seconds: float = 0.0
+    default_flight_profile: str = "cinematic_drone"
+    schema_version: int = SCHEMA_VERSION
+    trajectory_engine_version: int = TRAJECTORY_ENGINE_VERSION
+    content_hash: str = ""
+
+
+@dataclass(frozen=True)
+class SourceAttribution:
+    flypath_id: str
+    revision_number: int
+    title: str
+    creator_display_name: str
+
+
+@dataclass(frozen=True)
+class FlypathRecord:
+    flypath_id: str
+    owner_account_id: str
+    owner_display_name: str
+    title: str
+    description: str
+    visibility: Visibility
+    region_id: str
+    created_utc: str
+    updated_utc: str
+    draft_revision_number: int
+    draft: RevisionDocument
+    published_revision_number: int | None = None
+    published: RevisionDocument | None = None
+    source_attribution: SourceAttribution | None = None
+
+
+def _require_text(value: str, field: str) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise DocumentValidationError(f"{field} must be non-empty text")
+
+
+def _require_finite(values: Iterable[float], field: str) -> None:
+    if not all(isfinite(float(value)) for value in values):
+        raise DocumentValidationError(f"{field} contains a non-finite value")
+
+
+def _validate_quaternion(value: Quaternion, field: str) -> None:
+    if len(value) != 4:
+        raise DocumentValidationError(f"{field} must contain four components")
+    _require_finite(value, field)
+    magnitude = sqrt(sum(float(component) ** 2 for component in value))
+    if abs(magnitude - 1.0) > 1.0e-4:
+        raise DocumentValidationError(f"{field} must be normalized")
+
+
+def validate_document(document: RevisionDocument, *, require_hash: bool = False) -> None:
+    if document.schema_version != SCHEMA_VERSION:
+        raise DocumentValidationError(f"unsupported schema version {document.schema_version}")
+    if document.trajectory_engine_version != TRAJECTORY_ENGINE_VERSION:
+        raise DocumentValidationError(
+            f"unsupported trajectory engine version {document.trajectory_engine_version}"
+        )
+    if document.revision_number < 1:
+        raise DocumentValidationError("revision number must be positive")
+    _require_text(document.region_id, "region_id")
+    _require_text(document.default_flight_profile, "default_flight_profile")
+    _require_finite((document.duration_seconds,), "duration_seconds")
+    if document.duration_seconds < 0.0:
+        raise DocumentValidationError("duration_seconds cannot be negative")
+
+    waypoint_ids: set[int] = set()
+    for index, waypoint in enumerate(document.waypoints):
+        if waypoint.waypoint_id <= 0 or waypoint.waypoint_id in waypoint_ids:
+            raise DocumentValidationError("waypoint IDs must be positive and unique")
+        waypoint_ids.add(waypoint.waypoint_id)
+        _require_finite(waypoint.position, f"waypoints[{index}].position")
+        _validate_quaternion(waypoint.body_rotation, f"waypoints[{index}].body_rotation")
+        _validate_quaternion(waypoint.gimbal_rotation, f"waypoints[{index}].gimbal_rotation")
+        _require_finite(
+            (
+                waypoint.lens.focal_length_mm,
+                waypoint.lens.aperture,
+                waypoint.lens.focus_distance_cm,
+                waypoint.hold_seconds,
+            ),
+            f"waypoints[{index}].camera",
+        )
+        if waypoint.lens.focal_length_mm <= 0.0 or waypoint.lens.aperture <= 0.0:
+            raise DocumentValidationError("focal length and aperture must be positive")
+        if waypoint.lens.focus_distance_cm < 0.0 or waypoint.hold_seconds < 0.0:
+            raise DocumentValidationError("focus distance and hold cannot be negative")
+        _require_text(waypoint.corner_mode, f"waypoints[{index}].corner_mode")
+
+    expected_segments = max(0, len(document.waypoints) - 1)
+    if len(document.segments) != expected_segments:
+        raise DocumentValidationError(
+            f"expected {expected_segments} segments for {len(document.waypoints)} waypoints"
+        )
+    segment_ids: set[int] = set()
+    calculated_duration = sum(waypoint.hold_seconds for waypoint in document.waypoints)
+    for index, segment in enumerate(document.segments):
+        if segment.segment_id <= 0 or segment.segment_id in segment_ids:
+            raise DocumentValidationError("segment IDs must be positive and unique")
+        segment_ids.add(segment.segment_id)
+        expected_from = document.waypoints[index].waypoint_id
+        expected_to = document.waypoints[index + 1].waypoint_id
+        if (segment.from_waypoint_id, segment.to_waypoint_id) != (expected_from, expected_to):
+            raise DocumentValidationError(f"segment {segment.segment_id} does not join adjacent waypoints")
+        _require_finite((segment.duration_seconds,), f"segments[{index}].duration_seconds")
+        if segment.duration_seconds <= 0.0:
+            raise DocumentValidationError("segment duration must be positive")
+        _require_text(segment.spatial_curve_type, f"segments[{index}].spatial_curve_type")
+        _require_text(segment.time_profile, f"segments[{index}].time_profile")
+        calculated_duration += segment.duration_seconds
+
+    if abs(calculated_duration - document.duration_seconds) > 1.0e-6:
+        raise DocumentValidationError(
+            f"cached duration {document.duration_seconds} does not match {calculated_duration}"
+        )
+    if require_hash:
+        if len(document.content_hash) != 64:
+            raise DocumentValidationError("content hash must be a SHA-256 hex digest")
+        try:
+            int(document.content_hash, 16)
+        except ValueError as error:
+            raise DocumentValidationError("content hash must be a SHA-256 hex digest") from error
+        expected_hash = calculate_content_hash(document)
+        if document.content_hash != expected_hash:
+            raise DocumentValidationError("content hash does not match the revision payload")
+
+
+def validate_record(record: FlypathRecord) -> None:
+    for value, field in (
+        (record.flypath_id, "flypath_id"),
+        (record.owner_account_id, "owner_account_id"),
+        (record.title, "title"),
+        (record.region_id, "region_id"),
+    ):
+        _require_text(value, field)
+    if record.visibility not in ("private", "public"):
+        raise DocumentValidationError(f"unsupported visibility {record.visibility}")
+    if record.draft.region_id != record.region_id:
+        raise DocumentValidationError("draft region does not match its Flypath record")
+    if record.draft.revision_number != record.draft_revision_number:
+        raise DocumentValidationError("draft revision does not match its Flypath record")
+    validate_document(record.draft, require_hash=True)
+
+    published_pair = (record.published_revision_number is not None, record.published is not None)
+    if published_pair[0] != published_pair[1]:
+        raise DocumentValidationError("published revision number and payload must be present together")
+    if record.visibility == "public" and record.published is None:
+        raise DocumentValidationError("a public Flypath requires a published snapshot")
+    if record.published is not None:
+        if record.published.region_id != record.region_id:
+            raise DocumentValidationError("published region does not match its Flypath record")
+        if record.published.revision_number != record.published_revision_number:
+            raise DocumentValidationError("published revision does not match its Flypath record")
+        validate_document(record.published, require_hash=True)
+    if record.source_attribution is not None:
+        _require_text(record.source_attribution.flypath_id, "source_attribution.flypath_id")
+        if record.source_attribution.revision_number < 1:
+            raise DocumentValidationError("source attribution revision must be positive")
+
+
+def _document_payload(document: RevisionDocument, *, include_hash: bool) -> dict[str, Any]:
+    payload = {
+        "schemaVersion": document.schema_version,
+        "trajectoryEngineVersion": document.trajectory_engine_version,
+        "revisionNumber": document.revision_number,
+        "regionId": document.region_id,
+        "durationSeconds": document.duration_seconds,
+        "defaultFlightProfile": document.default_flight_profile,
+        "waypoints": [
+            {
+                "waypointId": waypoint.waypoint_id,
+                "position": list(waypoint.position),
+                "bodyRotation": list(waypoint.body_rotation),
+                "gimbalRotation": list(waypoint.gimbal_rotation),
+                "lens": {
+                    "focalLengthMm": waypoint.lens.focal_length_mm,
+                    "aperture": waypoint.lens.aperture,
+                    "focusDistanceCm": waypoint.lens.focus_distance_cm,
+                },
+                "holdSeconds": waypoint.hold_seconds,
+                "cornerMode": waypoint.corner_mode,
+                "annotation": waypoint.annotation,
+            }
+            for waypoint in document.waypoints
+        ],
+        "segments": [
+            {
+                "segmentId": segment.segment_id,
+                "fromWaypointId": segment.from_waypoint_id,
+                "toWaypointId": segment.to_waypoint_id,
+                "durationSeconds": segment.duration_seconds,
+                "spatialCurveType": segment.spatial_curve_type,
+                "timeProfile": segment.time_profile,
+            }
+            for segment in document.segments
+        ],
+    }
+    if include_hash:
+        payload["contentHash"] = document.content_hash
+    return payload
+
+
+def canonical_json(payload: Any) -> str:
+    return json.dumps(payload, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":"))
+
+
+def calculate_content_hash(document: RevisionDocument) -> str:
+    payload = canonical_json(_document_payload(document, include_hash=False)).encode("utf-8")
+    return sha256(payload).hexdigest()
+
+
+def seal_document(document: RevisionDocument) -> RevisionDocument:
+    unsealed = replace(document, content_hash="")
+    validate_document(unsealed)
+    return replace(unsealed, content_hash=calculate_content_hash(unsealed))
+
+
+def serialize_document(document: RevisionDocument) -> str:
+    validate_document(document, require_hash=True)
+    return canonical_json(_document_payload(document, include_hash=True))
+
+
+def deserialize_document(text: str) -> RevisionDocument:
+    try:
+        payload = json.loads(text)
+        waypoints = tuple(
+            Waypoint(
+                waypoint_id=item["waypointId"],
+                position=tuple(item["position"]),
+                body_rotation=tuple(item["bodyRotation"]),
+                gimbal_rotation=tuple(item["gimbalRotation"]),
+                lens=LensState(
+                    focal_length_mm=item["lens"]["focalLengthMm"],
+                    aperture=item["lens"]["aperture"],
+                    focus_distance_cm=item["lens"]["focusDistanceCm"],
+                ),
+                hold_seconds=item["holdSeconds"],
+                corner_mode=item["cornerMode"],
+                annotation=item.get("annotation", ""),
+            )
+            for item in payload["waypoints"]
+        )
+        segments = tuple(
+            Segment(
+                segment_id=item["segmentId"],
+                from_waypoint_id=item["fromWaypointId"],
+                to_waypoint_id=item["toWaypointId"],
+                duration_seconds=item["durationSeconds"],
+                spatial_curve_type=item["spatialCurveType"],
+                time_profile=item["timeProfile"],
+            )
+            for item in payload["segments"]
+        )
+        document = RevisionDocument(
+            schema_version=payload["schemaVersion"],
+            trajectory_engine_version=payload["trajectoryEngineVersion"],
+            revision_number=payload["revisionNumber"],
+            region_id=payload["regionId"],
+            duration_seconds=payload["durationSeconds"],
+            default_flight_profile=payload["defaultFlightProfile"],
+            waypoints=waypoints,
+            segments=segments,
+            content_hash=payload["contentHash"],
+        )
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+        raise DocumentValidationError(f"invalid serialized Flypath document: {error}") from error
+    validate_document(document, require_hash=True)
+    return document
+
+
+def utc_text(value: datetime) -> str:
+    if value.tzinfo is None:
+        raise DocumentValidationError("timestamps must be timezone-aware")
+    return value.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def create_private_flypath(
+    *,
+    flypath_id: str,
+    owner_account_id: str,
+    owner_display_name: str,
+    title: str,
+    region_id: str,
+    now: datetime,
+) -> FlypathRecord:
+    for value, field in (
+        (flypath_id, "flypath_id"),
+        (owner_account_id, "owner_account_id"),
+        (title, "title"),
+        (region_id, "region_id"),
+    ):
+        _require_text(value, field)
+    draft = seal_document(RevisionDocument(revision_number=1, region_id=region_id))
+    timestamp = utc_text(now)
+    record = FlypathRecord(
+        flypath_id=flypath_id,
+        owner_account_id=owner_account_id,
+        owner_display_name=owner_display_name,
+        title=title,
+        description="",
+        visibility="private",
+        region_id=region_id,
+        created_utc=timestamp,
+        updated_utc=timestamp,
+        draft_revision_number=1,
+        draft=draft,
+    )
+    validate_record(record)
+    return record
+
+
+def save_draft(
+    record: FlypathRecord,
+    candidate: RevisionDocument,
+    *,
+    expected_revision: int,
+    now: datetime,
+) -> FlypathRecord:
+    if expected_revision != record.draft_revision_number:
+        raise RevisionConflictError(
+            f"expected revision {expected_revision}, current revision is {record.draft_revision_number}"
+        )
+    if candidate.region_id != record.region_id:
+        raise DocumentValidationError("a draft cannot change its Flypath region")
+    next_revision = record.draft_revision_number + 1
+    draft = seal_document(replace(candidate, revision_number=next_revision, content_hash=""))
+    saved = replace(
+        record,
+        draft_revision_number=next_revision,
+        draft=draft,
+        updated_utc=utc_text(now),
+    )
+    validate_record(saved)
+    return saved
+
+
+def publish(record: FlypathRecord, *, now: datetime) -> FlypathRecord:
+    validate_record(record)
+    published = replace(
+        record,
+        visibility="public",
+        published_revision_number=record.draft_revision_number,
+        published=record.draft,
+        updated_utc=utc_text(now),
+    )
+    validate_record(published)
+    return published
+
+
+def clone_published(
+    source: FlypathRecord,
+    *,
+    flypath_id: str,
+    owner_account_id: str,
+    owner_display_name: str,
+    now: datetime,
+) -> FlypathRecord:
+    if source.visibility != "public" or source.published is None or source.published_revision_number is None:
+        raise DocumentValidationError("only a published revision can be cloned")
+    clone = create_private_flypath(
+        flypath_id=flypath_id,
+        owner_account_id=owner_account_id,
+        owner_display_name=owner_display_name,
+        title=f"{source.title} (Clone)",
+        region_id=source.region_id,
+        now=now,
+    )
+    cloned_draft = seal_document(replace(source.published, revision_number=1, content_hash=""))
+    result = replace(
+        clone,
+        draft=cloned_draft,
+        source_attribution=SourceAttribution(
+            flypath_id=source.flypath_id,
+            revision_number=source.published_revision_number,
+            title=source.title,
+            creator_display_name=source.owner_display_name,
+        ),
+    )
+    validate_record(result)
+    return result
+
+
+def readable_revision(record: FlypathRecord, requester_account_id: str) -> RevisionDocument | None:
+    if requester_account_id == record.owner_account_id:
+        return record.draft
+    if record.visibility == "public":
+        return record.published
+    return None
+
+
+def owner_may_edit(record: FlypathRecord, requester_account_id: str) -> bool:
+    return requester_account_id == record.owner_account_id

@@ -141,11 +141,15 @@ absolute-time start/update/stop playback functions. P toggles the equal-duration
 linear path; active playback suppresses manual flight and edits, and every
 normal/emergency exit stops playback first. The generated and Unreal-round-trip
 62-node/235-pin EventGraph passes reciprocal-link and semantic contracts. The
-next autonomous gate is deterministic two-player PIE movement/isolation and a
-physical F10/K/P/P/F9 route. Cooked-package validation remains required but is
-explicitly deferred until an attended session. After the playback gate, the
-transitional arrays are promoted into authored waypoint/flypath document structs
-and the remaining lifecycle restoration hooks.
+real F10 production route has now passed deterministic two-player PIE acceptance
+for invalid drafts, initial snap, absolute-time movement, exact final-frame hold,
+restart, explicit stop, isolation, and possession/view restoration. An
+engine-independent Flypath document oracle now locks down canonical JSON,
+content hashes, revision conflicts, immutable publication, private creation and
+cloning, attribution, and structural camera/path validation. The next autonomous
+gate maps that contract into the authored Blueprint structs and path preview.
+Cooked-package validation remains required but is explicitly deferred until an
+attended session.
 
 ## Repository layout
 
@@ -159,6 +163,8 @@ and the remaining lifecycle restoration hooks.
   first-slice Unreal assets.
 - `tools/blueprint/` — validates, exports, and prepares native Blueprint graph
   clipboard snippets without launching the DevKit.
+- `tools/document/` — executable Flypath serialization, revision, publication,
+  ownership, and clone contracts for the Blueprint/server implementation.
 
 ## DevKit setup
 

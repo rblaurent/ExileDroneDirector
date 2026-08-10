@@ -96,6 +96,18 @@ This section is the authoritative handoff. Detailed evidence remains in
   `DraftSegmentsV1` and default-constructed `DraftDocumentV1` members. The
   schema/configurator contract is deterministic, executable, and idempotent;
   document population is deliberately the next transactional slice.
+- `SyncDraftDocumentV1` now exists as a compiled empty live function with all
+  private scratch state required for an atomic implementation. Its pure oracle
+  fixes reconciliation semantics: preserve a surviving adjacency's complete
+  authored segment, allocate new IDs above the highest reusable prior ID,
+  reject exhaustion, recompute duration, preserve editable metadata, clear the
+  stale content hash, and replace `DraftSegmentsV1` plus `DraftDocumentV1` only
+  after every guard succeeds. Nine executable cases cover these invariants.
+- The exact native UE 5.6 Make/Break serialization for `ST_EDD_Segment` and
+  `ST_EDD_FlypathDocument` is checked in and contract-tested. The generated pin
+  suffixes, nested array element types, defaults, directions, and the native
+  omission of explicit empty-string defaults are now stable inputs to the
+  deterministic graph builder rather than undocumented editor knowledge.
 - The generated 84-node/362-pin sync graph and copied post-compile Unreal
   round-trip both pass reciprocal-link and semantic contracts. A production-path
   PIE run
@@ -880,12 +892,14 @@ is complete; that gate still requires cooked multiplayer acceptance.
 The installation and initial camera reconnaissance are complete. Follow the
 exact session runbook in section 1.1. The immediate sequence is:
 
-1. Transactional document population, visible path preview, serialization, and
-   undo/redo.
-2. Cinematic interpolation profiles built on the validated absolute-time kernel.
-3. First cook/package proof in normal Conan Enhanced when an attended session is
+1. Generate, paste, compile, and round-trip `SyncDraftDocumentV1` against its
+   reconciliation oracle; then connect every successful waypoint mutation to
+   it and prove the transaction in PIE.
+2. Visible path preview, serialization, and undo/redo.
+3. Cinematic interpolation profiles built on the validated absolute-time kernel.
+4. First cook/package proof in normal Conan Enhanced when an attended session is
    available.
-4. Test Workshop item and controlled G-Portal deployment only after that cooked
+5. Test Workshop item and controlled G-Portal deployment only after that cooked
    build passes locally.
 
 The first public capability milestone is not “the camera moved in PIE.” It is

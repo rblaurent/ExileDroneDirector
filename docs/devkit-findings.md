@@ -1150,6 +1150,50 @@ This milestone proves the typed storage boundary, not document population.
 design. The next function must build both transactionally from the validated
 `DraftWaypointsV1` snapshot and preserve the prior document on rejection.
 
+## Transactional document-sync seam and native node forms (2026-08-10)
+
+`BPC_EDD_ClientDirector.SyncDraftDocumentV1` now exists as a compiled, saved
+function seam. `Configure-DocumentSync.py` idempotently creates and verifies the
+private scratch members used by the eventual graph:
+
+- `DocumentSyncValidV1` (`Boolean`)
+- `DocumentTotalDurationV1` (`Float`, double precision)
+- `DocumentNextSegmentIdV1` (`Integer`)
+- `DocumentMatchFoundV1` (`Boolean`)
+- `DocumentUsedSegmentIdsV1` (`Integer[]`)
+- `DocumentSegmentsScratchV1` (`ST_EDD_Segment[]`)
+- `DocumentCandidateSegmentV1` (`ST_EDD_Segment`)
+
+The commandlet was run twice. The first run created every member and function;
+the second reported every item already present. Both runs compiled, saved,
+verified defaults/empty arrays, and ended with `COMPLETE|True`. The function
+body remains intentionally empty until the generated graph passes source-side
+semantic contracts.
+
+`tools/document/document_bridge.py` is the executable reconciliation oracle.
+It preserves the ID, duration, spatial curve, and time profile of the first
+valid unused prior segment whose exact `(FromWaypointId, ToWaypointId)` pair
+survives. New adjacency IDs are strictly above the highest reusable prior ID;
+invalid and duplicate candidates are repaired without recycling IDs. It also
+validates the typed waypoint snapshot and editable document metadata, handles
+the 32-bit Blueprint integer ceiling, recomputes waypoint holds plus segment
+durations, preserves revision/region/default profile, clears `ContentHash`, and
+returns deep value snapshots without mutating prior state. Nine unit tests pass.
+
+The live editor was then used only to export native Make/Break forms for
+`ST_EDD_Segment` and `ST_EDD_FlypathDocument`. Temporary nodes were undone and
+the function returned to its empty compiled seam before the editor was closed
+normally (`LogExit: Exiting.`). The four unlinked forms are checked in as
+`document-sync-struct-node-forms.eddgraph`. Their contract test locks every
+generated field-pin suffix and direction, both nested array element types, and
+the exact defaults. One subtle native rule is now explicit: Unreal may omit a
+`DefaultValue` token entirely for an empty String pin; absence and an explicit
+empty value are semantically equivalent, while non-empty defaults remain exact.
+
+The next bounded implementation step is the deterministic graph builder and
+semantic graph test. Only after that generated graph matches the oracle will it
+be pasted into the live function, compiled, copied back out, and PIE-tested.
+
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 
 The installed `DreamworldMods` plugin declares editor support for cooking,

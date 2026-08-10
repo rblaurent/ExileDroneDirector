@@ -1656,7 +1656,7 @@ in parity at every checkpoint. It ended in
 `EDD_HISTORY_SHORTCUT_PIE:AUTOMATIC_RESULT:PASS`. Focus-stealing automation still
 must not run while Laurent is using the computer.
 
-## History pop repair and package-identity rule (2026-08-10)
+## History pop repair and cold-load package gate (2026-08-10)
 
 The first attended Ctrl+Y run exposed a real Blueprint evaluation trap. Undo and
 redo shared the pure expression `Length(SourceDocumentsV1) - 1` across all three
@@ -1674,22 +1674,26 @@ live graph exports include reciprocal native entry links and pass the complete
 history lifecycle contract; the saved client asset then passed the physical PIE
 sequence above without an EDD runtime error.
 
-The repair also established a critical Conan Enhanced package-path rule. Files
-under the physical mod source directory
-`Content/Mods/ExileDroneDirector/Local/...` are exposed to Unreal as
-`/Game/Mods/ExileDroneDirector/...`; `Local` is not part of the virtual object
-path. Opening `/Game/Mods/ExileDroneDirector/Local/...` loaded the same physical
-`.uasset` under a second package identity. Unreal consequently held its own
-target file open and save failed with `DeleteFile was unable to delete`,
+The repair also established a critical Conan Enhanced launch/package rule.
+Files under the physical mod source directory
+`Content/Mods/ExileDroneDirector/Local/...` are exposed at
+`/Game/Mods/ExileDroneDirector/...` by the `-ModDevKit` platform layer. A normal
+Unreal launch without that flag does not install the mapping. In that invalid
+session, the physical tree appeared as `/Game/Mods/ExileDroneDirector/Local/...`,
+root-path dependencies were unavailable, Blueprint structs degraded to unknown
+types, and save could fail with `DeleteFile was unable to delete`,
 `Failed to move ... from temp directory`, and `Error saving`.
 
-The safe recovery was to discard/reload and unload the wrong dirty package, then
-open the already loaded correct package at
-`/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector`. Saving the
-correct package replaced the physical asset successfully; its SHA-256 changed
-from `E9228B139B2EE68805486F220FFF94DCA43799CC4086FF650C8E1CB8E1D1F9B7`
-to `7B50872A3C2B33124B72915EC07FA78F67027F05E6E40A8F99509EDDDA10543C`.
-Never include physical `Local` in a `/Game/Mods/<ModName>/...` object path.
+The safe recovery is to close the generic editor without saving and relaunch
+the Conan project with `-ModDevKit`; do not move assets out of `Local` and do not
+repair the resulting phantom compiler errors. The committed client asset's
+SHA-256 is `7B50872A3C2B33124B72915EC07FA78F67027F05E6E40A8F99509EDDDA10543C`.
+`tools/Test-ColdAssetLoad.ps1` now starts a fresh mod-aware commandlet, loads all
+seven core assets through their root virtual paths, compiles all four
+Blueprints in memory, and requires `EDD_COLD_LOAD|RESULT|PASS`. The accepted
+history asset passed that gate with zero commandlet errors after a fully cold
+start. This gate is mandatory after every promoted `.uasset`; a warm PIE pass
+alone cannot prove restart-safe package resolution.
 
 After that PIE gate, the first packaged-runtime target is a normal local Conan
 Enhanced single-player save. It must prove load, F10 entry, flight, authoring,

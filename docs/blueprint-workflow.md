@@ -61,13 +61,17 @@ Blueprint automation will report that valid mod assets cannot be loaded.
 - A snippet has one responsibility and one documented acceptance signal.
 - Source graph exports must belong to `/Game/Mods/ExileDroneDirector/`.
 - Physical mod assets live beneath `Content/Mods/ExileDroneDirector/Local`, but
-  Unreal omits `Local` from their virtual package path. Always load them as
-  `/Game/Mods/ExileDroneDirector/...`; opening a virtual `/Local/` alias can load
-  the same file under a second package identity and make Unreal fail to replace
-  its own `.uasset` during save.
+  the Conan `-ModDevKit` platform layer exposes that tree at
+  `/Game/Mods/ExileDroneDirector/...`. Always load assets through that virtual
+  root. If the Content Browser instead exposes `/Game/Mods/ExileDroneDirector/Local/...`,
+  the editor was launched without `-ModDevKit`; close it without saving and
+  relaunch correctly before opening any mod package.
 - Never hand-edit `NodeGuid`, `PinId`, or `LinkedTo` relationships casually.
 - Do not paste a snippet twice unless it is explicitly designed to be repeated.
 - Compile after every paste; do not accumulate multiple unverified graph batches.
+- Before promoting an accepted `.uasset`, close the GUI editor and run
+  `tools/Test-ColdAssetLoad.ps1`. A warm PIE pass is not evidence that every
+  package dependency resolves after restart.
 - Never sync `.uasset` files while Unreal is open. For repository promotion,
   stop PIE, compile/save, close every DevKit window, wait for
   `LogExit: Exiting.`, then sync `FromDevKit`. Sync `ToDevKit` only before the

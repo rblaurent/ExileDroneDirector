@@ -95,6 +95,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-DraftHistoryContracts.py',
     'tools\blueprint\Build-DraftHistoryIntegrationGraphs.py',
     'tools\blueprint\Test-DraftHistoryIntegrationContracts.py',
+    'tools\blueprint\Build-DraftHistoryDispatch.py',
+    'tools\blueprint\Test-DraftHistoryDispatchContracts.py',
     'tools\blueprint\templates\waypoint-capture-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-struct-sync-node-forms.eddgraph',
     'tools\blueprint\templates\document-sync-struct-node-forms.eddgraph',
@@ -111,6 +113,7 @@ $requiredFiles = @(
     'tools\blueprint\snippets\exit-drone-mode.eddgraph',
     'tools\blueprint\snippets\emergency-exit-drone-mode.eddgraph',
     'tools\blueprint\snippets\client-director-event-graph.eddgraph',
+    'tools\blueprint\snippets\client-director-event-playback-v1.eddgraph',
     'tools\blueprint\snippets\capture-current-waypoint.eddgraph',
     'tools\blueprint\snippets\sync-draft-waypoints-v1.eddgraph',
     'tools\blueprint\snippets\replace-selected-waypoint.eddgraph',
@@ -602,4 +605,52 @@ if ($LASTEXITCODE -ne 0) {
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')
 if ($LASTEXITCODE -ne 0) {
     throw "Checked draft history integration contracts failed with exit code $LASTEXITCODE."
+}
+
+$historyDispatchNonce = [guid]::NewGuid().ToString('N')
+$historyDispatchBase = Join-Path $ProjectRoot 'tools\blueprint\snippets\client-director-event-playback-v1.eddgraph'
+$generatedHistoryDispatch = Join-Path $scratchRoot "edd-history-dispatch-$historyDispatchNonce.eddgraph"
+$generatedHistoryDispatchRepeat = Join-Path $scratchRoot "edd-history-dispatch-$historyDispatchNonce-repeat.eddgraph"
+$generatedHistoryDispatchIdempotent = Join-Path $scratchRoot "edd-history-dispatch-$historyDispatchNonce-idempotent.eddgraph"
+$checkedHistoryDispatch = Join-Path $ProjectRoot 'tools\blueprint\snippets\client-director-event-graph.eddgraph'
+foreach ($output in @($generatedHistoryDispatch, $generatedHistoryDispatchRepeat)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-DraftHistoryDispatch.py') `
+        --input $historyDispatchBase --output $output
+    if ($LASTEXITCODE -ne 0) {
+        throw "Draft history dispatch generation failed with exit code $LASTEXITCODE."
+    }
+}
+if ((Get-FileHash -Algorithm SHA256 $generatedHistoryDispatch).Hash -ne
+    (Get-FileHash -Algorithm SHA256 $generatedHistoryDispatchRepeat).Hash) {
+    throw 'Draft history dispatch generation is not deterministic.'
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-DraftHistoryDispatch.py') `
+    --input $generatedHistoryDispatch --output $generatedHistoryDispatchIdempotent
+if ($LASTEXITCODE -ne 0) {
+    throw "Idempotent draft history dispatch generation failed with exit code $LASTEXITCODE."
+}
+if ((Get-FileHash -Algorithm SHA256 $generatedHistoryDispatch).Hash -ne
+    (Get-FileHash -Algorithm SHA256 $generatedHistoryDispatchIdempotent).Hash) {
+    throw 'Draft history dispatch generation is not idempotent.'
+}
+foreach ($graph in @($generatedHistoryDispatch, $checkedHistoryDispatch)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-WaypointCaptureContracts.py') `
+        --capture (Join-Path $ProjectRoot 'tools\blueprint\snippets\capture-current-waypoint.eddgraph') `
+        --event $graph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Waypoint authoring contracts failed for history dispatch with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-WaypointFeedbackContracts.py') --event $graph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Waypoint feedback contracts failed for history dispatch with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-LinearPlaybackDispatchContracts.py') --event $graph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Linear playback contracts failed for history dispatch with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-DraftHistoryDispatchContracts.py') --event $graph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Draft history dispatch contracts failed with exit code $LASTEXITCODE."
+    }
 }

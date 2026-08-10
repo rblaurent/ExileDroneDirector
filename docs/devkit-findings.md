@@ -1533,10 +1533,29 @@ successfully but failed the live round-trip contract. The rule is now explicit:
 compiler green is necessary but never sufficient, and every function contract
 must name the exact native-entry successor as well as its internal paths.
 
-The next runtime slice is intentionally UI-free: wire Ctrl+Z/Ctrl+Y, add stable
-diagnostic logs, and prove the complete shortcut route in PIE, a cooked normal
-client, and the controlled G-Portal environment. Timeline/editor UI design is
-deferred until those tests reveal the minimum workflow that is actually useful.
+`Build-DraftHistoryDispatch.py` now extends the checked 62-node playback graph
+with a deterministic, idempotent Ctrl+Z/Ctrl+Y layer. It accepts either Control
+key, checks Z before Y, tests the appropriate stack before calling the history
+kernel, and terminates every accepted or rejected chord. No-Control and
+Control-without-Z/Y paths rejoin manual speed/translation/rotation/roll input;
+active playback remains exclusive. This ordering is important because Z is also
+the existing manual-roll key: Ctrl+Z must never undo and bank in one tick.
+
+The installed result is an 86-node/355-pin EventGraph. It compiled in the
+Enhanced DevKit, saved, copied back from Unreal, and passed the generic graph,
+waypoint-authoring, feedback, playback-arbitration, and history-dispatch
+contracts. Stable runtime messages are `[EDD] Undo applied`,
+`[EDD] Redo applied`, `[EDD] Undo ignored: history empty`, and
+`[EDD] Redo ignored: history empty`; successful history actions also emit the
+existing dynamic waypoint-count/selection line. The 62-node pre-history graph is
+retained as `client-director-event-playback-v1.eddgraph` so the repository tests
+generation from a known base instead of merely accepting an already-extended
+graph.
+
+The next runtime slice remains intentionally UI-free: complete stable mutation
+diagnostics and prove the shortcut route in PIE, a cooked normal client, and the
+controlled G-Portal environment. Timeline/editor UI design is deferred until
+those tests reveal the minimum workflow that is actually useful.
 
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 

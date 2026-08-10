@@ -23,7 +23,7 @@ def load_contract_helpers():
 def assert_feedback(path: Path) -> None:
     helpers = load_contract_helpers()
     nodes = helpers.parse_graph(path)
-    helpers.require(len(nodes) in {51, 62}, f"Feedback EventGraph expected 51 or 62 nodes; found {len(nodes)}")
+    helpers.require(len(nodes) in {51, 62, 86}, f"Feedback EventGraph expected 51, 62, or 86 nodes; found {len(nodes)}")
 
     builders = [node for node in nodes.values() if 'MemberName="BuildString_Int"' in node.text]
     helpers.require(len(builders) == 2, f"Feedback needs exactly two BuildString_Int nodes; found {len(builders)}")
@@ -50,7 +50,13 @@ def assert_feedback(path: Path) -> None:
 
     ids = helpers.one(nodes, 'VariableReference=(MemberName="DraftWaypointIds"')
     selected = helpers.one(nodes, 'VariableReference=(MemberName="SelectedWaypointIndex"')
-    length = helpers.one(nodes, 'MemberName="Array_Length"')
+    length_matches = [
+        node for node in nodes.values()
+        if 'MemberName="Array_Length"' in node.text
+        and helpers.linked(ids, "DraftWaypointIds", node, "TargetArray")
+    ]
+    helpers.require(len(length_matches) == 1, "Draft IDs must drive exactly one feedback length node")
+    length = length_matches[0]
     helpers.require_link(ids, "DraftWaypointIds", length, "TargetArray", "Draft IDs must drive the count")
     helpers.require_link(length, "ReturnValue", count_builder, "InInt", "Array length must format as the count")
     helpers.require_link(

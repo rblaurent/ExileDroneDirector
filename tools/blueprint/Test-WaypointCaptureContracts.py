@@ -179,7 +179,10 @@ def assert_capture(nodes: dict[str, Node]) -> None:
 
 
 def assert_dispatch(nodes: dict[str, Node]) -> None:
-    require(len(nodes) in {37, 43, 51, 62}, f"Client EventGraph expected 37, 43, 51, or 62 total nodes; found {len(nodes)}")
+    require(
+        len(nodes) in {37, 43, 51, 62, 86},
+        f"Client EventGraph expected 37, 43, 51, 62, or 86 total nodes; found {len(nodes)}",
+    )
     roll = one(nodes, 'MemberName="ApplyRollAndHorizonInput"')
     capture = one(nodes, 'MemberName="CaptureCurrentWaypoint"')
 

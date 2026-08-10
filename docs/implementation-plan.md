@@ -180,6 +180,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   camera/index attempts remain terminal and consume no history. Deterministic
   full/paste generation, fresh live Unreal exports, compiler results, reciprocal
   links, and semantic contracts all pass for the three mutation paths.
+- Ctrl+Z/Ctrl+Y now enter the compiled undo/redo core only for the owning local
+  controller while Drone Mode is active, the camera is valid, and playback is
+  inactive. Either Control key is accepted; an undo chord cannot also execute
+  the Z roll binding. Applied and empty-stack paths have stable diagnostics and
+  terminate the tick. The 86-node/355-pin EventGraph compiled live, saved,
+  round-tripped from Unreal, and passes authoring, feedback, playback, history,
+  deterministic-generation, and idempotence contracts in the full scaffold.
 
 ### Reproducible graph evidence
 
@@ -210,17 +217,20 @@ This section is the authoritative handoff. Detailed evidence remains in
 The next implementation slice deliberately proves the product through keyboard
 controls and explicit logs before any editor UI is built:
 
-1. Wire Ctrl+Z/Ctrl+Y to the validated undo/redo functions without disturbing
-   text input or the existing F10/K/R/Delete/P/F9 arbitration.
-2. Emit explicit, stable logs for accepted mutations, rejected no-ops, undo,
-   redo, current waypoint count/selection, and camera restoration.
-3. Run deterministic PIE acceptance through the real shortcut route, proving
+1. Add explicit, stable logs for accepted mutations, rejected no-ops, current
+   waypoint count/selection, and camera restoration. Undo/redo applied and
+   empty-stack diagnostics are already live.
+2. Run deterministic PIE acceptance through the real Ctrl+Z/Ctrl+Y shortcut
+   route, proving
    document/preview parity, history cap/branch behavior, and invalid-attempt
    no-ops.
-4. Cook/package and run the same small slice in normal Conan Enhanced, then on
+3. Cook/package and run the same small slice in normal Conan Enhanced, then on
    the controlled G-Portal server with identical client/server Workshop build.
-5. Only after those gates pass, specify the smallest useful authoring UI from
+4. Only after those gates pass, specify the smallest useful authoring UI from
    observed workflow friction. A custom timeline is not assumed to be necessary.
+5. Before recording acceptance, add the local `Toggle Clean Frame` action and
+   prove that it hides/restores every mod-owned overlay without destroying the
+   preview, mutating the draft, stopping playback, or disabling Emergency Exit.
 6. Close, sync, run the complete repository suite, commit, and push after each
    meaningful compiled milestone.
 
@@ -798,6 +808,8 @@ Make real-world server playback and recording dependable.
 2. Implement route preparation/prewarming supported by Conan.
 3. Add conservative bounds/speed policy where streaming cannot keep up.
 4. Implement Clean Playback HUD suppression and configurable countdown.
+   The suppression path uses the same remappable `Toggle Clean Frame` action as
+   authoring/free flight and restores the exact prior overlay visibility state.
 5. Document OBS and Steam Recording workflows.
 6. Add loop, selection playback, and deterministic repeated takes.
 7. Add optional authoring-pass capture that reduces live Free Look/Carrier
@@ -978,8 +990,9 @@ client-owned marker/linear-segment preview, and bounded history transaction core
 are complete. Follow the exact session runbook in section 1.1. The immediate
 sequence is:
 
-1. Wire and log Ctrl+Z/Ctrl+Y, then prove history/document/preview parity and
-   invalid-attempt no-ops through the physical shortcut route in PIE.
+1. Complete stable mutation/no-op diagnostics, then prove Ctrl+Z/Ctrl+Y
+   history/document/preview parity and invalid-attempt no-ops through the
+   physical shortcut route in PIE.
 2. Run the first cook/package proof in normal Conan Enhanced during an attended
    session, then repeat the validated slice through the controlled
    Workshop/G-Portal path.

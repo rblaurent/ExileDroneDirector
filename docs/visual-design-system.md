@@ -312,6 +312,14 @@ soft-tether proximity only while relevant. Recenter progress is communicated by
 subtle motion/reticle convergence rather than a modal message. The HUD must be
 fully suppressible for recording while Emergency Exit remains globally bound.
 
+The suppression command is named `Toggle Clean Frame` everywhere: binding UI,
+tooltips, logs, and documentation. It is not a panel-collapse shortcut. Clean
+Frame hides the complete mod-owned presentation layer in one atomic state change
+and restores each previous visibility flag on exit. Preview geometry is hidden,
+not rebuilt; no fade, toast, cursor, or focus ring may contaminate the clean
+frame after the toggle completes. The toggle and Emergency Exit remain operable
+without visible controls.
+
 ## 8. Timeline visual behavior
 
 - Current time uses Ember and remains visible over every track color.

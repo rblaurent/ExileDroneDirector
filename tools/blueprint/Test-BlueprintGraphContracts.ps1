@@ -761,8 +761,10 @@ Assert-GraphMatch $emergencyPrint 'PinName="bPrintToLog"[^\r\n]*DefaultValue="tr
 
 $eventGraph = [IO.File]::ReadAllText($eventGraphPath)
 $eventGraphNodes = [regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/BlueprintGraph\.').Count
-if ($eventGraphNodes -ne 61) {
-    throw "Client-director EventGraph contract expected 61 executable nodes plus one design comment; found $eventGraphNodes executable nodes."
+$hasHistoryDispatch = $eventGraph -match 'MemberName="UndoDraftV1"'
+$expectedEventGraphNodes = if ($hasHistoryDispatch) { 85 } else { 61 }
+if ($eventGraphNodes -ne $expectedEventGraphNodes) {
+    throw "Client-director EventGraph contract expected $expectedEventGraphNodes executable nodes plus one design comment; found $eventGraphNodes executable nodes."
 }
 if ([regex]::Matches($eventGraph, '(?m)^Begin Object Class=/Script/UnrealEd\.EdGraphNode_Comment').Count -ne 1) {
     throw 'Client-director EventGraph must retain exactly one design comment node.'
@@ -807,6 +809,11 @@ $playbackUpdate = Get-NodeBlock $eventGraph 'K2Node_CallFunction_55'
 $playbackNormalStop = Get-NodeBlock $eventGraph 'K2Node_CallFunction_56'
 $playbackManualStop = Get-NodeBlock $eventGraph 'K2Node_CallFunction_57'
 $playbackInvalidStop = Get-NodeBlock $eventGraph 'K2Node_CallFunction_58'
+$historyLeftCtrlBranch = if ($hasHistoryDispatch) {
+    Get-NodeBlock $eventGraph 'K2Node_IfThenElse_12'
+} else {
+    $null
+}
 
 Assert-GraphMatch $tickEvent 'EventReference=.*MemberName="ReceiveTick"' 'Emergency polling must run from the component tick.'
 Assert-GraphMatch $tickEvent 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_5 ' 'ReceiveTick must enter the owning-local-controller gate first.'
@@ -859,7 +866,12 @@ Assert-GraphMatch $playbackToggleBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node
 Assert-GraphMatch $playbackStart 'MemberName="StartLinearPlayback"' 'Playback start must delegate to the compiled kernel.'
 Assert-GraphMatch $playbackToggleStop 'MemberName="StopLinearPlayback"' 'Playback stop must delegate to the compiled kernel.'
 Assert-GraphMatch $playbackUpdateBranch 'PinName="then"[^\r\n]*LinkedTo=\(K2Node_CallFunction_55 ' 'Active playback ticks must update the path.'
-Assert-GraphMatch $playbackUpdateBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_CallFunction_17 ' 'Inactive playback ticks must retain manual flight controls.'
+if ($hasHistoryDispatch) {
+    Assert-GraphMatch $playbackUpdateBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_12 ' 'Inactive playback ticks must enter history arbitration before manual flight controls.'
+    Assert-GraphMatch $historyLeftCtrlBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_IfThenElse_13 ' 'A tick without LeftControl must continue to the RightControl arbitration branch.'
+} else {
+    Assert-GraphMatch $playbackUpdateBranch 'PinName="else"[^\r\n]*LinkedTo=\(K2Node_CallFunction_17 ' 'Inactive playback ticks must retain manual flight controls.'
+}
 Assert-GraphMatch $playbackUpdate 'MemberName="UpdateLinearPlayback"' 'Playback ticks must delegate to the absolute-time update kernel.'
 Assert-GraphMatch $speedInput 'FunctionReference=.*MemberName="UpdateSpeedControls"' 'Active-mode input must delegate to BP_EDD_DroneCamera.UpdateSpeedControls.'
 Assert-GraphMatch $speedInput 'PinName="self"[^\r\n]*LinkedTo=\(K2Node_VariableGet_2 ' 'Speed control must target the validated DroneCameraRef.'

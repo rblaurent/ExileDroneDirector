@@ -23,7 +23,7 @@ def load_helpers():
 def assert_dispatch(path: Path) -> None:
     h = load_helpers()
     nodes = h.parse_graph(path)
-    h.require(len(nodes) == 62, f"Playback EventGraph expected 62 nodes; found {len(nodes)}")
+    h.require(len(nodes) in {62, 86}, f"Playback EventGraph expected 62 or 86 nodes; found {len(nodes)}")
 
     def calls(function: str):
         return [node for node in nodes.values() if f'MemberName="{function}"' in node.text]
@@ -87,12 +87,15 @@ def assert_dispatch(path: Path) -> None:
         branch
         for branch in active_branches
         if h.linked(branch, "then", update, "execute")
-        and h.linked(branch, "else", speed, "execute")
     ]
-    h.require(len(update_candidates) == 1, "Tick arbitration must update playback when active and manual flight when inactive")
+    h.require(len(update_candidates) == 1, "Tick arbitration must update playback when active")
     update_branch = update_candidates[0]
     h.require_link(p_branch, "else", update_branch, "execute", "Only a tick without a P edge may update movement")
     h.require(not h.pin(update, "then").links, "Playback update must suppress all manual/edit controls for the tick")
+    if len(nodes) == 62:
+        h.require_link(update_branch, "else", speed, "execute", "Inactive playback must retain manual flight")
+    else:
+        h.require(not h.linked(update_branch, "else", speed, "execute"), "History-enabled ticks must arbitrate shortcuts before manual flight")
 
     valid_camera_branch = next(
         node

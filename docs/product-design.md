@@ -241,7 +241,30 @@ The editor uses a four-region layout:
 Panels can collapse so the live camera remains useful at different resolutions.
 The viewport shows only authoring overlays; clean preview hides them all.
 
-### 8.1 Drone navigation
+### 8.1 Clean Frame toggle
+
+`Toggle Clean Frame` is a dedicated, remappable local shortcut available during
+free flight, authoring, and playback. One press hides every mod-owned visual:
+editor panels, transport, diagnostics, waypoint markers, path lines, focus
+markers, reticles, labels, and gizmos. A second press restores the exact prior
+visibility state without changing Drone Mode, camera transform, selection,
+playhead, playback, or recording state.
+
+Clean Frame is presentation state, never Flypath data and never server-shared.
+The preview actor remains alive with its document/instances intact; its visual
+components are hidden rather than destroyed so restoration is immediate and
+cannot mutate the draft. Emergency Exit and the Clean Frame shortcut remain
+active while invisible. Activation is written to the diagnostic log; any
+on-screen acknowledgement must disappear before the next captured frame.
+
+The guaranteed contract covers every Exile Drone Director overlay. Hiding the
+base Conan HUD is attempted only through a verified, reversible supported API;
+if Enhanced does not expose one safely, the mod presents the game's own HUD
+binding as a separate recording prerequisite rather than taking ownership of
+unrelated UI. The default key is selected after a Conan/PIE conflict audit and
+remains user-remappable.
+
+### 8.2 Drone navigation
 
 Default flight controls provide forward/back, strafe, ascend/descend, yaw,
 pitch, optional roll, and mouse-wheel speed trim. Precision modifiers are:
@@ -581,7 +604,7 @@ not market unrestricted remote playback as suitable for competitive PvP.
 
 The dependable first-release workflow is clean deterministic playback captured
 by OBS, Steam Recording, or another external recorder. The mod supplies countdown,
-clean HUD, repeatable timing, and capture-safe restoration.
+the dedicated Clean Frame toggle, repeatable timing, and capture-safe restoration.
 
 Direct Movie Render Queue or image-sequence output is a later technical spike and
 is enabled only if Conan's cooked build ships the required runtime modules. It is

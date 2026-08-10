@@ -82,7 +82,15 @@ def assert_exit(c, nodes, *, paste: bool) -> None:
         c.require_link(entry, "then", destroy, "execute", "Exit entry must always destroy the preview first")
 
 
-def assert_mutation(c, nodes, entry_name: str, expected_paths: int, *, paste: bool) -> None:
+def assert_mutation(
+    c,
+    nodes,
+    entry_name: str,
+    expected_paths: int,
+    *,
+    paste: bool,
+    diagnostic_terminals: bool = False,
+) -> None:
     assert_closed(c, nodes, entry_name, paste=paste)
     branches = [node for node in nodes.values() if node.node_class.endswith("K2Node_IfThenElse")]
     exposed = [node for node in branches if not node.pins["execute"].links]
@@ -140,11 +148,17 @@ def assert_mutation(c, nodes, entry_name: str, expected_paths: int, *, paste: bo
     if entry_name in {"CaptureCurrentWaypoint", "ReplaceSelectedWaypoint"}:
         refresh = refreshes[0]
         prints = calls(nodes, "PrintString")
-        c.require(len(prints) == 1, f"{entry_name} feedback node changed")
-        c.require_link(refresh, "then", prints[0], "execute", "Feedback must follow preview refresh")
+        accepted = [node for node in prints if c.linked(refresh, "then", node, "execute")]
+        c.require(len(accepted) == 1, f"{entry_name} accepted feedback path changed")
+        if not diagnostic_terminals:
+            c.require(len(prints) == 1, f"{entry_name} feedback node changed")
     else:
         for refresh in refreshes:
-            c.require(not refresh.pins["then"].links, "Delete refreshes must terminate their successful branches")
+            if diagnostic_terminals:
+                diagnostic = c.linked_target(nodes, refresh, "then", "execute", 'MemberName="PrintString"')
+                c.require(not diagnostic.pins["then"].links, "Delete success diagnostic must terminate its branch")
+            else:
+                c.require(not refresh.pins["then"].links, "Delete refreshes must terminate their successful branches")
 
 
 def main() -> None:

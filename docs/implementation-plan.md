@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.26.0-clean-frame`
+Current internal build: `0.27.0-mutation-diagnostics`
 
 ## 1. Delivery strategy
 
@@ -51,6 +51,9 @@ This section is the authoritative handoff. Detailed evidence remains in
   capture, R replace, and Delete removal shortcuts while inactive. Each
   successful mutation continues to shared dynamic feedback:
   `[EDD] Draft waypoints: N | selected: I`.
+- Accepted capture, replace, and delete function bodies now emit stable
+  log-only success/rejection diagnostics. They never print on screen, so
+  authoring evidence remains available without contaminating cinematic output.
 - Normal F10 exit, manual F9 emergency exit, and invalid-camera recovery each
   stop playback before restoring the player view.
 
@@ -240,22 +243,26 @@ This section is the authoritative handoff. Detailed evidence remains in
 The next implementation slice deliberately proves the product through keyboard
 controls and explicit logs before any editor UI is built:
 
-1. Add explicit, stable logs for accepted mutations, rejected no-ops, current
-   waypoint count/selection, and camera restoration. Undo/redo applied and
-   empty-stack diagnostics are already live.
-2. Run deterministic PIE acceptance through the real Ctrl+Z/Ctrl+Y shortcut
+1. Sync the accepted mutation-diagnostic Blueprint round-trips from the closed
+   DevKit and preserve their structural contracts in Git.
+2. Run attended deterministic PIE acceptance through the real F10,
+   Ctrl+Z/Ctrl+Y, R, Delete, and F9 shortcut
    route, proving
    document/preview parity, history cap/branch behavior, and invalid-attempt
    no-ops.
-3. Cook/package and run the same small slice in normal Conan Enhanced, then on
-   the controlled G-Portal server with identical client/server Workshop build.
-4. Only after those gates pass, specify the smallest useful authoring UI from
+3. Cook/package and run the same small slice in a normal local Conan Enhanced
+   **single-player game**. This is the first real-client gate and requires no
+   Workshop publication or hosted server.
+4. Only after local single-player passes, publish an explicitly test-only
+   Workshop build and repeat the safe subset on the controlled G-Portal server
+   with identical client/server version and load order.
+5. Only after those gates pass, specify the smallest useful authoring UI from
    observed workflow friction. A custom timeline is not assumed to be necessary.
-5. In the first cooked-client recording acceptance, visually prove that the
+6. In the first cooked-client recording acceptance, visually prove that the
    implemented F7 `Toggle Clean Frame` action hides/restores Conan's complete
    native HUD and every mod-owned overlay without destroying the preview,
    mutating the draft, stopping playback, or disabling Emergency Exit.
-6. Close, sync, run the complete repository suite, commit, and push after each
+7. Close, sync, run the complete repository suite, commit, and push after each
    meaningful compiled milestone.
 
 The first supported cook/package and normal-client test remain mandatory before
@@ -299,8 +306,10 @@ passing before paste is necessary but not sufficient.
 - **Hands-on PIE gate:** Laurent can fly for several minutes, capture at least
   three points, replace/delete the selection, and exit with the original camera
   and pawn intact.
-- **Cooked local gate:** the same slice loads from a packaged mod in normal
-  Conan Enhanced, survives relaunch, and restores safely outside PIE.
+- **Cooked local single-player gate:** the same slice loads from a packaged mod
+  in a normal Conan Enhanced single-player save, survives relaunch, enters and
+  exits Drone Mode safely outside PIE, and visually hides/restores Conan's
+  native HUD through F7.
 - **G-Portal gate:** publish a test Workshop item, install it on an Enhanced
   backup/staging server, use identical client/server mod version and load order,
   and repeat the camera-restoration test. This gate initially tests only local
@@ -1015,16 +1024,18 @@ client-owned marker/linear-segment preview, and bounded history transaction core
 are complete. Follow the exact session runbook in section 1.1. The immediate
 sequence is:
 
-1. Complete stable mutation/no-op diagnostics, then prove Ctrl+Z/Ctrl+Y
+1. Close/sync the completed stable mutation/no-op diagnostics, then prove
+   Ctrl+Z/Ctrl+Y
    history/document/preview parity and invalid-attempt no-ops through the
    physical shortcut route in PIE.
-2. Run the first cook/package proof in normal Conan Enhanced during an attended
-   session, then repeat the validated slice through the controlled
-   Workshop/G-Portal path. Include physical F7 and visual native-HUD Clean Frame
-   acceptance in that real-client pass.
-3. Add local serialization and restore validation for authored drafts.
-4. Build cinematic interpolation profiles on the validated absolute-time kernel.
-5. Design the minimum editor HUD only from validated real-environment needs;
+2. Run the first cook/package proof in a normal local Conan Enhanced
+   single-player save during an attended session. Include physical F7 and
+   visual native-HUD Clean Frame acceptance in that real-client pass.
+3. Only after the local gate passes, repeat the validated subset through the
+   controlled Workshop/G-Portal path.
+4. Add local serialization and restore validation for authored drafts.
+5. Build cinematic interpolation profiles on the validated absolute-time kernel.
+6. Design the minimum editor HUD only from validated real-environment needs;
    defer the custom timeline until testing demonstrates that it earns its cost.
 
 The first public capability milestone is not “the camera moved in PIE.” It is

@@ -223,6 +223,22 @@ leave the previous graph active without an obvious warning.
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.
 
+Mutation functions have an additional cinematic-feedback rule: accepted and
+rejected diagnostics are log-only (`bPrintToScreen=false`,
+`bPrintToLog=true`). The complete function body is generated in one pass, its
+entryless variant is pasted into an emptied function, the native entry is wired
+manually, and the fresh Unreal round-trip must pass
+`Test-MutationDiagnosticContracts.py` together with history/document/preview
+contracts. Rejected branches must terminate at their diagnostic and may not
+reach history capture, mutation, document synchronization, or preview refresh.
+
+Physical shortcut acceptance is an attended gate. Do not identify the game
+viewport through `Get-Process.MainWindowHandle`: the editor, Blueprint editor,
+Message Log, and Enhanced Preview can all be top-level windows in the same
+process. More importantly, do not run focus-stealing key/mouse automation while
+the computer is in use. Arm the PIE harness, let the operator focus the Enhanced
+Preview explicitly, and follow its logged readiness markers.
+
 `Export-BlueprintGraphClipboard.ps1` reads and validates the clipboard; it does
 not drive Unreal or refresh the clipboard itself. Before every export, focus the
 intended graph, select all nodes, and copy again. A successful export message

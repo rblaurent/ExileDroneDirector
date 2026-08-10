@@ -37,8 +37,25 @@ def array_mutations(nodes, operation: str):
     ]
 
 
-def assert_history_path(c, preview, nodes, entry_name: str, expected_paths: int, operation: str, *, paste: bool):
-    preview.assert_mutation(c, nodes, entry_name, expected_paths, paste=paste)
+def assert_history_path(
+    c,
+    preview,
+    nodes,
+    entry_name: str,
+    expected_paths: int,
+    operation: str,
+    *,
+    paste: bool,
+    rejection_message: str | None = None,
+):
+    preview.assert_mutation(
+        c,
+        nodes,
+        entry_name,
+        expected_paths,
+        paste=paste,
+        diagnostic_terminals=rejection_message is not None,
+    )
     records = calls(nodes, "RecordUndoSnapshotV1")
     c.require(len(records) == 1, f"{entry_name} must record exactly one undo snapshot")
     record = records[0]
@@ -50,7 +67,15 @@ def assert_history_path(c, preview, nodes, entry_name: str, expected_paths: int,
             guarded.append(branch)
     c.require(len(guarded) == 1, f"{entry_name} snapshot must have one successful precondition guard")
     guard = guarded[0]
-    c.require(not guard.pins["else"].links, f"{entry_name} invalid attempt must remain a history-free no-op")
+    if rejection_message is None:
+        c.require(not guard.pins["else"].links, f"{entry_name} invalid attempt must remain a history-free no-op")
+    else:
+        rejected = c.linked_target(nodes, guard, "else", "execute", 'MemberName="PrintString"')
+        c.require(
+            f'DefaultValue="{rejection_message}"' in rejected.text,
+            f"{entry_name} rejection diagnostic changed",
+        )
+        c.require(not rejected.pins["then"].links, f"{entry_name} rejection diagnostic must terminate the no-op")
     first_mutation = c.linked_target(nodes, record, "then", "execute", "K2Node_CallArrayFunction")
     c.require(first_mutation in mutations, f"{entry_name} snapshot must precede the first {operation}")
     for mutation in mutations:

@@ -1614,6 +1614,47 @@ editor closed through `LogExit: Exiting.`. `FromDevKit` copied only
 `BPC_EDD_ClientDirector.uasset`; repository and live source both hash to
 `2A32E93710603AAD7C66EF02F4131C36FBBDA70BB1E3DE1C31DDF9B979BE5E54`.
 
+## Mutation diagnostics and attended shortcut boundary (2026-08-10)
+
+The three production mutation functions now have complete deterministic graph
+generators and accepted live Unreal round-trips. Capture contains 29 nodes/110
+pins, Replace contains 26/105, and Delete contains 29/117. Their entryless paste
+bodies are 28/109, 25/104, and 28/116 respectively. Every live function
+compiled `Good to go`, was saved, exported again from Unreal, and passed the
+combined history, document-sync, path-preview, native-entry, and diagnostic
+contracts.
+
+The stable messages are `[EDD] Waypoint captured`, `[EDD] Selected waypoint
+replaced`, `[EDD] Selected waypoint deleted`, `[EDD] Capture ignored: no drone
+camera`, `[EDD] Replace ignored: no drone camera`, `[EDD] Replace ignored:
+invalid selection`, and `[EDD] Delete ignored: invalid selection`. All are
+`PrintString` calls with screen output disabled and log output enabled. A
+rejected path terminates before history capture, mutation, document sync, or
+preview refresh. Successful paths retain the existing dynamic count/selection
+feedback owned by the EventGraph.
+
+`Validate-DraftHistoryShortcutsPIE.py` is the focused runtime harness for the
+next gate. It seeds 65 accepted edits to prove the live 64-transaction cap,
+checks typed-document/source-array/preview parity after undo and redo, proves
+redo invalidation after a branch edit, reaches an invalid selection naturally
+by deleting the draft, checks invalid replace/delete no-ops, tests invalid
+capture naturally after F9 removes the camera, and verifies exact original view
+restoration. It never edits Blueprint class defaults or instance-locked
+properties.
+
+Automated Windows key injection did not satisfy the real F10 poll because the
+Enhanced DevKit owns several top-level windows inside one `UnrealEditor`
+process and the preview's character-creation/game-input focus is not stable.
+Those attempts timed out cleanly and ended PIE; they are harness/input-driving
+failures, not failures of the compiled mod. Do not run focus-stealing mouse/key
+automation while Laurent is using the computer. The remaining physical
+shortcut acceptance is deliberately attended and bounded.
+
+After that PIE gate, the first packaged-runtime target is a normal local Conan
+Enhanced single-player save. It must prove load, F10 entry, flight, authoring,
+undo/redo, playback, F7 native-HUD suppression/restoration, F9 recovery, and
+safe relaunch before any Workshop or G-Portal deployment is attempted.
+
 The native GUI module controller also exposes `IsCategoryEnabled`, so Clean
 Frame can capture the HUD and Popup category states before suppression. Exit
 must call the Conan-native show path and then restore both saved category flags

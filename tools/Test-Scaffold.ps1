@@ -47,6 +47,7 @@ $requiredFiles = @(
     'tools\unreal\Validate-PathPreviewSegmentsPIE.py',
     'tools\unreal\Validate-PathPreviewLifecyclePIE.py',
     'tools\unreal\Validate-CleanFramePIE.py',
+    'tools\unreal\Validate-DraftHistoryShortcutsPIE.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
     'tools\preview\linear_preview.py',
@@ -97,6 +98,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-DraftHistoryContracts.py',
     'tools\blueprint\Build-DraftHistoryIntegrationGraphs.py',
     'tools\blueprint\Test-DraftHistoryIntegrationContracts.py',
+    'tools\blueprint\Build-MutationDiagnosticGraphs.py',
+    'tools\blueprint\Test-MutationDiagnosticContracts.py',
     'tools\blueprint\Build-DraftHistoryDispatch.py',
     'tools\blueprint\Test-DraftHistoryDispatchContracts.py',
     'tools\blueprint\Build-CleanFrameGraphs.py',
@@ -155,6 +158,9 @@ $requiredFiles = @(
     'tools\blueprint\snippets\capture-current-waypoint-history-v1.eddgraph',
     'tools\blueprint\snippets\replace-selected-waypoint-history-v1.eddgraph',
     'tools\blueprint\snippets\delete-selected-waypoint-history-v1.eddgraph',
+    'tools\blueprint\snippets\capture-current-waypoint-diagnostics-v1.eddgraph',
+    'tools\blueprint\snippets\replace-selected-waypoint-diagnostics-v1.eddgraph',
+    'tools\blueprint\snippets\delete-selected-waypoint-diagnostics-v1.eddgraph',
     'tools\blueprint\snippets\enter-clean-frame-v1.eddgraph',
     'tools\blueprint\snippets\exit-clean-frame-v1.eddgraph',
     'tools\blueprint\snippets\toggle-clean-frame-v1.eddgraph',
@@ -617,6 +623,51 @@ if ($LASTEXITCODE -ne 0) {
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')
 if ($LASTEXITCODE -ne 0) {
     throw "Checked draft history integration contracts failed with exit code $LASTEXITCODE."
+}
+
+$mutationDiagnosticNonce = [guid]::NewGuid().ToString('N')
+$generatedMutationDiagnosticDir = Join-Path $scratchRoot "edd-mutation-diagnostic-$mutationDiagnosticNonce"
+$generatedMutationDiagnosticRepeatDir = Join-Path $scratchRoot "edd-mutation-diagnostic-$mutationDiagnosticNonce-repeat"
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-MutationDiagnosticGraphs.py') `
+    --project-root $ProjectRoot --output-dir $generatedMutationDiagnosticDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Mutation diagnostic graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-MutationDiagnosticGraphs.py') `
+    --project-root $ProjectRoot --output-dir $generatedMutationDiagnosticRepeatDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Repeated mutation diagnostic graph generation failed with exit code $LASTEXITCODE."
+}
+$mutationDiagnosticFiles = @(
+    'capture-current-waypoint-diagnostics-v1.eddgraph',
+    'capture-current-waypoint-diagnostics-v1-paste.eddgraph',
+    'replace-selected-waypoint-diagnostics-v1.eddgraph',
+    'replace-selected-waypoint-diagnostics-v1-paste.eddgraph',
+    'delete-selected-waypoint-diagnostics-v1.eddgraph',
+    'delete-selected-waypoint-diagnostics-v1-paste.eddgraph'
+)
+foreach ($file in $mutationDiagnosticFiles) {
+    $first = Join-Path $generatedMutationDiagnosticDir $file
+    $second = Join-Path $generatedMutationDiagnosticRepeatDir $file
+    if ((Get-FileHash -Algorithm SHA256 $first).Hash -ne (Get-FileHash -Algorithm SHA256 $second).Hash) {
+        throw "Mutation diagnostic graph generation is not deterministic: $file"
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $first
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-MutationDiagnosticContracts.py') `
+    --project-root $ProjectRoot --input-dir $generatedMutationDiagnosticDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated mutation diagnostic contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-MutationDiagnosticContracts.py') `
+    --project-root $ProjectRoot --input-dir $generatedMutationDiagnosticDir --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated mutation diagnostic paste contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-MutationDiagnosticContracts.py') `
+    --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')
+if ($LASTEXITCODE -ne 0) {
+    throw "Checked mutation diagnostic contracts failed with exit code $LASTEXITCODE."
 }
 
 $historyDispatchNonce = [guid]::NewGuid().ToString('N')

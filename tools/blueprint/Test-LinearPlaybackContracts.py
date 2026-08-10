@@ -56,7 +56,7 @@ def assert_start(path: Path, h) -> None:
 
 def assert_update(path: Path, h) -> None:
     nodes = h.parse_graph(path)
-    h.require(len(nodes) == 36, f"Update graph expected 36 nodes; found {len(nodes)}")
+    h.require(len(nodes) == 34, f"Update graph expected 34 nodes; found {len(nodes)}")
     entry = h.one(nodes, 'MemberName="UpdateLinearPlayback"')
     active = next(
         n for n in nodes.values()
@@ -90,10 +90,10 @@ def assert_update(path: Path, h) -> None:
     tlerp = h.one(nodes, 'MemberName="TLerp"')
     set_transforms = [n for n in nodes.values() if 'MemberName="K2_SetActorTransform"' in n.text]
     h.require(len(set_transforms) == 2, "Update needs in-progress and exact-final transform writes")
-    active_set = next(
+    active_sets = [
         n for n in nodes.values()
         if n.node_class.endswith("K2Node_VariableSet") and 'MemberName="PlaybackActive"' in n.text
-    )
+    ]
     selected_sets = [n for n in nodes.values() if 'K2Node_VariableSet' in n.text and 'MemberName="SelectedWaypointIndex"' in n.text]
     h.require(len(selected_sets) == 2, "Update must expose current segment and final waypoint selection")
 
@@ -116,10 +116,10 @@ def assert_update(path: Path, h) -> None:
         h.require_link(transforms, "DraftWaypointTransforms", array_get, "Array", "All evaluation reads must use captured transforms")
     h.require_link(alpha, "ReturnValue", tlerp, "Alpha", "Transform lerp must use the local segment alpha")
     h.require(explicit_default(tlerp, "InterpMode") == "QuatInterp", "Rotation must use quaternion interpolation")
-    h.require(explicit_default(active_set, "PlaybackActive") == "false", "Completion must stop playback")
+    h.require(not active_sets, "Completion must hold the final frame until explicit stop")
     combined = "".join(n.text for n in nodes.values())
     h.require("GetWorldDeltaSeconds" not in combined and "FInterpTo" not in combined, "Update must not integrate from frame delta")
-    h.require('DefaultValue="[EDD] Linear playback complete"' in combined, "Completion diagnostic missing")
+    h.require('DefaultValue="[EDD] Linear playback complete"' not in combined, "Final-frame hold must not print every tick")
     h.require('ErrorType=' not in combined, "Update graph retains compiler errors")
     h.require(h.pin(entry, "then").links, "Update native entry must be reciprocal in the complete graph")
 

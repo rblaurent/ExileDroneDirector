@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.13.0-waypoint-feedback`
+Current internal build: `0.14.0-linear-playback`
 
 ## 1. Delivery strategy
 
@@ -41,7 +41,9 @@ This section is the authoritative handoff. Detailed evidence remains in
   entry links.
 - `StartLinearPlayback`, `UpdateLinearPlayback`, and `StopLinearPlayback` are
   compiled absolute-time functions. P toggles playback; active playback ticks
-  suppress manual flight and waypoint edits.
+  suppress manual flight and waypoint edits. Completion holds the exact final
+  authored transform until explicit stop, preventing horizon stabilization or
+  manual input from pulling the camera off its last frame.
 - The live 62-node/235-pin client EventGraph retains mutually exclusive K
   capture, R replace, and Delete removal shortcuts while inactive. Each
   successful mutation continues to shared dynamic feedback:
@@ -61,9 +63,11 @@ This section is the authoritative handoff. Detailed evidence remains in
   press emits `[EDD] Draft waypoints: 1 | selected: 0`.
 - Pure reference tests prove direct-time linear evaluation, exact authored
   endpoints, equal segment duration, negative-time clamping, history
-  independence, and shortest quaternion interpolation. Live playback dispatch
-  is compiled and round-trip validated; its deterministic PIE movement gate is
-  the next test.
+  independence, and shortest quaternion interpolation. A deterministic
+  two-player PIE run through the real F10 entry route proves empty and
+  single-waypoint no-ops, initial snap, absolute-time movement, exact final-frame
+  hold, restart, explicit stop, client isolation, and unchanged possession/view
+  restoration. It ended with `AUTOMATIC_RESULT:PASS`.
 - Reviewed live graph snippets cover capture, replace, and delete. Their tests
   validate pin types, execution order, stable ID/hold behavior, all six array
   mutations, selection repair, and exact native function-entry linkage.
@@ -93,21 +97,21 @@ This section is the authoritative handoff. Detailed evidence remains in
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
   directly to G-Portal.
 
-### Exact next DevKit session
+### Exact next autonomous slice
 
 The user explicitly deferred the attended cook/Workshop step for the night. The
 next autonomous implementation slice is therefore:
 
-1. Begin from the committed compiled playback-dispatch checkpoint with one
-   DevKit editor.
-2. Run deterministic two-player PIE tests for invalid drafts, initial snap,
-   midpoint and exact endpoint evaluation, completion, explicit stop, and
-   remote-client isolation.
-3. Confirm the controlled pawn, controller possession, and original view target
-   remain unchanged/restored through the complete route.
-4. Run physical F10/K/P/P/F9 acceptance after the deterministic fixture passes.
-5. Close, sync, run the complete repository suite, bump the internal playback
-   checkpoint, commit, and push.
+1. Commit and push the compiled, deterministic-runtime-validated linear
+   playback checkpoint.
+2. Promote the transient six-array waypoint bridge toward explicit waypoint and
+   Flypath document structs without weakening the validated camera boundary.
+3. Add visible waypoint/path preview, serialization, and undo/redo as bounded,
+   independently validated vertical slices.
+4. Preserve the physical F10/K/P/P/F9 route as the regression acceptance path
+   for every change that touches playback or authoring.
+5. Close, sync, run the complete repository suite, commit, and push after each
+   meaningful compiled milestone.
 
 The first supported cook/package and normal-client test remain mandatory before
 any public release or Workshop/G-Portal deployment; they resume in an attended
@@ -808,7 +812,7 @@ Content/Mods/ExileDroneDirector/
 
 Version numbers describe capability gates, not calendar promises.
 
-Internal checkpoint versions such as `0.13.0-waypoint-feedback` count validated
+Internal checkpoint versions such as `0.14.0-linear-playback` count validated
 development slices. They do not claim that the public **0.1 Camera Spike** gate
 is complete; that gate still requires cooked multiplayer acceptance.
 
@@ -817,8 +821,8 @@ is complete; that gate still requires cooked multiplayer acceptance.
 The installation and initial camera reconnaissance are complete. Follow the
 exact session runbook in section 1.1. The immediate sequence is:
 
-1. Deterministic linear playback over the validated local waypoint draft.
-2. Visible path preview, document structs, serialization, and undo/redo.
+1. Visible path preview, document structs, serialization, and undo/redo.
+2. Cinematic interpolation profiles built on the validated absolute-time kernel.
 3. First cook/package proof in normal Conan Enhanced when an attended session is
    available.
 4. Test Workshop item and controlled G-Portal deployment only after that cooked

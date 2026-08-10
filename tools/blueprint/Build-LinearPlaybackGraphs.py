@@ -233,11 +233,6 @@ def build_update(bp, source):
     set_default(bp, set_last, "bTeleport", "true")
     selected_last = add("selected_last", "start_set", "K2Node_VariableSet_0", 3424, -128)
     retarget_selected(bp, selected_last)
-    active_set = add("active_set", "active_set", "K2Node_VariableSet_1", 3680, -128)
-    set_default(bp, active_set, "PlaybackActive", "false")
-    complete_print = add("complete_print", "print", "K2Node_CallFunction_10", 3936, -128)
-    set_default(bp, complete_print, "InString", "[EDD] Linear playback complete")
-
     segment_time = add("segment_time", "div_double", "K2Node_CallFunction_11", 2912, 656)
     floor_node = add("floor", "floor", "K2Node_CallFunction_12", 3136, 656)
     index_double = add("index_double", "int_to_double", "K2Node_CallFunction_13", 3360, 656)
@@ -285,8 +280,6 @@ def build_update(bp, source):
     bp.connect(drone, "DroneCameraRef", set_last, "self")
     bp.connect(set_last, "then", selected_last, "execute")
     bp.connect(segment_count, "ReturnValue", selected_last, "SelectedWaypointIndex")
-    bp.connect(selected_last, "then", active_set, "execute")
-    bp.connect(active_set, "then", complete_print, "execute")
 
     bp.connect(complete_branch, "else", set_transform, "execute")
     bp.connect(elapsed, "ReturnValue", segment_time, "A")

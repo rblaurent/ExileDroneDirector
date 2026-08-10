@@ -31,6 +31,7 @@ $requiredFiles = @(
     'tools\unreal\Configure-LinearPlayback.py',
     'tools\unreal\Probe-WaypointTypes.py',
     'tools\unreal\Validate-WaypointCapturePIE.py',
+    'tools\unreal\Validate-LinearPlaybackPIE.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
     'tools\unreal\Generate-MvpScaffold.py',

@@ -73,7 +73,7 @@ One per owning client. Responsibilities:
 
 #### Current waypoint-authoring bridge
 
-The `0.13.0-waypoint-feedback` implementation deliberately precedes the final
+The `0.14.0-linear-playback` implementation deliberately precedes the final
 document structs. `BPC_EDD_ClientDirector` currently owns six client-local,
 transient lockstep arrays:
 
@@ -90,6 +90,12 @@ Replace validates camera plus selected ID index and changes only transform and
 lens channels; ID and hold remain stable. Delete removes the same index from all
 six channels and preserves that index when a successor exists or clamps to the
 last survivor/`-1`.
+
+Linear playback evaluates this bridge from absolute game time rather than
+integrating frame delta. It uses quaternion transform interpolation and keeps
+ownership of the exact final authored transform until an explicit stop. That
+final-frame hold is intentional: releasing ownership at completion lets the
+inactive horizon-lock/manual-flight path immediately alter the authored roll.
 
 When playback is inactive, the active-mode client dispatch maps K/R/Delete to
 those three operations and then formats one shared local status message from

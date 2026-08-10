@@ -13,6 +13,7 @@ import unreal
 PREFIX = "EDD_WAYPOINT_STRUCT_SYNC"
 CLIENT_PATH = "/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector"
 VARIABLE_NAME = "DraftWaypointsV1"
+PREFLIGHT_VARIABLE_NAME = "WaypointPreflightValid"
 FUNCTION_NAME = "SyncDraftWaypointsV1"
 
 
@@ -49,11 +50,35 @@ def generated_value(variable_name: str):
     raise RuntimeError(f"Generated class is missing {variable_name}: {last_error}")
 
 
+def has_generated_property(variable_name: str) -> bool:
+    try:
+        generated_value(variable_name)
+        return True
+    except Exception:
+        return False
+
+
 client = require_asset(CLIENT_PATH)
+if not has_generated_property(PREFLIGHT_VARIABLE_NAME):
+    bool_type = unreal.BlueprintEditorLibrary.get_basic_type_by_name("bool")
+    if not unreal.BlueprintEditorLibrary.add_member_variable(
+        client,
+        PREFLIGHT_VARIABLE_NAME,
+        bool_type,
+    ):
+        raise RuntimeError(f"Failed to add {PREFLIGHT_VARIABLE_NAME}")
+    emit("PREFLIGHT_VARIABLE_CREATED", PREFLIGHT_VARIABLE_NAME)
+    unreal.BlueprintEditorLibrary.compile_blueprint(client)
+else:
+    emit("PREFLIGHT_VARIABLE_ALREADY_PRESENT", PREFLIGHT_VARIABLE_NAME)
+
 typed_default = generated_value(VARIABLE_NAME)
 if len(typed_default) != 0:
     raise RuntimeError(f"{VARIABLE_NAME} default must be empty")
 emit("TYPED_ARRAY_VERIFIED", len(typed_default))
+if bool(generated_value(PREFLIGHT_VARIABLE_NAME)):
+    raise RuntimeError(f"{PREFLIGHT_VARIABLE_NAME} default must be false")
+emit("PREFLIGHT_DEFAULT_VERIFIED", False)
 
 graph = unreal.BlueprintEditorLibrary.find_graph(client, unreal.Name(FUNCTION_NAME))
 if graph is None:

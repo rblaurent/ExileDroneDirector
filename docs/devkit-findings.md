@@ -1021,12 +1021,10 @@ struct values, and exit restored the camera. The final marker was
 `EDD_WAYPOINT_STRUCT_PIE:AUTOMATIC_RESULT:PASS`.
 
 PIE Python cannot write Blueprint component instance arrays; Unreal rejects the
-operation as non-editable. The mismatch-preserves-prior behavior is therefore
-proved by the complete graph topology and the pure document oracle rather than
-by mutating a live instance from Python. Live positive-ID, uniqueness, and
-finite/scalar-domain checks are not claimed yet. The legacy arrays remain the
-runtime authority until mutation functions call sync and those remaining
-preflight checks land.
+operation as non-editable. At this checkpoint the mismatch-preserves-prior
+behavior was therefore proved by complete graph topology and the pure document
+oracle rather than by mutating a live instance from Python. Positive-ID,
+uniqueness, and finite/scalar-domain checks were the next bounded live slice.
 
 ## Mutation-integrated typed waypoint parity (2026-08-10)
 
@@ -1052,10 +1050,56 @@ six legacy channels. All assertions passed and the run ended with
 world, so the optional client-isolation branch reported `SKIPPED`; prior
 two-player authoring acceptance remains the isolation evidence.
 
-The typed array is therefore a validated synchronized projection of every live
-authoring mutation. The legacy channels remain authoritative until the live
-sync preflight also enforces positive unique IDs and finite camera scalar
-domains, matching the complete document oracle.
+The typed array was therefore a validated synchronized projection of every live
+authoring mutation. Full preflight parity was the remaining gate before it
+could become the authoritative read-side document snapshot.
+
+## Full typed-waypoint preflight parity (2026-08-10)
+
+`SyncDraftWaypointsV1` now reaches the complete version-1 document-oracle
+boundary. After the six channel-length guards succeed, it sets a local
+`WaypointPreflightValid` accumulator, scans every source index without mutating
+the prior typed snapshot, and rejects:
+
+- IDs less than one;
+- duplicate IDs, using `Array_Find(CurrentId) == CurrentIndex`;
+- non-finite focal length, aperture, focus distance, or hold time;
+- focal length or aperture less than or equal to zero; and
+- focus distance or hold time less than zero.
+
+The finite check is Blueprint-safe and deterministic: `Value - Value == 0` is
+true for finite values and false for NaN and both infinities. Every failing
+branch clears the accumulator. Only the scan's completed path reads that
+accumulator; rejection prints a diagnostic and leaves `DraftWaypointsV1`
+untouched, while success clears and rebuilds it in a second ordered loop. Empty
+drafts remain valid.
+
+`Build-WaypointStructSyncGraph.py` now deterministically generates the complete
+84-node/362-pin graph (83-node paste body). The checked-in snippet, generated
+full graph, live pre-compile copy, and post-compile Unreal round-trip all pass
+generic reciprocal-link validation and the expanded semantic contract. The
+native function entry must still be wired after paste: zoom into the tiny entry
+and first Branch, draw the pin connection, then copy the full graph back out;
+the serialized contract is the acceptance check. The final Blueprint compiled
+`Good to go` and saved successfully.
+
+Two corrected automatic PIE runs passed on the compiled asset. The struct-sync
+run proved empty rebuild, exact two-waypoint field mapping, idempotence, and
+restoration, ending with
+`EDD_WAYPOINT_STRUCT_PIE:AUTOMATIC_RESULT:PASS`. The production mutation run
+proved typed parity after capture, replacement, survivor/empty deletion,
+invalid-edit no-ops, and restoration, ending with
+`EDD_WAYPOINT_PIE:AUTOMATIC_RESULT:PASS`. The one-world profile explicitly
+skipped its optional second-client branch; prior two-player acceptance remains
+the isolation evidence. No EDD Blueprint runtime error occurred.
+
+Python still cannot inject malformed values into these live instance arrays, so
+invalid-domain runtime injection is not claimed. Rejection semantics are
+covered by the full live graph topology/round-trip contract and the executable
+pure oracle. With those boundaries explicit, `DraftWaypointsV1` is now the
+authoritative read-side waypoint snapshot after each successful authoring
+mutation; the six arrays remain transitional write-side channels until direct
+typed mutation replaces them.
 
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 

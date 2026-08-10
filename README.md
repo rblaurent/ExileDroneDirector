@@ -147,17 +147,18 @@ restart, explicit stop, isolation, and possession/view restoration. An
 engine-independent Flypath document oracle now locks down canonical JSON,
 content hashes, revision conflicts, immutable publication, private creation and
 cloning, attribution, and structural camera/path validation. The compiled
-`SyncDraftWaypointsV1` bridge now validates all six channel lengths before
-mutation and rebuilds the typed array in stable source order. Its generated and
-live round-trip graphs pass semantic contracts, while production-path PIE proved
-empty rebuild, exact two-waypoint mapping, idempotence, and restoration. The
-capture, replace, and delete functions now invoke that bridge on every
-successful mutation. Their generated graphs and copied live Unreal round-trips
-pass semantic contracts, and production-path PIE proved exact typed parity
-after both captures, replacement, survivor/empty deletion, and invalid-edit
-no-ops. The next autonomous gate completes positive-ID, uniqueness, finite, and
-camera-scalar preflight before typed data becomes authoritative; path preview
-follows.
+`SyncDraftWaypointsV1` bridge now validates all six channel lengths, positive
+unique IDs, finite camera scalars, positive focal length and aperture, and
+non-negative focus distance and hold time before mutation. Its generated and
+live Unreal round-trip graphs contain 84 nodes/362 pins and pass reciprocal-link
+plus semantic contracts. Capture, replace, and delete invoke the bridge before
+feedback on every successful mutation. Production-path PIE proved empty
+rebuild, exact two-waypoint mapping, idempotence, exact typed parity after both
+captures/replacement/survivor and empty deletion, invalid-edit no-ops, and
+restoration. `DraftWaypointsV1` is now the validated authoritative read-side
+snapshot; the six legacy arrays remain only the transitional write-side
+capture/edit channels. The next autonomous slice starts the segment and Flypath
+document assets, visible path preview, and undo/redo.
 Cooked-package validation remains required but is explicitly deferred until an
 attended session.
 

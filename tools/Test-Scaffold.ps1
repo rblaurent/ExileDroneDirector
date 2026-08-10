@@ -29,9 +29,11 @@ $requiredFiles = @(
     'tools\unreal\Configure-DroneMovement.py',
     'tools\unreal\Configure-WaypointCapture.py',
     'tools\unreal\Configure-WaypointDocumentBridge.py',
+    'tools\unreal\Configure-WaypointStructSync.py',
     'tools\unreal\Configure-LinearPlayback.py',
     'tools\unreal\Probe-WaypointTypes.py',
     'tools\unreal\Validate-WaypointCapturePIE.py',
+    'tools\unreal\Validate-WaypointStructSyncPIE.py',
     'tools\unreal\Validate-LinearPlaybackPIE.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
@@ -50,16 +52,19 @@ $requiredFiles = @(
     'tools\blueprint\Build-ClientWaypointDispatch.py',
     'tools\blueprint\Build-ClientWaypointEditDispatch.py',
     'tools\blueprint\Build-WaypointCaptureGraph.py',
+    'tools\blueprint\Build-WaypointStructSyncGraph.py',
     'tools\blueprint\Build-WaypointEditGraphs.py',
     'tools\blueprint\Build-WaypointFeedbackDispatch.py',
     'tools\blueprint\Build-LinearPlaybackGraphs.py',
     'tools\blueprint\Build-LinearPlaybackDispatch.py',
     'tools\blueprint\Test-WaypointCaptureContracts.py',
+    'tools\blueprint\Test-WaypointStructSyncContracts.py',
     'tools\blueprint\Test-WaypointEditContracts.py',
     'tools\blueprint\Test-WaypointFeedbackContracts.py',
     'tools\blueprint\Test-LinearPlaybackContracts.py',
     'tools\blueprint\Test-LinearPlaybackDispatchContracts.py',
     'tools\blueprint\templates\waypoint-capture-node-forms.eddgraph',
+    'tools\blueprint\templates\waypoint-struct-sync-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-edit-node-forms.eddgraph',
     'tools\blueprint\templates\linear-playback-node-forms.eddgraph',
     'tools\blueprint\snippets\toggle-input.eddgraph',
@@ -72,6 +77,7 @@ $requiredFiles = @(
     'tools\blueprint\snippets\emergency-exit-drone-mode.eddgraph',
     'tools\blueprint\snippets\client-director-event-graph.eddgraph',
     'tools\blueprint\snippets\capture-current-waypoint.eddgraph',
+    'tools\blueprint\snippets\sync-draft-waypoints-v1.eddgraph',
     'tools\blueprint\snippets\replace-selected-waypoint.eddgraph',
     'tools\blueprint\snippets\delete-selected-waypoint.eddgraph',
     'tools\blueprint\snippets\start-linear-playback.eddgraph',
@@ -166,6 +172,32 @@ if (-not $RequireMvpAssets) {
 
 & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphContracts.ps1') `
     -ProjectRoot $ProjectRoot
+
+$scratchRoot = if ($env:REDLEAF_SCRATCH_DIR) {
+    $env:REDLEAF_SCRATCH_DIR
+} else {
+    [IO.Path]::GetTempPath()
+}
+$syncNonce = [guid]::NewGuid().ToString('N')
+$generatedSync = Join-Path $scratchRoot "edd-sync-$syncNonce.eddgraph"
+$generatedSyncPaste = Join-Path $scratchRoot "edd-sync-$syncNonce-paste.eddgraph"
+$checkedSync = Join-Path $ProjectRoot 'tools\blueprint\snippets\sync-draft-waypoints-v1.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-WaypointStructSyncGraph.py') `
+    --project-root $ProjectRoot `
+    --output $generatedSync `
+    --paste-output $generatedSyncPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Waypoint struct sync generation failed with exit code $LASTEXITCODE."
+}
+if ((Get-FileHash -Algorithm SHA256 $generatedSync).Hash -ne (Get-FileHash -Algorithm SHA256 $checkedSync).Hash) {
+    throw 'Checked waypoint struct sync graph has drifted from its deterministic generator.'
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-WaypointStructSyncContracts.py') `
+    --graph $generatedSync `
+    --paste-graph $generatedSyncPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated waypoint struct sync contracts failed with exit code $LASTEXITCODE."
+}
 
 & python (Join-Path $ProjectRoot 'tools\playback\test_linear_reference.py')
 if ($LASTEXITCODE -ne 0) {

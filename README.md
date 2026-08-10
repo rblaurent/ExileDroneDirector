@@ -146,8 +146,14 @@ for invalid drafts, initial snap, absolute-time movement, exact final-frame hold
 restart, explicit stop, isolation, and possession/view restoration. An
 engine-independent Flypath document oracle now locks down canonical JSON,
 content hashes, revision conflicts, immutable publication, private creation and
-cloning, attribution, and structural camera/path validation. The next autonomous
-gate completes the legacy-array-to-struct adapter, then adds the path preview.
+cloning, attribution, and structural camera/path validation. The compiled
+`SyncDraftWaypointsV1` bridge now validates all six channel lengths before
+mutation and rebuilds the typed array in stable source order. Its generated and
+live round-trip graphs pass semantic contracts, while production-path PIE proved
+empty rebuild, exact two-waypoint mapping, idempotence, and restoration. The
+next autonomous gate invokes that bridge after successful capture/replace/delete
+and completes scalar-domain preflight before typed data becomes authoritative;
+path preview follows.
 Cooked-package validation remains required but is explicitly deferred until an
 attended session.
 

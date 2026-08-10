@@ -173,5 +173,12 @@ an unreachable no-op. Move the native entry clear of overlapping pasted nodes,
 wire it manually, copy the complete live graph back out, and require the exact
 entry pin link in the semantic contract before runtime testing.
 
+`Build-WaypointStructSyncGraph.py` encodes this boundary explicitly: its full
+source graph contains the reciprocal entry link, while its paste artifact leaves
+the first Branch execution input intentionally unlinked. After paste, connect
+the native entry once, compile, export the complete live function, and run
+`Test-WaypointStructSyncContracts.py` against that round-trip. Never use
+`-AllowExternalFunctionEntry` to disguise an unreachable paste body.
+
 Each snippet is captured only after its live-editor version compiles and passes
 its focused PIE check.

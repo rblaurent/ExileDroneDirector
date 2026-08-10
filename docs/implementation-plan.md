@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.17.0-waypoint-bridge-contract`
+Current internal build: `0.18.0-typed-waypoint-sync`
 
 ## 1. Delivery strategy
 
@@ -76,15 +76,22 @@ This section is the authoritative handoff. Detailed evidence remains in
   optimistic revision conflicts, immutable published snapshots, owner-only
   editing, private-by-default creation/cloning, and clone attribution plus
   independence. Blueprint and server implementations must conform to it.
-- `ST_EDD_Waypoint` now contains the exact six-field lossless bridge and
-  `BPC_EDD_ClientDirector` compiles with an empty typed `DraftWaypointsV1` array.
-  Its idempotent configurator proves create/reopen/compile/save behavior. The
-  legacy arrays intentionally remain authoritative until an explicit sync
-  function passes parity tests.
-- The pure `SyncDraftWaypointsV1` oracle now proves all-or-nothing lockstep
+- `ST_EDD_Waypoint` contains the exact six-field lossless bridge and
+  `BPC_EDD_ClientDirector` now compiles with a live `SyncDraftWaypointsV1`
+  function. It checks all six channel lengths before mutation, preserves the
+  prior typed snapshot on a mismatch, clears only after every guard succeeds,
+  and rebuilds `DraftWaypointsV1` in ID-array order.
+- The pure `SyncDraftWaypointsV1` oracle proves all-or-nothing lockstep
   validation, positive unique IDs, finite/valid camera scalars, ordered exact
   value copies, empty drafts, and snapshot independence. The live Blueprint
-  function must match these contracts before mutation dispatch calls it.
+  function currently matches the structural and exact-copy subset. Positive-ID,
+  uniqueness, and scalar-domain rejection remain explicit preflight work before
+  the typed array becomes authoritative document state.
+- The generated 40-node/172-pin sync graph and copied live Unreal round-trip
+  both pass reciprocal-link and semantic contracts. A production-path PIE run
+  proved empty rebuild, two exact captured struct values, repeat-sync
+  idempotence, and clean camera restoration, ending in
+  `EDD_WAYPOINT_STRUCT_PIE:AUTOMATIC_RESULT:PASS`.
 - Repository scaffold, semantic graph contracts, Python syntax, and the 1 GiB
   repository budget pass. Tracked source is only a few MiB; DevKit and cooked
   outputs are never committed.
@@ -116,10 +123,10 @@ This section is the authoritative handoff. Detailed evidence remains in
 The user explicitly deferred the attended cook/Workshop step for the night. The
 next autonomous implementation slice is therefore:
 
-1. Commit and push the compiled, deterministic-runtime-validated linear
-   playback checkpoint.
-2. Implement and validate `SyncDraftWaypointsV1`, rebuilding the typed waypoint
-   array atomically from the runtime-proven six-array bridge after mutations.
+1. Call `SyncDraftWaypointsV1` after successful capture, replace, and delete;
+   validate typed parity across the complete edit cycle.
+2. Add positive-ID, uniqueness, finite-number, and camera-scalar preflight so
+   the live function reaches full parity with the document oracle.
 3. Author the segment/Flypath structs, then add visible waypoint/path preview
    and undo/redo as bounded, independently validated vertical slices.
 4. Preserve the physical F10/K/P/P/F9 route as the regression acceptance path
@@ -377,10 +384,14 @@ adapter and server persistence layer consume this contract.
 
 The first mapping step is live: `ST_EDD_Waypoint` has Integer `WaypointId`,
 Transform `CameraTransform`, and Float `FocalLength`, `Aperture`,
-`ManualFocusDistance`, and `HoldSeconds`. `DraftWaypointsV1` is an empty typed
-array on the client component, compiled/saved twice through an idempotent
-configurator. No graph writes it yet, so validated capture/edit/playback behavior
-is unchanged and there is no dual-source ambiguity.
+`ManualFocusDistance`, and `HoldSeconds`. `SyncDraftWaypointsV1` now performs a
+guarded structural migration from the six legacy channels into
+`DraftWaypointsV1`. It validates every channel length before clearing the prior
+typed snapshot, then maps one indexed value from every channel into each struct.
+The complete graph compiles green, round-trips with reciprocal links, and passed
+production-path PIE for empty, exact two-waypoint, idempotent, and restoration
+behavior. Capture/edit dispatch does not call it yet, so the legacy arrays remain
+the sole runtime authority until the next bounded integration slice.
 
 ### Verification
 
@@ -841,7 +852,7 @@ Content/Mods/ExileDroneDirector/
 
 Version numbers describe capability gates, not calendar promises.
 
-Internal checkpoint versions such as `0.17.0-waypoint-bridge-contract` count validated
+Internal checkpoint versions such as `0.18.0-typed-waypoint-sync` count validated
 development slices. They do not claim that the public **0.1 Camera Spike** gate
 is complete; that gate still requires cooked multiplayer acceptance.
 

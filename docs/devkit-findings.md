@@ -992,6 +992,42 @@ runtime model and no silent divergence. The next gate is a bounded
 six channels, followed by mutation and round-trip parity tests. Only after that
 passes may later code read the struct array as document state.
 
+## Live typed-waypoint sync bridge (2026-08-10)
+
+`SyncDraftWaypointsV1` is now a compiled function on
+`BPC_EDD_ClientDirector`. Its five exact integer-equality guards compare the ID
+array length with transform, focal, aperture, focus-distance, and hold lengths.
+No mutation is reachable until all five pass. The valid path clears
+`DraftWaypointsV1`, iterates IDs in source order, reads every other channel with
+the same array index, makes `ST_EDD_Waypoint`, and appends exactly once.
+Mismatch paths emit a channel-specific diagnostic and preserve the prior typed
+snapshot.
+
+The source is reproducible through `Build-WaypointStructSyncGraph.py`; the
+40-node full graph and 39-node paste body pass
+`Test-WaypointStructSyncContracts.py`. The paste body intentionally has no
+external entry reference. Enhanced Unreal strips a link to an unselected native
+function entry, and a one-sided serialized link can compile green as an
+unreachable no-op. The reliable sequence is paste the unlinked body, draw the
+single native entry-to-first-Branch wire, compile, then copy the complete graph
+back out. The live round-trip passed the same reciprocal semantic contracts.
+
+An automatic production-path PIE probe first rebuilt an empty draft, entered
+Drone Mode, moved the real local drone twice, invoked the existing capture
+function twice, and then called the sync function. It verified both struct IDs,
+transforms, focal lengths, apertures, focus distances, and hold values exactly
+against the six captured arrays. A second sync produced byte-identical exported
+struct values, and exit restored the camera. The final marker was
+`EDD_WAYPOINT_STRUCT_PIE:AUTOMATIC_RESULT:PASS`.
+
+PIE Python cannot write Blueprint component instance arrays; Unreal rejects the
+operation as non-editable. The mismatch-preserves-prior behavior is therefore
+proved by the complete graph topology and the pure document oracle rather than
+by mutating a live instance from Python. Live positive-ID, uniqueness, and
+finite/scalar-domain checks are not claimed yet. The legacy arrays remain the
+runtime authority until mutation functions call sync and those remaining
+preflight checks land.
+
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 
 The installed `DreamworldMods` plugin declares editor support for cooking,

@@ -37,6 +37,7 @@ $exitPath = Join-Path $snippetRoot 'exit-drone-mode.eddgraph'
 $emergencyPath = Join-Path $snippetRoot 'emergency-exit-drone-mode.eddgraph'
 $eventGraphPath = Join-Path $snippetRoot 'client-director-event-graph.eddgraph'
 $waypointCapturePath = Join-Path $snippetRoot 'capture-current-waypoint.eddgraph'
+$waypointStructSyncPath = Join-Path $snippetRoot 'sync-draft-waypoints-v1.eddgraph'
 $waypointReplacePath = Join-Path $snippetRoot 'replace-selected-waypoint.eddgraph'
 $waypointDeletePath = Join-Path $snippetRoot 'delete-selected-waypoint.eddgraph'
 $linearStartPath = Join-Path $snippetRoot 'start-linear-playback.eddgraph'
@@ -63,6 +64,7 @@ $validator = Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.
     $emergencyPath,
     $eventGraphPath,
     $waypointCapturePath,
+    $waypointStructSyncPath,
     $waypointReplacePath,
     $waypointDeletePath,
     $linearStartPath,
@@ -82,6 +84,12 @@ $waypointContractTester = Join-Path $ProjectRoot 'tools\blueprint\Test-WaypointC
 & python $waypointContractTester --capture $waypointCapturePath --event $eventGraphPath
 if ($LASTEXITCODE -ne 0) {
     throw "Waypoint capture semantic contracts failed with exit code $LASTEXITCODE."
+}
+
+$waypointStructSyncTester = Join-Path $ProjectRoot 'tools\blueprint\Test-WaypointStructSyncContracts.py'
+& python $waypointStructSyncTester --graph $waypointStructSyncPath
+if ($LASTEXITCODE -ne 0) {
+    throw "Waypoint struct sync semantic contracts failed with exit code $LASTEXITCODE."
 }
 
 $waypointEditContractTester = Join-Path $ProjectRoot 'tools\blueprint\Test-WaypointEditContracts.py'

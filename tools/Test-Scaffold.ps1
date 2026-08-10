@@ -59,6 +59,7 @@ $requiredFiles = @(
     'tools\blueprint\Build-ClientWaypointEditDispatch.py',
     'tools\blueprint\Build-WaypointCaptureGraph.py',
     'tools\blueprint\Build-WaypointStructSyncGraph.py',
+    'tools\blueprint\Test-DocumentSyncStructForms.py',
     'tools\blueprint\Build-WaypointEditGraphs.py',
     'tools\blueprint\Build-WaypointFeedbackDispatch.py',
     'tools\blueprint\Build-LinearPlaybackGraphs.py',
@@ -71,6 +72,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-LinearPlaybackDispatchContracts.py',
     'tools\blueprint\templates\waypoint-capture-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-struct-sync-node-forms.eddgraph',
+    'tools\blueprint\templates\document-sync-struct-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-edit-node-forms.eddgraph',
     'tools\blueprint\templates\linear-playback-node-forms.eddgraph',
     'tools\blueprint\snippets\toggle-input.eddgraph',
@@ -228,4 +230,10 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\document\test_document_bridge.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Typed document bridge contracts failed with exit code $LASTEXITCODE."
+}
+
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-DocumentSyncStructForms.py') `
+    --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\document-sync-struct-node-forms.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Document sync native struct-form contracts failed with exit code $LASTEXITCODE."
 }

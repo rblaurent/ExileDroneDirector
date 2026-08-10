@@ -392,16 +392,19 @@ def build_pop(bp, templates: dict[str, str], *, source: str, opposite: str, grap
     bp.connect(subtract, "ReturnValue", next_get, "Dimension 1")
     bp.connect(next_get, "Output", stage_next, "HistoryRestoreNextWaypointIdV1")
     bp.connect(stage_next, "then", push_opposite, "execute")
-    bp.connect(push_opposite, "then", remove_document, "execute")
-    bp.connect(documents, f"{source}DocumentsV1", remove_document, "TargetArray")
-    bp.connect(subtract, "ReturnValue", remove_document, "IndexToRemove")
-    bp.connect(remove_document, "then", remove_selection, "execute")
+    # The shared last-index expression is evaluated lazily by Blueprint. Keep
+    # the primary document array unchanged until both parallel int arrays have
+    # removed that index; otherwise Length(Documents)-1 changes mid-chain.
+    bp.connect(push_opposite, "then", remove_selection, "execute")
     bp.connect(selections, f"{source}SelectionsV1", remove_selection, "TargetArray")
     bp.connect(subtract, "ReturnValue", remove_selection, "IndexToRemove")
     bp.connect(remove_selection, "then", remove_next, "execute")
     bp.connect(next_ids, f"{source}NextWaypointIdsV1", remove_next, "TargetArray")
     bp.connect(subtract, "ReturnValue", remove_next, "IndexToRemove")
-    bp.connect(remove_next, "then", apply_snapshot, "execute")
+    bp.connect(remove_next, "then", remove_document, "execute")
+    bp.connect(documents, f"{source}DocumentsV1", remove_document, "TargetArray")
+    bp.connect(subtract, "ReturnValue", remove_document, "IndexToRemove")
+    bp.connect(remove_document, "then", apply_snapshot, "execute")
     return b.nodes
 
 

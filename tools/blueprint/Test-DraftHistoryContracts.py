@@ -193,10 +193,10 @@ def assert_pop(c, nodes, source: str, opposite: str, entry_name: str, *, has_ent
     document_remove = c.linked_target(nodes, documents, f"{source}DocumentsV1", "TargetArray", 'MemberName="Array_Remove"')
     selection_remove = c.linked_target(nodes, selections, f"{source}SelectionsV1", "TargetArray", 'MemberName="Array_Remove"')
     next_remove = c.linked_target(nodes, next_ids, f"{source}NextWaypointIdsV1", "TargetArray", 'MemberName="Array_Remove"')
-    c.require_link(push, "then", document_remove, "execute", "Opposite snapshot must precede source removal")
-    c.require_link(document_remove, "then", selection_remove, "execute", "Source arrays must pop in lockstep")
-    c.require_link(selection_remove, "then", next_remove, "execute", "Source arrays must pop in lockstep")
-    c.require_link(next_remove, "then", apply_call, "execute", "Restore must occur only after the full source pop")
+    c.require_link(push, "then", selection_remove, "execute", "Opposite snapshot must precede source removal")
+    c.require_link(selection_remove, "then", next_remove, "execute", "Parallel int arrays must pop first")
+    c.require_link(next_remove, "then", document_remove, "execute", "Primary document array must remain stable while the shared last index is evaluated")
+    c.require_link(document_remove, "then", apply_call, "execute", "Restore must occur only after the full source pop")
     for remove in removes:
         c.require_link(subtract, "ReturnValue", remove, "IndexToRemove", "Every source channel must remove the same last index")
     if has_entry:

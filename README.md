@@ -187,8 +187,11 @@ undo/redo now has a compiled six-function history core plus one guarded,
 pre-mutation snapshot on each capture/replace/delete path. The generated and live
 round-trips pass semantic contracts. Ctrl+Z/Ctrl+Y are now wired through guarded
 local-player dispatch with stable applied/empty-history logs; the 86-node live
-EventGraph compiles and survives exact Unreal copy-back validation. Explicit
-mutation rejection logs and shortcut-route PIE acceptance are next. F7 now
+EventGraph compiles and survives exact Unreal copy-back validation. Focused
+physical-key PIE acceptance now proves 65 captures, the live 64-entry cap,
+Ctrl+Z/Ctrl+Y restoration parity, branch-edit redo invalidation, empty-history
+and invalid-edit no-ops, exact F9 camera restoration, and inactive-K rejection;
+it ends in `EDD_HISTORY_SHORTCUT_PIE:AUTOMATIC_RESULT:PASS`. F7 now
 provides reversible Clean Frame presentation during free flight, authoring, and
 playback: it captures and suppresses Conan's native HUD/Popup categories, hides
 the remaining BaseGameHUD notification layer when present, and hides the intact

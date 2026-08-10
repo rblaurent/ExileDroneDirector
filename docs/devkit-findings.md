@@ -1638,17 +1638,58 @@ next gate. It seeds 65 accepted edits to prove the live 64-transaction cap,
 checks typed-document/source-array/preview parity after undo and redo, proves
 redo invalidation after a branch edit, reaches an invalid selection naturally
 by deleting the draft, checks invalid replace/delete no-ops, tests invalid
-capture naturally after F9 removes the camera, and verifies exact original view
-restoration. It never edits Blueprint class defaults or instance-locked
-properties.
+capture through a physical K press after F9, and verifies exact original view
+restoration. Exit intentionally retains the reusable `DroneCameraRef`; the
+public EventGraph's inactive-mode guard, rather than a direct internal function
+call, is the correct user-facing no-op boundary. The harness never edits
+Blueprint class defaults or instance-locked properties.
 
-Automated Windows key injection did not satisfy the real F10 poll because the
-Enhanced DevKit owns several top-level windows inside one `UnrealEditor`
-process and the preview's character-creation/game-input focus is not stable.
-Those attempts timed out cleanly and ended PIE; they are harness/input-driving
-failures, not failures of the compiled mod. Do not run focus-stealing mouse/key
-automation while Laurent is using the computer. The remaining physical
-shortcut acceptance is deliberately attended and bounded.
+The complete physical-input run now passes. Windows key injection must first
+focus the PIE viewport and hold each key/chord long enough to cross at least one
+game tick; instantaneous modifier down/key down/key up/modifier up sequences can
+be swallowed by the editor. With explicit holds, the run proved F10 entry, 65
+captures, the 64-entry cap, Ctrl+Z, Ctrl+Y, a second undo, branch-edit redo
+invalidation, empty redo, invalid replace/delete, F9 restoration, and inactive
+K rejection. Typed document, all six source arrays, selection, next stable ID,
+both history stacks, preview document, marker count, and segment count remained
+in parity at every checkpoint. It ended in
+`EDD_HISTORY_SHORTCUT_PIE:AUTOMATIC_RESULT:PASS`. Focus-stealing automation still
+must not run while Laurent is using the computer.
+
+## History pop repair and package-identity rule (2026-08-10)
+
+The first attended Ctrl+Y run exposed a real Blueprint evaluation trap. Undo and
+redo shared the pure expression `Length(SourceDocumentsV1) - 1` across all three
+snapshot arrays, then removed the document entry first. Pure Blueprint nodes are
+not cached values: each downstream consumer re-evaluated the expression. After
+the document removal, the parallel selection and next-ID removals received
+`-1`, producing `RedoSelectionsV1 [-1/0]` and
+`RedoNextWaypointIdsV1 [-1/0]` warnings and diverging the stacks.
+
+`UndoDraftV1` and `RedoDraftV1` now remove the selection array first, the
+next-ID array second, and the primary document array last. The document length
+therefore remains stable for every consumer of the shared last-index expression.
+The graph builder and semantic contract encode that order explicitly. Fresh
+live graph exports include reciprocal native entry links and pass the complete
+history lifecycle contract; the saved client asset then passed the physical PIE
+sequence above without an EDD runtime error.
+
+The repair also established a critical Conan Enhanced package-path rule. Files
+under the physical mod source directory
+`Content/Mods/ExileDroneDirector/Local/...` are exposed to Unreal as
+`/Game/Mods/ExileDroneDirector/...`; `Local` is not part of the virtual object
+path. Opening `/Game/Mods/ExileDroneDirector/Local/...` loaded the same physical
+`.uasset` under a second package identity. Unreal consequently held its own
+target file open and save failed with `DeleteFile was unable to delete`,
+`Failed to move ... from temp directory`, and `Error saving`.
+
+The safe recovery was to discard/reload and unload the wrong dirty package, then
+open the already loaded correct package at
+`/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector`. Saving the
+correct package replaced the physical asset successfully; its SHA-256 changed
+from `E9228B139B2EE68805486F220FFF94DCA43799CC4086FF650C8E1CB8E1D1F9B7`
+to `7B50872A3C2B33124B72915EC07FA78F67027F05E6E40A8F99509EDDDA10543C`.
+Never include physical `Local` in a `/Game/Mods/<ModName>/...` object path.
 
 After that PIE gate, the first packaged-runtime target is a normal local Conan
 Enhanced single-player save. It must prove load, F10 entry, flight, authoring,

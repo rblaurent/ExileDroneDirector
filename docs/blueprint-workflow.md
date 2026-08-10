@@ -60,6 +60,11 @@ Blueprint automation will report that valid mod assets cannot be loaded.
 - Never paste or save nodes into a Conan base-game asset.
 - A snippet has one responsibility and one documented acceptance signal.
 - Source graph exports must belong to `/Game/Mods/ExileDroneDirector/`.
+- Physical mod assets live beneath `Content/Mods/ExileDroneDirector/Local`, but
+  Unreal omits `Local` from their virtual package path. Always load them as
+  `/Game/Mods/ExileDroneDirector/...`; opening a virtual `/Local/` alias can load
+  the same file under a second package identity and make Unreal fail to replace
+  its own `.uasset` during save.
 - Never hand-edit `NodeGuid`, `PinId`, or `LinkedTo` relationships casually.
 - Do not paste a snippet twice unless it is explicitly designed to be repeated.
 - Compile after every paste; do not accumulate multiple unverified graph batches.
@@ -83,6 +88,10 @@ Blueprint automation will report that valid mod assets cannot be loaded.
   test level/package.
 - Runtime state machines live in named Blueprint functions or components, not a
   monolithic Event Graph.
+- Pure Blueprint expressions are reevaluated for each consumer. If several
+  mutating nodes share an index such as `Length(Array) - 1`, either materialize
+  it before mutation or keep the measured array unchanged until every consumer
+  has executed. Semantic contracts must lock the required mutation order.
 - PIE evidence is recorded in `docs/devkit-findings.md` before a diagnostic node
   is removed or generalized.
 - A graph screenshot is supporting evidence only. Checked-in node serialization

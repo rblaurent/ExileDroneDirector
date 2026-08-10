@@ -9,6 +9,7 @@ physical keys requested by its log markers::
     EDD_HISTORY_SHORTCUT_PIE:READY_FOR_EMPTY_REDO:True -> Ctrl+Y
     EDD_HISTORY_SHORTCUT_PIE:READY_FOR_INVALID_REPLACE:True -> R
     EDD_HISTORY_SHORTCUT_PIE:READY_FOR_INVALID_DELETE:True  -> Delete
+    EDD_HISTORY_SHORTCUT_PIE:READY_FOR_INACTIVE_CAPTURE:True -> K
 
 The driver also requests physical F10 before the sequence and physical F9 after
 it, because ``DroneModeActive`` is intentionally owned by the EventGraph input
@@ -30,6 +31,7 @@ import unreal
 
 PREFIX = "EDD_HISTORY_SHORTCUT_PIE"
 MANUAL_INPUT_TIMEOUT_SECONDS = 300.0
+PIE_START_TIMEOUT_SECONDS = 600.0
 WORLD_PATH = "/Game/Dev/UEDPIE_0_AlmostEmpty.AlmostEmpty"
 CLIENT_CLASS_PATH = "/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector_C"
 
@@ -256,8 +258,10 @@ def tick(_delta_seconds: float) -> None:
                 component_value = director(world_object)
                 require(component_value.get_owner().has_actor_begun_play(), "director owner not ready")
             except Exception:
-                if time.monotonic() - state["armed_at"] > 45.0:
-                    raise RuntimeError("PIE did not become ready within 45 seconds")
+                if time.monotonic() - state["armed_at"] > PIE_START_TIMEOUT_SECONDS:
+                    raise RuntimeError(
+                        f"PIE did not become ready within {PIE_START_TIMEOUT_SECONDS:.0f} seconds"
+                    )
                 return
             state["stage"] = "settle"
             state["stage_at"] = time.monotonic()
@@ -391,11 +395,21 @@ def tick(_delta_seconds: float) -> None:
             owner = controller(pie_world())
             require(owner.get_view_target() == state["original_view"], "physical F9 did not restore exact camera")
             require(component_value.get_editor_property("PathPreviewActorV1") is None, "physical F9 retained preview")
-            before_capture = fingerprint(component_value)
-            component_value.call_method("CaptureCurrentWaypoint")
-            require(fingerprint(component_value) == before_capture, "invalid capture mutated state/history/preview")
-            emit("INVALID_CAPTURE_NOOP_VALID", True)
+            state["stable"] = fingerprint(component_value)
             emit("CAMERA_RESTORATION_VALID", True)
+            state["stage"] = "wait_inactive_capture"
+            state["stage_at"] = time.monotonic()
+            emit("READY_FOR_INACTIVE_CAPTURE", True)
+            return
+
+        if state["stage"] == "wait_inactive_capture":
+            if time.monotonic() - state["stage_at"] < 2.0:
+                return
+            require(
+                fingerprint(component_value) == state["stable"],
+                "physical K outside Drone Mode mutated state/history/preview",
+            )
+            emit("PHYSICAL_INACTIVE_CAPTURE_NOOP_VALID", True)
             state["stage"] = "complete"
             finish(True)
     except Exception as error:
@@ -412,7 +426,7 @@ _EDD_HISTORY_SHORTCUT_STATE = {
     "stage": "wait_for_pie",
     "armed_at": time.monotonic(),
     "stage_at": time.monotonic(),
-    "deadline": time.monotonic() + 45.0,
+    "deadline": time.monotonic() + PIE_START_TIMEOUT_SECONDS,
     "callback": None,
 }
 _EDD_HISTORY_SHORTCUT_STATE["callback"] = unreal.register_slate_post_tick_callback(tick)

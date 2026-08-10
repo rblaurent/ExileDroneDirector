@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.27.0-mutation-diagnostics`
+Current internal build: `0.28.0-history-acceptance`
 
 ## 1. Delivery strategy
 
@@ -190,6 +190,14 @@ This section is the authoritative handoff. Detailed evidence remains in
   terminate the tick. The 86-node/355-pin EventGraph compiled live, saved,
   round-tripped from Unreal, and passes authoring, feedback, playback, history,
   deterministic-generation, and idempotence contracts in the full scaffold.
+- The physical shortcut runtime gate now passes end to end. One focused PIE run
+  captured 65 waypoints, proved the live 64-transaction cap, restored exact
+  typed documents/source arrays/preview instances through Ctrl+Z and Ctrl+Y,
+  proved a second undo followed by branch-edit redo invalidation, and verified
+  empty redo plus invalid replace/delete as strict no-ops. F9 restored the exact
+  original view and a physical K press outside Drone Mode left the entire draft,
+  history, and preview fingerprint unchanged. The final marker was
+  `EDD_HISTORY_SHORTCUT_PIE:AUTOMATIC_RESULT:PASS`.
 - Clean Frame is now a compiled client-local presentation primitive. F7 is
   polled after owner, Drone Mode, and camera-validity guards but before playback
   arbitration, so it remains available during free flight, authoring, and
@@ -493,8 +501,9 @@ Create an in-memory private Flypath and edit intentional waypoints.
 5. Provide exact numeric transform editing plus WASD/mouse fine adjustment.
 6. Render numbered markers and a linear path preview.
 7. Implement transactional undo/redo for all waypoint operations. The bounded
-   history core and capture/replace/delete transaction boundaries are complete;
-   physical shortcuts, logs, and runtime acceptance remain.
+   history core, capture/replace/delete transaction boundaries, physical
+   shortcuts, stable logs, live 64-entry cap, redo-branch invalidation, and PIE
+   runtime acceptance are complete. Normal cooked-client acceptance remains.
 8. Implement structural validation and clear diagnostics.
 9. Keep draft model independent from preview actor components.
 

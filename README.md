@@ -204,6 +204,13 @@ gate. Polished UI and cooking are deliberately deferred until the complete
 backend—persistence, ownership/privacy/cloning, cinematic tracks, lens, and
 events—passes programmatic PIE plus an attended keyboard/debug dogfood workflow.
 
+The first persistence adapter now exists as
+`SG_EDD_RepositoryStorage`, a Blueprint `SaveGame` with version, generation,
+commit, hash, opaque-record, and tombstone channels. An automated writer and a
+separate fresh DevKit reader proved exact cross-process persistence for scalars,
+arrays, canonical payload text, and Unicode, then removed the probe slot. This is
+the verified storage seam; server repository command graphs are the next layer.
+
 ## Repository layout
 
 - `project.json` — stable project identity and first-slice asset contract.
@@ -219,6 +226,8 @@ events—passes programmatic PIE plus an attended keyboard/debug dogfood workflo
 - `tools/document/` — executable Flypath serialization, repository, copy-on-write
   recovery, revision, publication, ownership, and clone contracts for the
   Blueprint/server implementation.
+- `tools/persistence/` and `tools/Test-RepositorySaveGame.ps1` — source schema
+  plus cross-process acceptance for the alternating repository storage slots.
 
 ## DevKit setup
 

@@ -4,7 +4,7 @@
   "target": "Conan Exiles Enhanced",
   "engine": "Unreal Engine 5.6.1",
   "implementation": "Blueprint-only",
-  "version": "0.28.0-history-acceptance",
+  "version": "0.29.0-savegame-adapter",
   "mvpAssets": [
     "Local/BP_EDD_ModController.uasset",
     "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
@@ -13,6 +13,7 @@
     "Local/Data/Structs/ST_EDD_FlypathDocument.uasset",
     "Local/Data/Structs/ST_EDD_Waypoint.uasset",
     "Local/Data/Structs/ST_EDD_Segment.uasset",
-    "Local/UI/Editor/WBP_EDD_DroneHUD.uasset"
+    "Local/UI/Editor/WBP_EDD_DroneHUD.uasset",
+    "Local/Server/Persistence/SG_EDD_RepositoryStorage.uasset"
   ]
 }

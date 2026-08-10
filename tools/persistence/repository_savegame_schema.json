@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Server/Persistence/SG_EDD_RepositoryStorage.uasset",
+  "virtualPath": "/Game/Mods/ExileDroneDirector/Server/Persistence/SG_EDD_RepositoryStorage",
+  "slots": [
+    "EDD_Repository_A",
+    "EDD_Repository_B"
+  ],
+  "purpose": "Alternating full-repository snapshots. Startup chooses the highest valid committed generation; writes target the older slot.",
+  "fields": [
+    { "name": "RepositorySchemaVersion", "type": "Integer", "container": "None", "default": 1 },
+    { "name": "Generation", "type": "Integer", "container": "None", "default": 0 },
+    { "name": "Committed", "type": "Boolean", "container": "None", "default": false },
+    { "name": "SnapshotHash", "type": "String", "container": "None", "default": "" },
+    { "name": "RecordEnvelopes", "type": "String", "container": "Array" },
+    { "name": "TombstoneFlypathIds", "type": "String", "container": "Array" }
+  ]
+}

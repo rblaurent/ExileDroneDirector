@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.28.0-history-acceptance`
+Current internal build: `0.29.0-savegame-adapter`
 
 ## 1. Delivery strategy
 
@@ -249,6 +249,10 @@ This section is the authoritative handoff. Detailed evidence remains in
   over the transient draft.
 - Draft waypoint data is client-local and transient. Other server members
   cannot see or play it.
+- A server-owned alternating-slot `SaveGame` storage asset now has idempotent
+  generation tooling and passed exact Unicode/array round trips across two fresh
+  Enhanced DevKit processes. Repository command graphs and client/server routing
+  are not implemented yet, so this proves the adapter boundary, not end-user save.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
   directly to G-Portal.
 

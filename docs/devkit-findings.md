@@ -1759,6 +1759,40 @@ classes, function references, pins, links, positions, defaults, and identifiers.
 The project therefore uses reviewed `.eddgraph` snippets for batch graph work.
 See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 
+## Repository persistence adapter proof (2026-08-10)
+
+- Enhanced 5.6 exposes Conan `PersistenceComponent`,
+  `ActorPersistenceComponent`, and `WorldPersistenceComponent`. They surface
+  database-loaded state plus data-loaded/pre-save signals, but no official mod
+  contract or arbitrary-record API was found. Their world-actor lifecycle remains
+  a dedicated-server research candidate, not the accepted first adapter.
+- Standard `GameplayStatics` SaveGame create/save/load/existence/delete calls are
+  exposed to Blueprint and Python. This is the first accepted server-invoked
+  adapter; clients must never become repository authority.
+- `Configure-RepositorySaveGame.py` idempotently creates
+  `SG_EDD_RepositoryStorage` under the correct virtual path and fixes six
+  automatable fields: schema version, generation, committed flag, snapshot hash,
+  opaque record envelopes, and tombstone IDs.
+- Blueprint variables had to be marked instance-editable before Python could set
+  values on a runtime SaveGame instance. CDO reads/writes alone do not prove the
+  runtime object contract.
+- A failed first generator run was safe: it stopped before save and produced no
+  `.uasset`. A second first-create run completed and saved the asset but returned
+  commandlet exit 1 because calling `load_asset` on a missing path logs an Unreal
+  error even when creation later succeeds. Guard first-create loads with
+  `does_asset_exist` so successful generation exits cleanly.
+- `Test-RepositorySaveGame.ps1` now reproduces three isolated processes:
+  configure/idempotence, writer plus same-process read, and fresh-process read
+  plus cleanup. Exact ints, bool, hash string, arrays, canonical record text, and
+  Unicode (`Unicode flight — 北風`) survived. The automation slot was deleted.
+- Cold asset load compiled the SaveGame Blueprint in a fresh commandlet. The
+  synced live/repository asset SHA-256 at acceptance was
+  `B6F3E471C7FD19EBE2A2B698BE1B4F1ACE13B3CEE59DE86932AF9D88810791E7`.
+- `UserDefinedStructureEditorUtils` is not exposed to Enhanced Python. New UDS
+  members cannot be authored with the current Python API; prefer Blueprint-class
+  variables for automatable runtime seams or treat a UDS edit as an explicit
+  one-time attended step.
+
 ## Pending local reconnaissance
 
 - Concrete Conan-character view restoration in a gameplay-map PIE run
@@ -1767,4 +1801,4 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Emergency camera restoration and the view lifecycle in cooked runtime
 - Exact Enhanced cook command/commandlet, output layout, and Workshop metadata
 - First normal-game `.pak` load and controlled Workshop update
-- Authenticated server identity and persistence APIs
+- Authenticated server identity and dedicated-server SaveGame behavior

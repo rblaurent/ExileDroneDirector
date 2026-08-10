@@ -473,6 +473,17 @@ Implement `Repository` functions behind one Blueprint-facing interface so the
 trajectory/editor code is independent of the chosen adapter. Do not commit to a
 client SaveGame for shared Flypaths.
 
+The first accepted adapter is a **server-invoked Blueprint SaveGame**. The
+`SG_EDD_RepositoryStorage` asset carries a version, generation, committed flag,
+snapshot hash, opaque canonical record envelopes, and explicit tombstones. Two
+alternating slots (`EDD_Repository_A` and `EDD_Repository_B`) prevent an in-place
+overwrite from destroying the last accepted snapshot. A same-process writer and
+fresh-process reader proved exact scalar, array, canonical text, and Unicode
+round trips in Enhanced 5.6. This does not authorize client-local repository
+authority: only the server service may call the adapter. Conan's native
+`PersistenceComponent` remains a possible later adapter after its undocumented
+world-actor/database lifecycle is proven on a dedicated server.
+
 ### 8.3 Atomicity and recovery
 
 Where the storage adapter lacks transactions, use copy-on-write records:

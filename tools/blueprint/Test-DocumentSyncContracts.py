@@ -131,6 +131,45 @@ def assert_contract(graph: Path, project_root: Path, has_entry: bool) -> None:
     c.require(len(break_segments) == 3, "Prior scan, match scan, and preserved append need segment breaks")
     c.require(len(break_waypoints) == 2, "Current and next waypoint breaks are required")
     c.require(len(break_documents) == 1, "Prior document metadata must be read once")
+    document_break = break_documents[0]
+
+    def metadata_guard(field_pin: str, member_name: str, expected_default: str):
+        matches = [
+            node
+            for node in nodes.values()
+            if f'MemberName="{member_name}"' in node.text
+            and (node.name, node.pins["A"].pin_id) in document_break.pins[field_pin].links
+        ]
+        c.require(len(matches) == 1, f"Metadata guard changed for {field_pin}")
+        guard = matches[0]
+        default_match = re.search(r'DefaultValue="([^"]*)"', guard.pins["B"].body)
+        c.require(
+            default_match is not None and default_match.group(1) == expected_default,
+            f"Metadata guard constant changed for {field_pin}",
+        )
+        c.require(not guard.pins["B"].links, f"Metadata guard B must stay unlinked for {field_pin}")
+        return guard
+
+    metadata_guard(DOC_SCHEMA, "EqualEqual_IntInt", "1")
+    metadata_guard(DOC_ENGINE, "EqualEqual_IntInt", "1")
+    metadata_guard(DOC_REVISION, "GreaterEqual_IntInt", "0")
+
+    next_id_initializers = [
+        node
+        for node in nodes.values()
+        if node.node_class.endswith("K2Node_VariableSet")
+        and 'MemberName="DocumentNextSegmentIdV1"' in node.text
+        and not node.pins["DocumentNextSegmentIdV1"].links
+    ]
+    c.require(len(next_id_initializers) == 1, "Next-segment ID needs one unlinked transaction initializer")
+    next_id_default = re.search(
+        r'DefaultValue="([^"]*)"',
+        next_id_initializers[0].pins["DocumentNextSegmentIdV1"].body,
+    )
+    c.require(
+        next_id_default is not None and next_id_default.group(1) == "0",
+        "Next-segment ID transaction must start from zero",
+    )
 
     max_nodes = [
         node
@@ -212,17 +251,31 @@ def assert_contract(graph: Path, project_root: Path, has_entry: bool) -> None:
         for node in nodes.values()
         if 'MemberName="Add_IntInt"' in node.text
         and 'DefaultValue="1"' in node.pins["B"].body
-        and (make_segment.name, make_segment.pins[SEG_ID].pin_id) in node.pins["ReturnValue"].links
+        and any(
+            target.node_class.endswith("K2Node_VariableSet")
+            and 'MemberName="DocumentNextSegmentIdV1"' in target.text
+            and (target.name, target.pins["DocumentNextSegmentIdV1"].pin_id) in node.pins["ReturnValue"].links
+            for target in nodes.values()
+        )
     )
-    c.require_link(increment, "ReturnValue", make_segment, SEG_ID, "New segment must use monotonic next ID")
+    committed_id_setters = [
+        node
+        for node in nodes.values()
+        if node.node_class.endswith("K2Node_VariableSet")
+        and 'MemberName="DocumentNextSegmentIdV1"' in node.text
+        and (node.name, node.pins["DocumentNextSegmentIdV1"].pin_id) in increment.pins["ReturnValue"].links
+    ]
+    c.require(len(committed_id_setters) == 1, "Increment must write one committed next-ID setter")
+    committed_id = committed_id_setters[0]
+    c.require_link(committed_id, "Output_Get", make_segment, SEG_ID, "New segment must use the committed next ID")
     new_id_adds = [
         node
         for node in nodes.values()
         if 'MemberName="Array_Add"' in node.text
         and 'PinType.PinCategory="int"' in node.pins["NewItem"].body
-        and (node.name, node.pins["NewItem"].pin_id) in increment.pins["ReturnValue"].links
+        and (node.name, node.pins["NewItem"].pin_id) in committed_id.pins["Output_Get"].links
     ]
-    c.require(len(new_id_adds) == 1, "New segment ID must append from the increment output")
+    c.require(len(new_id_adds) == 1, "New segment ID must append from the committed setter output")
     default_duration_adds = [
         node
         for node in nodes.values()
@@ -264,7 +317,6 @@ def assert_contract(graph: Path, project_root: Path, has_entry: bool) -> None:
     c.require_link(segment_set, "then", document_set, "execute", "Public values must commit in one final chain")
 
     make_document = make_documents[0]
-    document_break = break_documents[0]
     for pin in (DOC_REVISION, DOC_REGION, DOC_PROFILE):
         c.require_link(document_break, pin, make_document, pin, f"Prior metadata {pin} must be preserved")
     c.require('DefaultValue="1"' in make_document.pins[DOC_SCHEMA].body, "Schema version default changed")

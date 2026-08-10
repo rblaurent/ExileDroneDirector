@@ -595,7 +595,7 @@ def main() -> None:
     connect(exhausted_branch, "else", next_set_new, "execute")
     connect(increment_id, "ReturnValue", next_set_new, "DocumentNextSegmentIdV1")
     make_new = add("make_new", "make_segment", "struct", 11984, 416)
-    connect(increment_id, "ReturnValue", make_new, SEG_ID)
+    connect(next_set_new, "Output_Get", make_new, SEG_ID)
     connect(current_break, WP_ID, make_new, SEG_FROM)
     connect(next_break, WP_ID, make_new, SEG_TO)
     append_segment(
@@ -606,8 +606,8 @@ def main() -> None:
         "ST_EDD_Segment",
         None,
         "",
-        increment_id,
-        "ReturnValue",
+        next_set_new,
+        "Output_Get",
         12240,
         duration_default="3.0",
     )

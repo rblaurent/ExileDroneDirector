@@ -1209,9 +1209,11 @@ shape checks did not catch:
 - integer Max reconstructs as a native
   `K2Node_CommutativeAssociativeBinaryOperator` with `MemberName="Max"`, not
   necessarily the legacy `Max_IntInt` call-function form;
-- the new segment's ID must fan out from the increment output to both the Make
-  Segment node and the used-ID array append; connecting the Make node's input
-  pin to the append input creates an illegal input-to-input edge;
+- the pure increment output must feed only the next-ID setter. The setter's
+  committed `Output_Get` must fan out to both Make Segment and the used-ID
+  append. Otherwise Unreal re-evaluates the pure increment after the setter has
+  mutated its source variable, producing segment ID `2` while the stored counter
+  remains `1`;
 - the new segment duration accumulator must consume its own unlinked
   three-second default. Connecting the Make node's duration input to that input
   creates the same illegal direction error. UE serializes the corrected `3.0`
@@ -1235,6 +1237,51 @@ This milestone is compile/round-trip proof, not runtime proof. The next bounded
 gate is a deterministic production-path PIE validator covering empty, single,
 and multi-waypoint documents, stable repeat sync, preserved authored segments,
 rollback on invalid input, and camera cleanup.
+
+## Transactional document-sync runtime acceptance (2026-08-10)
+
+`Validate-DocumentSyncPIE.py` now provides the deterministic production-path
+runtime gate. The initial executions found two defects that source-shape and
+compile checks could not expose:
+
+- Unreal reconstructed the live schema-version and trajectory-engine equality
+  constants as `0`, so every transaction stopped at metadata guard 1. Both live
+  constants were repaired to `1`, and the semantic graph contract now locks
+  schema `1`, engine `1`, revision floor `0`, and transaction next-ID `0`.
+- A pure integer increment was connected to the setter, Make Segment, and the
+  used-ID append. Pure Blueprint nodes are evaluated per consumer, so the setter
+  committed `1` and the later consumers re-evaluated against the mutated source
+  to obtain `2`. The increment now feeds only the setter; both consumers use the
+  setter's committed `Output_Get`. The generated graph, fresh live clipboard
+  export, and semantic validator all enforce this topology.
+
+The final acceptance uses three clean PIE component constructions. Phase one
+starts empty, captures two exact drone poses through `CaptureCurrentWaypoint`,
+and proves empty/single/two-waypoint parity, segment ID `1`, endpoints `1 -> 2`,
+the three-second default, total duration, and repeat-sync idempotence. Phase two
+reconstructs a real component with an authored `7.25` second segment using
+`catmull_rom` and `ease_in_out`; sync preserves every segment field plus revision
+`12`, region `runtime_test`, and default profile `fpv`, clears the stale content
+hash, and recomputes total duration. Phase three deliberately shortens one of
+the six authoritative waypoint channels; waypoint preflight rejects it and the
+typed waypoint snapshot, segment array, and complete document remain unchanged.
+
+The private runtime members were not made Instance Editable for the test.
+Instead, the harness deep-copies class defaults, seeds the complete authoritative
+source state between PIE phases, constructs the normal game-attached component,
+and restores every source/typed/document default in a `finally`-protected path.
+It verifies restoration before reporting success. The final signals were:
+
+- `PRESERVED_AUTHORED_SEGMENT_VALID:True`
+- `INVALID_INPUT_ROLLBACK_VALID:True`
+- `CLASS_DEFAULTS_RESTORED:True`
+- `AUTOMATIC_RESULT:PASS`
+
+The probe-dirty editor session was closed with Don't Save after restoration and
+reached `LogExit: Exiting.` The repository retains the earlier compiled/saved
+asset rather than any temporary test defaults. The next autonomous product slice
+is visible path preview from the accepted typed document, followed by draft
+undo/redo; cook/Workshop remains an attended release gate.
 
 ## Cook, Workshop, and G-Portal reconnaissance (2026-08-09)
 

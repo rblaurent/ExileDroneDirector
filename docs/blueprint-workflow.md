@@ -194,3 +194,23 @@ Treat numeric defaults semantically rather than matching one textual spelling.
 UE 5.6 can round-trip an authored `3.0` as `3.000000`. Validators should parse
 the serialized scalar, compare it within a strict tolerance, and still require
 the pin to be unlinked when the default is meant to drive execution.
+
+## Document-sync runtime gate
+
+Run `tools/unreal/Validate-DocumentSyncPIE.py` once from the editor console, then
+start PIE three times in response to its markers:
+
+1. The first PIE captures two production waypoints and ends after
+   `SECOND_PIE_REQUIRED:True`.
+2. The second constructs a normal component with an authored surviving segment
+   and ends after `THIRD_PIE_REQUIRED:True`.
+3. The third constructs a normal component with one deliberately mismatched
+   authoritative channel and ends at `AUTOMATIC_RESULT:PASS`.
+
+Do not save the editor package after this gate. The harness restores and verifies
+every class default, but setting those defaults temporarily still marks the
+Blueprint package dirty. Close the editor, choose Don't Save, and require
+`LogExit: Exiting.` The accepted production asset is the already compiled/saved
+asset from before the test. A pass is valid only when the log also contains
+`PRESERVED_AUTHORED_SEGMENT_VALID:True`,
+`INVALID_INPUT_ROLLBACK_VALID:True`, and `CLASS_DEFAULTS_RESTORED:True`.

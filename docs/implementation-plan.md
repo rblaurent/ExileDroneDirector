@@ -3,7 +3,7 @@
 Status: execution plan for Conan Exiles Enhanced DevKit development
 Planning rule: every phase ends in a cooked, testable vertical capability
 Release strategy: prove safety and persistence before investing in maximal polish
-Current internal build: `0.22.0-document-sync`
+Current internal build: `0.22.1-document-sync-runtime`
 
 ## 1. Delivery strategy
 
@@ -103,8 +103,12 @@ This section is the authoritative handoff. Detailed evidence remains in
   exhaustion, recomputes total duration, preserves editable document metadata,
   clears the stale content hash, and publishes `DraftSegmentsV1` plus
   `DraftDocumentV1` only after every guard succeeds. Nine pure executable cases
-  cover the same transaction contract; live PIE parity is the next acceptance
-  gate and is not claimed yet.
+  cover the same transaction contract. A three-phase production-path PIE run
+  now proves empty/single/two-waypoint rebuilds, exact endpoint references,
+  segment ID `1`, repeat-sync idempotence, preservation of an authored `7.25`
+  second Catmull-Rom/ease-in-out segment and document metadata, stale-hash
+  clearing, malformed-channel rollback, and exact test-default restoration. It
+  ended in `EDD_DOCUMENT_SYNC_PIE:AUTOMATIC_RESULT:PASS`.
 - The exact native UE 5.6 Make/Break serialization for `ST_EDD_Segment` and
   `ST_EDD_FlypathDocument` is checked in and contract-tested. The generated pin
   suffixes, nested array element types, defaults, directions, and the native
@@ -152,16 +156,16 @@ This section is the authoritative handoff. Detailed evidence remains in
 
 ### Exact next autonomous slice
 
-The user explicitly deferred the attended cook/Workshop step for the night. The
-next autonomous implementation slice is therefore:
+The attended cook/Workshop step remains deliberately separate. The next
+autonomous implementation slice is:
 
-1. Add and run deterministic production-path PIE validation for
-   `SyncDraftDocumentV1`: empty/single/two-waypoint rebuilds, exact endpoint
-   references, monotonic IDs, repeat-sync idempotence, preserved surviving
-   segment edits, invalid-input rollback, and clean camera restoration.
-2. Add visible waypoint/path preview and undo/redo as bounded, independently
-   validated vertical slices.
-3. Preserve the physical F10/K/P/P/F9 route as the regression acceptance path
+1. Add visible waypoint/path preview as a bounded, independently validated
+   vertical slice, driven from the accepted typed document rather than the
+   legacy capture arrays.
+2. Add draft undo/redo with explicit transaction boundaries for capture,
+   replace, delete, and later segment edits.
+3. Preserve the physical F10/K/P/P/F9 route and the three-phase document-sync
+   validator as regression acceptance paths
    for every change that touches playback or authoring.
 4. Close, sync, run the complete repository suite, commit, and push after each
    meaningful compiled milestone.

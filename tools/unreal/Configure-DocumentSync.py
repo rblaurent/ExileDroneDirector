@@ -19,7 +19,7 @@ FUNCTION_NAME = "SyncDraftDocumentV1"
 SCALAR_VARIABLES = (
     ("DocumentSyncValidV1", "bool", False),
     ("DocumentTotalDurationV1", "real", 0.0),
-    ("DocumentNextSegmentIdV1", "int", 1),
+    ("DocumentNextSegmentIdV1", "int", 0),
     ("DocumentMatchFoundV1", "bool", False),
 )
 INT_ARRAY_VARIABLE = "DocumentUsedSegmentIdsV1"

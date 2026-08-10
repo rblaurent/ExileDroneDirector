@@ -34,6 +34,7 @@ $requiredFiles = @(
     'tools\unreal\Configure-DocumentSync.py',
     'tools\unreal\Configure-PathPreview.py',
     'tools\unreal\Configure-PathPreviewLifecycle.py',
+    'tools\unreal\Configure-DraftHistory.py',
     'tools\unreal\Configure-LinearPlayback.py',
     'tools\unreal\Probe-WaypointTypes.py',
     'tools\unreal\Probe-PathPreviewLifecycleTypes.py',
@@ -48,6 +49,8 @@ $requiredFiles = @(
     'tools\playback\test_linear_reference.py',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
+    'tools\history\draft_history.py',
+    'tools\history\test_draft_history.py',
     'tools\document\flypath_document.py',
     'tools\document\test_flypath_document.py',
     'tools\document\waypoint_bridge.py',
@@ -88,6 +91,8 @@ $requiredFiles = @(
     'tools\blueprint\Build-PathPreviewIntegrationGraphs.py',
     'tools\blueprint\Test-PathPreviewLifecycleContracts.py',
     'tools\blueprint\Test-PathPreviewIntegrationContracts.py',
+    'tools\blueprint\Build-DraftHistoryGraphs.py',
+    'tools\blueprint\Test-DraftHistoryContracts.py',
     'tools\blueprint\templates\waypoint-capture-node-forms.eddgraph',
     'tools\blueprint\templates\waypoint-struct-sync-node-forms.eddgraph',
     'tools\blueprint\templates\document-sync-struct-node-forms.eddgraph',
@@ -128,7 +133,13 @@ $requiredFiles = @(
     'tools\blueprint\snippets\exit-drone-mode-preview.eddgraph',
     'tools\blueprint\snippets\capture-current-waypoint-preview.eddgraph',
     'tools\blueprint\snippets\replace-selected-waypoint-preview.eddgraph',
-    'tools\blueprint\snippets\delete-selected-waypoint-preview.eddgraph'
+    'tools\blueprint\snippets\delete-selected-waypoint-preview.eddgraph',
+    'tools\blueprint\snippets\push-current-to-undo-v1.eddgraph',
+    'tools\blueprint\snippets\push-current-to-redo-v1.eddgraph',
+    'tools\blueprint\snippets\record-undo-snapshot-v1.eddgraph',
+    'tools\blueprint\snippets\apply-history-snapshot-v1.eddgraph',
+    'tools\blueprint\snippets\undo-draft-v1.eddgraph',
+    'tools\blueprint\snippets\redo-draft-v1.eddgraph'
 )
 
 $missing = @(
@@ -487,4 +498,58 @@ if ($LASTEXITCODE -ne 0) {
     --paste-graph $generatedDocumentSyncPaste
 if ($LASTEXITCODE -ne 0) {
     throw "Document sync graph contracts failed with exit code $LASTEXITCODE."
+}
+
+& python (Join-Path $ProjectRoot 'tools\history\test_draft_history.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Draft history state contracts failed with exit code $LASTEXITCODE."
+}
+
+$historyNonce = [guid]::NewGuid().ToString('N')
+$generatedHistoryDir = Join-Path $scratchRoot "edd-history-$historyNonce"
+$generatedHistoryPasteDir = Join-Path $scratchRoot "edd-history-$historyNonce-paste"
+$generatedHistoryRepeatDir = Join-Path $scratchRoot "edd-history-$historyNonce-repeat"
+$generatedHistoryRepeatPasteDir = Join-Path $scratchRoot "edd-history-$historyNonce-repeat-paste"
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-DraftHistoryGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $generatedHistoryDir `
+    --paste-dir $generatedHistoryPasteDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Draft history graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-DraftHistoryGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $generatedHistoryRepeatDir `
+    --paste-dir $generatedHistoryRepeatPasteDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Repeated draft history graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($directoryPair in @(
+    @($generatedHistoryDir, $generatedHistoryRepeatDir),
+    @($generatedHistoryPasteDir, $generatedHistoryRepeatPasteDir)
+)) {
+    foreach ($file in Get-ChildItem -LiteralPath $directoryPair[0] -File) {
+        $peer = Join-Path $directoryPair[1] $file.Name
+        if (-not (Test-Path -LiteralPath $peer -PathType Leaf) -or
+            (Get-FileHash -Algorithm SHA256 $file.FullName).Hash -ne
+            (Get-FileHash -Algorithm SHA256 $peer).Hash) {
+            throw "Draft history graph generation is not deterministic: $($file.Name)"
+        }
+        & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $file.FullName
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-DraftHistoryContracts.py') `
+    --project-root $ProjectRoot --input-dir $generatedHistoryDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated draft history contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-DraftHistoryContracts.py') `
+    --project-root $ProjectRoot --input-dir $generatedHistoryPasteDir --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Generated draft history paste contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-DraftHistoryContracts.py') `
+    --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')
+if ($LASTEXITCODE -ne 0) {
+    throw "Checked draft history contracts failed with exit code $LASTEXITCODE."
 }

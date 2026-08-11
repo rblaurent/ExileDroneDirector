@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.41.0-tombstone-recovery`
+Current internal build: `0.42.0-record-recovery`
 
 ## 1. Delivery strategy
 
@@ -450,33 +450,34 @@ before any polished editor UI or cook is attempted:
 1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
    owner identity, visibility, revision, attribution, published snapshot,
    structural integrity mode, codecs, and live Blueprint validation contracts.
-2. **Current:** build tombstone validation/merge and record-granular
-   corrupt-newest fallback on the accepted deterministic A/B recovery order,
-   then connect and
-   prove the inactive-slot uncommitted/committed SaveGame writer, then
-   implement private create/save/load/list/delete on top of it.
+2. **Complete:** record-granular corrupt-newest fallback, duplicate ambiguity,
+   generation-aware tombstone masking, and failure-guarded authoritative commit
+   are accepted on the deterministic A/B recovery order.
    `EncodeWaypointV1`, `EncodeSegmentV1`, `EncodeDocumentV1`, all three matching
    document decoders, all three record encoders, all three record decoders,
    repository core, and exact numeric/null/type JSON node forms are accepted
    live-compiled proof, not remaining discovery work.
-3. Prove optimistic revisions, atomic save behavior, corruption recovery, schema
+3. **Current:** connect and prove the inactive-slot uncommitted/committed
+   SaveGame writer, then implement private create/save/load/list/delete on top
+   of it.
+4. Prove optimistic revisions, atomic save behavior, corruption recovery, schema
    migration hooks, limit validation, and typed failures through executable tests.
-4. Implement server-authoritative ownership, privacy, publication, immutable
+5. Implement server-authoritative ownership, privacy, publication, immutable
    snapshots, discovery, playback fetch, and private cloning with attribution.
-5. Implement the complete trajectory compiler: linear and cinematic curves,
+6. Implement the complete trajectory compiler: linear and cinematic curves,
    monotonic timing/speed profiles, smooth quaternion rotation, flight profiles,
    deterministic sampling, and discontinuity diagnostics.
-6. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
+7. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
    event tracks with bounded target adapters and authorization.
-7. Expose every backend operation through temporary shortcuts, compact debug
+8. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.
-8. Run an attended end-to-end keyboard/debug dogfood pass. Only after that pass
+9. Run an attended end-to-end keyboard/debug dogfood pass. Only after that pass
    may polished library/editor/timeline UX begin.
-9. Cook/package only after the full backend prototype and its dogfood workflow
+10. Cook/package only after the full backend prototype and its dogfood workflow
    are accepted. Workshop and G-Portal remain later deployment gates.
-10. Close, sync, run the complete repository suite, commit, and push after every
-    meaningful compiled feature milestone.
+11. Close, sync, run the complete repository suite, commit, and push after every
+   meaningful compiled feature milestone.
 
 ### UX investment gate
 
@@ -1243,10 +1244,10 @@ and repeatable isolated PIE runner are complete. The immediate sequence is:
 1. Keep `tools\Run-DraftHistoryPIE.ps1`, the full scaffold, and the cold asset
    gate green after every relevant change. Graph contracts own shortcut wiring;
    isolated PIE runners own runtime semantics and edge cases.
-2. Complete record-granular newest-to-older recovery on top of the accepted
-   authority ordering and tombstone merge, then replace authoritative memory
-   only after the entire candidate is valid.
-3. Implement the inactive-slot two-phase writer, followed by private
+2. **Complete:** record-granular newest-to-older recovery on the accepted
+   authority ordering and tombstone merge; authoritative memory is replaced
+   only after the complete candidate remains valid.
+3. **Current:** implement the inactive-slot two-phase writer, followed by private
    create/save/load/list/delete through modular Blueprint service boundaries;
    then prove reconnect and restart recovery.
 4. Add server identity, ownership, privacy, immutable publication, discovery,

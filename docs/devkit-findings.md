@@ -2484,3 +2484,49 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   older snapshot, apply tombstone masks, and commit authoritative memory only
   after the complete candidate validates. Writer, CRUD, cook, and polished UI
   remain pending.
+
+## Repository record recovery accepted (2026-08-11)
+
+- Internal checkpoint `0.42.0-record-recovery` adds nine compiled functions:
+  `ResetRecoveryRecordsV1` 19 nodes,
+  `DecodeValidateRecoveryEnvelopeV1` 7,
+  `ScanRecoveryRecordIdentityV1` 20,
+  `AppendRecoveryRecordIfNewV1` 23,
+  `TryMergeRecoveryRecordV1` 23,
+  `RecoverRecordChannelV1` 19,
+  `RecoverRepositoryRecordsV1` 20,
+  `CommitRecoveredRepositoryV1` 20, and `LoadRepositoryV1` 6.
+- Recovery uses two passes per selected snapshot. Pass one decodes and validates
+  identities and marks same-generation duplicate IDs ambiguous. Pass two skips
+  ambiguous or invalid envelopes and merges valid records newest-first. This
+  permits an ambiguous or corrupt newest record to fall back to an older valid
+  envelope without allowing one duplicate to win by array order.
+- Tombstone masks are generation-aware: a tombstone at the same or newer
+  generation suppresses a record, an older tombstone cannot suppress a newer
+  record, and records already recovered from the newest snapshot cannot be
+  replaced by the older snapshot.
+- Recovered envelope, ID, owner, visibility, and updated-time arrays are
+  appended in lockstep. `CommitRecoveredRepositoryV1` copies them and the
+  merged tombstones into authoritative state only while recovery remains
+  failure-free; `RepositoryLoadedV1` is set last.
+- The semantic oracle covers newest-only, disjoint snapshots, newest-wins,
+  corrupt-newest fallback, duplicate ambiguity fallback, all tombstone
+  generation relations, duplicate-only omission, and metadata alignment.
+  Generated full/paste graphs, initial live exports, and all nine post-compile
+  exports pass the same contracts.
+- Windows can return false from `SetForegroundWindow` even after an activation
+  request. `Invoke-EnhancedEditorInput.ps1` now attaches input threads when
+  necessary and validates the actual foreground HWND. The new
+  `Export-BlueprintFunctions.ps1` opens exact functions through My Blueprint,
+  exports exact node counts, and fails closed on graph identity.
+- Compile/save returned true and its marked interval contained no Blueprint,
+  K2, FileManager, or SavePackage diagnostics. Guarded quit reached
+  `LogExit: Exiting.` A fresh nine-asset commandlet emitted
+  `EDD_COLD_LOAD|RESULT|PASS` with zero errors.
+- FromDevKit preview reported 16 unchanged assets and exactly one reviewed
+  repository conflict. Forced sync copied that package only. Live and mirror
+  SHA-256 is
+  `8B9E3DE940835A2442911A3A84559EF461214DD4D0E154D096582A8F1DA833FF`.
+- Next: inactive-slot two-phase writer, then private create/save/load/list/delete.
+  Ownership, privacy/publication/cloning, cinematic tracks, cook, and polished
+  UI remain pending.

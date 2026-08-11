@@ -110,6 +110,26 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         self.assertEqual(by_name["ScratchRecoverySearchIndexV1"]["default"], -1)
         self.assertEqual(by_name["ScratchRecoveryChannelGenerationV1"]["default"], 0)
 
+    def test_record_recovery_state_is_explicit_and_metadata_aligned(self) -> None:
+        by_name = {field["name"]: field for field in SCHEMA["variables"]}
+        arrays = (
+            "ScratchRecoveryRecordEnvelopesV1",
+            "ScratchRecoveryRecordFlypathIdsV1",
+            "ScratchRecoveryRecordOwnerAccountIdsV1",
+            "ScratchRecoveryRecordVisibilitiesV1",
+            "ScratchRecoveryRecordUpdatedUtcV1",
+            "ScratchRecoveryChannelRecordEnvelopesV1",
+            "ScratchRecoveryChannelSeenRecordIdsV1",
+            "ScratchRecoveryChannelAmbiguousRecordIdsV1",
+        )
+        for name in arrays:
+            self.assertEqual(by_name[name]["type"], "String")
+            self.assertEqual(by_name[name]["container"], "Array")
+        self.assertEqual(by_name["ScratchRecoveryChannelRecordGenerationV1"]["type"], "Integer")
+        self.assertEqual(by_name["ScratchRecoveryChannelRecordGenerationV1"]["default"], 0)
+        self.assertEqual(by_name["ScratchRecoveryCurrentRecordEnvelopeV1"]["type"], "String")
+        self.assertEqual(by_name["ScratchRecoveryCurrentRecordEnvelopeV1"]["default"], "")
+
     def test_only_automatable_variable_types_are_used(self) -> None:
         supported = {
             "Boolean",
@@ -175,6 +195,14 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "FindRecoveryStringIndexV1",
             "ValidateRecoveryTombstoneChannelV1",
             "MergeRecoveryTombstonesV1",
+            "ResetRecoveryRecordsV1",
+            "DecodeValidateRecoveryEnvelopeV1",
+            "ScanRecoveryRecordIdentityV1",
+            "AppendRecoveryRecordIfNewV1",
+            "TryMergeRecoveryRecordV1",
+            "RecoverRecordChannelV1",
+            "RecoverRepositoryRecordsV1",
+            "CommitRecoveredRepositoryV1",
             "CreatePrivateFlypathV1",
             "SaveDraftV1",
             "LoadDraftV1",

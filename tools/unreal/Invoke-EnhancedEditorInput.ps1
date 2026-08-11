@@ -66,6 +66,44 @@ public static class EddEnhancedEditorInput {
     public static extern bool SetForegroundWindow(IntPtr hWnd);
 
     [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr processId);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
+
+    [DllImport("user32.dll")]
+    private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool attach);
+
+    [DllImport("user32.dll")]
+    private static extern bool BringWindowToTop(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int command);
+
+    public static bool FocusWindow(IntPtr hWnd) {
+        if (GetForegroundWindow() == hWnd) return true;
+        IntPtr foreground = GetForegroundWindow();
+        uint currentThread = GetCurrentThreadId();
+        uint foregroundThread = foreground == IntPtr.Zero ? 0 : GetWindowThreadProcessId(foreground, IntPtr.Zero);
+        uint targetThread = GetWindowThreadProcessId(hWnd, IntPtr.Zero);
+        bool attachedForeground = foregroundThread != 0 && foregroundThread != currentThread && AttachThreadInput(currentThread, foregroundThread, true);
+        bool attachedTarget = targetThread != 0 && targetThread != currentThread && targetThread != foregroundThread && AttachThreadInput(currentThread, targetThread, true);
+        try {
+            ShowWindow(hWnd, 9);
+            BringWindowToTop(hWnd);
+            SetForegroundWindow(hWnd);
+            return GetForegroundWindow() == hWnd;
+        }
+        finally {
+            if (attachedTarget) AttachThreadInput(currentThread, targetThread, false);
+            if (attachedForeground) AttachThreadInput(currentThread, foregroundThread, false);
+        }
+    }
+
+    [DllImport("user32.dll")]
     public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
 
     [DllImport("user32.dll")]
@@ -81,7 +119,7 @@ $handle = [IntPtr]$WindowHandle
 if (-not [EddEnhancedEditorInput]::IsWindow($handle)) {
     throw "Window handle is not valid: $WindowHandle"
 }
-if (-not [EddEnhancedEditorInput]::SetForegroundWindow($handle)) {
+if (-not [EddEnhancedEditorInput]::FocusWindow($handle)) {
     throw "Could not focus window handle: $WindowHandle"
 }
 Start-Sleep -Milliseconds 150

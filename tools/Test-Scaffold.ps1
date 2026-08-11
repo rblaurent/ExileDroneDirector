@@ -121,8 +121,11 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryRecoverySelectionContracts.py',
     'tools\blueprint\Build-RepositoryTombstoneRecoveryGraphs.py',
     'tools\blueprint\Test-RepositoryTombstoneRecoveryContracts.py',
+    'tools\blueprint\Build-RepositoryRecordRecoveryGraphs.py',
+    'tools\blueprint\Test-RepositoryRecordRecoveryContracts.py',
     'tools\blueprint\templates\repository-string-trim-node-form.eddgraph',
     'tools\unreal\Invoke-EnhancedEditorInput.ps1',
+    'tools\unreal\Export-BlueprintFunctions.ps1',
     'tools\blueprint\Test-RepositorySaveGameNodeForms.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
@@ -251,6 +254,15 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\find-recovery-string-index-v1.eddgraph',
     'tools\blueprint\live-snippets\validate-recovery-tombstone-channel-v1.eddgraph',
     'tools\blueprint\live-snippets\merge-recovery-tombstones-v1.eddgraph',
+    'tools\blueprint\live-snippets\reset-recovery-records-v1.eddgraph',
+    'tools\blueprint\live-snippets\decode-validate-recovery-envelope-v1.eddgraph',
+    'tools\blueprint\live-snippets\scan-recovery-record-identity-v1.eddgraph',
+    'tools\blueprint\live-snippets\append-recovery-record-if-new-v1.eddgraph',
+    'tools\blueprint\live-snippets\try-merge-recovery-record-v1.eddgraph',
+    'tools\blueprint\live-snippets\recover-record-channel-v1.eddgraph',
+    'tools\blueprint\live-snippets\recover-repository-records-v1.eddgraph',
+    'tools\blueprint\live-snippets\commit-recovered-repository-v1.eddgraph',
+    'tools\blueprint\live-snippets\load-repository-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -1022,6 +1034,50 @@ foreach ($graphName in @(
     --project-root $ProjectRoot --input-dir $repositoryTombstoneRecoveryLive
 if ($LASTEXITCODE -ne 0) {
     throw "Repository tombstone-recovery live contracts failed with exit code $LASTEXITCODE."
+}
+$repositoryRecordRecoveryNonce = [guid]::NewGuid().ToString('N')
+$repositoryRecordRecoveryRoot = Join-Path $scratchRoot "edd-repository-record-recovery-$repositoryRecordRecoveryNonce"
+$repositoryRecordRecoveryFull = Join-Path $repositoryRecordRecoveryRoot 'full'
+$repositoryRecordRecoveryPaste = Join-Path $repositoryRecordRecoveryRoot 'paste'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryRecordRecoveryGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryRecordRecoveryFull `
+    --paste-dir $repositoryRecordRecoveryPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository record-recovery generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryRecordRecoveryFull,$repositoryRecordRecoveryPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecordRecoveryContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryRecordRecoveryFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository record-recovery contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecordRecoveryContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryRecordRecoveryPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository record-recovery paste contracts failed with exit code $LASTEXITCODE."
+}
+$repositoryRecordRecoveryLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets'
+foreach ($graphName in @(
+    'reset-recovery-records-v1.eddgraph',
+    'decode-validate-recovery-envelope-v1.eddgraph',
+    'scan-recovery-record-identity-v1.eddgraph',
+    'append-recovery-record-if-new-v1.eddgraph',
+    'try-merge-recovery-record-v1.eddgraph',
+    'recover-record-channel-v1.eddgraph',
+    'recover-repository-records-v1.eddgraph',
+    'commit-recovered-repository-v1.eddgraph',
+    'load-repository-v1.eddgraph'
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+        -Path (Join-Path $repositoryRecordRecoveryLive $graphName)
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecordRecoveryContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryRecordRecoveryLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository record-recovery live contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')

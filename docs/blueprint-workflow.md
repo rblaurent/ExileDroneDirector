@@ -291,6 +291,18 @@ Only the post-compile exports become canonical `live-snippets`; this caught
 missed root drags while keeping an in-memory visual impression from becoming
 evidence.
 
+Use `tools/unreal/Invoke-EnhancedEditorInput.ps1` for the narrow editor-input
+seam instead of rebuilding inline `user32` calls. It requires the exact editor
+window handle and supports focused SendKeys, client-coordinate clicks, drags,
+and wheel zoom. Visual coordinates remain provisional: after every root-pin
+drag, export the complete graph and require a reciprocal native-entry link.
+
+Enhanced's pure string-normalization node is
+`KismetStringLibrary.Trim(SourceString) -> ReturnValue`. The harvested native
+form is `repository-string-trim-node-form.eddgraph`. Use it for persisted
+identifier validation; an ID is accepted only when it is non-empty and exactly
+equal to its trimmed form.
+
 For object-targeted nodes that do not appear in an empty graph's action menu,
 add or reuse a member with the exact object type, drag a getter into the graph,
 then drag from that typed output and search for the property/function. This is

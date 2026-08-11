@@ -4,7 +4,7 @@
   "target": "Conan Exiles Enhanced",
   "engine": "Unreal Engine 5.6.1",
   "implementation": "Blueprint-only",
-  "version": "0.40.0-recovery-selection",
+  "version": "0.41.0-tombstone-recovery",
   "mvpAssets": [
     "Local/BP_EDD_ModController.uasset",
     "Local/Core/Client/BPC_EDD_ClientDirector.uasset",

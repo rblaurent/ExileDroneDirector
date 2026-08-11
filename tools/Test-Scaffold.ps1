@@ -119,6 +119,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositorySaveGameAdapterContracts.py',
     'tools\blueprint\Build-RepositoryRecoverySelectionGraphs.py',
     'tools\blueprint\Test-RepositoryRecoverySelectionContracts.py',
+    'tools\blueprint\Build-RepositoryTombstoneRecoveryGraphs.py',
+    'tools\blueprint\Test-RepositoryTombstoneRecoveryContracts.py',
+    'tools\blueprint\templates\repository-string-trim-node-form.eddgraph',
+    'tools\unreal\Invoke-EnhancedEditorInput.ps1',
     'tools\blueprint\Test-RepositorySaveGameNodeForms.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
@@ -243,6 +247,10 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\stage-recovery-a-newer-v1.eddgraph',
     'tools\blueprint\live-snippets\stage-recovery-b-newer-v1.eddgraph',
     'tools\blueprint\live-snippets\select-repository-recovery-order-v1.eddgraph',
+    'tools\blueprint\live-snippets\reset-recovery-tombstones-v1.eddgraph',
+    'tools\blueprint\live-snippets\find-recovery-string-index-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-recovery-tombstone-channel-v1.eddgraph',
+    'tools\blueprint\live-snippets\merge-recovery-tombstones-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -975,6 +983,45 @@ foreach ($graphName in @(
     --project-root $ProjectRoot --input-dir $repositoryRecoverySelectionLive
 if ($LASTEXITCODE -ne 0) {
     throw "Repository recovery-selection live contracts failed with exit code $LASTEXITCODE."
+}
+$repositoryTombstoneRecoveryNonce = [guid]::NewGuid().ToString('N')
+$repositoryTombstoneRecoveryRoot = Join-Path $scratchRoot "edd-repository-tombstone-recovery-$repositoryTombstoneRecoveryNonce"
+$repositoryTombstoneRecoveryFull = Join-Path $repositoryTombstoneRecoveryRoot 'full'
+$repositoryTombstoneRecoveryPaste = Join-Path $repositoryTombstoneRecoveryRoot 'paste'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryTombstoneRecoveryGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryTombstoneRecoveryFull `
+    --paste-dir $repositoryTombstoneRecoveryPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository tombstone-recovery generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryTombstoneRecoveryFull,$repositoryTombstoneRecoveryPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryTombstoneRecoveryContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryTombstoneRecoveryFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository tombstone-recovery contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryTombstoneRecoveryContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryTombstoneRecoveryPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository tombstone-recovery paste contracts failed with exit code $LASTEXITCODE."
+}
+$repositoryTombstoneRecoveryLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets'
+foreach ($graphName in @(
+    'reset-recovery-tombstones-v1.eddgraph',
+    'find-recovery-string-index-v1.eddgraph',
+    'validate-recovery-tombstone-channel-v1.eddgraph',
+    'merge-recovery-tombstones-v1.eddgraph'
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+        -Path (Join-Path $repositoryTombstoneRecoveryLive $graphName)
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryTombstoneRecoveryContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryTombstoneRecoveryLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository tombstone-recovery live contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')

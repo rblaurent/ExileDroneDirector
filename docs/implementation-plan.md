@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.40.0-recovery-selection`
+Current internal build: `0.41.0-tombstone-recovery`
 
 ## 1. Delivery strategy
 
@@ -1243,10 +1243,12 @@ and repeatable isolated PIE runner are complete. The immediate sequence is:
 1. Keep `tools\Run-DraftHistoryPIE.ps1`, the full scaffold, and the cold asset
    gate green after every relevant change. Graph contracts own shortcut wiring;
    isolated PIE runners own runtime semantics and edge cases.
-2. Freeze the repository/persistence Blueprint contracts and add executable
-   schema, authorization, revision, structural-integrity, recovery, and migration oracles.
-3. Implement private create/save/load/list/delete through modular Blueprint
-   service boundaries, then prove reconnect and restart recovery.
+2. Complete record-granular newest-to-older recovery on top of the accepted
+   authority ordering and tombstone merge, then replace authoritative memory
+   only after the entire candidate is valid.
+3. Implement the inactive-slot two-phase writer, followed by private
+   create/save/load/list/delete through modular Blueprint service boundaries;
+   then prove reconnect and restart recovery.
 4. Add server identity, ownership, privacy, immutable publication, discovery,
    playback snapshots, cloning, conflicts, limits, and typed failures.
 5. Complete cinematic position/timing/rotation, flight profiles, lens/focus/

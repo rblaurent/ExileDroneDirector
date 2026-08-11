@@ -2439,3 +2439,48 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Next: validate/merge tombstones, recover records newest-first with per-record
   older fallback, and only then replace authoritative memory. The writer, CRUD,
   cook, and polished UI remain unimplemented.
+
+## Repository tombstone recovery accepted (2026-08-11)
+
+- Internal checkpoint `0.41.0-tombstone-recovery` adds four compiled functions
+  after authority selection and before record-envelope recovery:
+  `ResetRecoveryTombstonesV1` 16 nodes,
+  `FindRecoveryStringIndexV1` 8,
+  `ValidateRecoveryTombstoneChannelV1` 40, and
+  `MergeRecoveryTombstonesV1` 22. Every native entry is reciprocally linked;
+  full, paste, first live, and post-compile exports pass the same contracts.
+- The reset owns only tombstone-merge scratch. It deliberately preserves
+  `ScratchRecoveryFailedV1` and `ScratchRecoveryDetailV1`, so a prior
+  `DivergentEqualGeneration` result cannot be erased by a later stage.
+- Each selected channel rejects empty IDs, leading/trailing whitespace, and
+  duplicates within that generation. Failure is monotonic and stable as
+  `MalformedTombstone` or `DuplicateTombstone`; later loop iterations cannot
+  overwrite the first failure.
+- Newest tombstones are processed before older tombstones. A flypath deleted
+  in both snapshots appears once and retains the newest deletion generation;
+  disjoint older deletions are appended with their own generation. The two
+  merged arrays are written in lockstep.
+- The semantic oracle covers no selected slot, newest-only, disjoint snapshots,
+  overlap/newer precedence, duplicate IDs in either channel, empty and padded
+  identifiers, and preservation of a pre-existing split-brain failure.
+- Enhanced exposes the required normalization operation as the pure native
+  `KismetStringLibrary.Trim` node. Its exact two-string-pin serialization is
+  captured in `repository-string-trim-node-form.eddgraph`; no guessed node form
+  is used.
+- The repeated focus/click/key/drag/wheel operations are now centralized in
+  `Invoke-EnhancedEditorInput.ps1`. It validates the exact HWND and client
+  coordinates before input. This converts the previously ad-hoc pin-linking
+  seam into a small reusable operation while serialized reciprocal links remain
+  the source of truth.
+- The marked compile/save interval contained zero Blueprint, K2, FileManager,
+  or SavePackage warnings/errors. Guarded quit reached `LogExit: Exiting.` A
+  fresh `-ModDevKit -NullRHI` commandlet loaded all nine core assets and emitted
+  `EDD_COLD_LOAD|RESULT|PASS` with zero errors.
+- FromDevKit preview reported 16 unchanged assets and exactly one reviewed
+  conflict. The forced sync copied only the repository package. Live and mirror
+  SHA-256 is
+  `CB46362D20BE8E12C2D7F7A04D984E1ABD23B8419D35370CD23BC793FA9F5B70`.
+- Next: recover record envelopes newest-first with per-record fallback to the
+  older snapshot, apply tombstone masks, and commit authoritative memory only
+  after the complete candidate validates. Writer, CRUD, cook, and polished UI
+  remain pending.

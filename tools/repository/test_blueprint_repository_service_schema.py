@@ -89,6 +89,27 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         self.assertNotEqual("ScratchSourceJsonV1", "ScratchEncodedDocumentV1")
         self.assertNotEqual("ScratchSourceDocumentJsonV1", "ScratchEncodedDocumentV1")
 
+    def test_tombstone_recovery_state_is_explicit_and_aligned(self) -> None:
+        by_name = {field["name"]: field for field in SCHEMA["variables"]}
+        expected = {
+            "ScratchRecoveryTombstoneIdsV1": ("String", "Array"),
+            "ScratchRecoveryTombstoneGenerationsV1": ("Integer", "Array"),
+            "ScratchRecoveryChannelTombstonesV1": ("String", "Array"),
+            "ScratchRecoveryChannelGenerationV1": ("Integer", "None"),
+            "ScratchRecoveryChannelSeenIdsV1": ("String", "Array"),
+            "ScratchRecoverySearchStringsV1": ("String", "Array"),
+            "ScratchRecoverySearchValueV1": ("String", "None"),
+            "ScratchRecoverySearchIndexV1": ("Integer", "None"),
+            "ScratchRecoveryCurrentTombstoneV1": ("String", "None"),
+            "ScratchRecoveryTrimmedTombstoneV1": ("String", "None"),
+        }
+        for name, (field_type, container) in expected.items():
+            self.assertIn(name, by_name)
+            self.assertEqual(by_name[name]["type"], field_type)
+            self.assertEqual(by_name[name]["container"], container)
+        self.assertEqual(by_name["ScratchRecoverySearchIndexV1"]["default"], -1)
+        self.assertEqual(by_name["ScratchRecoveryChannelGenerationV1"]["default"], 0)
+
     def test_only_automatable_variable_types_are_used(self) -> None:
         supported = {
             "Boolean",
@@ -150,6 +171,10 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "ValidateRecordPublishedV1",
             "ValidateRecordSourceAttributionV1",
             "ValidateRecordV1",
+            "ResetRecoveryTombstonesV1",
+            "FindRecoveryStringIndexV1",
+            "ValidateRecoveryTombstoneChannelV1",
+            "MergeRecoveryTombstonesV1",
             "CreatePrivateFlypathV1",
             "SaveDraftV1",
             "LoadDraftV1",

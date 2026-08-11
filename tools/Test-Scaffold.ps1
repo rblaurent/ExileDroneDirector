@@ -54,6 +54,7 @@ $requiredFiles = @(
     'tools\unreal\Write-RepositorySaveGameProbe.py',
     'tools\unreal\Read-RepositorySaveGameProbe.py',
     'tools\unreal\Configure-RepositoryService.py',
+    'tools\unreal\Open-RepositoryServiceEditor.py',
     'tools\unreal\Validate-RepositoryJsonCodec.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
@@ -155,6 +156,8 @@ $requiredFiles = @(
     'tools\blueprint\snippets\reset-repository-result-v1-paste.eddgraph',
     'tools\blueprint\snippets\find-record-index-v1.eddgraph',
     'tools\blueprint\snippets\find-record-index-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-repository-result-v1.eddgraph',
+    'tools\blueprint\live-snippets\find-record-index-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -577,6 +580,19 @@ foreach ($pair in $repositoryCorePairs) {
         (Get-FileHash -Algorithm SHA256 -LiteralPath $checkedInPaste).Hash) {
         throw "Repository core paste graph is not deterministic: $($pair[0])"
     }
+}
+
+# Live editor round-trips retain Unreal-assigned GUIDs and layout, so they are
+# semantic installation evidence rather than deterministic generator outputs.
+$repositoryCoreLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets'
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryCoreLive -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryCoreContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir $repositoryCoreLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository core live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-DocumentSyncStructForms.py') `

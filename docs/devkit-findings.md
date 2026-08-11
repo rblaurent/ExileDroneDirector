@@ -1824,6 +1824,37 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - `Test-RepositoryService.ps1` is the focused seam gate: schema contracts,
   idempotent asset configuration, and the runtime JSON dependency round trip.
 
+## Repository core graph runtime installation (2026-08-11)
+
+- `AssetEditorSubsystem.open_editor_for_assets` reliably opens the mod-owned
+  repository Blueprint from an interactive `-ModDevKit` session. The Enhanced
+  Python API still does not expose graph-focus or graph-edit operations.
+- `PrintWindow` can capture the exact background Blueprint top-level window
+  without bringing Unreal over the user's foreground application. Direct
+  `WM_*` messages work for ordinary tab clicks, compile/save clicks, paste, and
+  graph framing. Slate pin drags additionally require the physical cursor to be
+  synchronized with every drag step.
+- Keyboard graph-copy commands require real focus. Attach the automation thread
+  to the foreground and Unreal window threads, activate the exact Blueprint
+  top-level window, click the graph canvas, and only accept clipboard text that
+  begins with `Begin Object Class=/Script/BlueprintGraph.` and contains the
+  expected function name. This prevents silently exporting a stale graph or a
+  `BPGraph(...)` document wrapper.
+- Unreal removes `DefaultValue=""` from an empty string pin when a pasted graph
+  is saved and copied back out. Semantic contracts must accept the absent field
+  as the canonical empty-string equivalent while rejecting every explicit
+  non-empty value.
+- The installed `ResetRepositoryResultV1` and `FindRecordIndexV1` graphs compiled
+  successfully, reported `All Saved`, exported with native function entries and
+  reciprocal links, and passed complete semantic contracts. A fresh Enhanced
+  commandlet cold-loaded the asset with zero errors. The synchronized live/Git
+  asset SHA-256 is
+  `51CEDB0DDC7BA4C1FFAE0162315CBEFB4162C2F6C4BE6389B409850CBA34D9D7`.
+- Rerunning `Configure-RepositoryService.py` resaves the package and may change
+  its binary hash even when the schema is already correct. After that resave,
+  re-export and semantically validate every installed graph, cold-load the final
+  package, and only then accept and synchronize its new hash.
+
 ## Pending local reconnaissance
 
 - Concrete Conan-character view restoration in a gameplay-map PIE run

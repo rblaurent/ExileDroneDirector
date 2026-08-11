@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.31.0-repository-core-source`
+Current internal build: `0.32.0-repository-core-runtime`
 
 ## 1. Delivery strategy
 
@@ -260,12 +260,14 @@ This section is the authoritative handoff. Detailed evidence remains in
   copy-on-write candidate, and typed SaveGame scratch channels. The bundled
   PlayFab JSON object passed a nested Unicode round trip and its insertion-order
   behavior is fixed by acceptance tests.
-- Deterministic, complete and body-only graph sources now exist for
-  `ResetRepositoryResultV1` and `FindRecordIndexV1`. Structural and semantic
-  contracts prove exact reset defaults, metadata clearing, derived-ID lookup,
-  staged request use, closed links, and byte-for-byte regeneration. These two
-  bodies are **not yet installed in the live `.uasset`**, so this checkpoint is
-  repository-core source/tooling, not functional CRUD.
+- Deterministic, complete and body-only graph sources exist for
+  `ResetRepositoryResultV1` and `FindRecordIndexV1`, and both bodies are now
+  installed in the live repository actor. The actor compiled successfully,
+  reported `All Saved`, survived a fresh-process cold load, and was synchronized
+  back to Git with an exact SHA-256 match. Native round-trip exports prove the
+  function entries and reciprocal links, reset defaults/metadata clearing, and
+  derived-ID lookup. This is executable repository-core plumbing, not yet full
+  private CRUD.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
   directly to G-Portal.
 

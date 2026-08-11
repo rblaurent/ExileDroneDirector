@@ -217,9 +217,10 @@ index, explicit request/result staging, policy limits, typed draft-document and
 SaveGame exchange, JSON scratch state, and separate codec, validation, storage,
 and CRUD function graphs. Enhanced's bundled PlayFab JSON object has passed
 nested-object, array, boolean, numeric-text, Unicode, and insertion-order
-acceptance. Deterministic source and paste-safe bodies now exist for result reset
-and ID lookup, but they are not yet installed in the live `.uasset`; runtime CRUD
-remains the next milestone.
+acceptance. The deterministic result-reset and ID-lookup graphs are now installed
+in the live actor, compile successfully, survive a fresh-process cold load, and
+round-trip back to reviewed `.eddgraph` text with their native entry links intact.
+Private CRUD remains the next runtime milestone.
 
 ## Repository layout
 

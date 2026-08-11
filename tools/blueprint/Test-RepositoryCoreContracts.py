@@ -55,7 +55,20 @@ def assert_reset(c, nodes, *, paste: bool) -> None:
     clear = one(c, nodes, 'MemberName="Array_Clear"')
     for node, (name, default) in zip(setters, order):
         line = next(line for line in node.text.splitlines() if f'PinName="{name}"' in line)
-        c.require(f'DefaultValue="{default}"' in line, f"{name} reset default changed")
+        if default == "":
+            # Unreal omits DefaultValue entirely when a pasted empty-string pin is
+            # saved and copied back out of the editor.  Both spellings mean the
+            # same empty string; any explicit non-empty value remains forbidden.
+            explicit_default = next(
+                (part for part in line.split(",") if part.startswith("DefaultValue=")),
+                None,
+            )
+            c.require(
+                explicit_default in (None, 'DefaultValue=""'),
+                f"{name} reset default changed",
+            )
+        else:
+            c.require(f'DefaultValue="{default}"' in line, f"{name} reset default changed")
     if paste:
         c.require(not setters[0].pins["execute"].links, "Paste body must expose the first setter")
     else:

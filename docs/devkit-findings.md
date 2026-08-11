@@ -2163,3 +2163,37 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Next backend slice: record-envelope codecs followed by private CRUD and
   deterministic restart recovery. There is still no authorization to cook or
   build the polished UI.
+
+## Repository record encoder accepted live (2026-08-11)
+
+- `EncodeRecordPublishedFieldsV1` and `EncodeRecordSourceAttributionV1` are
+  accepted at 17 nodes/57 pins each; `EncodeRecordV1` is 44/157. Exact live
+  copy-backs passed before and after compile/save. The semantic suite proves
+  canonical record/envelope order, explicit null publication and attribution,
+  numeric revision conversion, isolated document staging, native entry
+  reachability, and the terminal `ScratchEncodedRecordV1` commit.
+- At `Zoom -7`, a visually plausible execution-pin drag was a verified no-op.
+  The reliable seam was: export exact identities and graph positions, deselect
+  all nodes after copy, move only the native entry beside the target, zoom to
+  `-2`, pan with explicit relative `mouse_event(MOVE, ...)` calls, and connect
+  the labelled `ScratchRecordJsonV1` setter. The contract rejected the no-op
+  and accepted only the serialized reciprocal link.
+- The repository-wide resave did not regress sibling functions. Fresh live
+  exports passed for the two repository-core graphs, all three document
+  encoders, and all three strict document decoders.
+- Invoke the remote runner with `--script`, not `--file`. Enhanced's
+  `AssetEditorSubsystem` exposes `close_all_editors_for_asset` but not
+  `get_all_edited_assets` or `close_all_asset_editors`; the safe-quit helper now
+  uses an explicit-path compatibility fallback and defaults to the repository
+  Blueprint. The editor then exited cleanly after closing the asset editor and
+  waiting three Slate ticks.
+- `Sync-DevKitContent.ps1` requires explicit
+  `-DevKitRoot F:\CEUE5Devkit`. A conflict-only dry run intentionally throws,
+  so run the reviewed `-Force` invocation separately rather than chaining it
+  behind the expected nonzero dry run.
+- A fresh `-ModDevKit -NullRHI` commandlet loaded and compiled all nine core
+  assets with `EDD_COLD_LOAD|RESULT|PASS` and zero errors. Sync copied exactly
+  one repository package; live and mirror SHA-256 is
+  `DB56429B5F83CBC6923D0761FA6B62A01A858C526A8B6AE3C963ED13AE655A64`.
+- Next backend slice: private CRUD and deterministic restart recovery. No cook
+  or polished UI is authorized yet.

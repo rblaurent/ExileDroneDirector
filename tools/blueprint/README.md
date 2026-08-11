@@ -86,6 +86,12 @@ Interactive editor automation uses a separate fail-closed seam:
   `live-snippets/decode-document-v1.eddgraph` are the post-compile Unreal
   copy-backs. The full scaffold validates their generic structure and exact
   semantics in addition to generated full/paste fixtures.
+- `live-snippets/encode-record-published-fields-v1.eddgraph`,
+  `live-snippets/encode-record-source-attribution-v1.eddgraph`, and
+  `live-snippets/encode-record-v1.eddgraph` are the accepted post-compile
+  record-envelope copy-backs. Their contracts lock canonical field order,
+  explicit null publication/attribution states, typed numeric bridges, nested
+  document staging, native-entry reachability, and the terminal encoded text.
 - `Export-BlueprintGraphClipboard.ps1` can fail closed on `-ExpectedGraph` and
   `-ExpectedNodeCount`; use both for every automated copy-back so a selected-but-
   unopened function cannot silently export the EventGraph.
@@ -95,7 +101,9 @@ Interactive editor automation uses a separate fail-closed seam:
   cursor rather than preserving its absolute generated coordinates.
 - Do not request process exit while a Blueprint asset editor still owns a
   preview scene. Invoke `tools/unreal/Quit-EnhancedEditorSafely.py` through the
-  remote runner; it closes asset editors, waits for Slate, and then exits.
+  remote runner with `--script`; it closes asset editors, waits for Slate, and
+  then exits. Enhanced does not expose `get_all_edited_assets`, so the helper
+  uses its explicit asset-path fallback and defaults to the repository asset.
 - `Test-WaypointCaptureContracts.py` verifies exact array types, data sources,
   append order, selected-index assignment, ID increment, and available
   EventGraph dispatch semantics.

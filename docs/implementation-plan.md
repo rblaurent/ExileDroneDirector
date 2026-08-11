@@ -342,6 +342,15 @@ This section is the authoritative handoff. Detailed evidence remains in
   nine core assets with `EDD_COLD_LOAD|RESULT|PASS`. The live and Git-mirror
   repository SHA-256 is
   `C0E8C7F3368E873C1774E8CBDADC8F402EF96320AFBCA9A7D6BCA279ED56E59F`.
+- The complete record-envelope encoder is now accepted live. The published
+  fields helper is 17 nodes/57 pins, source attribution is 17/57, and the root
+  record encoder is 44/157. Post-compile copy-backs pass exact contracts for
+  canonical ordering, explicit null states, typed revision bridges, document
+  isolation, and native-entry reachability. All eight pre-existing repository
+  graphs also passed fresh live regression exports after the shared save.
+  A new cold process loaded and compiled all nine core assets with zero errors;
+  live and mirror repository SHA-256 is
+  `DB56429B5F83CBC6923D0761FA6B62A01A858C526A8B6AE3C963ED13AE655A64`.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported
@@ -361,11 +370,12 @@ before any polished editor UI or cook is attempted:
 1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
    owner identity, visibility, revision, attribution, published snapshot,
    structural integrity mode, and validation contracts.
-2. **Current:** complete record-envelope codecs and implement private
-   create/save/load/list/delete and deterministic restart recovery.
+2. **Current:** implement private create/save/load/list/delete and deterministic
+   restart recovery on top of the accepted record-envelope codecs.
    `EncodeWaypointV1`, `EncodeSegmentV1`, `EncodeDocumentV1`, all three matching
-   decoders, repository core, and exact numeric/null JSON node forms are
-   accepted live-compiled proof, not remaining discovery work.
+   decoders, all three record encoders, repository core, and exact numeric/null
+   JSON node forms are accepted live-compiled proof, not remaining discovery
+   work.
 3. Prove optimistic revisions, atomic save behavior, corruption recovery, schema
    migration hooks, limit validation, and typed failures through executable tests.
 4. Implement server-authoritative ownership, privacy, publication, immutable

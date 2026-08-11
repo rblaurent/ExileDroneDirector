@@ -102,6 +102,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py',
     'tools\blueprint\Build-RepositoryDocumentDecoderGraphs.py',
     'tools\blueprint\Test-RepositoryDocumentDecoderContracts.py',
+    'tools\blueprint\Build-RepositoryRecordEncoderGraphs.py',
+    'tools\blueprint\Test-RepositoryRecordEncoderContracts.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
@@ -196,6 +198,9 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\encode-waypoint-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-segment-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-document-v1.eddgraph',
+    'tools\blueprint\live-snippets\encode-record-published-fields-v1.eddgraph',
+    'tools\blueprint\live-snippets\encode-record-source-attribution-v1.eddgraph',
+    'tools\blueprint\live-snippets\encode-record-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -674,6 +679,51 @@ if ($LASTEXITCODE -ne 0) {
     --project-root $ProjectRoot --input-dir $repositoryDecoderPaste --paste
 if ($LASTEXITCODE -ne 0) {
     throw "Repository document decoder paste contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryRecordEncoderNonce = [guid]::NewGuid().ToString('N')
+$repositoryRecordEncoderRoot = Join-Path $scratchRoot "edd-repository-record-encoder-$repositoryRecordEncoderNonce"
+$repositoryRecordEncoderFull = Join-Path $repositoryRecordEncoderRoot 'full'
+$repositoryRecordEncoderPaste = Join-Path $repositoryRecordEncoderRoot 'paste'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryRecordEncoderGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryRecordEncoderFull `
+    --paste-dir $repositoryRecordEncoderPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository record encoder generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryRecordEncoderFull -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryRecordEncoderPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecordEncoderContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryRecordEncoderFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository record encoder contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecordEncoderContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryRecordEncoderPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository record encoder paste contracts failed with exit code $LASTEXITCODE."
+}
+foreach ($recordEncoderName in @(
+    'encode-record-published-fields-v1',
+    'encode-record-source-attribution-v1',
+    'encode-record-v1'
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+        -Path (Join-Path $ProjectRoot "tools\blueprint\live-snippets\$recordEncoderName.eddgraph")
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live $recordEncoderName graph structure failed with exit code $LASTEXITCODE."
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecordEncoderContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets')
+if ($LASTEXITCODE -ne 0) {
+    throw "Live repository record encoder contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')

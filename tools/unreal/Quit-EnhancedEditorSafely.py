@@ -2,8 +2,10 @@
 
 Closing the process while a Blueprint preview scene is still alive can assert
 in ``BlueprintEditor.cpp`` during shutdown.  Invoke this through the official
-remote-execution seam; it closes every asset editor, waits for Slate to flush
-the close operation, and only then requests process exit.
+remote-execution seam; it closes the relevant asset editors, waits for Slate
+to flush the close operation, and only then requests process exit.  Stock UE
+builds can enumerate every edited asset.  Enhanced's reduced Python surface
+falls back to ``EDD_SAFE_QUIT_ASSET_PATHS`` or the repository Blueprint.
 """
 
 from __future__ import annotations
@@ -15,6 +17,9 @@ PREFIX = "EDD_SAFE_QUIT"
 STATE_KEY = "_EDD_SAFE_QUIT_STATE"
 MINIMUM_TICKS = 3
 MAXIMUM_TICKS = 120
+DEFAULT_ASSET_PATHS = (
+    "/Game/Mods/ExileDroneDirector/Server/Repository/BP_EDD_FlypathRepository",
+)
 
 
 def emit(label: str, value) -> None:
@@ -29,7 +34,19 @@ subsystem = unreal.get_editor_subsystem(unreal.AssetEditorSubsystem)
 if subsystem is None:
     raise RuntimeError("AssetEditorSubsystem is unavailable")
 
-edited_assets = list(subsystem.get_all_edited_assets())
+can_enumerate = hasattr(subsystem, "get_all_edited_assets")
+if can_enumerate:
+    edited_assets = list(subsystem.get_all_edited_assets())
+else:
+    configured_paths = globals().get("EDD_SAFE_QUIT_ASSET_PATHS", DEFAULT_ASSET_PATHS)
+    edited_assets = []
+    for asset_path in configured_paths:
+        asset = unreal.EditorAssetLibrary.load_asset(asset_path)
+        if asset is None:
+            raise RuntimeError(f"Safe-quit asset could not be loaded: {asset_path}")
+        edited_assets.append(asset)
+    emit("ENUMERATION_UNAVAILABLE", len(edited_assets))
+
 emit("EDITORS_BEFORE_CLOSE", len(edited_assets))
 if hasattr(subsystem, "close_all_asset_editors"):
     subsystem.close_all_asset_editors()
@@ -43,7 +60,7 @@ globals()[STATE_KEY] = state
 
 def finish_shutdown(_delta_seconds: float) -> None:
     state["ticks"] += 1
-    remaining = len(subsystem.get_all_edited_assets())
+    remaining = len(subsystem.get_all_edited_assets()) if can_enumerate else 0
     if state["ticks"] < MINIMUM_TICKS:
         return
     if remaining and state["ticks"] < MAXIMUM_TICKS:

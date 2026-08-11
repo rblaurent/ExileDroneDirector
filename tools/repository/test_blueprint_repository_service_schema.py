@@ -43,6 +43,10 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         by_name = {field["name"]: field for field in SCHEMA["variables"]}
         expected = {
             "ScratchDocumentV1": "ST_EDD_FlypathDocument",
+            "ScratchEnvelopeJsonV1": "PlayFabJsonObject",
+            "ScratchRecordJsonV1": "PlayFabJsonObject",
+            "ScratchDocumentJsonV1": "PlayFabJsonObject",
+            "ScratchAttributionJsonV1": "PlayFabJsonObject",
             "ScratchSourceJsonV1": "String",
             "ScratchSourceDocumentJsonV1": "String",
             "ScratchEncodedDocumentV1": "String",
@@ -114,6 +118,8 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "DecodeSegmentV1",
             "EncodeDocumentV1",
             "DecodeDocumentV1",
+            "EncodeRecordPublishedFieldsV1",
+            "EncodeRecordSourceAttributionV1",
             "EncodeRecordV1",
             "DecodeRecordV1",
             "CreatePrivateFlypathV1",

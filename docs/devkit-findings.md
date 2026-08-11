@@ -2669,3 +2669,44 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   optimistic revision conflict, atomic candidate replacement, real SaveGame
   restart evidence, cleanup, regression, commit, and push. No UI, cook, or
   Workshop work.
+
+## Owner-only optimistic private draft saving accepted (2026-08-11)
+
+- Internal checkpoint `0.46.0-private-draft-save` implements `SaveDraftV1` as
+  a 98-node/382-pin compiled function (97-node body-only). It resolves the
+  derived record index, enforces the derived and decoded owner identities,
+  strictly decodes and validates the stored record, compares the caller's
+  expected revision, rebuilds the request document with server-forced
+  `current+1`, validates/encodes the updated record, replaces exactly one
+  candidate envelope, and invokes the accepted two-phase writer.
+- Executable proof caught three defects which structural shape alone had not:
+  the valid-index result was initially disconnected from the found branch;
+  `PersistRepositoryV1` reset `ResultRecordIndexV1` before the post-commit
+  derived update; and the pure `current+1` node reevaluated after staging,
+  reporting one revision too high. The permanent contracts now require the
+  found condition link, pre-writer `ScratchIndexV1` cache/post-writer restore,
+  and success outputs sourced from the already-staged authoritative revision
+  and document rather than mutable pure recomputation.
+- The compiled-actor suite passed a private revision-1 fixture, missing ID,
+  wrong owner, optimistic conflict with current-revision disclosure, blank
+  timestamp, waypoint ceiling, region mismatch, serialized ceiling, two
+  successful saves, immutable ID/owner/title/visibility/creation/publication/
+  attribution preservation, stale-write rejection, owner-only reload, and the
+  exact committed physical payload. Rejections proved unchanged generation,
+  slot, envelopes, tombstones, and derived indexes.
+- Deterministic progression was `revision 1 / generation 1 / slot A`, then
+  `revision 2 / generation 2 / slot B`, then `revision 3 / generation 3 /
+  slot A`. After guarded editor exit, a fresh commandlet recovered revision 3,
+  denied the wrong owner, rejected stale expected revision 2 without mutation,
+  resumed at revision 4/generation 4/slot B, verified the committed physical
+  payload, and deleted both A/B fixtures.
+- A separate fresh `-ModDevKit -NullRHI` process loaded all nine core assets,
+  compiled every Blueprint, emitted `EDD_COLD_LOAD|RESULT|PASS`, and reported
+  zero errors. Exact post-compile SaveDraftV1 export SHA-256 is
+  `2873CEEA9250D963FC2E89EF4204523F991492B92FA3C83C43218E7174938347`.
+  FromDevKit preview found 16 unchanged assets and exactly one reviewed
+  repository conflict; forced sync copied only that package. Live/mirror
+  repository SHA-256 is
+  `5057B36DD2347F0DF51DEA3B938874EC2A61B00353801F9F94D58422EF45D879`.
+- Next ordered private CRUD slice is owner-filtered private listing. No UI,
+  cook, or Workshop work.

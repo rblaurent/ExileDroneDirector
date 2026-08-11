@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.45.0-private-flypath-create`
+Current internal build: `0.46.0-private-draft-save`
 
 ## 1. Delivery strategy
 
@@ -483,11 +483,14 @@ before any polished editor UI or cook is attempted:
    two-process Blueprint SaveGame round trip all pass. The executable probe
    changes authority from generation 41 to 42, verifies the exact committed
    Unicode payload in a fresh process, and removes its isolated fixture.
-4. **Current:** private owner-only load and private-by-default create are
-   accepted. Implement `SaveDraftV1` next, followed by private list and delete,
-   then prove optimistic revisions, atomic save behavior,
-   corruption recovery, schema migration hooks, limit validation, and typed
-   failures through executable tests.
+4. **Current:** private owner-only load, private-by-default create, and
+   owner-only optimistic `SaveDraftV1` are accepted. Save replaces exactly one
+   candidate envelope through the two-phase writer, advances only from the
+   stored revision, preserves immutable metadata, publishes results only after
+   physical commit, and survives fresh-process recovery/resumed writing.
+   Implement private list next, followed by private delete, then extend the
+   accepted corruption recovery, schema migration hooks, limits, and typed
+   failures across the remaining CRUD boundaries.
 5. Implement server-authoritative ownership, privacy, publication, immutable
    snapshots, discovery, playback fetch, and private cloning with attribution.
 6. Implement the complete trajectory compiler: linear and cinematic curves,

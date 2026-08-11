@@ -68,6 +68,8 @@ $requiredFiles = @(
     'tools\unreal\Validate-RepositoryPrivateDraftLoad.py',
     'tools\unreal\Validate-RepositoryPrivateCreate.py',
     'tools\unreal\Validate-RepositoryPrivateCreateRestart.py',
+    'tools\unreal\Validate-RepositoryPrivateSave.py',
+    'tools\unreal\Validate-RepositoryPrivateSaveRestart.py',
     'tools\unreal\Read-RepositoryPersistenceWriter.py',
     'tools\unreal\Open-RepositoryServiceEditor.py',
     'tools\unreal\Validate-RepositoryJsonCodec.py',
@@ -103,6 +105,7 @@ $requiredFiles = @(
     'tools\blueprint\Build-RepositoryCoreGraphs.py',
     'tools\blueprint\Build-RepositoryPrivateDraftLoadGraph.py',
     'tools\blueprint\Build-RepositoryPrivateCreateGraph.py',
+    'tools\blueprint\Build-RepositoryPrivateSaveGraph.py',
     'tools\blueprint\Build-RepositoryJsonMissingNodeProbe.py',
     'tools\blueprint\Build-RepositoryDecoderNativeNodeProbe.py',
     'tools\blueprint\Test-RepositoryJsonNodeForms.py',
@@ -139,6 +142,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\blueprint\Test-RepositoryPrivateDraftLoadContracts.py',
     'tools\blueprint\Test-RepositoryPrivateCreateContracts.py',
+    'tools\blueprint\Test-RepositoryPrivateSaveContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -233,10 +237,13 @@ $requiredFiles = @(
     'tools\blueprint\snippets\load-draft-v1-paste.eddgraph',
     'tools\blueprint\snippets\create-private-flypath-v1.eddgraph',
     'tools\blueprint\snippets\create-private-flypath-v1-paste.eddgraph',
+    'tools\blueprint\snippets\save-draft-v1.eddgraph',
+    'tools\blueprint\snippets\save-draft-v1-paste.eddgraph',
     'tools\blueprint\live-snippets\reset-repository-result-v1.eddgraph',
     'tools\blueprint\live-snippets\find-record-index-v1.eddgraph',
     'tools\blueprint\live-snippets\load-draft-v1.eddgraph',
     'tools\blueprint\live-snippets\create-private-flypath-v1.eddgraph',
+    'tools\blueprint\live-snippets\save-draft-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-waypoint-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-segment-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-document-v1.eddgraph',
@@ -1350,6 +1357,53 @@ $repositoryPrivateCreateLive = Join-Path $ProjectRoot 'tools\blueprint\live-snip
     --input $repositoryPrivateCreateLive
 if ($LASTEXITCODE -ne 0) {
     throw "Repository private-create live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryPrivateSaveNonce = [guid]::NewGuid().ToString('N')
+$repositoryPrivateSaveRoot = Join-Path $scratchRoot "edd-repository-private-save-$repositoryPrivateSaveNonce"
+$repositoryPrivateSaveFull = Join-Path $repositoryPrivateSaveRoot 'full'
+$repositoryPrivateSavePaste = Join-Path $repositoryPrivateSaveRoot 'paste'
+New-Item -ItemType Directory -Force -Path $repositoryPrivateSaveFull, $repositoryPrivateSavePaste | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryPrivateSaveGraph.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryPrivateSaveFull `
+    --paste-dir $repositoryPrivateSavePaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-save graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryPrivateSaveFull, $repositoryPrivateSavePaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateSaveContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPrivateSaveFull 'save-draft-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-save full contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateSaveContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPrivateSavePaste 'save-draft-v1-paste.eddgraph') `
+    --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-save paste contracts failed with exit code $LASTEXITCODE."
+}
+foreach ($pair in @(
+    @((Join-Path $repositoryPrivateSaveFull 'save-draft-v1.eddgraph'), 'tools\blueprint\snippets\save-draft-v1.eddgraph'),
+    @((Join-Path $repositoryPrivateSavePaste 'save-draft-v1-paste.eddgraph'), 'tools\blueprint\snippets\save-draft-v1-paste.eddgraph')
+)) {
+    $checkedIn = Join-Path $ProjectRoot $pair[1]
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $pair[0]).Hash -ne
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $checkedIn).Hash) {
+        throw "Repository private-save graph is not deterministic: $($pair[1])"
+    }
+}
+$repositoryPrivateSaveLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets\save-draft-v1.eddgraph'
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $repositoryPrivateSaveLive
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateSaveContracts.py') `
+    --project-root $ProjectRoot `
+    --input $repositoryPrivateSaveLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-save live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-DocumentSyncStructForms.py') `

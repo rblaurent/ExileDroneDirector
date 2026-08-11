@@ -256,8 +256,13 @@ copy-on-write writer, and mutates derived indexes only after the physical commit
 succeeds. The compiled actor passed scalar invalid-input and collision
 isolation, deterministic ID/index/revision behavior, two successive A/B
 SaveGame commits, immediate owner-only loads, fresh-process recovery and owner
-isolation, fixture cleanup, and a fresh cold compile. Private save, list, and
-delete are the next CRUD slices.
+isolation, fixture cleanup, and a fresh cold compile. `SaveDraftV1` now adds
+owner-only optimistic updates: it rejects missing/wrong-owner/stale/invalid/
+oversized requests without mutation, server-forces the next revision, preserves
+immutable record metadata, replaces exactly one candidate envelope, and exposes
+the updated document only after the two-phase SaveGame commit. Two interactive
+saves plus a fresh-process resumed save proved deterministic revisions and A/B
+generation alternation. Private list and delete are the next CRUD slices.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata
@@ -282,8 +287,8 @@ headless cold compile pass. Canonical whitespace and UTC ordering remain an
 explicit parity gap owned by the next repository boundary. Alternating-slot
 state transitions, exact native SaveGame construction forms, connected raw slot
 reads, deterministic recovery, the two-phase writer, owner-only private draft
-loading, and private-by-default creation are accepted; private save/list/delete
-are the next runtime milestones.
+loading, private-by-default creation, and owner-only optimistic private saving
+are accepted; private list/delete are the next runtime milestones.
 
 ## Repository layout
 

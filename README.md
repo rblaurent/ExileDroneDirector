@@ -232,9 +232,15 @@ executed typed cast. The read half is now connected live: two narrow slot
 readers perform existence/load/typed-cast/property staging, and a coordinator
 resets state, reads A then B, and validates both headers. Exact Unreal exports
 pass before and after compile/save plus a fresh cold compile. These functions
-intentionally stop at raw slot staging; authority selection, per-record
-fallback, authoritative memory replacement, and the two-phase writer remain
-required before runtime persistence is claimed.
+intentionally stop at raw slot staging. The next recovery-order layer is now
+connected live as eight small functions: it resets selection state, compares
+ordered record/tombstone arrays, stages one or two eligible generations, picks
+newest-first deterministically, accepts identical equal-generation peers with a
+B tie-break, and fails closed on divergent equal-generation peers. Exact live
+exports pass before and after compile/save plus a fresh nine-asset cold load.
+Tombstone validation/merge, per-record corrupt-newest fallback, authoritative
+memory replacement, and the two-phase writer remain required before runtime
+persistence is claimed.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata
@@ -258,8 +264,8 @@ attribution. Their 230-node Unreal round-trips, full compile/save, and fresh
 headless cold compile pass. Canonical whitespace and UTC ordering remain an
 explicit parity gap owned by the next repository boundary. Alternating-slot
 state transitions, exact native SaveGame construction forms, and connected raw
-slot reads are accepted; authority selection, record recovery, the write
-adapter, and private
+slot reads plus deterministic authority ordering are accepted; tombstone and
+record recovery, the write adapter, and private
 create/save/load/list/delete are the next runtime milestones.
 
 ## Repository layout

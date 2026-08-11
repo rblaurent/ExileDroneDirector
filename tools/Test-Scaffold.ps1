@@ -117,6 +117,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryPersistenceStateContracts.py',
     'tools\blueprint\Build-RepositorySaveGameAdapterGraphs.py',
     'tools\blueprint\Test-RepositorySaveGameAdapterContracts.py',
+    'tools\blueprint\Build-RepositoryRecoverySelectionGraphs.py',
+    'tools\blueprint\Test-RepositoryRecoverySelectionContracts.py',
     'tools\blueprint\Test-RepositorySaveGameNodeForms.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
@@ -233,6 +235,14 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\read-repository-storage-slot-a-v1.eddgraph',
     'tools\blueprint\live-snippets\read-repository-storage-slot-b-v1.eddgraph',
     'tools\blueprint\live-snippets\read-repository-storage-slots-v1.eddgraph',
+    'tools\blueprint\live-snippets\reset-recovery-selection-v1.eddgraph',
+    'tools\blueprint\live-snippets\compare-recovery-string-arrays-v1.eddgraph',
+    'tools\blueprint\live-snippets\compare-equal-generation-storage-v1.eddgraph',
+    'tools\blueprint\live-snippets\stage-recovery-a-only-v1.eddgraph',
+    'tools\blueprint\live-snippets\stage-recovery-b-only-v1.eddgraph',
+    'tools\blueprint\live-snippets\stage-recovery-a-newer-v1.eddgraph',
+    'tools\blueprint\live-snippets\stage-recovery-b-newer-v1.eddgraph',
+    'tools\blueprint\live-snippets\select-repository-recovery-order-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -922,6 +932,49 @@ foreach ($graphName in @(
     --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets')
 if ($LASTEXITCODE -ne 0) {
     throw "Repository SaveGame adapter live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+$repositoryRecoverySelectionNonce = [guid]::NewGuid().ToString('N')
+$repositoryRecoverySelectionRoot = Join-Path $scratchRoot "edd-repository-recovery-selection-$repositoryRecoverySelectionNonce"
+$repositoryRecoverySelectionFull = Join-Path $repositoryRecoverySelectionRoot 'full'
+$repositoryRecoverySelectionPaste = Join-Path $repositoryRecoverySelectionRoot 'paste'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryRecoverySelectionGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryRecoverySelectionFull `
+    --paste-dir $repositoryRecoverySelectionPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository recovery-selection generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryRecoverySelectionFull,$repositoryRecoverySelectionPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecoverySelectionContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryRecoverySelectionFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository recovery-selection contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecoverySelectionContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryRecoverySelectionPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository recovery-selection paste contracts failed with exit code $LASTEXITCODE."
+}
+$repositoryRecoverySelectionLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets'
+foreach ($graphName in @(
+    'reset-recovery-selection-v1.eddgraph',
+    'compare-recovery-string-arrays-v1.eddgraph',
+    'compare-equal-generation-storage-v1.eddgraph',
+    'stage-recovery-a-only-v1.eddgraph',
+    'stage-recovery-b-only-v1.eddgraph',
+    'stage-recovery-a-newer-v1.eddgraph',
+    'stage-recovery-b-newer-v1.eddgraph',
+    'select-repository-recovery-order-v1.eddgraph'
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+        -Path (Join-Path $repositoryRecoverySelectionLive $graphName)
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecoverySelectionContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryRecoverySelectionLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository recovery-selection live contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')

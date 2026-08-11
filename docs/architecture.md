@@ -600,6 +600,20 @@ generation, recover individual records, replace repository memory, or report a
 successful repository load. Those responsibilities remain in the recovery
 layer, keeping raw I/O failure terminals separate from semantic recovery.
 
+Recovery ordering is a second accepted layer, deliberately separate from raw
+I/O and record decoding. `ResetRecoverySelectionV1` clears every recovery
+scratch channel. `CompareRecoveryStringArraysV1` compares ordered arrays by
+length and exact item equality; `CompareEqualGenerationStorageV1` applies it to
+both record envelopes and tombstones. Four staging functions copy an eligible
+A-only, B-only, A-newer, or B-newer pair into explicit newest/older channels.
+`SelectRepositoryRecoveryOrderV1` chooses among those cases after header
+validation. Identical equal-generation peers select B deterministically without
+claiming two generations; unequal equal-generation peers set
+`ScratchRecoveryFailedV1` and `DivergentEqualGeneration` and stage no authority.
+This layer still does not validate tombstone semantics, decode individual
+records, fall back corrupt newest records to older envelopes, replace active
+repository memory, or set `RepositoryLoadedV1`.
+
 The accepted Enhanced 5.6 construction seam is deliberately version-specific.
 All four `GameplayStatics` calls (`DoesSaveGameExist`, `LoadGameFromSlot`,
 `CreateSaveGameObject`, `SaveGameToSlot`) carry execution pins. Configuring

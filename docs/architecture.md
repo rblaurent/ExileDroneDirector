@@ -388,6 +388,16 @@ flags. Blueprint structs, Blueprint validation, server DTOs, and persistence
 adapters must produce the same fields and pass the same fixtures before replacing
 the transient six-array bridge.
 
+The server Blueprint's codec boundary uses dedicated scratch state rather than
+aliasing request or result fields. `ScratchDocumentV1` plus encoded document and
+record strings are the document codec seam. Record identity, ownership,
+metadata, draft/published documents, and source attribution each have explicit
+`ScratchRecord...V1` fields; `HasPublishedRevision` and
+`HasSourceAttribution` remain typed booleans in Blueprint while the canonical
+JSON encoder writes actual `null` for absent optional payloads. This makes each
+codec function independently callable and testable before CRUD graphs compose
+it, and prevents a nested encode/decode call from corrupting a staged request.
+
 ## 6. Ownership, visibility, and identity
 
 The server derives `RequesterAccountId` from the authenticated player/controller

@@ -1897,6 +1897,14 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   commandlet; the accepted cleanup marker is
   `EDD_JSON_NODE_PROBE_DELETE:DELETED:True` and the physical package must be
   absent afterward.
+- Conan's Python module does not expose `unreal.KismetMathLibrary` directly.
+  Load `/Script/Engine.KismetMathLibrary` with `unreal.load_class`, then call
+  `unreal.get_type_from_class`; Enhanced returns the generated `MathLibrary`
+  Python type. Reflection proves the codec-critical
+  `conv_rotator_to_quaternion`, `quat_rotator`, `quat_is_finite`,
+  `quat_is_normalized`, and `quat_normalized` functions. This preserves the
+  canonical quaternion document contract while the current authoring bridge
+  still stores an Unreal `Transform`.
 
 ## Pending local reconnaissance
 

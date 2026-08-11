@@ -37,6 +37,32 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         self.assertIn("RequestDraftDocumentV1", names)
         self.assertIn("ResultDraftDocumentV1", names)
 
+    def test_codec_staging_is_explicit_and_not_aliased_to_request_results(self) -> None:
+        by_name = {field["name"]: field for field in SCHEMA["variables"]}
+        expected = {
+            "ScratchDocumentV1": "ST_EDD_FlypathDocument",
+            "ScratchEncodedDocumentV1": "String",
+            "ScratchEncodedRecordV1": "String",
+            "ScratchRecordFlypathIdV1": "String",
+            "ScratchRecordOwnerAccountIdV1": "String",
+            "ScratchRecordVisibilityV1": "String",
+            "ScratchRecordDraftRevisionNumberV1": "Integer",
+            "ScratchRecordDraftDocumentV1": "ST_EDD_FlypathDocument",
+            "ScratchRecordHasPublishedRevisionV1": "Boolean",
+            "ScratchRecordPublishedRevisionNumberV1": "Integer",
+            "ScratchRecordPublishedDocumentV1": "ST_EDD_FlypathDocument",
+            "ScratchRecordHasSourceAttributionV1": "Boolean",
+            "ScratchRecordSourceFlypathIdV1": "String",
+            "ScratchRecordSourceRevisionNumberV1": "Integer",
+        }
+        for name, field_type in expected.items():
+            self.assertIn(name, by_name)
+            self.assertEqual(by_name[name]["type"], field_type)
+            self.assertEqual(by_name[name]["container"], "None")
+        self.assertEqual(by_name["ScratchRecordVisibilityV1"]["default"], "private")
+        self.assertFalse(by_name["ScratchRecordHasPublishedRevisionV1"]["default"])
+        self.assertFalse(by_name["ScratchRecordHasSourceAttributionV1"]["default"])
+
     def test_only_automatable_variable_types_are_used(self) -> None:
         supported = {
             "Boolean",

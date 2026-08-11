@@ -59,6 +59,7 @@ $requiredFiles = @(
     'tools\unreal\Probe-HashEncodingApi.py',
     'tools\unreal\Prepare-RepositoryJsonNodeProbe.py',
     'tools\unreal\Inspect-RepositoryJsonBlueprintApi.py',
+    'tools\unreal\Inspect-QuaternionBlueprintApi.py',
     'tools\unreal\Delete-RepositoryJsonNodeProbe.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',

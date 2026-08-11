@@ -283,6 +283,14 @@ This section is the authoritative handoff. Detailed evidence remains in
   `DecodeJson`. The disposable probe asset was deleted in a fresh process.
   Repository codec graph composition can now proceed deterministically without
   further action-menu discovery.
+- The repository service schema now specifies dedicated document/record codec
+  staging, including explicit draft/published documents, owner/metadata fields,
+  optional-payload flags, and source attribution. It is intentionally not yet
+  applied to the live `.uasset`: apply it in the same editor transaction that
+  installs the codec graphs, then re-export the already installed core graphs
+  and cold-load the final package once. Quaternion conversion reflection also
+  proves the current Transform bridge can emit/consume the canonical normalized
+  quaternion representation without changing the persisted schema.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
   directly to G-Portal.
 

@@ -93,6 +93,7 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         supported = {
             "Boolean",
             "Integer",
+            "Real",
             "String",
             "ST_EDD_FlypathDocument",
             "ST_EDD_Waypoint",
@@ -105,6 +106,20 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             self.assertIn(field["container"], {"None", "Array"})
             if field["container"] == "Array":
                 self.assertNotIn("default", field)
+
+    def test_real_type_uses_the_devkit_supported_basic_type_key(self) -> None:
+        configurator = (
+            ROOT.parent / "unreal" / "Configure-RepositoryService.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            '"Real": unreal.BlueprintEditorLibrary.get_basic_type_by_name("real")',
+            configurator,
+        )
+        self.assertNotIn(
+            '"Real": unreal.BlueprintEditorLibrary.get_basic_type_by_name("double")',
+            configurator,
+        )
+        self.assertIn("expected_basic_pin_fragments", configurator)
 
     def test_crud_and_codec_function_boundaries_are_explicit(self) -> None:
         functions = SCHEMA["functions"]
@@ -125,6 +140,12 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "DecodeRecordPublishedFieldsV1",
             "DecodeRecordSourceAttributionV1",
             "DecodeRecordV1",
+            "ValidateWaypointV1",
+            "ValidateSegmentV1",
+            "ValidateDocumentV1",
+            "ValidateRecordPublishedV1",
+            "ValidateRecordSourceAttributionV1",
+            "ValidateRecordV1",
             "CreatePrivateFlypathV1",
             "SaveDraftV1",
             "LoadDraftV1",

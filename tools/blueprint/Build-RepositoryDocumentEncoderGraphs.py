@@ -92,6 +92,8 @@ def type_parts(kind: str) -> tuple[str, str, str]:
         return "bool", "", "None"
     if kind == "int":
         return "int", "", "None"
+    if kind == "real":
+        return "real", "double", "None"
     if kind == "string":
         return "string", "", "None"
     if kind == "json":

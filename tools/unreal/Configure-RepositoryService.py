@@ -82,6 +82,10 @@ if storage_class is None:
 types = {
     "Boolean": unreal.BlueprintEditorLibrary.get_basic_type_by_name("bool"),
     "Integer": unreal.BlueprintEditorLibrary.get_basic_type_by_name("int"),
+    # UE 5.6 silently falls back to an integer pin for unknown basic type
+    # names. "double" is not a valid key here; "real" produces a Blueprint
+    # double (PinCategory=real, PinSubCategory=double).
+    "Real": unreal.BlueprintEditorLibrary.get_basic_type_by_name("real"),
     "String": unreal.BlueprintEditorLibrary.get_basic_type_by_name("string"),
     "ST_EDD_FlypathDocument": unreal.BlueprintEditorLibrary.get_struct_type(document),
     "ST_EDD_Waypoint": unreal.BlueprintEditorLibrary.get_struct_type(waypoint),
@@ -89,6 +93,20 @@ types = {
     "PlayFabJsonObject": unreal.BlueprintEditorLibrary.get_object_reference_type(unreal.PlayFabJsonObject),
     "SG_EDD_RepositoryStorage": unreal.BlueprintEditorLibrary.get_object_reference_type(storage_class),
 }
+
+expected_basic_pin_fragments = {
+    "Boolean": 'PinCategory="bool"',
+    "Integer": 'PinCategory="int"',
+    "Real": 'PinCategory="real",PinSubCategory="double"',
+    "String": 'PinCategory="string"',
+}
+for type_name, expected_fragment in expected_basic_pin_fragments.items():
+    exported_type = types[type_name].export_text()
+    if expected_fragment not in exported_type:
+        raise RuntimeError(
+            f"Blueprint basic type {type_name} resolved incorrectly: {exported_type}"
+        )
+    emit("TYPE_VERIFIED", f"{type_name}={expected_fragment}")
 
 for field in schema["variables"]:
     name = field["name"]

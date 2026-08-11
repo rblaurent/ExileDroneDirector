@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.34.0-record-codec-contract`
+Current internal build: `0.35.0-validation-contract`
 
 ## 1. Delivery strategy
 
@@ -364,6 +364,23 @@ This section is the authoritative handoff. Detailed evidence remains in
   links. A fresh commandlet compiled all nine core assets with zero errors; the
   live and Git-mirror repository SHA-256 is
   `DBCCCACC223F164276AAE887C804CCEB2F9F30F399019302BF72B7DAFCD22B2B`.
+- The complete structural/semantic validation layer is now accepted live.
+  `ValidateWaypointV1` is 66 nodes, `ValidateSegmentV1` 40,
+  `ValidateDocumentV1` 47, `ValidateRecordPublishedV1` 18,
+  `ValidateRecordSourceAttributionV1` 12, and `ValidateRecordV1` 47. The
+  230-node live round-trip suite proves finite and domain-valid camera values,
+  unit scale, positive unique IDs, exact adjacency, finite positive segment
+  durations, required/versioned document metadata, exact accumulated duration,
+  private/public policy, optional published-snapshot rules, revision ordering,
+  and clone-attribution requirements. Generated full graphs, compact paste
+  graphs, exact live exports, repository-wide compile/save, and a fresh
+  `-ModDevKit -NullRHI` cold compile all pass. Live and Git-mirror repository
+  SHA-256 is
+  `AF95AA2E9DF5F3AFEC28307A0B441CE398E0D7FC5B3727385930A1F184C96E5B`.
+  Canonical whitespace trimming and canonical/non-reversed UTC timestamps are
+  still enforced by the executable repository oracle but not yet by these
+  Blueprint validator graphs; persistence/CRUD must not claim full oracle
+  parity until those checks are implemented or placed at a proven boundary.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported
@@ -382,7 +399,7 @@ before any polished editor UI or cook is attempted:
 
 1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
    owner identity, visibility, revision, attribution, published snapshot,
-   structural integrity mode, and validation contracts.
+   structural integrity mode, codecs, and live Blueprint validation contracts.
 2. **Current:** implement private create/save/load/list/delete and deterministic
    restart recovery on top of the accepted record-envelope codecs.
    `EncodeWaypointV1`, `EncodeSegmentV1`, `EncodeDocumentV1`, all three matching

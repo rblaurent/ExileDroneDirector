@@ -106,6 +106,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryRecordEncoderContracts.py',
     'tools\blueprint\Build-RepositoryRecordDecoderGraphs.py',
     'tools\blueprint\Test-RepositoryRecordDecoderContracts.py',
+    'tools\blueprint\Build-RepositoryValidationGraphs.py',
+    'tools\blueprint\Test-RepositoryValidationContracts.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
@@ -206,6 +208,12 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\decode-record-published-fields-v1.eddgraph',
     'tools\blueprint\live-snippets\decode-record-source-attribution-v1.eddgraph',
     'tools\blueprint\live-snippets\decode-record-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-waypoint-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-segment-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-document-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-record-published-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-record-source-attribution-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-record-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -774,6 +782,39 @@ foreach ($recordDecoderName in @(
     --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets')
 if ($LASTEXITCODE -ne 0) {
     throw "Live repository record decoder contracts failed with exit code $LASTEXITCODE."
+}
+$repositoryValidationNonce = [guid]::NewGuid().ToString('N')
+$repositoryValidationRoot = Join-Path $scratchRoot "edd-repository-validation-$repositoryValidationNonce"
+$repositoryValidationFull = Join-Path $repositoryValidationRoot 'full'
+$repositoryValidationPaste = Join-Path $repositoryValidationRoot 'paste'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryValidationGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryValidationFull `
+    --paste-dir $repositoryValidationPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository validation generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryValidationFull -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryValidationPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryValidationContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryValidationFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository validation contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryValidationContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryValidationPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository validation paste contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryValidationContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository validation live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')

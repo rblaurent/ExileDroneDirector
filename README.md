@@ -229,8 +229,13 @@ the unbound action menu does not expose reliably. The complete record-envelope
 codec is now accepted live as well: three encoders and three strict decoders
 compile in the repository actor, round-trip through Unreal, and reject malformed,
 mistyped, reordered, noncanonical, or non-object record envelopes before validity
-can be committed. Private create/save/load/list/delete and restart recovery are
-the next runtime milestone.
+can be committed. Six live semantic validators now add finite/domain-safe camera
+values, unique positive IDs, exact segment adjacency, document topology and
+duration accounting, visibility/publication rules, revision ordering, and clone
+attribution. Their 230-node Unreal round-trips, full compile/save, and fresh
+headless cold compile pass. Canonical whitespace and UTC ordering remain an
+explicit parity gap owned by the next repository boundary. Private
+create/save/load/list/delete and restart recovery are the next runtime milestone.
 
 ## Repository layout
 

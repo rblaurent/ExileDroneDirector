@@ -2759,3 +2759,51 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `6360F36C3FC2EA620514595F4DFD55CAE30FBF6C94C0F90A17366C1CE2CE65A4`.
 - Next ordered private CRUD slice is owner-only private delete through the
   accepted tombstone/persistence boundary. No UI, cook, or Workshop work.
+
+## Owner-only optimistic private delete accepted (2026-08-12)
+
+- Internal checkpoint `0.48.0-private-delete` implements `DeleteFlypathV1` as
+  a 64-node live function. It resets results, resolves the derived index,
+  caches that index privately, immediately sanitizes the public result index,
+  then authorizes the exact owner before decoding any stored envelope. The
+  decoded ID/owner and parallel derived arrays must agree before the optimistic
+  expected-revision check is allowed to disclose the current revision.
+- The mutation is copy-on-write: `PreparePersistenceCandidateV1` clones active
+  state, the cached index is removed from the candidate record array, the ID is
+  appended to the candidate tombstone channel, and `PersistRepositoryV1` calls
+  the accepted two-phase writer. Only its committed-success branch removes the
+  same cached index, in order, from all four derived arrays. Rejections and
+  failed persistence therefore cannot alter authoritative in-memory state.
+- The first executable run caught a real result-hygiene bug: the shared lookup
+  helper exposed its found index to wrong owners. Graph v2 now copies the index
+  to `ScratchIndexV1` and clears `ResultRecordIndexV1` to `-1` before any found,
+  authorization, decode, or revision branch. The semantic contract requires
+  those exact reciprocal links and execution order; the corrected runtime proves
+  missing ID, wrong owner, blank owner, stale revision, corrupt envelope,
+  decoded/index identity mismatch, and repeat delete are mutation- and
+  SaveGame-free with all non-conflict result payloads cleared.
+- Successful runtime deletion removed only fixture A, committed generation 3 to
+  slot A, retained fixture B, aligned every derived index, and persisted the A
+  tombstone. Owner load, list, and repeat-delete boundaries agreed immediately.
+  After guarded editor shutdown, a fresh `-ModDevKit -NullRHI` process recovered
+  generation 3/slot A, proved A remained deleted and B loadable/listed, deleted B
+  through the compiled function, committed generation 4 to slot B with no
+  records and ordered tombstones `[A,B]`, reloaded that state, proved both IDs
+  absent and the owner list empty, then removed both acceptance slots.
+- Exact compile/save log interval `2013..2021` contained the marked begin/save/
+  end sequence with `SAVED|True` and zero errors. The exact post-compile graph
+  SHA-256 is
+  `C0CDE0523650BC3B93A54081B497A46FB506CBDC7A44300EF5EFE3C21F2EF854`.
+  A separate fresh commandlet loaded all nine required assets, compiled every
+  Blueprint, emitted `EDD_COLD_LOAD|RESULT|PASS`, and reported zero errors.
+- Closed-editor FromDevKit preview found 16 unchanged assets and exactly one
+  reviewed repository conflict; forced sync copied only that package. Live and
+  mirror repository SHA-256 is
+  `F9D40D02D107353C8FDB3CD7ECBC563E8B61F6760A108CA2052187C4A043F970`.
+- A folded delete layout placed a node under the list-era `(1300,740)` export
+  point; selection there silently captured the wrong count. The verified blank
+  canvas point for this function is `(600,700)`. As with prior seams, hover both
+  endpoints until their tooltips say `Exec`, wire once, export the exact node
+  count, and require reciprocal-link contracts before compiling.
+- Private create/load/save/list/delete is now accepted backend work. The next
+  ordered slice is publication and sharing policy—not UI, cook, or Workshop.

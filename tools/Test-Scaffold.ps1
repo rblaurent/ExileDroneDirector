@@ -72,6 +72,8 @@ $requiredFiles = @(
     'tools\unreal\Validate-RepositoryPrivateSaveRestart.py',
     'tools\unreal\Validate-RepositoryPrivateList.py',
     'tools\unreal\Validate-RepositoryPrivateListRestart.py',
+    'tools\unreal\Validate-RepositoryPrivateDelete.py',
+    'tools\unreal\Validate-RepositoryPrivateDeleteRestart.py',
     'tools\unreal\Read-RepositoryPersistenceWriter.py',
     'tools\unreal\Open-RepositoryServiceEditor.py',
     'tools\unreal\Validate-RepositoryJsonCodec.py',
@@ -109,6 +111,7 @@ $requiredFiles = @(
     'tools\blueprint\Build-RepositoryPrivateCreateGraph.py',
     'tools\blueprint\Build-RepositoryPrivateSaveGraph.py',
     'tools\blueprint\Build-RepositoryPrivateListGraph.py',
+    'tools\blueprint\Build-RepositoryPrivateDeleteGraph.py',
     'tools\blueprint\Build-RepositoryJsonMissingNodeProbe.py',
     'tools\blueprint\Build-RepositoryDecoderNativeNodeProbe.py',
     'tools\blueprint\Test-RepositoryJsonNodeForms.py',
@@ -147,6 +150,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryPrivateCreateContracts.py',
     'tools\blueprint\Test-RepositoryPrivateSaveContracts.py',
     'tools\blueprint\Test-RepositoryPrivateListContracts.py',
+    'tools\blueprint\Test-RepositoryPrivateDeleteContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -243,11 +247,14 @@ $requiredFiles = @(
     'tools\blueprint\snippets\create-private-flypath-v1-paste.eddgraph',
     'tools\blueprint\snippets\save-draft-v1.eddgraph',
     'tools\blueprint\snippets\save-draft-v1-paste.eddgraph',
+    'tools\blueprint\snippets\delete-flypath-v1.eddgraph',
+    'tools\blueprint\snippets\delete-flypath-v1-paste.eddgraph',
     'tools\blueprint\live-snippets\reset-repository-result-v1.eddgraph',
     'tools\blueprint\live-snippets\find-record-index-v1.eddgraph',
     'tools\blueprint\live-snippets\load-draft-v1.eddgraph',
     'tools\blueprint\live-snippets\create-private-flypath-v1.eddgraph',
     'tools\blueprint\live-snippets\save-draft-v1.eddgraph',
+    'tools\blueprint\live-snippets\delete-flypath-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-waypoint-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-segment-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-document-v1.eddgraph',
@@ -1465,6 +1472,53 @@ foreach ($graph in @(
     --input-dir $repositoryCoreLive
 if ($LASTEXITCODE -ne 0) {
     throw "Repository private-list live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryPrivateDeleteNonce = [guid]::NewGuid().ToString('N')
+$repositoryPrivateDeleteRoot = Join-Path $scratchRoot "edd-repository-private-delete-$repositoryPrivateDeleteNonce"
+$repositoryPrivateDeleteFull = Join-Path $repositoryPrivateDeleteRoot 'full'
+$repositoryPrivateDeletePaste = Join-Path $repositoryPrivateDeleteRoot 'paste'
+New-Item -ItemType Directory -Force -Path $repositoryPrivateDeleteFull, $repositoryPrivateDeletePaste | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryPrivateDeleteGraph.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryPrivateDeleteFull `
+    --paste-dir $repositoryPrivateDeletePaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-delete graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryPrivateDeleteFull, $repositoryPrivateDeletePaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateDeleteContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPrivateDeleteFull 'delete-flypath-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-delete full contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateDeleteContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPrivateDeletePaste 'delete-flypath-v1-paste.eddgraph') `
+    --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-delete paste contracts failed with exit code $LASTEXITCODE."
+}
+foreach ($pair in @(
+    @((Join-Path $repositoryPrivateDeleteFull 'delete-flypath-v1.eddgraph'), 'tools\blueprint\snippets\delete-flypath-v1.eddgraph'),
+    @((Join-Path $repositoryPrivateDeletePaste 'delete-flypath-v1-paste.eddgraph'), 'tools\blueprint\snippets\delete-flypath-v1-paste.eddgraph')
+)) {
+    $checkedIn = Join-Path $ProjectRoot $pair[1]
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $pair[0]).Hash -ne
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $checkedIn).Hash) {
+        throw "Repository private-delete graph is not deterministic: $($pair[1])"
+    }
+}
+$repositoryPrivateDeleteLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets\delete-flypath-v1.eddgraph'
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $repositoryPrivateDeleteLive
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateDeleteContracts.py') `
+    --project-root $ProjectRoot `
+    --input $repositoryPrivateDeleteLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-delete live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-DocumentSyncStructForms.py') `

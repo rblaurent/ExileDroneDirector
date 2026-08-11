@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.47.0-private-list`
+Current internal build: `0.48.0-private-delete`
 
 ## 1. Delivery strategy
 
@@ -297,6 +297,17 @@ This section is the authoritative handoff. Detailed evidence remains in
   cleanup, and a separate cold load all pass. This accepts private listing only;
   delete, publication/discovery, clone, playback, trajectory, events, and UX
   remain ordered work.
+- `DeleteFlypathV1` is now the accepted owner-only optimistic private-delete
+  boundary. It authorizes through the derived owner index before decoding,
+  validates decoded/index identity and the expected draft revision, removes the
+  record only from the copy-on-write candidate, appends one tombstone, and
+  mutates all derived arrays only after the accepted two-phase SaveGame writer
+  commits. Generated full/paste graphs, an exact post-compile export, marked
+  compile/save, executable rejection and success cases, a guarded restart,
+  second alternating-slot delete, final reload, fixture cleanup, and an
+  independent cold compile all pass. This accepts private CRUD only; publishing,
+  discovery, cloning, playback, trajectory, events, keyboard dogfood, and UX
+  remain ordered work.
 - Runtime persistence integrity is frozen as explicit `structural-v1` after an
   Enhanced reflection probe found no Blueprint/Python digest helper. Canonical
   envelopes now declare the mode, require reserved hash fields to remain empty,
@@ -493,16 +504,18 @@ before any polished editor UI or cook is attempted:
    changes authority from generation 41 to 42, verifies the exact committed
    Unicode payload in a fresh process, and removes its isolated fixture.
 4. **Complete:** private owner-only load, private-by-default create,
-   owner-only optimistic `SaveDraftV1`, and owner-filtered `ListMineV1` are
+   owner-only optimistic `SaveDraftV1`, owner-filtered `ListMineV1`, and
+   owner-only optimistic `DeleteFlypathV1` are
    accepted. Save replaces exactly one
    candidate envelope through the two-phase writer, advances only from the
    stored revision, preserves immutable metadata, publishes results only after
    physical commit, and survives fresh-process recovery/resumed writing. List
    is deterministic, metadata-only, read-only, owner-filtered, paged, and
-   independently proven after SaveGame restart.
-5. **Current:** implement private delete through the accepted tombstone writer,
-   then extend the accepted corruption recovery, schema migration hooks, limits,
-   and typed failures across the remaining CRUD boundaries.
+   independently proven after SaveGame restart. Delete writes an ordered
+   tombstone, removes aligned derived state only after physical commit, survives
+   a fresh-process recovery, and completes a second generation-4/slot-B delete.
+5. **Current:** extend the accepted corruption recovery, schema migration hooks,
+   limits, and typed failures across the publication and sharing boundaries.
 6. Implement server-authoritative ownership, privacy, publication, immutable
    snapshots, discovery, playback fetch, and private cloning with attribution.
 7. Implement the complete trajectory compiler: linear and cinematic curves,

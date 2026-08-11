@@ -267,7 +267,15 @@ metadata listing with offset/limit clamping, descending timestamp/ID ordering,
 strict selected-record decoding, atomic failure clearing, and no authority or
 SaveGame mutation. Its compiled runtime suite covers paging, ties, visibility,
 publication metadata, foreign/selected corruption, index misalignment, and a
-fresh-process recovery/list/cleanup cycle. Private delete is the next CRUD slice.
+fresh-process recovery/list/cleanup cycle. `DeleteFlypathV1` now completes the
+private CRUD boundary with owner-first authorization, optimistic revision
+checks, strict stored-record identity validation, copy-on-write removal, and an
+ordered tombstone committed through the accepted two-phase writer. Runtime
+acceptance proves every available no-write rejection, result-payload hygiene,
+aligned derived-index removal, physical A/B generations 3 and 4 across a fresh
+restart, deleted/survivor read boundaries, tombstone accumulation, final reload,
+fixture cleanup, and a separate cold compile. Publishing and sharing remain
+ordered backend work; this is not a completed mod or a UI/cook checkpoint.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata

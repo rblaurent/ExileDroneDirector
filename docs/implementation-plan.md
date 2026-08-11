@@ -309,6 +309,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   `toWaypointId`. It compiled with zero Blueprint/K2 errors, saved through
   Unreal's API, survived fresh-process cold compilation, and was mirrored with
   an exact live/Git SHA-256 match.
+- `EncodeDocumentV1` is now installed and accepted as the deterministic root
+  document encoder. Its post-save live export is exactly 37 nodes/146 pins,
+  contains zero incidental reroute nodes, encodes all scalar metadata plus
+  ordered segment and waypoint object arrays, and passed the semantic contract
+  before and after compile/save. It survived fresh-process cold compilation and
+  is mirrored with exact live/Git SHA-256
+  `52DF21CC7428D0472549E0233F3633FF9C0973887B347F005413C1EBA437DCF9`.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported
@@ -328,10 +335,11 @@ before any polished editor UI or cook is attempted:
 1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
    owner identity, visibility, revision, attribution, published snapshot,
    structural integrity mode, and validation contracts.
-2. **Current:** complete `EncodeDocumentV1`, the corresponding
-   decoders, and record-envelope codecs; then implement private
+2. **Current:** complete the document decoders and record-envelope codecs; then
+   implement private
    create/save/load/list/delete and deterministic restart recovery.
-   `EncodeWaypointV1`, `EncodeSegmentV1`, repository core, and exact
+   `EncodeWaypointV1`, `EncodeSegmentV1`, `EncodeDocumentV1`, repository core,
+   and exact
    numeric/null JSON node forms are accepted live-compiled proof, not remaining
    discovery work.
 3. Prove optimistic revisions, atomic save behavior, corruption recovery, schema

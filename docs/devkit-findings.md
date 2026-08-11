@@ -2026,3 +2026,35 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `912E7ABB6514F0A94CE5F36005ADD9DDFE8B408716272BCA2C8ED7DA13A2F9B6`.
 - Next codec target is `EncodeDocumentV1`; no cook or polished UI is authorized
   yet.
+
+## EncodeDocumentV1 accepted live (2026-08-11)
+
+- The deterministic 36-node paste body was installed only after the empty
+  `EncodeDocumentV1` target identity was exported and proven. The final native
+  function entry was connected to `ScratchRootJsonV1` at 1:1 zoom, then the
+  complete live export passed the document semantic contract as exactly 37
+  nodes/146 pins.
+- At `Zoom -4`, overlapping native entry/output nodes and tiny execution pins
+  produced harmless no-op drags. The reliable procedure is: export exact node
+  coordinates, separate overlaps, frame the entry/root seam, zoom to 1:1, make
+  one pin-center connection, and immediately re-export. Do not infer success
+  from cursor movement.
+- Moving the heavily connected `ScratchRootJsonV1` setter caused Enhanced to
+  insert 26 reroute knots. The closed-node contract rejected the 63-node state.
+  Undoing the connection and reroute transaction restored exactly 37 nodes;
+  reconnecting at 1:1 without another move preserved zero knots. Node count and
+  semantic closure are mandatory evidence, not formatting preferences.
+- `BlueprintEditorLibrary.compile_blueprint` completed with zero Blueprint/K2
+  warnings or errors, `save_loaded_asset(..., only_if_is_dirty=False)` returned
+  true, and the post-save graph contract passed again. The editor exited
+  gracefully with crash directories unchanged at 16.
+- A fresh `-ModDevKit` commandlet loaded and compiled every core Blueprint and
+  emitted `EDD_COLD_LOAD|RESULT|PASS` with zero errors. Dry sync found exactly
+  one repository asset conflict and 16 unchanged assets; forced FromDevKit sync
+  copied only that asset. Live and Git-mirror SHA-256 are both
+  `52DF21CC7428D0472549E0233F3633FF9C0973887B347F005413C1EBA437DCF9`.
+- Checked-in post-save evidence is
+  `tools/blueprint/live-snippets/encode-document-v1.eddgraph`, and the full
+  scaffold now validates its structure and document semantics. Next work is
+  document decoding, record-envelope codecs, private CRUD, and restart
+  persistence. No cook or polished UI is authorized yet.

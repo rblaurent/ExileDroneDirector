@@ -189,6 +189,7 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\find-record-index-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-waypoint-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-segment-v1.eddgraph',
+    'tools\blueprint\live-snippets\encode-document-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -639,6 +640,15 @@ if ($LASTEXITCODE -ne 0) {
     --only segment
 if ($LASTEXITCODE -ne 0) {
     throw "Live EncodeSegmentV1 contracts failed with exit code $LASTEXITCODE."
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path (Join-Path $ProjectRoot 'tools\blueprint\live-snippets\encode-document-v1.eddgraph')
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets') `
+    --only document
+if ($LASTEXITCODE -ne 0) {
+    throw "Live EncodeDocumentV1 contracts failed with exit code $LASTEXITCODE."
 }
 
 $repositoryCoreNonce = [guid]::NewGuid().ToString('N')

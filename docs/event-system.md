@@ -320,7 +320,7 @@ not advertise lease support.
 
 For Viewer Interaction and Server World scopes:
 
-1. Client starts playback with an immutable published revision/hash.
+1. Client starts playback with an immutable published Flypath ID and revision.
 2. Server validates revision/event availability and creates an optional bounded
    event session token.
 3. At the scheduled crossing or clip transition, the client submits Event ID,

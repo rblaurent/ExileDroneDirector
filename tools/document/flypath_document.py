@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
-from hashlib import sha256
 import json
 from math import isfinite, sqrt
 from typing import Any, Iterable, Literal
@@ -19,6 +18,7 @@ from typing import Any, Iterable, Literal
 SCHEMA_VERSION = 1
 TRAJECTORY_ENGINE_VERSION = 1
 REPOSITORY_SCHEMA_VERSION = 1
+RUNTIME_INTEGRITY_MODE = "structural-v1"
 Visibility = Literal["private", "public"]
 Vector3 = tuple[float, float, float]
 Quaternion = tuple[float, float, float, float]
@@ -132,7 +132,7 @@ def _parse_utc_text(value: str, field: str) -> datetime:
     return parsed
 
 
-def validate_document(document: RevisionDocument, *, require_hash: bool = False) -> None:
+def validate_document(document: RevisionDocument) -> None:
     if document.schema_version != SCHEMA_VERSION:
         raise DocumentValidationError(f"unsupported schema version {document.schema_version}")
     if document.trajectory_engine_version != TRAJECTORY_ENGINE_VERSION:
@@ -196,16 +196,10 @@ def validate_document(document: RevisionDocument, *, require_hash: bool = False)
         raise DocumentValidationError(
             f"cached duration {document.duration_seconds} does not match {calculated_duration}"
         )
-    if require_hash:
-        if len(document.content_hash) != 64:
-            raise DocumentValidationError("content hash must be a SHA-256 hex digest")
-        try:
-            int(document.content_hash, 16)
-        except ValueError as error:
-            raise DocumentValidationError("content hash must be a SHA-256 hex digest") from error
-        expected_hash = calculate_content_hash(document)
-        if document.content_hash != expected_hash:
-            raise DocumentValidationError("content hash does not match the revision payload")
+    if document.content_hash != "":
+        raise DocumentValidationError(
+            "ContentHash is reserved and must be empty in structural-v1"
+        )
 
 
 def validate_record(record: FlypathRecord) -> None:
@@ -226,7 +220,7 @@ def validate_record(record: FlypathRecord) -> None:
         raise DocumentValidationError("draft region does not match its Flypath record")
     if record.draft.revision_number != record.draft_revision_number:
         raise DocumentValidationError("draft revision does not match its Flypath record")
-    validate_document(record.draft, require_hash=True)
+    validate_document(record.draft)
 
     published_pair = (record.published_revision_number is not None, record.published is not None)
     if published_pair[0] != published_pair[1]:
@@ -240,7 +234,7 @@ def validate_record(record: FlypathRecord) -> None:
             raise DocumentValidationError("published revision does not match its Flypath record")
         if record.published.revision_number > record.draft_revision_number:
             raise DocumentValidationError("published revision cannot exceed the draft revision")
-        validate_document(record.published, require_hash=True)
+        validate_document(record.published)
     if record.source_attribution is not None:
         _require_text(record.source_attribution.flypath_id, "source_attribution.flypath_id")
         _require_text(record.source_attribution.title, "source_attribution.title")
@@ -294,19 +288,35 @@ def canonical_json(payload: Any) -> str:
     return json.dumps(payload, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":"))
 
 
-def calculate_content_hash(document: RevisionDocument) -> str:
-    payload = canonical_json(_document_payload(document, include_hash=False)).encode("utf-8")
-    return sha256(payload).hexdigest()
+def _require_exact_keys(payload: Any, expected: set[str], field: str) -> None:
+    if not isinstance(payload, dict):
+        raise DocumentValidationError(f"{field} must be an object")
+    actual = set(payload)
+    if actual != expected:
+        missing = sorted(expected - actual)
+        extra = sorted(actual - expected)
+        raise DocumentValidationError(
+            f"{field} fields do not match schema; missing={missing}, extra={extra}"
+        )
+
+
+def _reject_duplicate_object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise DocumentValidationError(f"duplicate JSON field {key}")
+        result[key] = value
+    return result
 
 
 def seal_document(document: RevisionDocument) -> RevisionDocument:
-    unsealed = replace(document, content_hash="")
-    validate_document(unsealed)
-    return replace(unsealed, content_hash=calculate_content_hash(unsealed))
+    sealed = replace(document, content_hash="")
+    validate_document(sealed)
+    return sealed
 
 
 def serialize_document(document: RevisionDocument) -> str:
-    validate_document(document, require_hash=True)
+    validate_document(document)
     return canonical_json(_document_payload(document, include_hash=True))
 
 
@@ -351,19 +361,69 @@ def serialize_record(record: FlypathRecord) -> str:
 
     validate_record(record)
     payload = _record_payload(record)
-    payload_hash = sha256(canonical_json(payload).encode("utf-8")).hexdigest()
     return canonical_json(
         {
+            "integrityMode": RUNTIME_INTEGRITY_MODE,
+            "recordContentHash": "",
             "repositorySchemaVersion": REPOSITORY_SCHEMA_VERSION,
             "record": payload,
-            "recordContentHash": payload_hash,
         }
     )
 
 
 def deserialize_document(text: str) -> RevisionDocument:
     try:
-        payload = json.loads(text)
+        payload = json.loads(text, object_pairs_hook=_reject_duplicate_object_pairs)
+        _require_exact_keys(
+            payload,
+            {
+                "schemaVersion",
+                "trajectoryEngineVersion",
+                "revisionNumber",
+                "regionId",
+                "durationSeconds",
+                "defaultFlightProfile",
+                "waypoints",
+                "segments",
+                "contentHash",
+            },
+            "document",
+        )
+        if not isinstance(payload["waypoints"], list) or not isinstance(payload["segments"], list):
+            raise DocumentValidationError("document waypoints and segments must be arrays")
+        for index, item in enumerate(payload["waypoints"]):
+            _require_exact_keys(
+                item,
+                {
+                    "waypointId",
+                    "position",
+                    "bodyRotation",
+                    "gimbalRotation",
+                    "lens",
+                    "holdSeconds",
+                    "cornerMode",
+                    "annotation",
+                },
+                f"waypoints[{index}]",
+            )
+            _require_exact_keys(
+                item["lens"],
+                {"focalLengthMm", "aperture", "focusDistanceCm"},
+                f"waypoints[{index}].lens",
+            )
+        for index, item in enumerate(payload["segments"]):
+            _require_exact_keys(
+                item,
+                {
+                    "segmentId",
+                    "fromWaypointId",
+                    "toWaypointId",
+                    "durationSeconds",
+                    "spatialCurveType",
+                    "timeProfile",
+                },
+                f"segments[{index}]",
+            )
         waypoints = tuple(
             Waypoint(
                 waypoint_id=item["waypointId"],
@@ -403,9 +463,13 @@ def deserialize_document(text: str) -> RevisionDocument:
             segments=segments,
             content_hash=payload["contentHash"],
         )
+    except DocumentValidationError:
+        raise
     except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
         raise DocumentValidationError(f"invalid serialized Flypath document: {error}") from error
-    validate_document(document, require_hash=True)
+    validate_document(document)
+    if canonical_json(payload) != text:
+        raise DocumentValidationError("serialized Flypath document is not canonical JSON")
     return document
 
 
@@ -417,29 +481,50 @@ def deserialize_record(text: str) -> FlypathRecord:
     """Parse and validate one complete repository record."""
 
     try:
-        envelope = json.loads(text)
-        if not isinstance(envelope, dict):
-            raise TypeError("record root must be an object")
+        envelope = json.loads(text, object_pairs_hook=_reject_duplicate_object_pairs)
+        _require_exact_keys(
+            envelope,
+            {"integrityMode", "record", "recordContentHash", "repositorySchemaVersion"},
+            "record root",
+        )
         if envelope["repositorySchemaVersion"] != REPOSITORY_SCHEMA_VERSION:
             raise ValueError(
                 f"unsupported repository schema version {envelope['repositorySchemaVersion']}"
             )
         payload = envelope["record"]
-        if not isinstance(payload, dict):
-            raise TypeError("record must be an object")
-        stored_hash = envelope["recordContentHash"]
-        if not isinstance(stored_hash, str) or len(stored_hash) != 64:
-            raise ValueError("recordContentHash must be a SHA-256 hex digest")
-        try:
-            int(stored_hash, 16)
-        except ValueError as error:
-            raise ValueError("recordContentHash must be a SHA-256 hex digest") from error
-        expected_hash = sha256(canonical_json(payload).encode("utf-8")).hexdigest()
-        if stored_hash != expected_hash:
-            raise ValueError("recordContentHash does not match the record payload")
+        _require_exact_keys(
+            payload,
+            {
+                "flypathId",
+                "ownerAccountId",
+                "ownerDisplayName",
+                "title",
+                "description",
+                "visibility",
+                "regionId",
+                "createdUtc",
+                "updatedUtc",
+                "draftRevisionNumber",
+                "draft",
+                "publishedRevisionNumber",
+                "published",
+                "sourceAttribution",
+            },
+            "record",
+        )
+        if envelope["integrityMode"] != RUNTIME_INTEGRITY_MODE:
+            raise ValueError(f"unsupported integrity mode {envelope['integrityMode']}")
+        if envelope["recordContentHash"] != "":
+            raise ValueError("recordContentHash is reserved and must be empty in structural-v1")
         attribution_payload = payload.get("sourceAttribution")
         if attribution_payload is not None and not isinstance(attribution_payload, dict):
             raise TypeError("sourceAttribution must be an object or null")
+        if attribution_payload is not None:
+            _require_exact_keys(
+                attribution_payload,
+                {"flypathId", "revisionNumber", "title", "creatorDisplayName"},
+                "sourceAttribution",
+            )
         attribution = (
             SourceAttribution(
                 flypath_id=attribution_payload["flypathId"],
@@ -471,9 +556,13 @@ def deserialize_record(text: str) -> FlypathRecord:
             ),
             source_attribution=attribution,
         )
+    except DocumentValidationError:
+        raise
     except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
         raise DocumentValidationError(f"invalid serialized Flypath record: {error}") from error
     validate_record(record)
+    if serialize_record(record) != text:
+        raise DocumentValidationError("serialized Flypath record is not canonical JSON")
     return record
 
 

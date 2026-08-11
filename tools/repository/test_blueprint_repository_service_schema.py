@@ -14,6 +14,7 @@ SCHEMA = json.loads((ROOT / "blueprint_repository_service_schema.json").read_tex
 class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
     def test_asset_and_runtime_dependencies_are_fixed(self) -> None:
         self.assertEqual(SCHEMA["schemaVersion"], 1)
+        self.assertEqual(SCHEMA["runtimeIntegrityMode"], "structural-v1")
         self.assertEqual(SCHEMA["parentClass"], "Actor")
         self.assertEqual(SCHEMA["jsonObjectClass"], "PlayFabJsonObject")
         self.assertEqual(
@@ -77,6 +78,11 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         self.assertEqual(by_name["MaxSerializedBytesV1"]["default"], 2_000_000)
         self.assertEqual(by_name["MaxTitleCharsV1"]["default"], 96)
         self.assertEqual(SCHEMA["arrayDefaults"]["AllowedRegionsV1"], ["ExiledLands", "Siptah"])
+
+    def test_hash_scratch_is_reserved_in_structural_mode(self) -> None:
+        by_name = {field["name"]: field for field in SCHEMA["variables"]}
+        self.assertTrue(by_name["CandidateSnapshotHashV1"]["reserved"])
+        self.assertEqual(by_name["CandidateSnapshotHashV1"]["default"], "")
 
     def test_result_codes_match_the_repository_oracle(self) -> None:
         self.assertEqual(

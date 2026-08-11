@@ -296,7 +296,7 @@ to what Conan persistence supports.
 | `Waypoints` | Ordered authored waypoint array |
 | `Segments` | Ordered transition array, count = waypoints - 1 |
 | `AdditionalTracks` | Sparse scalar/quaternion tracks not owned by a waypoint |
-| `ContentHash` | Integrity/cache key |
+| `ContentHash` | Reserved empty field in runtime `structural-v1`; migration seam for a future native digest |
 
 Published revisions are copied snapshots. An edit never mutates the published
 payload in place.
@@ -351,8 +351,10 @@ the first Blueprint repository and persistence implementation. Version 1 fixes
 these rules:
 
 - serialized revision documents use canonical UTF-8 JSON with sorted keys,
-  compact separators, finite numbers only, and a SHA-256 content hash calculated
-  without the `contentHash` field;
+  compact separators, finite numbers only, exact field/schema validation, and
+  decode/re-encode equality so duplicate fields or noncanonical text fail;
+  runtime integrity mode `structural-v1` requires the reserved `contentHash`
+  field to remain empty instead of claiming an unavailable digest;
 - waypoint and segment IDs are positive, stable, unique within a document, and
   segments join adjacent waypoints in authored order;
 - positions and lens/focus/hold values are finite, rotations are normalized
@@ -365,9 +367,10 @@ these rules:
 - new Flypaths and clones are private, only published snapshots are cloneable,
   clones preserve document-scoped waypoint IDs and source attribution, and have
   no live link to their source.
-- complete Flypath records use a versioned canonical envelope with a full-record
-  SHA-256 hash and validate canonical UTC timestamps, revision ordering,
-  optional-payload flags, and every nested document hash;
+- complete Flypath records use a versioned canonical envelope declaring
+  `integrityMode: structural-v1`, require reserved hash fields to remain empty,
+  and validate exact fields, canonical UTC timestamps, revision ordering,
+  optional-payload flags, and every nested document invariant;
 - repository requests return stable typed result codes and never mutate the
   authoritative in-memory record when persistence fails;
 - metadata queries are bounded, paged, sorted, and do not carry full revision
@@ -419,7 +422,8 @@ but the logical operations are stable.
 - `GetServerPolicy()`
 
 Metadata is paged and lightweight. Full payloads are fetched on edit/play/clone
-and cached by Flypath ID, revision, and content hash.
+and cached by Flypath ID plus immutable revision. A future supported digest may
+augment that key without changing the version-1 Blueprint structs.
 
 ### 7.2 Commands
 
@@ -475,7 +479,8 @@ client SaveGame for shared Flypaths.
 
 The first accepted adapter is a **server-invoked Blueprint SaveGame**. The
 `SG_EDD_RepositoryStorage` asset carries a version, generation, committed flag,
-snapshot hash, opaque canonical record envelopes, and explicit tombstones. Two
+a reserved empty snapshot-hash field, opaque canonical record envelopes, and
+explicit tombstones. Two
 alternating slots (`EDD_Repository_A` and `EDD_Repository_B`) prevent an in-place
 overwrite from destroying the last accepted snapshot. A same-process writer and
 fresh-process reader proved exact scalar, array, canonical text, and Unicode
@@ -493,8 +498,11 @@ one repository function, and copies its typed result; clients never access the
 actor directly. Record envelopes are decoded and encoded with the bundled
 `PlayFabJsonObject` Blueprint API, whose nested object, array, boolean,
 numeric-text, and Unicode round trip has been proven locally. No Blueprint SHA-256
-helper was exposed; cryptographic content hashing remains a codec implementation
-gate rather than being silently replaced by a weaker hash.
+helper was exposed. Runtime version 1 therefore declares `structural-v1` and
+uses strict schema/semantic validation plus transactional generations; it does
+not silently substitute a weak checksum or claim cryptographic tamper detection.
+The server-owned SaveGame is a trusted storage boundary. Native SHA-256 can be
+introduced later as a new integrity mode without changing authored structs.
 
 `EncodeJson` preserves insertion order rather than sorting object keys. Every
 canonical encoder graph must therefore set fields in explicit ascending-key
@@ -506,12 +514,13 @@ iteration over a JSON object's fields is forbidden for canonical output.
 Where the storage adapter lacks transactions, use copy-on-write records:
 
 1. Validate complete candidate revision.
-2. Write candidate with new revision/content hash.
+2. Write the canonical candidate to the inactive generation.
 3. Mark candidate committed.
 4. Update metadata pointer.
 5. Retain or later garbage-collect the previous committed revision.
 
-On load, ignore uncommitted candidates and fall back to the latest valid hash.
+On load, ignore uncommitted candidates and fall back to the latest committed
+candidate that parses and passes exact schema plus semantic validation.
 The exact mechanism is adjusted to storage primitives available in Blueprint.
 Committed deletion is represented by a tombstone generation. Recovery stops at
 the newest committed tombstone rather than falling through to older valid data.
@@ -735,7 +744,7 @@ zero-error blend origin. Recenter and mode exit decay position and rotation
 offsets smoothly to zero with bounded velocity and acceleration.
 
 Operator state is client-local, allocation-free during Tick, excluded from
-Flypath hashes, and discarded on session restoration. It cannot affect Cue or
+published snapshot identity, and discarded on session restoration. It cannot affect Cue or
 State Clip timing. If an author explicitly records an operator pass, sampled
 input is reduced into normal editable gimbal/carrier-offset tracks before save;
 raw per-frame input is never placed in a published record.
@@ -796,7 +805,7 @@ player pawn is never silently teleported to make streaming work.
 - Arc-length and FPV samples: adaptive but capped by server/client policy
 - Library: metadata paging, full payload on demand
 - Preview visualization: pooled components/meshes, density reduced with distance
-- Network: bounded documents, hashes, no per-frame transform RPCs
+- Network: bounded documents, immutable revision keys, no per-frame transform RPCs
 - Server: no Tick required for stored Flypaths
 
 Measure Blueprint time and memory in PIE and cooked client before increasing
@@ -887,7 +896,7 @@ class/function names from a client.
 
 Local Cinematic events execute entirely on the viewer. Viewer Interaction and
 Server World scopes cross a dedicated server-authoritative adapter layer that
-validates authenticated identity, published revision/hash, target binding,
+validates authenticated identity, published Flypath ID/revision, target binding,
 operation, server policy, rate limit, and current object state. Stateful
 interactions may use bounded server leases only when an adapter supports reliable
 read/restore/conflict behavior.

@@ -56,6 +56,7 @@ $requiredFiles = @(
     'tools\unreal\Configure-RepositoryService.py',
     'tools\unreal\Open-RepositoryServiceEditor.py',
     'tools\unreal\Validate-RepositoryJsonCodec.py',
+    'tools\unreal\Probe-HashEncodingApi.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
     'tools\preview\linear_preview.py',

@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.32.0-repository-core-runtime`
+Current internal build: `0.33.0-runtime-integrity-contract`
 
 ## 1. Delivery strategy
 
@@ -81,7 +81,8 @@ This section is the authoritative handoff. Detailed evidence remains in
   validate pin types, execution order, stable ID/hold behavior, all six array
   mutations, selection repair, and exact native function-entry linkage.
 - The executable version-1 Flypath document oracle proves canonical lossless
-  serialization and content hashes, structural waypoint/segment validation,
+  serialization under explicit `structural-v1` integrity, exact schema and
+  waypoint/segment validation,
   optimistic revision conflicts, immutable published snapshots, owner-only
   editing, private-by-default creation/cloning, and clone attribution plus
   independence. Blueprint and server implementations must conform to it.
@@ -268,6 +269,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   function entries and reciprocal links, reset defaults/metadata clearing, and
   derived-ID lookup. This is executable repository-core plumbing, not yet full
   private CRUD.
+- Runtime persistence integrity is frozen as explicit `structural-v1` after an
+  Enhanced reflection probe found no Blueprint/Python digest helper. Canonical
+  envelopes now declare the mode, require reserved hash fields to remain empty,
+  reject unknown/missing fields and all semantic inconsistencies, and recover
+  past a corrupt newest committed generation. The 57-test document/repository
+  suite, complete scaffold, and fresh-process cold asset load pass. This does
+  not claim cryptographic tamper detection; private CRUD graphs remain next.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
   directly to G-Portal.
 
@@ -554,8 +562,8 @@ graph now round-trips into the checked-in textual source with capture, edit, and
 feedback contracts.
 
 The version-1 document oracle is also complete. It gives the Blueprint data
-assets a tested target contract before runtime migration. Nine executable
-tests cover canonical round-trip serialization, content-integrity rejection,
+assets a tested target contract before runtime migration. Executable tests
+cover canonical round-trip serialization, exact-field and semantic-corruption rejection,
 finite and normalized camera state, ID/topology validation, private creation,
 optimistic saves, immutable publication, private deep clones, attribution, and
 owner/viewer access. Runtime save/load is not claimed until the Blueprint
@@ -760,7 +768,8 @@ Complete the social Flypath loop.
 
 1. Implement atomic Publish Draft and Unpublish.
 2. Implement paged My Flypaths and Server Flypaths metadata queries.
-3. Implement published snapshot fetch/cache by ID, revision, and hash.
+3. Implement published snapshot fetch/cache by ID and immutable revision; add a
+   digest only if a supported native Blueprint seam becomes available.
 4. Implement library search/filter/sort and compatibility badges.
 5. Implement individual viewer playback preparation, countdown, controls, and
    safe restoration.
@@ -768,7 +777,7 @@ Complete the social Flypath loop.
    snap-free entry, recenter, return-to-directed, speed trim, and emergency exit.
 7. Implement a stable twist-minimizing carrier frame plus world-aligned and
    body-relative operator controls.
-8. Keep operator offsets local and outside published snapshot hashes, event
+8. Keep operator offsets local and outside published snapshot identity, event
    evaluation, and server authority.
 9. Implement Clone Published as a deep private copy with attribution.
 10. Ensure draft edits never mutate published revision.
@@ -987,7 +996,7 @@ utility tests and golden sampled outputs that can be run before cooking.
 | FPV integration depends on frame rate | High | Fixed-step compile/prebake and absolute-time sample evaluation |
 | UMG curve editor too expensive/fragile | Medium | Semantic presets first; advanced editor built after core evaluator |
 | Public Flypaths enable PvP scouting | High | Admin/creative defaults, range/region policy, explicit warnings |
-| Large revisions overload RPC/storage | High | Limits, on-demand fetch, hashes, full-document measurement before deltas |
+| Large revisions overload RPC/storage | High | Limits, on-demand fetch, revision keys, full-document measurement before deltas |
 | DevKit update moves private base members | Medium | Attachment adapters, minimal base coupling, version diagnostics |
 | Enhanced cook/upload has no stable headless entry point | High | Prove the Funcom plugin commandlet; otherwise use a self-hosted Windows runner with a narrowly automated editor cook step |
 | Workshop credentials or Steam Guard make unattended CI fragile | High | Create and accept the first item manually; keep secrets off Git; prefer an authenticated self-hosted runner and deliberate release approval |
@@ -1066,7 +1075,7 @@ and repeatable isolated PIE runner are complete. The immediate sequence is:
    gate green after every relevant change. Graph contracts own shortcut wiring;
    isolated PIE runners own runtime semantics and edge cases.
 2. Freeze the repository/persistence Blueprint contracts and add executable
-   schema, authorization, revision, hash, recovery, and migration oracles.
+   schema, authorization, revision, structural-integrity, recovery, and migration oracles.
 3. Implement private create/save/load/list/delete through modular Blueprint
    service boundaries, then prove reconnect and restart recovery.
 4. Add server identity, ownership, privacy, immutable publication, discovery,

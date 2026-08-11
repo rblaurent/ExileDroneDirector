@@ -206,10 +206,13 @@ events—passes programmatic PIE plus an attended keyboard/debug dogfood workflo
 
 The first persistence adapter now exists as
 `SG_EDD_RepositoryStorage`, a Blueprint `SaveGame` with version, generation,
-commit, hash, opaque-record, and tombstone channels. An automated writer and a
+commit, reserved digest, opaque-record, and tombstone channels. An automated writer and a
 separate fresh DevKit reader proved exact cross-process persistence for scalars,
 arrays, canonical payload text, and Unicode, then removed the probe slot. This is
-the verified storage seam.
+the verified storage seam. Runtime integrity mode `structural-v1` combines
+canonical JSON, exact schema/semantic validation, alternating committed
+generations, and newest-valid fallback; it deliberately does not pretend the
+DevKit's missing Blueprint SHA-256 support is available.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata

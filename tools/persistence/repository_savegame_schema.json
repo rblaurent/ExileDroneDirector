@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "runtimeIntegrityMode": "structural-v1",
   "asset": "Local/Server/Persistence/SG_EDD_RepositoryStorage.uasset",
   "virtualPath": "/Game/Mods/ExileDroneDirector/Server/Persistence/SG_EDD_RepositoryStorage",
   "slots": [
@@ -11,7 +12,7 @@
     { "name": "RepositorySchemaVersion", "type": "Integer", "container": "None", "default": 1 },
     { "name": "Generation", "type": "Integer", "container": "None", "default": 0 },
     { "name": "Committed", "type": "Boolean", "container": "None", "default": false },
-    { "name": "SnapshotHash", "type": "String", "container": "None", "default": "" },
+    { "name": "SnapshotHash", "type": "String", "container": "None", "default": "", "reserved": true },
     { "name": "RecordEnvelopes", "type": "String", "container": "Array" },
     { "name": "TombstoneFlypathIds", "type": "String", "container": "Array" }
   ]

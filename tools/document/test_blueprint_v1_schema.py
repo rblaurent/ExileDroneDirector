@@ -30,6 +30,7 @@ class BlueprintV1SchemaContracts(unittest.TestCase):
     def test_schema_and_struct_order_are_fixed(self) -> None:
         self.assertEqual(self.schema["schemaVersion"], 1)
         self.assertEqual(self.schema["repositorySchemaVersion"], 1)
+        self.assertEqual(self.schema["runtimeIntegrityMode"], "structural-v1")
         self.assertEqual(
             list(self.structs),
             [

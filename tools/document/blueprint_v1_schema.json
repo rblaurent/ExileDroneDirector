@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "repositorySchemaVersion": 1,
+  "runtimeIntegrityMode": "structural-v1",
   "structs": {
     "ST_EDD_Waypoint": {
       "asset": "Local/Data/Structs/ST_EDD_Waypoint.uasset",

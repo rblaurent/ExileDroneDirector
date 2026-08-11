@@ -77,19 +77,46 @@ def source_record() -> FlypathRecord:
 
 
 class FlypathDocumentContracts(unittest.TestCase):
-    def test_canonical_round_trip_and_hash_are_stable(self) -> None:
+    def test_canonical_structural_round_trip_is_stable(self) -> None:
         document = authored_document()
         encoded = serialize_document(document)
         self.assertEqual(deserialize_document(encoded), document)
         self.assertEqual(serialize_document(deserialize_document(encoded)), encoded)
         self.assertNotIn(" ", encoded)
-        self.assertEqual(len(document.content_hash), 64)
+        self.assertEqual(document.content_hash, "")
 
-    def test_hash_rejects_tampered_payload(self) -> None:
+    def test_structural_validation_rejects_semantically_corrupt_payload(self) -> None:
         payload = json.loads(serialize_document(authored_document()))
-        payload["waypoints"][0]["position"][0] = 12345.0
-        with self.assertRaisesRegex(DocumentValidationError, "content hash"):
+        payload["segments"][0]["toWaypointId"] = 7
+        with self.assertRaisesRegex(DocumentValidationError, "adjacent"):
             deserialize_document(json.dumps(payload))
+
+    def test_structural_mode_rejects_a_claimed_content_hash(self) -> None:
+        payload = json.loads(serialize_document(authored_document()))
+        payload["contentHash"] = "not-a-real-runtime-hash"
+        with self.assertRaisesRegex(DocumentValidationError, "reserved"):
+            deserialize_document(json.dumps(payload))
+
+    def test_structural_mode_rejects_missing_and_unknown_fields(self) -> None:
+        payload = json.loads(serialize_document(authored_document()))
+        del payload["defaultFlightProfile"]
+        with self.assertRaisesRegex(DocumentValidationError, "missing"):
+            deserialize_document(json.dumps(payload))
+        payload = json.loads(serialize_document(authored_document()))
+        payload["waypoints"][0]["unexpected"] = True
+        with self.assertRaisesRegex(DocumentValidationError, "extra"):
+            deserialize_document(json.dumps(payload))
+
+    def test_structural_mode_rejects_duplicate_json_fields(self) -> None:
+        encoded = serialize_document(authored_document())
+        duplicate = encoded.replace('{"contentHash":""', '{"contentHash":"","contentHash":""', 1)
+        with self.assertRaisesRegex(DocumentValidationError, "duplicate JSON field contentHash"):
+            deserialize_document(duplicate)
+
+    def test_structural_mode_rejects_noncanonical_json(self) -> None:
+        encoded = serialize_document(authored_document())
+        with self.assertRaisesRegex(DocumentValidationError, "not canonical"):
+            deserialize_document(encoded.replace(":", ": ", 1))
 
     def test_rejects_non_finite_and_non_normalized_camera_state(self) -> None:
         document = authored_document()

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "runtimeIntegrityMode": "structural-v1",
   "asset": "Local/Server/Repository/BP_EDD_FlypathRepository.uasset",
   "virtualPath": "/Game/Mods/ExileDroneDirector/Server/Repository/BP_EDD_FlypathRepository",
   "parentClass": "Actor",
@@ -22,7 +23,7 @@
     { "name": "CandidateTombstoneFlypathIdsV1", "type": "String", "container": "Array" },
     { "name": "CandidateGenerationV1", "type": "Integer", "container": "None", "default": 0 },
     { "name": "CandidateTargetSlotV1", "type": "String", "container": "None", "default": "" },
-    { "name": "CandidateSnapshotHashV1", "type": "String", "container": "None", "default": "" },
+    { "name": "CandidateSnapshotHashV1", "type": "String", "container": "None", "default": "", "reserved": true },
 
     { "name": "RequestRequesterAccountIdV1", "type": "String", "container": "None", "default": "" },
     { "name": "RequestRequesterDisplayNameV1", "type": "String", "container": "None", "default": "" },

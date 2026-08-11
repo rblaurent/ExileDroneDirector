@@ -90,20 +90,47 @@ class FlypathRepositoryContracts(unittest.TestCase):
         record = self.create()
         envelope = json.loads(serialize_record(record))
         envelope["record"]["updatedUtc"] = "2026-08-10T11:59:59Z"
-        envelope["recordContentHash"] = self._record_hash(envelope["record"])
         with self.assertRaisesRegex(DocumentValidationError, "precede"):
             deserialize_record(json.dumps(envelope))
         envelope["record"]["updatedUtc"] = "2026-08-10T12:00:00+00:00"
-        envelope["recordContentHash"] = self._record_hash(envelope["record"])
         with self.assertRaisesRegex(DocumentValidationError, "canonical UTC"):
             deserialize_record(json.dumps(envelope))
 
-    def test_record_hash_rejects_metadata_tampering(self) -> None:
+    def test_record_envelope_rejects_unknown_integrity_or_claimed_hash(self) -> None:
         record = self.create()
         envelope = json.loads(serialize_record(record))
-        envelope["record"]["title"] = "Tampered"
-        with self.assertRaisesRegex(DocumentValidationError, "recordContentHash"):
+        envelope["integrityMode"] = "sha256-v1"
+        with self.assertRaisesRegex(DocumentValidationError, "integrity mode"):
             deserialize_record(json.dumps(envelope))
+        envelope["integrityMode"] = "structural-v1"
+        envelope["recordContentHash"] = "fake"
+        with self.assertRaisesRegex(DocumentValidationError, "reserved"):
+            deserialize_record(json.dumps(envelope))
+
+    def test_record_envelope_rejects_missing_and_unknown_fields(self) -> None:
+        envelope = json.loads(serialize_record(self.create()))
+        del envelope["record"]["visibility"]
+        with self.assertRaisesRegex(DocumentValidationError, "missing"):
+            deserialize_record(json.dumps(envelope))
+        envelope = json.loads(serialize_record(self.repository.records["path-a"]))
+        envelope["unexpected"] = True
+        with self.assertRaisesRegex(DocumentValidationError, "extra"):
+            deserialize_record(json.dumps(envelope))
+
+    def test_record_envelope_rejects_duplicate_json_fields(self) -> None:
+        encoded = serialize_record(self.create())
+        duplicate = encoded.replace(
+            '"integrityMode":"structural-v1"',
+            '"integrityMode":"structural-v1","integrityMode":"structural-v1"',
+            1,
+        )
+        with self.assertRaisesRegex(DocumentValidationError, "duplicate JSON field integrityMode"):
+            deserialize_record(duplicate)
+
+    def test_record_envelope_rejects_noncanonical_json(self) -> None:
+        encoded = serialize_record(self.create())
+        with self.assertRaisesRegex(DocumentValidationError, "not canonical"):
+            deserialize_record(encoded.replace(":", ": ", 1))
 
     def test_create_save_restart_and_load_preserve_exact_record(self) -> None:
         self.create()
@@ -228,8 +255,7 @@ class FlypathRepositoryContracts(unittest.TestCase):
     def test_corrupt_latest_committed_generation_falls_back_to_previous_valid(self) -> None:
         original = self.create()
         envelope = json.loads(serialize_record(original))
-        envelope["record"]["draft"]["contentHash"] = "0" * 64
-        envelope["recordContentHash"] = self._record_hash(envelope["record"])
+        envelope["record"]["draft"]["revisionNumber"] = 999
         generation = self.storage.stage("path-a", json.dumps(envelope))
         self.storage.commit("path-a", generation)
         self.storage.activate("path-a", generation)
@@ -325,20 +351,6 @@ class FlypathRepositoryContracts(unittest.TestCase):
         self.assertEqual(len(page.items), 1)
         self.assertTrue(page.has_more)
         self.assertFalse(hasattr(page.items[0], "draft"))
-
-    @staticmethod
-    def _record_hash(payload: dict) -> str:
-        from hashlib import sha256
-
-        encoded = json.dumps(
-            payload,
-            ensure_ascii=False,
-            allow_nan=False,
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-        return sha256(encoded).hexdigest()
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

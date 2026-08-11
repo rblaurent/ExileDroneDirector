@@ -17,6 +17,7 @@ class RepositorySaveGameSchemaContracts(unittest.TestCase):
 
     def test_asset_slots_and_field_order_are_fixed(self) -> None:
         self.assertEqual(self.schema["schemaVersion"], 1)
+        self.assertEqual(self.schema["runtimeIntegrityMode"], "structural-v1")
         self.assertEqual(
             self.schema["virtualPath"],
             "/Game/Mods/ExileDroneDirector/Server/Persistence/SG_EDD_RepositoryStorage",
@@ -47,6 +48,8 @@ class RepositorySaveGameSchemaContracts(unittest.TestCase):
         self.assertEqual(by_name["TombstoneFlypathIds"]["container"], "Array")
         self.assertEqual(by_name["Committed"]["default"], False)
         self.assertEqual(by_name["Generation"]["default"], 0)
+        self.assertTrue(by_name["SnapshotHash"]["reserved"])
+        self.assertEqual(by_name["SnapshotHash"]["default"], "")
 
 
 if __name__ == "__main__":

@@ -1771,7 +1771,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   adapter; clients must never become repository authority.
 - `Configure-RepositorySaveGame.py` idempotently creates
   `SG_EDD_RepositoryStorage` under the correct virtual path and fixes six
-  automatable fields: schema version, generation, committed flag, snapshot hash,
+  automatable fields: schema version, generation, committed flag, reserved
+  snapshot-hash seam,
   opaque record envelopes, and tombstone IDs.
 - Blueprint variables had to be marked instance-editable before Python could set
   values on a runtime SaveGame instance. CDO reads/writes alone do not prove the
@@ -1811,8 +1812,12 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   exercise malformed-record rejection through repository validation fixtures.
 - No Blueprint/Python SHA-256, MD5, digest, or general string-hash helper was
   exposed by this build. Do not substitute an undocumented weak checksum while
-  claiming the canonical SHA-256 contract; content hashing remains an explicit
-  codec graph gate.
+  claiming the canonical SHA-256 contract. Runtime version 1 now explicitly uses
+  `structural-v1`: canonical JSON, exact field/schema validation, full semantic
+  validation, alternating committed generations, tombstones, and newest-valid
+  recovery. `ContentHash`, `RecordContentHash`, and `SnapshotHash` remain empty
+  reserved migration seams. This detects malformed and semantically corrupt
+  storage but deliberately does not claim adversarial tamper detection.
 - `BP_EDD_FlypathRepository` is generated idempotently as a non-replicated Actor
   with active snapshot state, request/result staging, policy values, typed
   `ST_EDD_FlypathDocument` exchange, PlayFab JSON scratch references, and named

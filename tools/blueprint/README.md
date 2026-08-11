@@ -81,9 +81,21 @@ Interactive editor automation uses a separate fail-closed seam:
   `Test-RepositoryDocumentDecoderContracts.py` locks those failure paths,
   execution order, every field/struct mapping, float array specialization,
   split-Quat reciprocity, nested loops, and terminal canonical comparison.
+- `live-snippets/decode-waypoint-v1.eddgraph`,
+  `live-snippets/decode-segment-v1.eddgraph`, and
+  `live-snippets/decode-document-v1.eddgraph` are the post-compile Unreal
+  copy-backs. The full scaffold validates their generic structure and exact
+  semantics in addition to generated full/paste fixtures.
 - `Export-BlueprintGraphClipboard.ps1` can fail closed on `-ExpectedGraph` and
   `-ExpectedNodeCount`; use both for every automated copy-back so a selected-but-
   unopened function cannot silently export the EventGraph.
+- Blueprint copy leaves all copied nodes selected. Click empty canvas before
+  moving a single native entry or exposed body node; otherwise the entire graph
+  translates. Also expect a pasted group's bounding box to be centered at the
+  cursor rather than preserving its absolute generated coordinates.
+- Do not request process exit while a Blueprint asset editor still owns a
+  preview scene. Invoke `tools/unreal/Quit-EnhancedEditorSafely.py` through the
+  remote runner; it closes asset editors, waits for Slate, and then exits.
 - `Test-WaypointCaptureContracts.py` verifies exact array types, data sources,
   append order, selected-index assignment, ID increment, and available
   EventGraph dispatch semantics.

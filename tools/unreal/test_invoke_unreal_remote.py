@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import tempfile
 import unittest
 
 
@@ -39,6 +40,24 @@ class InvokeUnrealRemoteContracts(unittest.TestCase):
             poll_seconds=0.001,
         )
         self.assertIs(actual, expected)
+
+    def test_script_source_receives_absolute_file_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source_path = Path(directory, "remote_script.py").resolve()
+            source_path.write_text(
+                "from __future__ import annotations\n"
+                "FILE_IDENTITY = __file__\n"
+                "ANNOTATION: list[str] = []\n",
+                encoding="utf-8",
+            )
+            source = REMOTE.source_for_script(source_path)
+            self.assertEqual(source.splitlines()[0], f"__file__ = {str(source_path)!r}")
+            self.assertIn("exec(compile(", source)
+            self.assertIn(", __file__, 'exec'), globals())", source)
+            namespace = {}
+            exec(source, namespace)
+            self.assertEqual(namespace["FILE_IDENTITY"], str(source_path))
+            self.assertEqual(namespace["__annotations__"]["ANNOTATION"], "list[str]")
 
     def test_ambiguous_matching_nodes_are_rejected(self):
         execution = FakeExecution(

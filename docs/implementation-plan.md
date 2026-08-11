@@ -283,14 +283,15 @@ This section is the authoritative handoff. Detailed evidence remains in
   `DecodeJson`. The disposable probe asset was deleted in a fresh process.
   Repository codec graph composition can now proceed deterministically without
   further action-menu discovery.
-- The repository service schema now specifies dedicated document/record codec
+- The repository service schema now owns dedicated document/record codec
   staging, including explicit draft/published documents, owner/metadata fields,
-  optional-payload flags, and source attribution. It is intentionally not yet
-  applied to the live `.uasset`: apply it in the same editor transaction that
-  installs the codec graphs, then re-export the already installed core graphs
-  and cold-load the final package once. Quaternion conversion reflection also
-  proves the current Transform bridge can emit/consume the canonical normalized
-  quaternion representation without changing the persisted schema.
+  optional-payload flags, source attribution, `ScratchSourceJsonV1`, and
+  `ScratchSourceDocumentJsonV1`. The complete schema is applied to the live
+  `.uasset`; its existing core/encoder functions and new decoder functions were
+  re-exported and contract-tested after the shared asset resave. Quaternion
+  conversion reflection proves the Transform bridge can emit/consume the
+  canonical normalized quaternion representation without changing the
+  persisted schema.
 - Quaternion codec forms are harvested, but Enhanced 5.6.1 cannot safely paste
   the split return pin of `Conv_RotatorToQuaternion`: it asserts in
   `K2Node.cpp:1360`. The accepted encoder uses the unsplit conversion followed
@@ -316,16 +317,15 @@ This section is the authoritative handoff. Detailed evidence remains in
   before and after compile/save. It survived fresh-process cold compilation and
   is mirrored with exact live/Git SHA-256
   `52DF21CC7428D0472549E0233F3633FF9C0973887B347F005413C1EBA437DCF9`.
-- Decoder prerequisites are now accepted from a real Enhanced editor
+- Decoder prerequisites are accepted from a real Enhanced editor
   round-trip. Exact string equality and split-input `Quat_Rotator` compiled
   green; the generic array-item form canonicalized to wildcard while unlinked
   and will specialize to PlayFab float only in the connected decoder graph.
   The shared clipboard cloner now rewrites split-pin `SubPins`/`ParentPin`
   GUIDs, and the contract rejects every stale internal reference. Separate
-  source JSON scratch strings are specified so nested re-encoding cannot
-  overwrite the document text being validated. These two variables and the
-  decoder bodies are deliberately not live yet; install them together, then
-  re-export all repository graphs and cold-load once.
+  source JSON scratch strings prevent nested re-encoding from overwriting the
+  document text being validated. Both variables and all decoder bodies are now
+  installed and accepted live.
 - All three decoder bodies are now generated and semantically closed offline.
   Full and body-only graphs pass structural validation and exact contracts:
   `DecodeWaypointV1` is 38 nodes/136 pins (37/135 paste),
@@ -333,7 +333,15 @@ This section is the authoritative handoff. Detailed evidence remains in
   (45/166 paste). Root JSON failure and numeric-array arity failure terminate
   before field or item reads; valid paths stage typed structs, call accepted
   encoders, and commit only canonical equality. The full scaffold owns these
-  tests. Live installation and editor reconstruction remain the next gate.
+  tests.
+- All three decoders are now installed in the live Enhanced repository asset.
+  Exact target identity was proven before each paste; live graph contracts
+  passed before and after compile/save with the same 38/136, 21/67, and 46/167
+  shapes. The repository core and all three encoders were also re-exported and
+  passed after the schema resave. A fresh commandlet loaded and compiled all
+  nine core assets with `EDD_COLD_LOAD|RESULT|PASS`. The live and Git-mirror
+  repository SHA-256 is
+  `C0E8C7F3368E873C1774E8CBDADC8F402EF96320AFBCA9A7D6BCA279ED56E59F`.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported
@@ -353,13 +361,11 @@ before any polished editor UI or cook is attempted:
 1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
    owner identity, visibility, revision, attribution, published snapshot,
    structural integrity mode, and validation contracts.
-2. **Current:** install and accept the completed offline document decoders, then
-   complete record-envelope codecs and implement private
+2. **Current:** complete record-envelope codecs and implement private
    create/save/load/list/delete and deterministic restart recovery.
-   `EncodeWaypointV1`, `EncodeSegmentV1`, `EncodeDocumentV1`, repository core,
-   and exact
-   numeric/null JSON node forms are accepted live-compiled proof, not remaining
-   discovery work.
+   `EncodeWaypointV1`, `EncodeSegmentV1`, `EncodeDocumentV1`, all three matching
+   decoders, repository core, and exact numeric/null JSON node forms are
+   accepted live-compiled proof, not remaining discovery work.
 3. Prove optimistic revisions, atomic save behavior, corruption recovery, schema
    migration hooks, limit validation, and typed failures through executable tests.
 4. Implement server-authoritative ownership, privacy, publication, immutable

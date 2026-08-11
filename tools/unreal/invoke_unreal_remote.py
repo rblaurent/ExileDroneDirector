@@ -72,6 +72,16 @@ def load_remote_module(devkit_root: Path) -> Any:
     return module
 
 
+def source_for_script(path: Path) -> str:
+    """Load a remote script while preserving the file identity Python normally provides."""
+    script_path = path.resolve()
+    script_source = script_path.read_text(encoding="utf-8-sig")
+    return (
+        f"__file__ = {str(script_path)!r}\n"
+        f"exec(compile({script_source!r}, __file__, 'exec'), globals())"
+    )
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     source = parser.add_mutually_exclusive_group(required=True)
@@ -97,7 +107,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.script is not None:
         if not args.script.is_file():
             raise RemoteInvocationError(f"Remote script is missing: {args.script}")
-        source = args.script.read_text(encoding="utf-8-sig")
+        source = source_for_script(args.script)
     assert source is not None
 
     remote = load_remote_module(args.devkit_root.resolve())

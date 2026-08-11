@@ -28,6 +28,17 @@ def one(c, nodes, marker: str):
     return c.one(nodes, marker)
 
 
+def function_call(c, nodes, name: str):
+    """Find a call by name even after the editor injects a MemberGuid."""
+    marker = re.compile(rf'FunctionReference=\(MemberName="{re.escape(name)}"(?:,|\))')
+    matches = [
+        node for node in nodes.values()
+        if "K2Node_CallFunction" in node.node_class and marker.search(node.text)
+    ]
+    c.require(len(matches) == 1, f"Expected one call to {name}; found {len(matches)}")
+    return matches[0]
+
+
 def variable(c, nodes, name: str, node_class: str):
     matches = [
         node for node in nodes.values()
@@ -197,7 +208,7 @@ def assert_waypoint(c, nodes, *, paste: bool) -> None:
         c.require_link(source, "ReturnValue", make, target, "Waypoint scalar mapping changed")
 
     store = variable(c, nodes, "ScratchWaypointV1", "K2Node_VariableSet")
-    encode = one(c, nodes, 'MemberName="EncodeWaypointV1",bSelfContext=True')
+    encode = function_call(c, nodes, "EncodeWaypointV1")
     equal = one(c, nodes, 'MemberName="EqualEqual_StrStr"')
     valid_setters = [
         node for node in nodes.values()
@@ -226,7 +237,7 @@ def assert_segment(c, nodes, *, paste: bool) -> None:
     assert_closed(c, nodes, 21 if not paste else 20, None if paste else "DecodeSegmentV1")
     source_store = variable(c, nodes, "ScratchSourceJsonV1", "K2Node_VariableSet")
     store = variable(c, nodes, "ScratchSegmentV1", "K2Node_VariableSet")
-    encode = one(c, nodes, 'MemberName="EncodeSegmentV1",bSelfContext=True')
+    encode = function_call(c, nodes, "EncodeSegmentV1")
     valid = variable(c, nodes, "ScratchValidV1", "K2Node_VariableSet")
     require_exec_chain(c, [source_store, store, encode, valid])
     if paste:
@@ -279,8 +290,8 @@ def assert_document(c, nodes, *, paste: bool) -> None:
     c.require(len(loops) == 2, "Document decoder must own two object loops")
     segment_loop = next(node for node in loops if c.linked(get_segments, "ReturnValue", node, "Array"))
     waypoint_loop = next(node for node in loops if c.linked(get_waypoints, "ReturnValue", node, "Array"))
-    decode_segment = one(c, nodes, 'MemberName="DecodeSegmentV1",bSelfContext=True')
-    decode_waypoint = one(c, nodes, 'MemberName="DecodeWaypointV1",bSelfContext=True')
+    decode_segment = function_call(c, nodes, "DecodeSegmentV1")
+    decode_waypoint = function_call(c, nodes, "DecodeWaypointV1")
     segment_nested = [node for node in nodes.values() if "K2Node_VariableSet" in node.node_class and 'MemberName="ScratchNestedJsonV1"' in node.text and c.linked(segment_loop, "Array Element", node, "ScratchNestedJsonV1")]
     waypoint_nested = [node for node in nodes.values() if "K2Node_VariableSet" in node.node_class and 'MemberName="ScratchNestedJsonV1"' in node.text and c.linked(waypoint_loop, "Array Element", node, "ScratchNestedJsonV1")]
     c.require(len(segment_nested) == 1 and len(waypoint_nested) == 1, "Nested object staging changed")
@@ -313,7 +324,7 @@ def assert_document(c, nodes, *, paste: bool) -> None:
     c.require(any(c.linked(node, "ScratchSegmentsV1", make, "Segments_27_C44AF0F54C828C6532348D8A42A4A92B") for node in segment_getters), "Final segment array mapping changed")
 
     store = variable(c, nodes, "ScratchDocumentV1", "K2Node_VariableSet")
-    encode = one(c, nodes, 'MemberName="EncodeDocumentV1",bSelfContext=True')
+    encode = function_call(c, nodes, "EncodeDocumentV1")
     c.require_link(waypoint_loop, "Completed", store, "execute", "Document commit must follow waypoint loop")
     c.require_link(store, "then", encode, "execute", "Document re-encode order changed")
     equal = one(c, nodes, 'MemberName="EqualEqual_StrStr"')

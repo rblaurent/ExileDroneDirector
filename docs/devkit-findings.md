@@ -2113,3 +2113,53 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   and 46/167 for document; body-only forms are one entry node and one pin less.
   Live schema application, editor reconstruction, compile/save, cold load, and
   mirror synchronization remain mandatory before these decoders are accepted.
+
+## Repository document decoders accepted live (2026-08-11)
+
+- `ScratchSourceJsonV1` and `ScratchSourceDocumentJsonV1` were added through the
+  checked repository-schema configurator, and all three empty decoder targets
+  were proven by graph name and one-node export before any body paste.
+- Post-compile live evidence is checked in under
+  `tools/blueprint/live-snippets/`: `DecodeWaypointV1` is 38 nodes/136 pins,
+  `DecodeSegmentV1` is 21/67, and `DecodeDocumentV1` is 46/167. All semantic
+  contracts passed both immediately after wiring and after repository-wide
+  compile/save.
+- The schema resave did not regress existing behavior. Fresh exports of
+  `ResetRepositoryResultV1` (9 nodes), `FindRecordIndexV1` (5),
+  `EncodeWaypointV1` (25), `EncodeSegmentV1` (14), and `EncodeDocumentV1` (37)
+  all passed their closed-graph semantic contracts.
+- Epic's remote executor does not define `__file__`. Script-file execution must
+  use `exec(compile(source, absolute_path, 'exec'), globals())` after setting
+  `__file__`; prepending text directly before a script's `from __future__`
+  import is invalid. The runner now owns this wrapper and its offline test.
+- Live Unreal copy-back injects a `MemberGuid` between `MemberName` and
+  `bSelfContext` in self-call references. Contracts must match a call node by
+  function name and node class, not by adjacency of serialized fields.
+- Pasting a multi-node graph centers its bounding box under the cursor, so the
+  exposed first executable node may land far from the native function entry.
+  Use `Home`, export exact coordinates, and enlarge only the final seam.
+- `Ctrl+A`/copy leaves every graph node selected. Before moving one node,
+  explicitly click empty canvas to clear selection; otherwise dragging one
+  selected node translates the entire graph. This caused harmless layout-only
+  translations during the document install, which exact coordinate export
+  diagnosed before the final entry connection.
+- `Blueprint.status` is protected in Enhanced Python and cannot be used as a
+  compile-status probe. Compile through `BlueprintEditorLibrary`, require the
+  remote command and API save to succeed, inspect the live log for K2 errors,
+  re-export the graph, and finish with a fresh commandlet cold compile.
+- The saved package remained healthy, but directly calling
+  `unreal.SystemLibrary.quit_editor()` while the repository Blueprint editor
+  was open created one shutdown-only assert:
+  `PreviewScene.GetWorld()` in `BlueprintEditor.cpp:10423`. This is distinct
+  from the earlier K2 clipboard assertion and happened after API save.
+  `tools/unreal/Quit-EnhancedEditorSafely.py` now closes all asset editors,
+  waits at least three Slate ticks (up to 120 for closure), and only then calls
+  `quit_editor()`. Use that script for future interactive shutdowns.
+- A new `-ModDevKit -NullRHI` process loaded all nine core assets, compiled
+  every Blueprint, and emitted `EDD_COLD_LOAD|RESULT|PASS` with zero errors,
+  proving the shutdown assert did not damage the package. Sync copied exactly
+  the changed repository package; its live and mirror SHA-256 is
+  `C0E8C7F3368E873C1774E8CBDADC8F402EF96320AFBCA9A7D6BCA279ED56E59F`.
+- Next backend slice: record-envelope codecs followed by private CRUD and
+  deterministic restart recovery. There is still no authorization to cook or
+  build the polished UI.

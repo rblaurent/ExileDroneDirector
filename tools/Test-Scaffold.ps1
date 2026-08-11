@@ -25,6 +25,7 @@ $requiredFiles = @(
     '.gitattributes',
     '.gitignore',
     'tools\Sync-DevKitContent.ps1',
+    'tools\unreal\Quit-EnhancedEditorSafely.py',
     'tools\Test-RepositoryBudget.ps1',
     'tools\Invoke-UnrealPython.ps1',
     'tools\Start-EnhancedDevKitRemote.ps1',
@@ -705,6 +706,21 @@ if ($LASTEXITCODE -ne 0) {
     --only document
 if ($LASTEXITCODE -ne 0) {
     throw "Live EncodeDocumentV1 contracts failed with exit code $LASTEXITCODE."
+}
+
+foreach ($decoderName in @('waypoint', 'segment', 'document')) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+        -Path (Join-Path $ProjectRoot "tools\blueprint\live-snippets\decode-$decoderName-v1.eddgraph")
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live Decode$decoderName V1 graph structure failed with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentDecoderContracts.py') `
+        --project-root $ProjectRoot `
+        --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets') `
+        --only $decoderName
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live Decode$decoderName V1 contracts failed with exit code $LASTEXITCODE."
+    }
 }
 
 $repositoryCoreNonce = [guid]::NewGuid().ToString('N')

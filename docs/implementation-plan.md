@@ -291,13 +291,18 @@ This section is the authoritative handoff. Detailed evidence remains in
   and cold-load the final package once. Quaternion conversion reflection also
   proves the current Transform bridge can emit/consume the canonical normalized
   quaternion representation without changing the persisted schema.
-- The exact quaternion codec node forms are now harvested from a green Enhanced
-  compile. `Conv_RotatorToQuaternion` exposes split float X/Y/Z/W outputs and
-  `Quat_Rotator` accepts split float X/Y/Z/W inputs on its const-reference Quat
-  pin. The checked-in three-node/15-pin fixture passes graph syntax and semantic
-  contracts, and the disposable probe was deleted in a fresh process. This
-  removes the last native node-form discovery dependency from document codec
-  composition; it does not yet claim that the document/record codecs are live.
+- Quaternion codec forms are harvested, but Enhanced 5.6.1 cannot safely paste
+  the split return pin of `Conv_RotatorToQuaternion`: it asserts in
+  `K2Node.cpp:1360`. The accepted encoder uses the unsplit conversion followed
+  by the separately harvested native `BreakQuat` call. Both fixtures and the
+  production graph are contract-tested; the toxic split form is explicitly
+  rejected before any live paste.
+- `EncodeWaypointV1` is now installed and accepted in the live repository
+  actor. The real editor reconstruction survived without a new crash, compiled
+  green, exported as 25 nodes/112 pins, passed complete semantic contracts,
+  saved through Unreal's API, survived a fresh-process cold compile, and was
+  mirrored back to Git with an exact SHA-256 match. Integer waypoint IDs use an
+  explicit `Conv_IntToDouble` bridge before PlayFab JSON numbers.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported
@@ -317,10 +322,11 @@ before any polished editor UI or cook is attempted:
 1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
    owner identity, visibility, revision, attribution, published snapshot,
    structural integrity mode, and validation contracts.
-2. **Current:** implement and native-round-trip modular document/record codecs,
-   then private create/save/load/list/delete and deterministic restart recovery.
-   The repository core and exact numeric/null JSON node forms are already live-
-   compiled proof, not remaining discovery work.
+2. **Current:** complete `EncodeSegmentV1`, `EncodeDocumentV1`, the corresponding
+   decoders, and record-envelope codecs; then implement private
+   create/save/load/list/delete and deterministic restart recovery.
+   `EncodeWaypointV1`, repository core, and exact numeric/null JSON node forms
+   are accepted live-compiled proof, not remaining discovery work.
 3. Prove optimistic revisions, atomic save behavior, corruption recovery, schema
    migration hooks, limit validation, and typed failures through executable tests.
 4. Implement server-authoritative ownership, privacy, publication, immutable

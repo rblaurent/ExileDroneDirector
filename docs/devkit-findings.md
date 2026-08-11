@@ -1956,6 +1956,41 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   paste, the runner must copy the active graph and verify the intended function
   name; a visual row click or coordinate alone is not accepted evidence.
 
+### Repeated-assertion containment rule
+
+- Eleven editor crashes between 05:31 and 06:35 UTC carried the identical
+  `NumNewPins == InNewPins.Num()` assertion. They were retries of one clipboard
+  reconstruction defect, not independent mod/runtime failures. Repeating an
+  unchanged import after this signature is prohibited: one recurrence stops
+  editor automation and returns the graph to offline reduction/fixture proof.
+- The invalid working state produced a distinct repository autosave. Its exact
+  path, timestamp, size, and SHA-256 were inspected before deleting only that
+  autosave. The live repository package was preserved.
+- After containment, a fresh `-ModDevKit` commandlet cold-loaded and compiled
+  every core asset, including `BP_EDD_FlypathRepository`, and exited with zero
+  errors. This proves the live package was not corrupted by the failed imports.
+- The production waypoint encoder now avoids the toxic split-return form. It
+  uses an unsplit `Conv_RotatorToQuaternion`, the editor-harvested native
+  `BreakQuat` fixture, and explicit `Conv_IntToDouble` bridges before PlayFab
+  JSON number nodes. Canonical and paste-ready semantic contracts must pass
+  before the single permitted controlled editor import.
+- The controlled import passed. `EncodeWaypointV1` reconstructed as 25
+  nodes/112 pins, compiled green, exported from the live graph, and passed the
+  full semantic contract. Unreal canonicalizes an unlinked empty string by
+  omitting `DefaultValue=""`; contracts accept either omitted-empty or explicit
+  empty while still rejecting links and non-empty annotation defaults.
+- The saved repository package survived a fresh-process cold compile and the
+  complete `-RequireMvpAssets` scaffold. Its live and Git-mirror SHA-256 is
+  `8AB8D7CEA2AEF7D1FBA205CC89E969058DE3054D57ED9C3EECD26F87BB39104B`.
+- A session-only command-line INI override enables Unreal's official Python
+  remote-execution node without permanently changing the DevKit:
+  `-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=True`.
+  The official `remote_execution.py` client discovered exactly one
+  `ConanSandbox` node and opened the repository asset with structured success
+  output. Prefer this channel for editor scripting; retain UI input only for
+  graph-front selection, clipboard import/export, and the final pin seam that
+  Enhanced does not expose through Python.
+
 ## Pending local reconnaissance
 
 - Concrete Conan-character view restoration in a gameplay-map PIE run

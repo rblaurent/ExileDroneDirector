@@ -85,8 +85,22 @@ def require_exec_chain(c, nodes) -> None:
         c.require_link(left, "then", right, "execute", "Canonical field execution order changed")
 
 
+def require_int_number_bridge(c, nodes, split, source_pin: str, target) -> None:
+    conversion_names = {
+        node.name
+        for node in nodes.values()
+        if 'MemberName="Conv_IntToDouble"' in node.text
+    }
+    linked_names = {name for name, _ in split.pins[source_pin].links}
+    matches = conversion_names & linked_names
+    c.require(len(matches) == 1, f"{source_pin} must use one explicit integer conversion")
+    conversion = nodes[next(iter(matches))]
+    c.require_link(split, source_pin, conversion, "InInt", "Integer conversion input changed")
+    c.require_link(conversion, "ReturnValue", target, "Number", "Integer conversion output changed")
+
+
 def assert_waypoint(c, nodes, *, paste: bool) -> None:
-    assert_closed(c, nodes, 23 if not paste else 21, None if paste else "EncodeWaypointV1")
+    assert_closed(c, nodes, 25 if not paste else 24, None if paste else "EncodeWaypointV1")
     store = one(c, nodes, 'MemberName="ScratchNestedJsonV1"')
     fields = [
         field_node(c, nodes, "SetStringField", "annotation"),
@@ -111,18 +125,13 @@ def assert_waypoint(c, nodes, *, paste: bool) -> None:
     split = next(node for node in nodes.values() if "K2Node_BreakStruct" in node.node_class)
     transform = one(c, nodes, 'MemberName="BreakTransform"')
     vector = one(c, nodes, 'MemberName="BreakVector"')
-    quat_nodes = [node for node in nodes.values() if 'MemberName="Conv_RotatorToQuaternion"' in node.text]
-    c.require(len(quat_nodes) == (0 if paste else 1), "Paste body must defer the isolated quaternion node")
-    quat = None if paste else quat_nodes[0]
+    quat = one(c, nodes, 'MemberName="Conv_RotatorToQuaternion"')
+    break_quat = one(c, nodes, 'MemberName="BreakQuat"')
     c.require_link(split, "CameraTransform_5_6A923AA84DB46D9EE28DF38943321FC9", transform, "InTransform", "Waypoint Transform bridge changed")
     c.require_link(transform, "Location", vector, "InVec", "Position extraction changed")
-    if paste:
-        c.require(
-            not transform.pins["Rotation"].links,
-            "Paste body must defer the crash-prone Rotator-to-Quat input bridge",
-        )
-    else:
-        c.require_link(transform, "Rotation", quat, "InRot", "Body quaternion extraction changed")
+    c.require_link(transform, "Rotation", quat, "InRot", "Body quaternion conversion changed")
+    c.require_link(quat, "ReturnValue", break_quat, "InQuat", "Body quaternion extraction changed")
+    c.require("ReturnValue_X" not in quat.pins, "Quaternion conversion return must remain unsplit")
 
     arrays = [node for node in nodes.values() if "K2Node_MakeArray" in node.node_class]
     c.require(len(arrays) == 3, "Waypoint encoder must own body/gimbal/position arrays")
@@ -140,7 +149,13 @@ def assert_waypoint(c, nodes, *, paste: bool) -> None:
 
     annotation = fields[0]
     corner = fields[2]
-    c.require('DefaultValue=""' in pin_line(annotation, "StringValue"), "Annotation default changed")
+    annotation_value = pin_line(annotation, "StringValue")
+    explicit_annotation = re.search(r'DefaultValue="([^"]*)"', annotation_value)
+    c.require(
+        explicit_annotation is None or explicit_annotation.group(1) == "",
+        "Annotation default changed",
+    )
+    c.require("LinkedTo=" not in annotation_value, "Annotation must remain an unlinked empty string")
     c.require('DefaultValue="glide"' in pin_line(corner, "StringValue"), "Corner mode bridge changed")
     gimbal_array = next(
         node
@@ -149,28 +164,29 @@ def assert_waypoint(c, nodes, *, paste: bool) -> None:
     )
     body_array = next(node for node in by_count[4] if node is not gimbal_array)
     for source, index in zip(
-        ("ReturnValue_X", "ReturnValue_Y", "ReturnValue_Z", "ReturnValue_W"),
+        ("X", "Y", "Z", "W"),
         range(4),
     ):
-        if paste:
-            c.require(
-                not body_array.pins[f"[{index}]"].links,
-                "Paste body must defer the crash-prone split-Quat array bridge",
-            )
-        else:
-            c.require_link(
-                quat,
-                source,
-                body_array,
-                f"[{index}]",
-                "Body quaternion component order changed",
-            )
+        c.require_link(
+            break_quat,
+            source,
+            body_array,
+            f"[{index}]",
+            "Body quaternion component order changed",
+        )
+    require_int_number_bridge(
+        c,
+        nodes,
+        split,
+        "WaypointId_2_0654FE3F4542AC31B6E13BBB55C34DAE",
+        fields[-1],
+    )
     c.require_link(gimbal_array, "Array", fields[3], "NumberArray", "Identity gimbal bridge changed")
     c.require("bOrphanedPin=True" not in "\n".join(node.text for node in nodes.values()), "Encoder contains orphaned pins")
 
 
 def assert_segment(c, nodes, *, paste: bool) -> None:
-    assert_closed(c, nodes, 11 if not paste else 10, None if paste else "EncodeSegmentV1")
+    assert_closed(c, nodes, 14 if not paste else 13, None if paste else "EncodeSegmentV1")
     store = one(c, nodes, 'MemberName="ScratchNestedJsonV1"')
     fields = [
         field_node(c, nodes, "SetNumberField", "durationSeconds"),
@@ -195,13 +211,21 @@ def assert_segment(c, nodes, *, paste: bool) -> None:
         "TimeProfile_16_3195F0C3470E1AECB34316A7BFBD2FBA",
         "ToWaypointId_7_4F6D070B43FD0BB9AE3B8080C8D2001B",
     )
+    integer_sources = {
+        "FromWaypointId_5_E660EAD84DEB59C3D0810980CF95CC91",
+        "SegmentId_3_57086B304FBCBD600FA6E398ECE727A0",
+        "ToWaypointId_7_4F6D070B43FD0BB9AE3B8080C8D2001B",
+    }
     for source, target in zip(expected_sources, fields):
         target_pin = "StringValue" if 'SetStringField' in target.text else "Number"
-        c.require_link(split, source, target, target_pin, "Segment field mapping changed")
+        if source in integer_sources:
+            require_int_number_bridge(c, nodes, split, source, target)
+        else:
+            c.require_link(split, source, target, target_pin, "Segment field mapping changed")
 
 
 def assert_document(c, nodes, *, paste: bool) -> None:
-    assert_closed(c, nodes, 34 if not paste else 33, None if paste else "EncodeDocumentV1")
+    assert_closed(c, nodes, 37 if not paste else 36, None if paste else "EncodeDocumentV1")
     store = one(c, nodes, 'MemberName="ScratchRootJsonV1"')
     scalar_fields = [
         field_node(c, nodes, "SetStringField", "contentHash"),
@@ -237,6 +261,9 @@ def assert_document(c, nodes, *, paste: bool) -> None:
     c.require_link(segment_loop, "Completed", segments, "execute", "Segments must commit after loop completion")
     c.require_link(segments, "then", engine, "execute", "trajectoryEngineVersion canonical position changed")
     c.require_link(engine, "then", clears[1], "execute", "Waypoint staging clear changed")
+    require_int_number_bridge(c, nodes, split, "RevisionNumber_5_951904BF45A63EADA84E4AB0386D19B4", scalar_fields[4])
+    require_int_number_bridge(c, nodes, split, "SchemaVersion_16_7F93B5224F25B9BFDAC842BCD5B16D37", scalar_fields[5])
+    require_int_number_bridge(c, nodes, split, "TrajectoryEngineVersion_3_442F783F41FCAC3B8146EDA9233D191D", engine)
     c.require_link(waypoint_loop, "Completed", waypoints, "execute", "Waypoints must commit after loop completion")
     encoded = one(c, nodes, 'MemberName="ScratchEncodedDocumentV1"')
     c.require_link(waypoints, "then", encoded, "execute", "Canonical document encode must commit terminally")
@@ -249,12 +276,21 @@ def main() -> None:
     parser.add_argument("--project-root", type=Path, required=True)
     parser.add_argument("--input-dir", type=Path, required=True)
     parser.add_argument("--paste", action="store_true")
+    parser.add_argument(
+        "--only",
+        choices=("all", "waypoint", "segment", "document"),
+        default="all",
+        help="Validate one live-exported graph or the complete generated encoder set.",
+    )
     args = parser.parse_args()
     c = load_contracts(args.project_root)
     suffix = "-paste" if args.paste else ""
-    assert_waypoint(c, c.parse_graph(args.input_dir / f"encode-waypoint-v1{suffix}.eddgraph"), paste=args.paste)
-    assert_segment(c, c.parse_graph(args.input_dir / f"encode-segment-v1{suffix}.eddgraph"), paste=args.paste)
-    assert_document(c, c.parse_graph(args.input_dir / f"encode-document-v1{suffix}.eddgraph"), paste=args.paste)
+    if args.only in ("all", "waypoint"):
+        assert_waypoint(c, c.parse_graph(args.input_dir / f"encode-waypoint-v1{suffix}.eddgraph"), paste=args.paste)
+    if args.only in ("all", "segment"):
+        assert_segment(c, c.parse_graph(args.input_dir / f"encode-segment-v1{suffix}.eddgraph"), paste=args.paste)
+    if args.only in ("all", "document"):
+        assert_document(c, c.parse_graph(args.input_dir / f"encode-document-v1{suffix}.eddgraph"), paste=args.paste)
     print("Repository document encoder graph contracts passed")
 
 

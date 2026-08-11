@@ -269,6 +269,7 @@ def load_templates(project_root: Path, bp) -> dict[str, str]:
     json_forms = bp.read_blocks(root / "templates" / "repository-json-node-forms.eddgraph")
     transform_forms = bp.read_blocks(root / "templates" / "repository-codec-transform-node-forms.eddgraph")
     math_forms = bp.read_blocks(root / "templates" / "repository-codec-math-node-forms.eddgraph")
+    break_quat_forms = bp.read_blocks(root / "templates" / "repository-codec-break-quat-node-form.eddgraph")
     vector_forms = bp.read_blocks(root / "templates" / "repository-codec-vector-node-forms.eddgraph")
     array_forms = bp.read_blocks(root / "templates" / "repository-codec-array-node-forms.eddgraph")
     marker_forms = bp.read_blocks(root / "templates" / "path-preview-marker-node-forms.eddgraph")
@@ -299,7 +300,11 @@ def load_templates(project_root: Path, bp) -> dict[str, str]:
         "break_transform": bp.find_block(transform_forms, r'MemberName="BreakTransform"'),
         "break_vector": bp.find_block(vector_forms, r'MemberName="BreakVector"'),
         "make_number_array": bp.find_block(array_forms, r"K2Node_MakeArray"),
-        "rotator_to_quat": bp.find_block(math_forms, r'MemberName="Conv_RotatorToQuaternion"'),
+        "rotator_to_quat": unsplit_quaternion_text(
+            bp.find_block(math_forms, r'MemberName="Conv_RotatorToQuaternion"')
+        ),
+        "break_quat": bp.find_block(break_quat_forms, r'MemberName="BreakQuat"'),
+        "int_to_double": bp.find_block(playback, r'MemberName="Conv_IntToDouble"'),
         **{
             f"json_{member}": bp.find_block(json_forms, rf'MemberName="{member}"')
             for member in (
@@ -326,7 +331,8 @@ def build_waypoint(bp, templates: dict[str, str]):
     break_transform = b.add("break_transform", "break_transform", 512, 480)
     break_vector = b.add("break_vector", "break_vector", 768, 560)
     quat = b.add("body_quaternion", "rotator_to_quat", 768, 720)
-    body_array = b.make_number_array(4, 1024, 720)
+    break_quat = b.add("break_body_quaternion", "break_quat", 1024, 720)
+    body_array = b.make_number_array(4, 1280, 720)
     gimbal_array = b.make_number_array(4, 1024, 920)
     position_array = b.make_number_array(3, 1024, 560)
     set_default(gimbal_array, "[3]", "1.0")
@@ -346,6 +352,7 @@ def build_waypoint(bp, templates: dict[str, str]):
     lens_object = b.json("SetObjectField", 2560, 0)
     position = b.json("SetNumberArrayField", 2816, 0)
     waypoint_id = b.json("SetNumberField", 3072, 0)
+    waypoint_id_number = b.add("waypoint_id_number", "int_to_double", 2816, 400)
 
     for node, name in (
         (annotation, "annotation"),
@@ -368,13 +375,14 @@ def build_waypoint(bp, templates: dict[str, str]):
     bp.connect(split, WP_TRANSFORM, break_transform, "InTransform")
     bp.connect(break_transform, "Location", break_vector, "InVec")
     bp.connect(break_transform, "Rotation", quat, "InRot")
+    bp.connect(quat, "ReturnValue", break_quat, "InQuat")
     for output, index in zip(("X", "Y", "Z"), range(3)):
         bp.connect(break_vector, output, position_array, f"[{index}]")
     for output, index in zip(
-        ("ReturnValue_X", "ReturnValue_Y", "ReturnValue_Z", "ReturnValue_W"),
+        ("X", "Y", "Z", "W"),
         range(4),
     ):
-        bp.connect(quat, output, body_array, f"[{index}]")
+        bp.connect(break_quat, output, body_array, f"[{index}]")
 
     bp.connect(root, "ReturnValue", store_root, "ScratchNestedJsonV1")
     for node in (annotation, body, corner, gimbal, hold, lens_object, position, waypoint_id):
@@ -390,7 +398,8 @@ def build_waypoint(bp, templates: dict[str, str]):
     bp.connect(split, WP_APERTURE, lens_aperture, "Number")
     bp.connect(split, WP_FOCAL, lens_focal, "Number")
     bp.connect(split, WP_FOCUS, lens_focus, "Number")
-    bp.connect(split, WP_ID, waypoint_id, "Number")
+    bp.connect(split, WP_ID, waypoint_id_number, "InInt")
+    bp.connect(waypoint_id_number, "ReturnValue", waypoint_id, "Number")
 
     chain = [store_root, annotation, body, corner, gimbal, hold, lens_aperture, lens_focal, lens_focus, lens_object, position, waypoint_id]
     bp.connect(b.entry, "then", chain[0], "execute")
@@ -411,6 +420,9 @@ def build_segment(bp, templates: dict[str, str]):
     curve = b.json("SetStringField", 1280, 0)
     time = b.json("SetStringField", 1536, 0)
     to_id = b.json("SetNumberField", 1792, 0)
+    from_id_number = b.add("from_waypoint_id_number", "int_to_double", 768, 400)
+    segment_id_number = b.add("segment_id_number", "int_to_double", 1024, 400)
+    to_id_number = b.add("to_waypoint_id_number", "int_to_double", 1792, 400)
     for node, name in (
         (duration, "durationSeconds"),
         (from_id, "fromWaypointId"),
@@ -424,13 +436,17 @@ def build_segment(bp, templates: dict[str, str]):
     bp.connect(segment, "ScratchSegmentV1", split, "ST_EDD_Segment")
     for source_pin, node, target_pin in (
         (SEGMENT_DURATION, duration, "Number"),
-        (SEGMENT_FROM, from_id, "Number"),
-        (SEGMENT_ID, segment_id, "Number"),
         (SEGMENT_CURVE, curve, "StringValue"),
         (SEGMENT_TIME, time, "StringValue"),
-        (SEGMENT_TO, to_id, "Number"),
     ):
         bp.connect(split, source_pin, node, target_pin)
+    for source_pin, conversion, node in (
+        (SEGMENT_FROM, from_id_number, from_id),
+        (SEGMENT_ID, segment_id_number, segment_id),
+        (SEGMENT_TO, to_id_number, to_id),
+    ):
+        bp.connect(split, source_pin, conversion, "InInt")
+        bp.connect(conversion, "ReturnValue", node, "Number")
     bp.connect(root, "ReturnValue", store_root, "ScratchNestedJsonV1")
     chain = [store_root, duration, from_id, segment_id, curve, time, to_id]
     bp.connect(b.entry, "then", chain[0], "execute")
@@ -452,6 +468,8 @@ def build_document(bp, templates: dict[str, str]):
     region = b.json("SetStringField", 1280, 0)
     revision = b.json("SetNumberField", 1536, 0)
     schema = b.json("SetNumberField", 1792, 0)
+    revision_number = b.add("revision_number", "int_to_double", 1536, 560)
+    schema_number = b.add("schema_number", "int_to_double", 1792, 560)
     for node, name in (
         (content_hash, "contentHash"),
         (profile, "defaultFlightProfile"),
@@ -477,6 +495,7 @@ def build_document(bp, templates: dict[str, str]):
     bp.connect(store_root, "Output_Get", set_segments, "self")
 
     engine = b.json("SetNumberField", 3584, 0)
+    engine_number = b.add("trajectory_engine_number", "int_to_double", 3584, 560)
     field(engine, "trajectoryEngineVersion")
     bp.connect(store_root, "Output_Get", engine, "self")
     objects_d = b.getter("ScratchJsonObjectsV1", "json", 3584, 360, array=True)
@@ -500,11 +519,15 @@ def build_document(bp, templates: dict[str, str]):
         (DOC_PROFILE, profile, "StringValue"),
         (DOC_DURATION, duration, "Number"),
         (DOC_REGION, region, "StringValue"),
-        (DOC_REVISION, revision, "Number"),
-        (DOC_SCHEMA, schema, "Number"),
-        (DOC_ENGINE, engine, "Number"),
     ):
         bp.connect(split, source_pin, node, target_pin)
+    for source_pin, conversion, node in (
+        (DOC_REVISION, revision_number, revision),
+        (DOC_SCHEMA, schema_number, schema),
+        (DOC_ENGINE, engine_number, engine),
+    ):
+        bp.connect(split, source_pin, conversion, "InInt")
+        bp.connect(conversion, "ReturnValue", node, "Number")
     bp.connect(root, "ReturnValue", store_root, "ScratchRootJsonV1")
 
     bp.connect(objects_a, "ScratchJsonObjectsV1", clear_segments, "TargetArray")
@@ -549,30 +572,9 @@ def write(nodes, output: Path, *, paste: bool) -> None:
     for node in nodes:
         if paste and node is entry:
             continue
-        # Enhanced 5.6.1 can reconstruct the split Quat node by itself, but
-        # asserts in K2Node.cpp when that node is part of the large encoder
-        # clipboard batch even with every Quat link removed. Install it as a
-        # second isolated paste, then wire its five deferred pins in-editor.
-        if paste and 'MemberName="Conv_RotatorToQuaternion"' in node.text:
-            continue
         text = node.text
         if paste:
             text = re.sub(r',LinkedTo=\(K2Node_FunctionEntry_0 [0-9A-F]{32},\)', "", text)
-            # Enhanced 5.6.1 crashes while reconstructing a pasted split Quat
-            # output that is already linked to a Make Array. Both nodes and all
-            # other bridges paste safely. Install these four links after paste.
-            if node.name == "K2Node_MakeArray_0":
-                text = re.sub(
-                    r',LinkedTo=\(K2Node_CallFunction_2 [0-9A-F]{32},\)',
-                    "",
-                    text,
-                )
-            if 'MemberName="BreakTransform"' in text:
-                text = re.sub(
-                    r',LinkedTo=\(K2Node_CallFunction_2 [0-9A-F]{32},\)',
-                    "",
-                    text,
-                )
         blocks.append(text)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text("\n".join(blocks) + "\n", encoding="utf-8")
@@ -591,13 +593,10 @@ def write_isolated_probe(nodes, output: Path, include) -> None:
     output.write_text("\n".join(blocks) + "\n", encoding="utf-8")
 
 
-def write_unsplit_quaternion_probe(nodes, output: Path) -> None:
+def unsplit_quaternion_text(text: str) -> str:
     """Collapse the harvested split Quat return to its native unsplit form."""
-    matches = [node for node in nodes if 'MemberName="Conv_RotatorToQuaternion"' in node.text]
-    if len(matches) != 1:
-        raise RuntimeError(f"Expected one Rotator-to-Quaternion node for {output.name}")
     lines = []
-    for line in matches[0].text.splitlines():
+    for line in text.splitlines():
         if 'PinName="ReturnValue_' in line:
             continue
         if 'PinName="ReturnValue",' in line:
@@ -605,8 +604,15 @@ def write_unsplit_quaternion_probe(nodes, output: Path) -> None:
             line = line.replace("bHidden=True", "bHidden=False")
         line = re.sub(r",LinkedTo=\([^)]*\)", "", line)
         lines.append(line)
+    return "\n".join(lines)
+
+
+def write_unsplit_quaternion_probe(nodes, output: Path) -> None:
+    matches = [node for node in nodes if 'MemberName="Conv_RotatorToQuaternion"' in node.text]
+    if len(matches) != 1:
+        raise RuntimeError(f"Expected one Rotator-to-Quaternion node for {output.name}")
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    output.write_text(unsplit_quaternion_text(matches[0].text) + "\n", encoding="utf-8")
 
 
 def write_linked_probe(nodes, output: Path, include) -> None:

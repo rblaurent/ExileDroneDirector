@@ -85,6 +85,7 @@ $requiredFiles = @(
     'tools\blueprint\Build-RepositoryJsonMissingNodeProbe.py',
     'tools\blueprint\Test-RepositoryJsonNodeForms.py',
     'tools\blueprint\Test-RepositoryCodecMathNodeForms.py',
+    'tools\blueprint\Test-RepositoryCodecBreakQuatNodeForm.py',
     'tools\blueprint\Test-RepositoryCodecTransformNodeForms.py',
     'tools\blueprint\Build-RepositoryDocumentEncoderGraphs.py',
     'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py',
@@ -96,6 +97,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-BlueprintGraphContracts.ps1',
     'tools\blueprint\Build-RollInputGraph.py',
     'tools\blueprint\templates\horizon-node-forms.eddgraph',
+    'tools\blueprint\templates\repository-codec-break-quat-node-form.eddgraph',
     'tools\blueprint\Build-ClientRollDispatch.py',
     'tools\blueprint\Build-ClientWaypointDispatch.py',
     'tools\blueprint\Build-ClientWaypointEditDispatch.py',
@@ -177,6 +179,7 @@ $requiredFiles = @(
     'tools\blueprint\snippets\find-record-index-v1-paste.eddgraph',
     'tools\blueprint\live-snippets\reset-repository-result-v1.eddgraph',
     'tools\blueprint\live-snippets\find-record-index-v1.eddgraph',
+    'tools\blueprint\live-snippets\encode-waypoint-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -564,6 +567,11 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Repository codec quaternion node-form contracts failed with exit code $LASTEXITCODE."
 }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryCodecBreakQuatNodeForm.py') `
+    --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\repository-codec-break-quat-node-form.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository codec BreakQuat node-form contracts failed with exit code $LASTEXITCODE."
+}
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryCodecTransformNodeForms.py') `
     --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\repository-codec-transform-node-forms.eddgraph')
 if ($LASTEXITCODE -ne 0) {
@@ -604,6 +612,15 @@ if ($LASTEXITCODE -ne 0) {
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')
 if ($LASTEXITCODE -ne 0) {
     throw "Checked-in repository document encoder contracts failed with exit code $LASTEXITCODE."
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path (Join-Path $ProjectRoot 'tools\blueprint\live-snippets\encode-waypoint-v1.eddgraph')
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets') `
+    --only waypoint
+if ($LASTEXITCODE -ne 0) {
+    throw "Live EncodeWaypointV1 contracts failed with exit code $LASTEXITCODE."
 }
 
 $repositoryCoreNonce = [guid]::NewGuid().ToString('N')

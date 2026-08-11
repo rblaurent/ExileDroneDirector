@@ -303,6 +303,12 @@ This section is the authoritative handoff. Detailed evidence remains in
   saved through Unreal's API, survived a fresh-process cold compile, and was
   mirrored back to Git with an exact SHA-256 match. Integer waypoint IDs use an
   explicit `Conv_IntToDouble` bridge before PlayFab JSON numbers.
+- `EncodeSegmentV1` is now installed and accepted beside it. The post-save live
+  export is 14 nodes/57 pins, covers all six segment fields, and uses explicit
+  integer-to-double bridges for `segmentId`, `fromWaypointId`, and
+  `toWaypointId`. It compiled with zero Blueprint/K2 errors, saved through
+  Unreal's API, survived fresh-process cold compilation, and was mirrored with
+  an exact live/Git SHA-256 match.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported
@@ -322,11 +328,12 @@ before any polished editor UI or cook is attempted:
 1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
    owner identity, visibility, revision, attribution, published snapshot,
    structural integrity mode, and validation contracts.
-2. **Current:** complete `EncodeSegmentV1`, `EncodeDocumentV1`, the corresponding
+2. **Current:** complete `EncodeDocumentV1`, the corresponding
    decoders, and record-envelope codecs; then implement private
    create/save/load/list/delete and deterministic restart recovery.
-   `EncodeWaypointV1`, repository core, and exact numeric/null JSON node forms
-   are accepted live-compiled proof, not remaining discovery work.
+   `EncodeWaypointV1`, `EncodeSegmentV1`, repository core, and exact
+   numeric/null JSON node forms are accepted live-compiled proof, not remaining
+   discovery work.
 3. Prove optimistic revisions, atomic save behavior, corruption recovery, schema
    migration hooks, limit validation, and typed failures through executable tests.
 4. Implement server-authoritative ownership, privacy, publication, immutable

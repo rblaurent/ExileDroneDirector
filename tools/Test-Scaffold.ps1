@@ -7,6 +7,11 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+& python (Join-Path $ProjectRoot 'tools\unreal\test_invoke_unreal_remote.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Unreal remote-execution helper contracts failed with exit code $LASTEXITCODE."
+}
+
 $requiredFiles = @(
     'README.md',
     'project.json',
@@ -22,8 +27,11 @@ $requiredFiles = @(
     'tools\Sync-DevKitContent.ps1',
     'tools\Test-RepositoryBudget.ps1',
     'tools\Invoke-UnrealPython.ps1',
+    'tools\Start-EnhancedDevKitRemote.ps1',
     'tools\Test-RepositorySaveGame.ps1',
     'tools\Test-RepositoryService.ps1',
+    'tools\unreal\invoke_unreal_remote.py',
+    'tools\unreal\test_invoke_unreal_remote.py',
     'tools\unreal\Probe-EnhancedApi.py',
     'tools\unreal\Inspect-BlueprintApi.py',
     'tools\unreal\Inspect-GraphApi.py',
@@ -180,6 +188,7 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\reset-repository-result-v1.eddgraph',
     'tools\blueprint\live-snippets\find-record-index-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-waypoint-v1.eddgraph',
+    'tools\blueprint\live-snippets\encode-segment-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -621,6 +630,15 @@ if ($LASTEXITCODE -ne 0) {
     --only waypoint
 if ($LASTEXITCODE -ne 0) {
     throw "Live EncodeWaypointV1 contracts failed with exit code $LASTEXITCODE."
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path (Join-Path $ProjectRoot 'tools\blueprint\live-snippets\encode-segment-v1.eddgraph')
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets') `
+    --only segment
+if ($LASTEXITCODE -ne 0) {
+    throw "Live EncodeSegmentV1 contracts failed with exit code $LASTEXITCODE."
 }
 
 $repositoryCoreNonce = [guid]::NewGuid().ToString('N')

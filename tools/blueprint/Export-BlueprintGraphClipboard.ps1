@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
+    [Alias('OutputPath')]
     [string]$DestinationPath,
 
     [switch]$Force

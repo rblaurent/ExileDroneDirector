@@ -2000,3 +2000,29 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Exact Enhanced cook command/commandlet, output layout, and Workshop metadata
 - First normal-game `.pak` load and controlled Workshop update
 - Authenticated server identity and dedicated-server SaveGame behavior
+
+## EncodeSegmentV1 accepted live (2026-08-11)
+
+- `tools/Start-EnhancedDevKitRemote.ps1` now verifies Enhanced 5.6, refuses any
+  existing `UnrealEditor` or `ConanSandbox` process, launches with `-ModDevKit`,
+  and enables remote execution only for that editor process.
+- `tools/unreal/invoke_unreal_remote.py` wraps Epic's bundled transport and
+  fails closed unless discovery returns exactly one `ConanSandbox` node. Its
+  ambiguity, missing-node, exact-name, and success-selection behavior is covered
+  by four offline tests in the full scaffold.
+- The controlled segment install proved the empty target identity before paste,
+  reconstructed the 13-node body without a crash (`Saved/Crashes` remained
+  16), and exported the wired live graph as 14 nodes/57 pins. Both the pre-wire
+  body and complete live graph passed their semantic contracts.
+- Interactive compilation uses
+  `unreal.BlueprintEditorLibrary.compile_blueprint`; this Enhanced build does
+  not expose `unreal.KismetEditorUtilities`. Read the active Unreal log with
+  `FileShare.ReadWrite` because a normal `ReadAllText` may lose a race against
+  the editor's log handle.
+- Unreal API save returned true, the editor exited gracefully, and a fresh
+  `-ModDevKit` commandlet loaded and compiled every core Blueprint with
+  `EDD_COLD_LOAD|RESULT|PASS` and zero errors. The repository package's exact
+  live/Git mirror SHA-256 is
+  `912E7ABB6514F0A94CE5F36005ADD9DDFE8B408716272BCA2C8ED7DA13A2F9B6`.
+- Next codec target is `EncodeDocumentV1`; no cook or polished UI is authorized
+  yet.

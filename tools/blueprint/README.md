@@ -15,6 +15,17 @@ The tools in this directory never launch Unreal:
   every checked-in snippet, including execution order and diagnostic source.
 - `Set-BlueprintGraphClipboard.ps1` resolves explicit `{{TOKEN}}` placeholders
   and places the graph on the Windows clipboard for pasting in Unreal.
+
+Interactive editor automation uses a separate fail-closed seam:
+
+- `tools/Start-EnhancedDevKitRemote.ps1` verifies Enhanced 5.6, refuses a
+  second editor, launches with `-ModDevKit`, and enables Python remote execution
+  only for that process.
+- `tools/unreal/invoke_unreal_remote.py` uses Epic's bundled
+  `remote_execution.py`, requires exactly one `ConanSandbox` discovery result,
+  and returns structured command success or failure. It is preferred for asset
+  open, compile, save, and read-only inspection. Native clipboard import/export
+  remains limited to the graph canvas seam that Enhanced does not expose.
 - `Build-RollInputGraph.py` composes manual bank, H toggle, held-input
   arbitration, and smooth world-up horizon stabilization from reviewed
   mod-owned node forms. Its paste output deliberately leaves the first exec pin

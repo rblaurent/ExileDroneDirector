@@ -65,6 +65,7 @@ $requiredFiles = @(
     'tools\unreal\Configure-RepositoryService.py',
     'tools\unreal\Compile-And-SaveRepository.py',
     'tools\unreal\Validate-RepositoryPersistenceWriter.py',
+    'tools\unreal\Validate-RepositoryPrivateDraftLoad.py',
     'tools\unreal\Read-RepositoryPersistenceWriter.py',
     'tools\unreal\Open-RepositoryServiceEditor.py',
     'tools\unreal\Validate-RepositoryJsonCodec.py',
@@ -98,6 +99,7 @@ $requiredFiles = @(
     'tools\repository\blueprint_repository_service_schema.json',
     'tools\repository\test_blueprint_repository_service_schema.py',
     'tools\blueprint\Build-RepositoryCoreGraphs.py',
+    'tools\blueprint\Build-RepositoryPrivateDraftLoadGraph.py',
     'tools\blueprint\Build-RepositoryJsonMissingNodeProbe.py',
     'tools\blueprint\Build-RepositoryDecoderNativeNodeProbe.py',
     'tools\blueprint\Test-RepositoryJsonNodeForms.py',
@@ -132,6 +134,7 @@ $requiredFiles = @(
     'tools\unreal\Export-BlueprintFunctions.ps1',
     'tools\blueprint\Test-RepositorySaveGameNodeForms.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
+    'tools\blueprint\Test-RepositoryPrivateDraftLoadContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -222,8 +225,11 @@ $requiredFiles = @(
     'tools\blueprint\snippets\reset-repository-result-v1-paste.eddgraph',
     'tools\blueprint\snippets\find-record-index-v1.eddgraph',
     'tools\blueprint\snippets\find-record-index-v1-paste.eddgraph',
+    'tools\blueprint\snippets\load-draft-v1.eddgraph',
+    'tools\blueprint\snippets\load-draft-v1-paste.eddgraph',
     'tools\blueprint\live-snippets\reset-repository-result-v1.eddgraph',
     'tools\blueprint\live-snippets\find-record-index-v1.eddgraph',
+    'tools\blueprint\live-snippets\load-draft-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-waypoint-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-segment-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-document-v1.eddgraph',
@@ -1243,6 +1249,53 @@ foreach ($graph in Get-ChildItem -LiteralPath $repositoryCoreLive -Filter '*.edd
     --input-dir $repositoryCoreLive
 if ($LASTEXITCODE -ne 0) {
     throw "Repository core live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryPrivateLoadNonce = [guid]::NewGuid().ToString('N')
+$repositoryPrivateLoadRoot = Join-Path $scratchRoot "edd-repository-private-load-$repositoryPrivateLoadNonce"
+$repositoryPrivateLoadFull = Join-Path $repositoryPrivateLoadRoot 'full'
+$repositoryPrivateLoadPaste = Join-Path $repositoryPrivateLoadRoot 'paste'
+New-Item -ItemType Directory -Force -Path $repositoryPrivateLoadFull, $repositoryPrivateLoadPaste | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryPrivateDraftLoadGraph.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryPrivateLoadFull `
+    --paste-dir $repositoryPrivateLoadPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-load graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryPrivateLoadFull, $repositoryPrivateLoadPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateDraftLoadContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPrivateLoadFull 'load-draft-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-load full contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateDraftLoadContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPrivateLoadPaste 'load-draft-v1-paste.eddgraph') `
+    --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-load paste contracts failed with exit code $LASTEXITCODE."
+}
+foreach ($pair in @(
+    @((Join-Path $repositoryPrivateLoadFull 'load-draft-v1.eddgraph'), 'tools\blueprint\snippets\load-draft-v1.eddgraph'),
+    @((Join-Path $repositoryPrivateLoadPaste 'load-draft-v1-paste.eddgraph'), 'tools\blueprint\snippets\load-draft-v1-paste.eddgraph')
+)) {
+    $checkedIn = Join-Path $ProjectRoot $pair[1]
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $pair[0]).Hash -ne
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $checkedIn).Hash) {
+        throw "Repository private-load graph is not deterministic: $($pair[1])"
+    }
+}
+$repositoryPrivateLoadLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets\load-draft-v1.eddgraph'
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $repositoryPrivateLoadLive
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateDraftLoadContracts.py') `
+    --project-root $ProjectRoot `
+    --input $repositoryPrivateLoadLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-load live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-DocumentSyncStructForms.py') `

@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.43.0-persistence-writer`
+Current internal build: `0.44.0-private-draft-load`
 
 ## 1. Delivery strategy
 
@@ -243,7 +243,7 @@ This section is the authoritative handoff. Detailed evidence remains in
 ### Not implemented yet
 
 - No polished editor UI, timeline, cinematic
-  curves, lens playback, save/load, server repository,
+  curves, lens playback, routed client/server save/load,
   sharing, permissions, cloning, or event execution exists yet. The client-owned
   preview actor renders validated markers and linear segments, while current
   playback remains deliberately limited to equal-duration transform interpolation
@@ -269,6 +269,14 @@ This section is the authoritative handoff. Detailed evidence remains in
   function entries and reciprocal links, reset defaults/metadata clearing, and
   derived-ID lookup. This is executable repository-core plumbing, not yet full
   private CRUD.
+- `LoadDraftV1` is now the first accepted private-CRUD boundary. It resolves the
+  derived record index, returns `NotFound` without leakage, requires exact owner
+  account identity before decoding, rejects corrupt/noncanonical envelopes, and
+  returns the canonical envelope, current revision, and typed draft only to the
+  owner. `ResetRepositoryResultV1` now also clears `ResultDraftDocumentV1`, so a
+  denial after a successful load cannot expose stale typed data. Generated
+  full/paste graphs, exact post-compile exports, clean compile/save, a real
+  compiled-actor five-case runtime probe, and fresh-process cold load all pass.
 - Runtime persistence integrity is frozen as explicit `structural-v1` after an
   Enhanced reflection probe found no Blueprint/Python digest helper. Canonical
   envelopes now declare the mode, require reserved hash fields to remain empty,
@@ -464,8 +472,9 @@ before any polished editor UI or cook is attempted:
    two-process Blueprint SaveGame round trip all pass. The executable probe
    changes authority from generation 41 to 42, verifies the exact committed
    Unicode payload in a fresh process, and removes its isolated fixture.
-4. **Current:** implement private create/save/load/list/delete on top of the
-   accepted writer, then prove optimistic revisions, atomic save behavior,
+4. **Current:** private owner-only load is accepted; implement private
+   create/save/list/delete on top of the accepted writer, then prove optimistic
+   revisions, atomic save behavior,
    corruption recovery, schema migration hooks, limit validation, and typed
    failures through executable tests.
 5. Implement server-authoritative ownership, privacy, publication, immutable

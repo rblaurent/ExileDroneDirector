@@ -41,7 +41,7 @@ def assert_closed(c, nodes, expected: int, entry_name: str | None) -> None:
 
 
 def assert_reset(c, nodes, *, paste: bool) -> None:
-    assert_closed(c, nodes, 9 if not paste else 8, None if paste else "ResetRepositoryResultV1")
+    assert_closed(c, nodes, 10 if not paste else 9, None if paste else "ResetRepositoryResultV1")
     order = (
         ("ResultCodeV1", "Success"),
         ("ResultDetailV1", ""),
@@ -49,13 +49,21 @@ def assert_reset(c, nodes, *, paste: bool) -> None:
         ("ResultCurrentRevisionV1", "0"),
         ("ResultRecordIndexV1", "-1"),
         ("ResultRecordEnvelopeV1", ""),
+        ("ResultDraftDocumentV1", None),
     )
     setters = [one(c, nodes, f'MemberName="{name}"') for name, _ in order]
     metadata = one(c, nodes, 'MemberName="ResultMetadataEnvelopesV1"')
     clear = one(c, nodes, 'MemberName="Array_Clear"')
     for node, (name, default) in zip(setters, order):
         line = next(line for line in node.text.splitlines() if f'PinName="{name}"' in line)
-        if default == "":
+        if default is None:
+            c.require(
+                'PinType.PinCategory="struct"' in line
+                and "ST_EDD_FlypathDocument" in line
+                and "DefaultValue=" not in line,
+                "ResultDraftDocumentV1 must reset to the default typed document",
+            )
+        elif default == "":
             # Unreal omits DefaultValue entirely when a pasted empty-string pin is
             # saved and copied back out of the editor.  Both spellings mean the
             # same empty string; any explicit non-empty value remains forbidden.

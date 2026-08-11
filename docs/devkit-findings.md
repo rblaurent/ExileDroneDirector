@@ -2572,3 +2572,47 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `F25458BC4D3B0FB7EF962A970FE39F42882606AF9453E09A6423BC8DF1C153DE`.
 - Next: private create/save/load/list/delete using the accepted writer. No cook
   and no polished UI.
+
+## Owner-only private draft load accepted (2026-08-11)
+
+- Internal checkpoint `0.44.0-private-draft-load` implements the first private
+  CRUD boundary: `LoadDraftV1` is 34 nodes and returns a typed draft only after
+  derived-ID lookup, exact owner-account authorization, strict record decoding,
+  and semantic record validation. Stable failures are `NotFound /
+  FlypathNotFound`, `Forbidden / OwnerRequired`, `ValidationFailed /
+  StoredRecordDecodeFailed`, and `ValidationFailed / StoredRecordInvalid`.
+- The first generated draft duplicated the owner-array link because
+  `ValidationBuilder.array_item()` already wires its source. Enhanced compiled
+  the paste but reported `failed building connection with 'Replace existing
+  input connections' at Get (a copy)`. The explicit second `bp.connect` was
+  removed and every contract now rejects duplicate `(node,pin)` links on any
+  pin. Never infer compile success from `save_asset=True`; scan the marked
+  compile interval for Blueprint/K2 errors.
+- The executable probe then found a real stale-data privacy bug: scalar result
+  channels reset, but `ResultDraftDocumentV1` survived a successful load and
+  remained readable after a later wrong-owner request. The shared
+  `ResetRepositoryResultV1` is now 10 nodes and resets the typed document before
+  clearing metadata. The same runtime probe now passes missing, wrong-owner,
+  corrupt-envelope, valid-owner, and denial-after-success cases on the real
+  compiled repository actor.
+- Runtime fixtures must use the shipped Blueprint `EncodeRecordV1` output.
+  Python-oracle JSON is semantically equivalent but PlayFab preserves insertion
+  order, while strict Blueprint decoders require byte-canonical order. Build the
+  typed document through its full user-defined-struct field GUIDs, invoke the
+  Blueprint encoder, and feed that exact envelope into runtime acceptance.
+- The Blueprint editor and Conan main editor are separate top-level windows in
+  the same Unreal process. In this run the Blueprint HWND was `27265536` and the
+  Conan main HWND was `44239610`; using the process main-window handle caused
+  mouse actions to land behind/outside the graph and clipboard copies to become
+  no-ops. Enumerate visible process windows by title and target the exact
+  Blueprint HWND. Client origin measured `-8,-8`; convert physical screenshot
+  pin centers to client coordinates accordingly. Every edit still requires an
+  immediate exact graph-name/node-count export and reciprocal-link contract.
+- Generated full/paste graphs, exact live and post-compile exports, duplicate
+  link regression, clean marked compile/save, the five-case compiled-actor
+  runtime probe, guarded quit, and fresh-process cold load all pass. FromDevKit
+  preview reported 16 unchanged assets and one reviewed repository conflict;
+  forced sync copied that package only. Live and mirror SHA-256 is
+  `0FA85E9243035AF70AE311CC10B1406AFFF6E959422B42E90D10D3E97B38B0CD`.
+- Next: private create, save, list, and delete on the accepted writer. No cook
+  and no polished UI.

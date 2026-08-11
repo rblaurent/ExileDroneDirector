@@ -103,8 +103,22 @@ class Builder:
         return node
 
     def setter(self, name: str, kind: str, x: int, y: int):
-        node = self.add("setter", f"K2Node_VariableSet_{len(self.nodes)}", x, y)
-        retarget_variable(node, "NextWaypointId", name, kind)
+        if kind == "document":
+            node = self.add("document_setter", f"K2Node_VariableSet_{len(self.nodes)}", x, y)
+            node.text = re.sub(
+                r'VariableReference=\(MemberName="ScratchRecordDraftDocumentV1"[^)]*\)',
+                f'VariableReference=(MemberName="{name}",bSelfContext=True)',
+                node.text,
+                count=1,
+            )
+            node.text = node.text.replace(
+                'PinName="ScratchRecordDraftDocumentV1"',
+                f'PinName="{name}"',
+            )
+            node.pins[name] = node.pins.pop("ScratchRecordDraftDocumentV1")
+        else:
+            node = self.add("setter", f"K2Node_VariableSet_{len(self.nodes)}", x, y)
+            retarget_variable(node, "NextWaypointId", name, kind)
         return node
 
     def getter(self, old_name: str, name: str, kind: str, x: int, y: int, *, array: bool = False):
@@ -118,6 +132,9 @@ def templates(project_root: Path, bp) -> dict[str, str]:
     snippets = project_root / "tools" / "blueprint" / "snippets"
     capture = bp.read_blocks(project_root / "tools" / "blueprint" / "templates" / "waypoint-capture-node-forms.eddgraph")
     sync = bp.read_blocks(snippets / "sync-draft-waypoints-v1.eddgraph")
+    record_decode = bp.read_blocks(
+        project_root / "tools" / "blueprint" / "live-snippets" / "decode-record-v1.eddgraph"
+    )
     return {
         "entry": bp.find_block(capture, r"K2Node_FunctionEntry"),
         "setter": bp.find_block(capture, r'K2Node_VariableSet.*MemberName="NextWaypointId"'),
@@ -125,6 +142,10 @@ def templates(project_root: Path, bp) -> dict[str, str]:
         "array_getter": bp.find_block(sync, r'K2Node_VariableGet.*MemberName="DraftWaypointIds"'),
         "array_clear": bp.find_block(sync, r'MemberName="Array_Clear"'),
         "array_find": bp.find_block(sync, r'MemberName="Array_Find"'),
+        "document_setter": bp.find_block(
+            record_decode,
+            r'K2Node_VariableSet.*MemberName="ScratchRecordDraftDocumentV1"',
+        ),
     }
 
 
@@ -137,21 +158,23 @@ def build_reset(bp, forms: dict[str, str]):
         ("ResultCurrentRevisionV1", "int", "0"),
         ("ResultRecordIndexV1", "int", "-1"),
         ("ResultRecordEnvelopeV1", "string", ""),
+        ("ResultDraftDocumentV1", "document", None),
     )
     setters = []
     for index, (name, kind, default) in enumerate(specs):
         node = b.setter(name, kind, 256 * (index + 1), 0)
-        set_default(node, name, default)
+        if default is not None:
+            set_default(node, name, default)
         setters.append(node)
     metadata = b.getter(
         "DraftWaypointIds",
         "ResultMetadataEnvelopesV1",
         "string",
-        1280,
+        1792,
         224,
         array=True,
     )
-    clear = b.add("array_clear", "K2Node_CallArrayFunction_8", 1792, 0)
+    clear = b.add("array_clear", "K2Node_CallArrayFunction_8", 2048, 0)
     retarget_array_clear(clear)
     bp.connect(b.entry, "then", setters[0], "execute")
     for left, right in zip(setters, setters[1:]):

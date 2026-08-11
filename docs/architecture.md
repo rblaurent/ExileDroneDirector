@@ -427,6 +427,16 @@ decoder stages every typed field and draft/published document, and
 between that regenerated envelope and the preserved source can set
 `ScratchValidV1=true`; every failure path terminates with validity already false.
 
+Private draft loading is an owner-only read boundary. `LoadDraftV1` resets every
+result channel, resolves `RequestFlypathIdV1` through the derived identity index,
+and compares the indexed owner account ID with the authenticated requester
+before exposing or decoding the record envelope. Missing, forbidden, corrupt,
+and invalid records return stable typed failures with no envelope, revision, or
+typed document. Success returns the canonical envelope, its current draft
+revision, and `ResultDraftDocumentV1`. The shared result reset clears the typed
+document as well as scalar fields, preventing a denial after a successful call
+from leaking stale draft data.
+
 ## 6. Ownership, visibility, and identity
 
 The server derives `RequesterAccountId` from the authenticated player/controller

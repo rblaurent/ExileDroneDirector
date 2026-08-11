@@ -558,13 +558,24 @@ Where the storage adapter lacks transactions, use copy-on-write records:
 4. Update metadata pointer.
 5. Retain or later garbage-collect the previous committed revision.
 
-On load, ignore uncommitted candidates and fall back to the latest committed
-candidate that parses and passes exact schema plus semantic validation.
-The exact mechanism is adjusted to storage primitives available in Blueprint.
-Committed deletion is represented by a tombstone generation. Recovery stops at
-the newest committed tombstone rather than falling through to older valid data.
-The repository only replaces its authoritative memory entry after the storage
-adapter reports Stage, Commit, and Activate success.
+On load, ignore uncommitted candidates. A committed slot header is eligible only
+when its schema version, positive generation, committed flag, and reserved empty
+hash are valid. Eligible slots are scanned newest first at record granularity:
+each canonical record envelope is decoded and semantically validated, and a
+corrupt newest envelope may fall back to the matching older record without
+discarding unrelated valid records from the new snapshot. Tombstones are
+collected with their generation before records are selected, so a newer
+committed tombstone masks every older copy of that Flypath. Malformed or
+duplicate tombstone channels fail the repository load closed rather than risk
+resurrection. Divergent committed slots with the same generation are a split
+brain and also fail closed.
+
+Candidate output is deterministic: records are ordered by Flypath ID,
+tombstones are sorted and monotonic, and live IDs are disjoint from tombstones.
+The repository only replaces authoritative memory after the inactive-slot
+uncommitted stage write and its committed rewrite both succeed. The exact
+Blueprint contract is mirrored by
+`tools/persistence/alternating_snapshot_oracle.py`.
 
 ### 8.4 Limits
 

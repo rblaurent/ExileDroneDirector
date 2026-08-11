@@ -88,6 +88,8 @@ $requiredFiles = @(
     'tools\document\test_document_bridge.py',
     'tools\persistence\repository_savegame_schema.json',
     'tools\persistence\test_repository_savegame_schema.py',
+    'tools\persistence\alternating_snapshot_oracle.py',
+    'tools\persistence\test_alternating_snapshot_oracle.py',
     'tools\repository\blueprint_repository_service_schema.json',
     'tools\repository\test_blueprint_repository_service_schema.py',
     'tools\blueprint\Build-RepositoryCoreGraphs.py',
@@ -584,6 +586,11 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\persistence\test_repository_savegame_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Repository SaveGame schema contracts failed with exit code $LASTEXITCODE."
+}
+
+& python (Join-Path $ProjectRoot 'tools\persistence\test_alternating_snapshot_oracle.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Alternating repository snapshot contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\repository\test_blueprint_repository_service_schema.py')

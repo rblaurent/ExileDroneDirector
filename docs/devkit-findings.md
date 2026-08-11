@@ -2276,3 +2276,26 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   enforced at this or a proven persistence boundary.
 - Next backend slice is alternating-slot persistence and private CRUD/recovery.
   There is still no authorization to cook or begin the polished UI.
+
+## Physical alternating-slot recovery contract closed (2026-08-11)
+
+- The logical repository oracle previously modeled per-record generations while
+  the accepted Blueprint adapter stores two complete repository snapshots. A
+  dedicated physical-layout oracle now removes that ambiguity:
+  `tools/persistence/alternating_snapshot_oracle.py`.
+- Its 11 cases lock A/B alternation, positive monotonically increasing
+  generations, uncommitted-candidate rejection, stage/commit failure isolation,
+  deterministic Flypath/tombstone ordering, invalid-header rejection, and
+  equal-generation split-brain rejection.
+- Recovery is deliberately record-granular inside valid committed slot headers.
+  A malformed newest record envelope can fall back to the older copy while
+  unrelated valid new records survive. Tombstones are collected by generation
+  before records are selected, so a newer committed tombstone masks every older
+  record for that ID.
+- Tombstone corruption is not treated like record corruption. An empty,
+  whitespace-padded, or duplicate tombstone channel fails repository load
+  closed; falling back would risk resurrecting a deletion. Blueprint recovery
+  must preserve this distinction.
+- Full scaffold passes at `0.36.0-snapshot-oracle-contract`. Next work is the
+  modular Blueprint staging/selection/commit graphs and the native
+  `GameplayStatics` SaveGame node seam, followed by private CRUD. No cook/UI.

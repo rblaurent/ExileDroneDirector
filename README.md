@@ -213,6 +213,11 @@ the verified storage seam. Runtime integrity mode `structural-v1` combines
 canonical JSON, exact schema/semantic validation, alternating committed
 generations, and newest-valid fallback; it deliberately does not pretend the
 DevKit's missing Blueprint SHA-256 support is available.
+The physical two-slot layout now has its own executable oracle rather than
+borrowing the logical per-record model: stage and commit failures preserve the
+last authority, uncommitted candidates are ignored, corrupt newest envelopes
+fall back per record, committed tombstones mask every older copy, malformed
+tombstone channels fail closed, and equal-generation split brain is rejected.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata

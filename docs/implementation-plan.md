@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.35.0-validation-contract`
+Current internal build: `0.36.0-snapshot-oracle-contract`
 
 ## 1. Delivery strategy
 
@@ -276,6 +276,14 @@ This section is the authoritative handoff. Detailed evidence remains in
   past a corrupt newest committed generation. The 57-test document/repository
   suite, complete scaffold, and fresh-process cold asset load pass. This does
   not claim cryptographic tamper detection; private CRUD graphs remain next.
+- The physical two-slot SaveGame layout now has a dedicated 11-case executable
+  oracle instead of relying on the logical per-record storage model. It locks
+  deterministic inactive-slot selection, stage/commit ordering, generation
+  increments, uncommitted-candidate rejection, record-granular corrupt-newest
+  fallback, newer tombstone masking, monotonic/disjoint tombstones, fail-closed
+  malformed tombstone channels, deterministic ordering, persistence failure
+  isolation, invalid-header rejection, and equal-generation split-brain
+  rejection. Blueprint persistence graphs must match this contract exactly.
 - The complete Enhanced PlayFab JSON Blueprint fixture is now harvested,
   compiled, natively round-tripped, and semantically tested: 22 calls/87 pins
   cover canonical construction, string/bool/float/object fields and arrays,

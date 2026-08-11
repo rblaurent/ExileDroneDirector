@@ -1906,6 +1906,30 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   canonical quaternion document contract while the current authoring bridge
   still stores an Unreal `Transform`.
 
+## Repository transform and precision forms accepted (2026-08-11)
+
+- A second disposable probe compiled `BreakTransform` and `MakeTransform`
+  successfully in Enhanced 5.6.1 and was copied back from Unreal. The accepted
+  fixture is
+  `tools/blueprint/templates/repository-codec-transform-node-forms.eddgraph`:
+  entry plus two pure Kismet Math Library calls, 11 pins, unit default scale,
+  const-reference Transform input, and zero orphaned pins.
+- Unreal Engine 5 uses a precision subtype on Blueprint `real` pins. The
+  Transform bridge exposes doubles while PlayFab JSON number pins expose
+  single-precision floats. Enhanced does not expose a standalone global
+  double-to-float action: supported float/double pin connections are coerced by
+  the Blueprint compiler. Do not keep searching the action menu for a missing
+  conversion node. Prove the seam by compiling the actual codec graph and by
+  exercising finite, fractional, negative, large, and boundary values through
+  encode/decode acceptance.
+- The disposable probe was closed by exact PID and removed in a fresh
+  commandlet. Accepted cleanup evidence was
+  `EDD_JSON_NODE_PROBE_DELETE:DELETED:True`, `COMPLETE:True`, and physical asset
+  absence.
+- This is node-form proof only. `EncodeDocumentV1`/`DecodeDocumentV1` are still
+  the current implementation slice; no private CRUD, collaboration, cinematic
+  trajectory, lens/event backend, polished UI, or cook is claimed by it.
+
 ## Pending local reconnaissance
 
 - Concrete Conan-character view restoration in a gameplay-map PIE run

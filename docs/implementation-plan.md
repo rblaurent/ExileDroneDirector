@@ -298,6 +298,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   contracts, and the disposable probe was deleted in a fresh process. This
   removes the last native node-form discovery dependency from document codec
   composition; it does not yet claim that the document/record codecs are live.
+- The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
+  harvested from a green compile and contract-tested. Unreal 5.6 represents
+  Blueprint floating-point pins as precision subtypes and inserts supported
+  float/double coercions at compile time; there is no separate global
+  double-to-float action to discover. The document codec must prove every such
+  coercion by compiling its real Transform/PlayFab connections and by
+  round-tripping representative values through the executable codec oracle.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
   directly to G-Portal.
 

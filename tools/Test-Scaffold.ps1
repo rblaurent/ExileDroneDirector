@@ -70,6 +70,8 @@ $requiredFiles = @(
     'tools\unreal\Validate-RepositoryPrivateCreateRestart.py',
     'tools\unreal\Validate-RepositoryPrivateSave.py',
     'tools\unreal\Validate-RepositoryPrivateSaveRestart.py',
+    'tools\unreal\Validate-RepositoryPrivateList.py',
+    'tools\unreal\Validate-RepositoryPrivateListRestart.py',
     'tools\unreal\Read-RepositoryPersistenceWriter.py',
     'tools\unreal\Open-RepositoryServiceEditor.py',
     'tools\unreal\Validate-RepositoryJsonCodec.py',
@@ -106,6 +108,7 @@ $requiredFiles = @(
     'tools\blueprint\Build-RepositoryPrivateDraftLoadGraph.py',
     'tools\blueprint\Build-RepositoryPrivateCreateGraph.py',
     'tools\blueprint\Build-RepositoryPrivateSaveGraph.py',
+    'tools\blueprint\Build-RepositoryPrivateListGraph.py',
     'tools\blueprint\Build-RepositoryJsonMissingNodeProbe.py',
     'tools\blueprint\Build-RepositoryDecoderNativeNodeProbe.py',
     'tools\blueprint\Test-RepositoryJsonNodeForms.py',
@@ -143,6 +146,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryPrivateDraftLoadContracts.py',
     'tools\blueprint\Test-RepositoryPrivateCreateContracts.py',
     'tools\blueprint\Test-RepositoryPrivateSaveContracts.py',
+    'tools\blueprint\Test-RepositoryPrivateListContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -1404,6 +1408,63 @@ $repositoryPrivateSaveLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippe
     --input $repositoryPrivateSaveLive
 if ($LASTEXITCODE -ne 0) {
     throw "Repository private-save live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryPrivateListNonce = [guid]::NewGuid().ToString('N')
+$repositoryPrivateListRoot = Join-Path $scratchRoot "edd-repository-private-list-$repositoryPrivateListNonce"
+$repositoryPrivateListFull = Join-Path $repositoryPrivateListRoot 'full'
+$repositoryPrivateListPaste = Join-Path $repositoryPrivateListRoot 'paste'
+New-Item -ItemType Directory -Force -Path $repositoryPrivateListFull, $repositoryPrivateListPaste | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryPrivateListGraph.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryPrivateListFull `
+    --paste-dir $repositoryPrivateListPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-list graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryPrivateListFull, $repositoryPrivateListPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateListContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir $repositoryPrivateListFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-list full contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateListContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir $repositoryPrivateListPaste `
+    --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-list paste contracts failed with exit code $LASTEXITCODE."
+}
+foreach ($pair in @(
+    @((Join-Path $repositoryPrivateListFull 'compare-strings-ordinal-v1.eddgraph'), 'tools\blueprint\snippets\compare-strings-ordinal-v1.eddgraph'),
+    @((Join-Path $repositoryPrivateListFull 'encode-metadata-v1.eddgraph'), 'tools\blueprint\snippets\encode-metadata-v1.eddgraph'),
+    @((Join-Path $repositoryPrivateListFull 'list-mine-v1.eddgraph'), 'tools\blueprint\snippets\list-mine-v1.eddgraph'),
+    @((Join-Path $repositoryPrivateListPaste 'compare-strings-ordinal-v1-paste.eddgraph'), 'tools\blueprint\snippets\compare-strings-ordinal-v1-paste.eddgraph'),
+    @((Join-Path $repositoryPrivateListPaste 'encode-metadata-v1-paste.eddgraph'), 'tools\blueprint\snippets\encode-metadata-v1-paste.eddgraph'),
+    @((Join-Path $repositoryPrivateListPaste 'list-mine-v1-paste.eddgraph'), 'tools\blueprint\snippets\list-mine-v1-paste.eddgraph')
+)) {
+    $checkedIn = Join-Path $ProjectRoot $pair[1]
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $pair[0]).Hash -ne
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $checkedIn).Hash) {
+        throw "Repository private-list graph is not deterministic: $($pair[1])"
+    }
+}
+foreach ($graph in @(
+    'compare-strings-ordinal-v1.eddgraph',
+    'encode-metadata-v1.eddgraph',
+    'list-mine-v1.eddgraph'
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+        -Path (Join-Path $repositoryCoreLive $graph)
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPrivateListContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir $repositoryCoreLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository private-list live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-DocumentSyncStructForms.py') `

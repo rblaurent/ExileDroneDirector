@@ -2710,3 +2710,52 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `5057B36DD2347F0DF51DEA3B938874EC2A61B00353801F9F94D58422EF45D879`.
 - Next ordered private CRUD slice is owner-filtered private listing. No UI,
   cook, or Workshop work.
+
+## Owner-filtered private metadata listing accepted (2026-08-11)
+
+- Internal checkpoint `0.47.0-private-list` implements `ListMineV1` with two
+  private helpers: `CompareStringsOrdinalV1` and `EncodeMetadataV1`. Enhanced's
+  pasted `Array_Sort` form was rejected at compile time, so ordering uses a
+  contract-tested ordinal comparator built from `GetCharacterAsNumber` and a
+  deterministic insertion pass. The stable order is `updatedUtc` descending,
+  then `flypathId` descending for equal timestamps.
+- The accepted list graph filters only by the derived owner-account index,
+  validates parallel index alignment before reading rows, clamps offset to zero
+  and limit to `[1,100]`, strictly decodes only selected owner rows, confirms
+  decoded/index identity, and emits an exact nine-field metadata envelope. It
+  never returns the owner account ID, description, draft document, or published
+  document. Any selected-record decode/identity failure clears the entire page.
+- Executable runtime proof caught a real missing edge that graph-size and broad
+  shape checks had missed: `RequestLimitV1` was not connected to the lower-bound
+  predicate, so every request collapsed to one row. The generator now connects
+  that exact pin and the contract requires the reciprocal link. The corrected
+  compiled graph returned four rows for `limit=1000` with safe limit 100 and
+  passed low/high clamps, middle/beyond pages, timestamp ties, owner isolation,
+  public/private metadata, published/unpublished metadata, foreign corruption,
+  selected corruption, identity mismatch, index misalignment, authority
+  immutability, and physical SaveGame immutability.
+- The full compiled runtime order was
+  `owner-z-tie, owner-a-tie, owner-middle, owner-old`. A separate canonical
+  writer fixture committed two private records to generation 2/slot B. After a
+  guarded editor exit, a fresh `-ModDevKit -NullRHI` process recovered the A/B
+  state, listed `create-runtime-b` then `create-runtime-a`, proved exact private
+  metadata and wrong-owner emptiness without writes, and deleted both fixtures.
+  A second fresh commandlet loaded and compiled every required asset and emitted
+  `EDD_COLD_LOAD|RESULT|PASS`.
+- Clipboard exports must click a canvas point known not to overlap a Boolean
+  checkbox in folded graphs. `Export-BlueprintFunctions.ps1` uses the explicit
+  safe point `(1300,740)` for these captures; the older default `(900,500)` can
+  silently toggle a node default before copying. Native entry seams are wired
+  only after hover tooltips prove both endpoints are `Exec`, followed by exact
+  node-count export and reciprocal-link contracts.
+- Exact post-compile SHA-256 values are
+  `4471F2239DFE16D76AFDB908F9C3C05647FCD72C54F08A70031DC8EB2313781E`
+  (`CompareStringsOrdinalV1`),
+  `D19DD3729FE8CC6340E8206FF43CD9B4A43159798A405EAC1096FA55FF5DF673`
+  (`EncodeMetadataV1`), and
+  `791167C439ECD31FFE35B1E5424C341718E60E0E4447B40082A07522E21E26B5`
+  (`ListMineV1`). The closed-editor FromDevKit sync copied exactly one package;
+  live and mirror repository SHA-256 is
+  `6360F36C3FC2EA620514595F4DFD55CAE30FBF6C94C0F90A17366C1CE2CE65A4`.
+- Next ordered private CRUD slice is owner-only private delete through the
+  accepted tombstone/persistence boundary. No UI, cook, or Workshop work.

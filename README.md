@@ -262,7 +262,12 @@ oversized requests without mutation, server-forces the next revision, preserves
 immutable record metadata, replaces exactly one candidate envelope, and exposes
 the updated document only after the two-phase SaveGame commit. Two interactive
 saves plus a fresh-process resumed save proved deterministic revisions and A/B
-generation alternation. Private list and delete are the next CRUD slices.
+generation alternation. `ListMineV1` now provides deterministic owner-filtered
+metadata listing with offset/limit clamping, descending timestamp/ID ordering,
+strict selected-record decoding, atomic failure clearing, and no authority or
+SaveGame mutation. Its compiled runtime suite covers paging, ties, visibility,
+publication metadata, foreign/selected corruption, index misalignment, and a
+fresh-process recovery/list/cleanup cycle. Private delete is the next CRUD slice.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata
@@ -287,8 +292,9 @@ headless cold compile pass. Canonical whitespace and UTC ordering remain an
 explicit parity gap owned by the next repository boundary. Alternating-slot
 state transitions, exact native SaveGame construction forms, connected raw slot
 reads, deterministic recovery, the two-phase writer, owner-only private draft
-loading, private-by-default creation, and owner-only optimistic private saving
-are accepted; private list/delete are the next runtime milestones.
+loading, private-by-default creation, owner-only optimistic private saving, and
+owner-filtered metadata listing are accepted; private delete is the next runtime
+milestone.
 
 ## Repository layout
 

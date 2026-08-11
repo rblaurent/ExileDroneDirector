@@ -104,7 +104,7 @@ class ValidationBuilder:
     def int_math(self, function: str, x: int, y: int, *, b_default: str | None = None):
         node = self.b.add(f"{function}_{len(self.nodes)}", "int_math", x, y)
         retarget_function(node, function)
-        if function in {"Add_IntInt", "Subtract_IntInt", "Max_IntInt"}:
+        if function in {"Add_IntInt", "Subtract_IntInt", "Max_IntInt", "Min_IntInt"}:
             self.enc.set_pin_type(node, "ReturnValue", "int")
         if b_default is not None:
             self.enc.set_default(node, "B", b_default)

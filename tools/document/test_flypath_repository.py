@@ -352,5 +352,33 @@ class FlypathRepositoryContracts(unittest.TestCase):
         self.assertTrue(page.has_more)
         self.assertFalse(hasattr(page.items[0], "draft"))
 
+    def test_list_mine_filters_owner_sorts_deterministically_and_clamps_page(self) -> None:
+        self.create(flypath_id="owner-z", owner="owner-a")
+        self.create(flypath_id="owner-a", owner="owner-a")
+        self.create(flypath_id="other", owner="owner-b")
+        # Equal timestamps use flypath id descending as the deterministic tie-break.
+        page = self.repository.list_mine(
+            requester_account_id="owner-a", offset=-5, limit=0
+        ).value
+        self.assertEqual(page.offset, 0)
+        self.assertEqual(page.total, 2)
+        self.assertEqual(len(page.items), 1)
+        self.assertEqual(page.items[0].flypath_id, "owner-z")
+        self.assertTrue(page.has_more)
+        self.assertNotIn("other", {item.flypath_id for item in page.items})
+        beyond = self.repository.list_mine(
+            requester_account_id="owner-a", offset=50, limit=1000
+        ).value
+        self.assertEqual(beyond.offset, 50)
+        self.assertEqual(beyond.total, 2)
+        self.assertEqual(beyond.items, ())
+        self.assertFalse(beyond.has_more)
+
+    def test_list_mine_rejects_blank_requester_without_payload(self) -> None:
+        self.create()
+        result = self.repository.list_mine(requester_account_id="   ")
+        self.assertEqual(result.code, ResultCode.VALIDATION_FAILED)
+        self.assertIsNone(result.value)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

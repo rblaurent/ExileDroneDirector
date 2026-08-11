@@ -377,6 +377,10 @@ class FlypathRepository:
     def list_mine(
         self, *, requester_account_id: str, offset: int = 0, limit: int = 20
     ) -> RepositoryResult[MetadataPage]:
+        if not requester_account_id.strip():
+            return RepositoryResult(
+                ResultCode.VALIDATION_FAILED, detail="invalid requester account id"
+            )
         records = [
             record
             for record in self.records.values()

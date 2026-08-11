@@ -28,6 +28,10 @@ param(
     [ValidateRange(50, 5000)]
     [int]$DragMilliseconds = 400,
 
+    [Parameter(ParameterSetName = 'Drag')]
+    [ValidateSet('Left', 'Middle', 'Right')]
+    [string]$DragButton = 'Left',
+
     [Parameter(Mandatory = $true, ParameterSetName = 'Wheel')]
     [int]$WheelClientX,
 
@@ -37,6 +41,12 @@ param(
     [Parameter(Mandatory = $true, ParameterSetName = 'Wheel')]
     [ValidateRange(-20, 20)]
     [int]$WheelNotches,
+
+    [Parameter(Mandatory = $true, ParameterSetName = 'Move')]
+    [int]$MoveClientX,
+
+    [Parameter(Mandatory = $true, ParameterSetName = 'Move')]
+    [int]$MoveClientY,
 
     [Parameter(ParameterSetName = 'Click')]
     [ValidateRange(1, 3)]
@@ -170,7 +180,17 @@ elseif ($PSCmdlet.ParameterSetName -eq 'Drag') {
     if (-not [EddEnhancedEditorInput]::SetCursorPos($start.X, $start.Y)) {
         throw "Could not position cursor at drag start $StartClientX,$StartClientY"
     }
-    [EddEnhancedEditorInput]::mouse_event(0x0002, 0, 0, 0, [UIntPtr]::Zero)
+    $buttonDown = switch ($DragButton) {
+        'Left' { 0x0002 }
+        'Middle' { 0x0020 }
+        'Right' { 0x0008 }
+    }
+    $buttonUp = switch ($DragButton) {
+        'Left' { 0x0004 }
+        'Middle' { 0x0040 }
+        'Right' { 0x0010 }
+    }
+    [EddEnhancedEditorInput]::mouse_event($buttonDown, 0, 0, 0, [UIntPtr]::Zero)
     $steps = [Math]::Max(2, [int]($DragMilliseconds / 20))
     for ($index = 1; $index -le $steps; $index++) {
         $x = [int]($start.X + (($end.X - $start.X) * $index / $steps))
@@ -178,10 +198,10 @@ elseif ($PSCmdlet.ParameterSetName -eq 'Drag') {
         [void][EddEnhancedEditorInput]::SetCursorPos($x, $y)
         Start-Sleep -Milliseconds ([Math]::Max(1, [int]($DragMilliseconds / $steps)))
     }
-    [EddEnhancedEditorInput]::mouse_event(0x0004, 0, 0, 0, [UIntPtr]::Zero)
-    $result = "DRAG:${StartClientX},${StartClientY}:${EndClientX},${EndClientY}"
+    [EddEnhancedEditorInput]::mouse_event($buttonUp, 0, 0, 0, [UIntPtr]::Zero)
+    $result = "DRAG:${DragButton}:${StartClientX},${StartClientY}:${EndClientX},${EndClientY}"
 }
-else {
+elseif ($PSCmdlet.ParameterSetName -eq 'Wheel') {
     $point = New-Object EddEnhancedEditorInput+POINT
     $point.X = $WheelClientX
     $point.Y = $WheelClientY
@@ -194,6 +214,18 @@ else {
     $delta = [uint32]([int64]$WheelNotches * 120 -band 0xFFFFFFFFL)
     [EddEnhancedEditorInput]::mouse_event(0x0800, 0, 0, $delta, [UIntPtr]::Zero)
     $result = "WHEEL:${WheelClientX},${WheelClientY}:${WheelNotches}"
+}
+else {
+    $point = New-Object EddEnhancedEditorInput+POINT
+    $point.X = $MoveClientX
+    $point.Y = $MoveClientY
+    if (-not [EddEnhancedEditorInput]::ClientToScreen($handle, [ref]$point)) {
+        throw "Could not convert move coordinate for window: $WindowHandle"
+    }
+    if (-not [EddEnhancedEditorInput]::SetCursorPos($point.X, $point.Y)) {
+        throw "Could not position cursor at client coordinate $MoveClientX,$MoveClientY"
+    }
+    $result = "MOVE:${MoveClientX},${MoveClientY}"
 }
 
 Start-Sleep -Milliseconds $PostDelayMilliseconds

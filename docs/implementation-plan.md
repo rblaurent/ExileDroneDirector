@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.46.0-private-draft-save`
+Current internal build: `0.47.0-private-list`
 
 ## 1. Delivery strategy
 
@@ -288,6 +288,15 @@ This section is the authoritative handoff. Detailed evidence remains in
   collision isolation, deterministic A/B generations, owner-only readback, two
   persisted records across a fresh restart, wrong-owner denial, fixture cleanup,
   and cold loading. This checkpoint does not claim the remaining CRUD or mod.
+- `ListMineV1` is now the accepted owner-filtered metadata listing boundary.
+  It clamps offset/limit, filters exclusively through the derived owner index,
+  sorts by `updatedUtc` descending with `flypathId` descending as the stable
+  tie-break, emits metadata-only JSON, and never writes authority or SaveGame.
+  Generated full/paste graphs, exact post-compile exports, marked compile/save,
+  compiled-actor success/failure/edge cases, guarded restart recovery, fixture
+  cleanup, and a separate cold load all pass. This accepts private listing only;
+  delete, publication/discovery, clone, playback, trajectory, events, and UX
+  remain ordered work.
 - Runtime persistence integrity is frozen as explicit `structural-v1` after an
   Enhanced reflection probe found no Blueprint/Python digest helper. Canonical
   envelopes now declare the mode, require reserved hash fields to remain empty,
@@ -483,29 +492,32 @@ before any polished editor UI or cook is attempted:
    two-process Blueprint SaveGame round trip all pass. The executable probe
    changes authority from generation 41 to 42, verifies the exact committed
    Unicode payload in a fresh process, and removes its isolated fixture.
-4. **Current:** private owner-only load, private-by-default create, and
-   owner-only optimistic `SaveDraftV1` are accepted. Save replaces exactly one
+4. **Complete:** private owner-only load, private-by-default create,
+   owner-only optimistic `SaveDraftV1`, and owner-filtered `ListMineV1` are
+   accepted. Save replaces exactly one
    candidate envelope through the two-phase writer, advances only from the
    stored revision, preserves immutable metadata, publishes results only after
-   physical commit, and survives fresh-process recovery/resumed writing.
-   Implement private list next, followed by private delete, then extend the
-   accepted corruption recovery, schema migration hooks, limits, and typed
-   failures across the remaining CRUD boundaries.
-5. Implement server-authoritative ownership, privacy, publication, immutable
+   physical commit, and survives fresh-process recovery/resumed writing. List
+   is deterministic, metadata-only, read-only, owner-filtered, paged, and
+   independently proven after SaveGame restart.
+5. **Current:** implement private delete through the accepted tombstone writer,
+   then extend the accepted corruption recovery, schema migration hooks, limits,
+   and typed failures across the remaining CRUD boundaries.
+6. Implement server-authoritative ownership, privacy, publication, immutable
    snapshots, discovery, playback fetch, and private cloning with attribution.
-6. Implement the complete trajectory compiler: linear and cinematic curves,
+7. Implement the complete trajectory compiler: linear and cinematic curves,
    monotonic timing/speed profiles, smooth quaternion rotation, flight profiles,
    deterministic sampling, and discontinuity diagnostics.
-7. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
+8. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
    event tracks with bounded target adapters and authorization.
-8. Expose every backend operation through temporary shortcuts, compact debug
+9. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.
-9. Run an attended end-to-end keyboard/debug dogfood pass. Only after that pass
+10. Run an attended end-to-end keyboard/debug dogfood pass. Only after that pass
    may polished library/editor/timeline UX begin.
-10. Cook/package only after the full backend prototype and its dogfood workflow
+11. Cook/package only after the full backend prototype and its dogfood workflow
    are accepted. Workshop and G-Portal remain later deployment gates.
-11. Close, sync, run the complete repository suite, commit, and push after every
+12. Close, sync, run the complete repository suite, commit, and push after every
    meaningful compiled feature milestone.
 
 ### UX investment gate

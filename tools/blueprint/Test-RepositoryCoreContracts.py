@@ -41,7 +41,7 @@ def assert_closed(c, nodes, expected: int, entry_name: str | None) -> None:
 
 
 def assert_reset(c, nodes, *, paste: bool) -> None:
-    assert_closed(c, nodes, 10 if not paste else 9, None if paste else "ResetRepositoryResultV1")
+    assert_closed(c, nodes, 13 if not paste else 12, None if paste else "ResetRepositoryResultV1")
     order = (
         ("ResultCodeV1", "Success"),
         ("ResultDetailV1", ""),
@@ -49,6 +49,9 @@ def assert_reset(c, nodes, *, paste: bool) -> None:
         ("ResultCurrentRevisionV1", "0"),
         ("ResultRecordIndexV1", "-1"),
         ("ResultRecordEnvelopeV1", ""),
+        ("ResultPageOffsetV1", "0"),
+        ("ResultTotalCountV1", "0"),
+        ("ResultHasMoreV1", "false"),
         ("ResultDraftDocumentV1", None),
     )
     setters = [one(c, nodes, f'MemberName="{name}"') for name, _ in order]

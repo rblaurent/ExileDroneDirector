@@ -158,6 +158,9 @@ def build_reset(bp, forms: dict[str, str]):
         ("ResultCurrentRevisionV1", "int", "0"),
         ("ResultRecordIndexV1", "int", "-1"),
         ("ResultRecordEnvelopeV1", "string", ""),
+        ("ResultPageOffsetV1", "int", "0"),
+        ("ResultTotalCountV1", "int", "0"),
+        ("ResultHasMoreV1", "bool", "false"),
         ("ResultDraftDocumentV1", "document", None),
     )
     setters = []
@@ -170,11 +173,11 @@ def build_reset(bp, forms: dict[str, str]):
         "DraftWaypointIds",
         "ResultMetadataEnvelopesV1",
         "string",
-        1792,
+        2560,
         224,
         array=True,
     )
-    clear = b.add("array_clear", "K2Node_CallArrayFunction_8", 2048, 0)
+    clear = b.add("array_clear", "K2Node_CallArrayFunction_8", 2816, 0)
     retarget_array_clear(clear)
     bp.connect(b.entry, "then", setters[0], "execute")
     for left, right in zip(setters, setters[1:]):

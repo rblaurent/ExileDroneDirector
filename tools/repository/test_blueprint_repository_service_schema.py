@@ -38,6 +38,9 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         self.assertIn("CandidateTombstoneFlypathIdsV1", names)
         self.assertIn("RequestDraftDocumentV1", names)
         self.assertIn("ResultDraftDocumentV1", names)
+        self.assertIn("ResultPageOffsetV1", names)
+        self.assertIn("ResultTotalCountV1", names)
+        self.assertIn("ResultHasMoreV1", names)
 
     def test_codec_staging_is_explicit_and_not_aliased_to_request_results(self) -> None:
         by_name = {field["name"]: field for field in SCHEMA["variables"]}
@@ -63,6 +66,7 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "ScratchRecordHasSourceAttributionV1": "Boolean",
             "ScratchRecordSourceFlypathIdV1": "String",
             "ScratchRecordSourceRevisionNumberV1": "Integer",
+            "ScratchEncodedMetadataV1": "String",
         }
         for name, field_type in expected.items():
             self.assertIn(name, by_name)
@@ -79,6 +83,24 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             self.assertEqual(by_name[name]["container"], "Array")
         self.assertEqual(by_name["ScratchWaypointV1"]["type"], "ST_EDD_Waypoint")
         self.assertEqual(by_name["ScratchSegmentV1"]["type"], "ST_EDD_Segment")
+
+    def test_private_listing_state_is_explicit_and_bounded(self) -> None:
+        by_name = {field["name"]: field for field in SCHEMA["variables"]}
+        for name in ("ScratchListOwnerIndexesV1", "ScratchListSortedIndexesV1"):
+            self.assertEqual(by_name[name]["type"], "Integer")
+            self.assertEqual(by_name[name]["container"], "Array")
+        self.assertEqual(by_name["ScratchListBestIndexV1"]["default"], -1)
+        self.assertEqual(by_name["ScratchListSafeOffsetV1"]["default"], 0)
+        self.assertEqual(by_name["ScratchListSafeLimitV1"]["default"], 20)
+        self.assertEqual(by_name["ScratchListEndExclusiveV1"]["default"], 0)
+        self.assertFalse(by_name["ScratchListFailedV1"]["default"])
+        self.assertEqual(by_name["ScratchCompareLeftV1"]["type"], "String")
+        self.assertEqual(by_name["ScratchCompareRightV1"]["type"], "String")
+        self.assertFalse(by_name["ScratchCompareResolvedV1"]["default"])
+        self.assertFalse(by_name["ScratchStringGreaterV1"]["default"])
+        self.assertEqual(by_name["ResultPageOffsetV1"]["default"], 0)
+        self.assertEqual(by_name["ResultTotalCountV1"]["default"], 0)
+        self.assertFalse(by_name["ResultHasMoreV1"]["default"])
 
     def test_decoder_source_staging_is_not_overwritten_by_nested_encoders(self) -> None:
         by_name = {field["name"]: field for field in SCHEMA["variables"]}
@@ -195,6 +217,8 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "ValidateRecordPublishedV1",
             "ValidateRecordSourceAttributionV1",
             "ValidateRecordV1",
+            "CompareStringsOrdinalV1",
+            "EncodeMetadataV1",
             "ResetRecoveryTombstonesV1",
             "FindRecoveryStringIndexV1",
             "ValidateRecoveryTombstoneChannelV1",

@@ -277,11 +277,12 @@ This section is the authoritative handoff. Detailed evidence remains in
   suite, complete scaffold, and fresh-process cold asset load pass. This does
   not claim cryptographic tamper detection; private CRUD graphs remain next.
 - The complete Enhanced PlayFab JSON Blueprint fixture is now harvested,
-  compiled, natively round-tripped, and semantically tested: 15 calls/60 pins
-  cover canonical construction, fields, arrays, `HasField`, `EncodeJson`, and
-  `DecodeJson`. The disposable probe asset was deleted. Repository codec graph
-  composition can now proceed deterministically without further action-menu
-  discovery.
+  compiled, natively round-tripped, and semantically tested: 22 calls/87 pins
+  cover canonical construction, string/bool/float/object fields and arrays,
+  explicit nulls, generic values, `HasField`, `IsNull`, `EncodeJson`, and
+  `DecodeJson`. The disposable probe asset was deleted in a fresh process.
+  Repository codec graph composition can now proceed deterministically without
+  further action-menu discovery.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
   directly to G-Portal.
 
@@ -291,11 +292,13 @@ The next implementation sequence deliberately proves the complete backend throug
 keyboard controls, debug geometry, typed logs, and direct programmatic PIE calls
 before any polished editor UI or cook is attempted:
 
-1. Freeze and version the persistent Flypath envelope, metadata, owner identity,
-   visibility, revision, attribution, published-snapshot, and validation contracts.
-2. Install and native-round-trip the proven repository core graphs, then
-   implement modular Blueprint repository/storage functions beginning with
-   private create/save/load/list/delete and deterministic restart recovery.
+1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
+   owner identity, visibility, revision, attribution, published snapshot,
+   structural integrity mode, and validation contracts.
+2. **Current:** implement and native-round-trip modular document/record codecs,
+   then private create/save/load/list/delete and deterministic restart recovery.
+   The repository core and exact numeric/null JSON node forms are already live-
+   compiled proof, not remaining discovery work.
 3. Prove optimistic revisions, atomic save behavior, corruption recovery, schema
    migration hooks, limit validation, and typed failures through executable tests.
 4. Implement server-authoritative ownership, privacy, publication, immutable

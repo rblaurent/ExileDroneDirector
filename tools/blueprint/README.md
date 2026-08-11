@@ -49,11 +49,13 @@ The tools in this directory never launch Unreal:
   forms. It emits complete contract graphs and body-only paste graphs; the
   latter intentionally require one explicit native function-entry exec wire.
 - `repository-json-node-forms.eddgraph` is the native-round-trip Enhanced 5.6
-  PlayFab JSON fixture. `Test-RepositoryJsonNodeForms.py` locks its 15 callable
-  signatures, pin types, purity, and impure array-getter behavior.
-- `Build-RepositoryJsonMissingNodeProbe.py` reconstructs the three reflected
-  calls that the global action menu hides (`HasField`, `EncodeJson`, and
-  `DecodeJson`) for disposable compile/copy-back validation.
+  PlayFab JSON fixture. `Test-RepositoryJsonNodeForms.py` locks its 22 callable
+  signatures, 87 pins, float/null/value types, purity, and impure array-getter
+  behavior.
+- `Build-RepositoryJsonMissingNodeProbe.py` reconstructs reflected calls from
+  accepted siblings for disposable compile/copy-back validation. It covers the
+  hidden `HasField`/`EncodeJson`/`DecodeJson` forms plus numeric fields/arrays,
+  explicit null assignment, generic-field access, and `PlayFabJsonValue.IsNull`.
 - `Test-WaypointCaptureContracts.py` verifies exact array types, data sources,
   append order, selected-index assignment, ID increment, and available
   EventGraph dispatch semantics.

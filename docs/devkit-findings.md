@@ -1863,15 +1863,22 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 ## Repository JSON native node forms (2026-08-11)
 
 - A disposable `Developer/Automation/BP_EDD_JsonNodeProbe` harvested the exact
-  Enhanced 5.6 PlayFab JSON call-node forms. The checked-in fixture contains 15
-  calls and 60 pins covering construction, string/bool/object fields, string and
-  object arrays, field-name enumeration, existence checks, encode, and decode.
+  Enhanced 5.6 PlayFab JSON call-node forms. The checked-in fixture contains 22
+  calls and 87 pins covering construction, string/bool/float/object fields,
+  string/float/object arrays, explicit nulls, generic values, field-name
+  enumeration, existence checks, encode, and decode.
 - `HasField`, `EncodeJson`, and `DecodeJson` exist as native UFunctions and are
   Python-visible, but the unbound Blueprint action menu does not list them
   reliably. Their nodes were derived from reflected sibling signatures, pasted
   into the probe, compiled to a green Blueprint, and copied back out by Unreal.
   The native round-trip confirmed `HasField(FieldName) -> bool`, pure
   `EncodeJson() -> string`, and impure `DecodeJson(JsonString) -> bool`.
+- Fresh reflection and a second green compile/copy-back prove
+  `Set/GetNumberField`, `Set/GetNumberArrayField`, `SetFieldNull`, `GetField`,
+  and `PlayFabJsonValue.IsNull`. PlayFab JSON numbers are Blueprint single-
+  precision floats. Optional `published` and `sourceAttribution` record fields
+  can therefore retain canonical JSON `null`; do not replace null with sentinel
+  strings or ambiguous zeroes.
 - Array getters (`GetStringArrayField` and `GetObjectArrayField`) are impure in
   this build and own execution pins. Treating all JSON getters as pure produces
   an invalid execution contract.
@@ -1883,6 +1890,13 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - The probe asset is disposable and was deleted after export. Production graphs
   consume `repository-json-node-forms.eddgraph`; they never depend on a
   Developer/Automation asset.
+- A loaded probe may remain rooted by `GCObjectReferencer` after its asset editor
+  closes, and in-session `DeleteAsset` then refuses with an ensure. Do not keep
+  retrying or force-delete the package. Close the isolated editor without saving
+  the disposable changes, then run `Delete-RepositoryJsonNodeProbe.py` in a fresh
+  commandlet; the accepted cleanup marker is
+  `EDD_JSON_NODE_PROBE_DELETE:DELETED:True` and the physical package must be
+  absent afterward.
 
 ## Pending local reconnaissance
 

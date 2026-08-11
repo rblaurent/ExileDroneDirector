@@ -224,9 +224,14 @@ functions reset repository state, validate both slot headers, prepare an
 inactive-slot candidate with the next generation, and promote a candidate only
 after its committed rewrite succeeds. Generated graphs, exact Unreal exports,
 repository-wide compile/save, and a fresh headless cold compile all pass. The
-next persistence slice is the native `GameplayStatics` SaveGame load/write
-adapter plus record-granular recovery; no runtime persistence is claimed until
-those calls and failure branches are connected and proven.
+exact Enhanced 5.6 `GameplayStatics` SaveGame node forms are now harvested from
+a green compile and contract-tested as well. All four calls are impure in this
+build; Create specializes its return after selecting
+`SG_EDD_RepositoryStorage`, while Load remains base `SaveGame` and needs an
+executed typed cast. The next persistence slice connects those accepted forms
+into the alternating-slot load/write adapter plus record-granular recovery; no
+runtime persistence is claimed until those calls and every failure branch are
+connected and proven.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata
@@ -249,8 +254,9 @@ duration accounting, visibility/publication rules, revision ordering, and clone
 attribution. Their 230-node Unreal round-trips, full compile/save, and fresh
 headless cold compile pass. Canonical whitespace and UTC ordering remain an
 explicit parity gap owned by the next repository boundary. Alternating-slot
-state transitions are accepted live; native SaveGame I/O, record recovery, and
-private create/save/load/list/delete are the next runtime milestones.
+state transitions and the exact native SaveGame construction forms are
+accepted; connected SaveGame I/O, record recovery, and private
+create/save/load/list/delete are the next runtime milestones.
 
 ## Repository layout
 

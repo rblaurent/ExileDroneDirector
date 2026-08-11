@@ -71,6 +71,8 @@ $requiredFiles = @(
     'tools\unreal\Inspect-RepositoryJsonBlueprintApi.py',
     'tools\unreal\Inspect-QuaternionBlueprintApi.py',
     'tools\unreal\Delete-RepositoryJsonNodeProbe.py',
+    'tools\unreal\Prepare-RepositorySaveGameNodeProbe.py',
+    'tools\unreal\Delete-RepositorySaveGameNodeProbe.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
     'tools\preview\linear_preview.py',
@@ -113,6 +115,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryValidationContracts.py',
     'tools\blueprint\Build-RepositoryPersistenceStateGraphs.py',
     'tools\blueprint\Test-RepositoryPersistenceStateContracts.py',
+    'tools\blueprint\Test-RepositorySaveGameNodeForms.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
@@ -123,6 +126,8 @@ $requiredFiles = @(
     'tools\blueprint\templates\horizon-node-forms.eddgraph',
     'tools\blueprint\templates\repository-codec-break-quat-node-form.eddgraph',
     'tools\blueprint\templates\repository-decoder-native-node-forms.eddgraph',
+    'tools\blueprint\templates\repository-savegame-native-node-forms.eddgraph',
+    'tools\blueprint\templates\repository-savegame-storage-node-forms.eddgraph',
     'tools\blueprint\Build-ClientRollDispatch.py',
     'tools\blueprint\Build-ClientWaypointDispatch.py',
     'tools\blueprint\Build-ClientWaypointEditDispatch.py',
@@ -341,6 +346,18 @@ if (-not $RequireMvpAssets) {
 
 & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphContracts.ps1') `
     -ProjectRoot $ProjectRoot
+
+$repositorySaveGameNativeForms = Join-Path $ProjectRoot 'tools\blueprint\templates\repository-savegame-native-node-forms.eddgraph'
+$repositorySaveGameStorageForms = Join-Path $ProjectRoot 'tools\blueprint\templates\repository-savegame-storage-node-forms.eddgraph'
+foreach ($graph in @($repositorySaveGameNativeForms, $repositorySaveGameStorageForms)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositorySaveGameNodeForms.py') `
+    --native $repositorySaveGameNativeForms `
+    --storage $repositorySaveGameStorageForms
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository SaveGame node-form contracts failed with exit code $LASTEXITCODE."
+}
 
 $scratchRoot = if ($env:REDLEAF_SCRATCH_DIR) {
     $env:REDLEAF_SCRATCH_DIR

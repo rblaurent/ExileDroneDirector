@@ -587,6 +587,15 @@ every success/failure edge back into these functions. Recovery then decodes
 records individually according to the oracle above before replacing active
 memory.
 
+The accepted Enhanced 5.6 construction seam is deliberately version-specific.
+All four `GameplayStatics` calls (`DoesSaveGameExist`, `LoadGameFromSlot`,
+`CreateSaveGameObject`, `SaveGameToSlot`) carry execution pins. Configuring
+Create with `SG_EDD_RepositoryStorage` specializes its return pin to that class;
+Load continues to return base `SaveGame`, so its completion and object output
+must both feed a dynamic cast to `SG_EDD_RepositoryStorage`. Storage fields are
+then accessed through object-targeted get/set nodes, never self-context guesses.
+`Test-RepositorySaveGameNodeForms.py` owns these serialization contracts.
+
 ### 8.4 Limits
 
 Server policy sets conservative limits for paths per owner/server, waypoint and

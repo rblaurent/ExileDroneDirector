@@ -264,6 +264,21 @@ UE 5.6 can round-trip an authored `3.0` as `3.000000`. Validators should parse
 the serialized scalar, compare it within a strict tolerance, and still require
 the pin to be unlinked when the default is meant to drive execution.
 
+For object-targeted nodes that do not appear in an empty graph's action menu,
+add or reuse a member with the exact object type, drag a getter into the graph,
+then drag from that typed output and search for the property/function. This is
+how the accepted `SG_EDD_RepositoryStorage.RepositorySchemaVersion` getter and
+setter were harvested. Frame the graph (`Home`) and re-check the pin position
+before every drag; canvas panning invalidates remembered coordinates.
+
+Disposable Blueprint probes can remain rooted by the editor transaction buffer
+or copied-node clipboard through `GCObjectReferencer`. Closing their asset
+editor, dropping Python references, and collecting garbage may still be
+insufficient. Never force-delete the package file from beneath a live editor.
+Guarded-quit, relaunch without opening the probe, delete immediately through
+`EditorAssetLibrary`, and verify both the API marker and physical package
+absence before closing again.
+
 ## Document-sync runtime gate
 
 Run `tools/unreal/Validate-DocumentSyncPIE.py` once from the editor console, then

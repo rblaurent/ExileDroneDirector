@@ -2336,3 +2336,35 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   accept `DoesSaveGameExist`, `LoadGameFromSlot`, `CreateSaveGameObject`,
   `SaveGameToSlot`, the storage cast/property forms, then implement
   record-granular recovery and private CRUD. No cook or polished UI.
+
+## Native repository SaveGame node forms accepted (2026-08-11)
+
+- Internal checkpoint `0.38.0-savegame-node-forms` captures the exact Enhanced
+  5.6 serialization of `DoesSaveGameExist`, `LoadGameFromSlot`,
+  `CreateSaveGameObject`, and `SaveGameToSlot`. Contrary to a stock-UE
+  assumption, all four expose `execute` and `then` pins in this DevKit build.
+- `LoadGameFromSlot` returns base `/Script/Engine.SaveGame`. Dragging from that
+  return to `Cast To SG_EDD_RepositoryStorage` automatically connected both the
+  data pin and Load's completion pin. Both reciprocal links are now required.
+- Selecting `SG_EDD_RepositoryStorage` on `CreateSaveGameObject.SaveGameClass`
+  serializes the custom class default and specializes Create's return pin to the
+  generated storage class. `SaveGameToSlot.SaveGameObject` remains base
+  `SaveGame`, as expected.
+- A typed `SG_EDD_RepositoryStorage` member was required to expose the object-
+  targeted `RepositorySchemaVersion` getter and setter. When context-sensitive
+  actions are absent, create/drag a typed object reference first and search from
+  its output pin; do not guess a self-context node form.
+- The 5-node native fixture and 9-node typed-storage fixture both compiled with
+  zero Blueprint/K2 errors and now pass exact node, pin type/direction/default,
+  specialized-class, cast, and reciprocal-link contracts in the full scaffold.
+- Deleting the disposable probe in the same session failed safely because the
+  editor transaction/clipboard retained it through `GCObjectReferencer`, even
+  after its asset editor closed and Python released its direct reference. The
+  guarded procedure is: quit cleanly, relaunch without opening the probe, delete
+  immediately through `EditorAssetLibrary`, then guarded quit. That returned
+  `EDD_SAVEGAME_NODE_PROBE|DELETED|True`; the package is physically absent.
+- A post-cleanup `Sync-DevKitContent.ps1 -WhatIf` reported copied 0, unchanged
+  17, conflicts 0. No runtime `.uasset` changed in this discovery slice.
+- Next: generate, install, compile, and runtime-test the actual alternating-slot
+  load/write adapter and record-granular recovery. Node-form acceptance alone is
+  not disk persistence. No private CRUD, cook, or polished UI is claimed.

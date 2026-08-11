@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.37.0-persistence-state-contract`
+Current internal build: `0.38.0-savegame-node-forms`
 
 ## 1. Delivery strategy
 
@@ -401,6 +401,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   `DCE427182D85FAECEEBB78B209A9DD5CF120689635D2F9ECDEA959E801596F88`.
   These functions deliberately own state transitions only: native SaveGame
   load/write calls and record-granular recovery remain the next slice.
+- The exact Enhanced 5.6 native SaveGame seam is now harvested from a green
+  compile and enforced by structural contracts. `DoesSaveGameExist`,
+  `LoadGameFromSlot`, `CreateSaveGameObject`, and `SaveGameToSlot` are impure
+  `GameplayStatics` calls in this build. Selecting `SG_EDD_RepositoryStorage`
+  specializes Create's return pin, while Load still returns base `SaveGame` and
+  requires an executed typed cast. Typed storage property get/set forms are
+  captured too. This proves node construction, not connected repository I/O.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported
@@ -420,8 +427,9 @@ before any polished editor UI or cook is attempted:
 1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
    owner identity, visibility, revision, attribution, published snapshot,
    structural integrity mode, codecs, and live Blueprint validation contracts.
-2. **Current:** connect and prove the native `GameplayStatics` alternating-slot
-   SaveGame adapter and deterministic record-granular restart recovery, then
+2. **Current:** use the accepted native `GameplayStatics` forms to connect and
+   prove the alternating-slot SaveGame adapter and deterministic record-granular
+   restart recovery, then
    implement private create/save/load/list/delete on top of it.
    `EncodeWaypointV1`, `EncodeSegmentV1`, `EncodeDocumentV1`, all three matching
    document decoders, all three record encoders, all three record decoders,

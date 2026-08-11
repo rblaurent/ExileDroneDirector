@@ -57,6 +57,8 @@
     { "name": "ScratchWaypointV1", "type": "ST_EDD_Waypoint", "container": "None" },
     { "name": "ScratchSegmentV1", "type": "ST_EDD_Segment", "container": "None" },
     { "name": "ScratchDocumentV1", "type": "ST_EDD_FlypathDocument", "container": "None" },
+    { "name": "ScratchSourceJsonV1", "type": "String", "container": "None", "default": "" },
+    { "name": "ScratchSourceDocumentJsonV1", "type": "String", "container": "None", "default": "" },
     { "name": "ScratchEncodedDocumentV1", "type": "String", "container": "None", "default": "" },
     { "name": "ScratchEncodedRecordV1", "type": "String", "container": "None", "default": "" },
     { "name": "ScratchRecordFlypathIdV1", "type": "String", "container": "None", "default": "" },

@@ -316,6 +316,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   before and after compile/save. It survived fresh-process cold compilation and
   is mirrored with exact live/Git SHA-256
   `52DF21CC7428D0472549E0233F3633FF9C0973887B347F005413C1EBA437DCF9`.
+- Decoder prerequisites are now accepted from a real Enhanced editor
+  round-trip. Exact string equality and split-input `Quat_Rotator` compiled
+  green; the generic array-item form canonicalized to wildcard while unlinked
+  and will specialize to PlayFab float only in the connected decoder graph.
+  The shared clipboard cloner now rewrites split-pin `SubPins`/`ParentPin`
+  GUIDs, and the contract rejects every stale internal reference. Separate
+  source JSON scratch strings are specified so nested re-encoding cannot
+  overwrite the document text being validated. These two variables and the
+  decoder bodies are deliberately not live yet; install them together, then
+  re-export all repository graphs and cold-load once.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported

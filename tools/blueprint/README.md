@@ -67,6 +67,14 @@ Interactive editor automation uses a separate fail-closed seam:
   accepted siblings for disposable compile/copy-back validation. It covers the
   hidden `HasField`/`EncodeJson`/`DecodeJson` forms plus numeric fields/arrays,
   explicit null assignment, generic-field access, and `PlayFabJsonValue.IsNull`.
+- `Build-RepositoryDecoderNativeNodeProbe.py` derives the three otherwise
+  missing decoder forms from editor-harvested siblings: a numeric array item,
+  exact string equality, and split-input quaternion-to-rotator conversion.
+  `Test-RepositoryDecoderNativeNodeForms.py` requires reciprocal split-pin GUIDs
+  and validates both the speculative probe and Unreal's accepted copy-back.
+- `Export-BlueprintGraphClipboard.ps1` can fail closed on `-ExpectedGraph` and
+  `-ExpectedNodeCount`; use both for every automated copy-back so a selected-but-
+  unopened function cannot silently export the EventGraph.
 - `Test-WaypointCaptureContracts.py` verifies exact array types, data sources,
   append order, selected-index assignment, ID increment, and available
   EventGraph dispatch semantics.

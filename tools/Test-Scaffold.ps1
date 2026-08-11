@@ -91,7 +91,9 @@ $requiredFiles = @(
     'tools\repository\test_blueprint_repository_service_schema.py',
     'tools\blueprint\Build-RepositoryCoreGraphs.py',
     'tools\blueprint\Build-RepositoryJsonMissingNodeProbe.py',
+    'tools\blueprint\Build-RepositoryDecoderNativeNodeProbe.py',
     'tools\blueprint\Test-RepositoryJsonNodeForms.py',
+    'tools\blueprint\Test-RepositoryDecoderNativeNodeForms.py',
     'tools\blueprint\Test-RepositoryCodecMathNodeForms.py',
     'tools\blueprint\Test-RepositoryCodecBreakQuatNodeForm.py',
     'tools\blueprint\Test-RepositoryCodecTransformNodeForms.py',
@@ -106,6 +108,7 @@ $requiredFiles = @(
     'tools\blueprint\Build-RollInputGraph.py',
     'tools\blueprint\templates\horizon-node-forms.eddgraph',
     'tools\blueprint\templates\repository-codec-break-quat-node-form.eddgraph',
+    'tools\blueprint\templates\repository-decoder-native-node-forms.eddgraph',
     'tools\blueprint\Build-ClientRollDispatch.py',
     'tools\blueprint\Build-ClientWaypointDispatch.py',
     'tools\blueprint\Build-ClientWaypointEditDispatch.py',
@@ -591,6 +594,31 @@ if ($LASTEXITCODE -ne 0) {
     --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\repository-codec-array-node-forms.eddgraph')
 if ($LASTEXITCODE -ne 0) {
     throw "Repository codec Make Array node-form contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryDecoderNativeProbe = Join-Path $scratchRoot `
+    ("edd-repository-decoder-native-{0}.eddgraph" -f [guid]::NewGuid().ToString('N'))
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryDecoderNativeNodeProbe.py') `
+    --project-root $ProjectRoot `
+    --output $repositoryDecoderNativeProbe
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository decoder native-node probe generation failed with exit code $LASTEXITCODE."
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path $repositoryDecoderNativeProbe
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDecoderNativeNodeForms.py') `
+    --project-root $ProjectRoot `
+    --forms $repositoryDecoderNativeProbe
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository decoder native-node probe contracts failed with exit code $LASTEXITCODE."
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+    -Path (Join-Path $ProjectRoot 'tools\blueprint\templates\repository-decoder-native-node-forms.eddgraph')
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDecoderNativeNodeForms.py') `
+    --project-root $ProjectRoot `
+    --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\repository-decoder-native-node-forms.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Accepted repository decoder native-node contracts failed with exit code $LASTEXITCODE."
 }
 
 $repositoryEncoderNonce = [guid]::NewGuid().ToString('N')

@@ -4,7 +4,12 @@ param(
     [Alias('OutputPath')]
     [string]$DestinationPath,
 
-    [switch]$Force
+    [switch]$Force,
+
+    [string]$ExpectedGraph = '',
+
+    [ValidateRange(0, [int]::MaxValue)]
+    [int]$ExpectedNodeCount = 0
 )
 
 Set-StrictMode -Version Latest
@@ -24,6 +29,22 @@ if ((Test-Path -LiteralPath $destination) -and -not $Force) {
 }
 
 $normalized = $clipboardText.Replace("`r`n", "`n").TrimEnd() + "`n"
+$nodeCount = ([regex]::Matches($normalized, '(?m)^Begin Object Class=')).Count
+if ($ExpectedNodeCount -gt 0 -and $nodeCount -ne $ExpectedNodeCount) {
+    throw "Blueprint clipboard node count mismatch. Expected $ExpectedNodeCount, found $nodeCount."
+}
+
+$graphMatches = [regex]::Matches(
+    $normalized,
+    'ExportPath="[^"]*:(?<graph>[^.:''"]+)\.[^"]+"'
+)
+$graphs = @($graphMatches | ForEach-Object { $_.Groups['graph'].Value } | Sort-Object -Unique)
+if ($graphs.Count -ne 1) {
+    throw "Blueprint clipboard must come from exactly one graph. Found: $($graphs -join ', ')"
+}
+if ($ExpectedGraph -and $graphs[0] -cne $ExpectedGraph) {
+    throw "Blueprint clipboard graph mismatch. Expected '$ExpectedGraph', found '$($graphs[0])'."
+}
 $temporaryPath = [IO.Path]::GetTempFileName()
 try {
     [IO.File]::WriteAllText($temporaryPath, $normalized, [Text.UTF8Encoding]::new($false))
@@ -39,4 +60,4 @@ if (-not (Test-Path -LiteralPath $parent -PathType Container)) {
     New-Item -ItemType Directory -Path $parent -Force | Out-Null
 }
 [IO.File]::WriteAllText($destination, $normalized, [Text.UTF8Encoding]::new($false))
-Write-Output "Exported Blueprint graph snippet: $destination"
+Write-Output "Exported Blueprint graph snippet: $destination ($nodeCount nodes from $($graphs[0]))"

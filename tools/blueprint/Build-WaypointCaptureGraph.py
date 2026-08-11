@@ -86,6 +86,7 @@ class Node:
         text = re.sub(r",LinkedTo=\([^)]*\)", "", text)
 
         pins: dict[str, str] = {}
+        pin_references: list[tuple[str, str]] = []
         rebuilt: list[str] = []
         for line in text.splitlines():
             match = PIN_RE.match(line)
@@ -93,11 +94,20 @@ class Node:
                 existing_pin = re.search(r"PinId=([0-9A-F]{32})", line)
                 if existing_pin is None:
                     raise RuntimeError(f"Node {key} pin {match.group('name')} has no PinId")
-                pin_id = existing_pin.group(1) if key == "entry" else new_id()
+                old_pin_id = existing_pin.group(1)
+                pin_id = old_pin_id if key == "entry" else new_id()
                 line = re.sub(r"PinId=[0-9A-F]{32}", f"PinId={pin_id}", line, count=1)
                 pins[match.group("name")] = pin_id
+                pin_references.append((old_pin_id, pin_id))
             rebuilt.append(line)
-        return cls(key=key, text="\n".join(rebuilt), name=name, pins=pins)
+        text = "\n".join(rebuilt)
+        # Split struct pins serialize an internal parent/child graph using the
+        # source node name and source pin GUIDs.  Regenerating only PinId values
+        # leaves a visually plausible but invalid clipboard node that asserts
+        # during K2 reconstruction.  Keep those internal references reciprocal.
+        for old_pin_id, pin_id in pin_references:
+            text = text.replace(f"{old_name} {old_pin_id}", f"{name} {pin_id}")
+        return cls(key=key, text=text, name=name, pins=pins)
 
     def mutate_pin(self, pin_name: str, mutate) -> None:
         pin_id = self.pins[pin_name]

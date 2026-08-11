@@ -398,15 +398,14 @@ JSON encoder writes actual `null` for absent optional payloads. This makes each
 codec function independently callable and testable before CRUD graphs compose
 it, and prevents a nested encode/decode call from corrupting a staged request.
 
-The Enhanced editor-compiled quaternion seam is preserved in
-`repository-codec-math-node-forms.eddgraph`. Encoding uses
-`Conv_RotatorToQuaternion` with its Quat output split to float X/Y/Z/W pins;
-decoding uses `Quat_Rotator` with its const-reference Quat input split to the
-same four floats. Both are pure `KismetMathLibrary` calls. The fixture was
-compiled green in the actual 5.6.1 Enhanced editor, copied back from Unreal,
-and contract-tested for exact parent/sub-pin structure and zero orphaned pins.
-Codec graph generation must reuse these reviewed forms instead of guessing
-Quat pin serialization.
+The Enhanced editor-compiled quaternion seam is preserved in reviewed fixtures.
+Encoding uses an unsplit `Conv_RotatorToQuaternion` followed by the native
+`BreakQuat` form because Enhanced asserts while reconstructing that conversion's
+split return pin in a populated graph. Decoding uses `Quat_Rotator` with its
+const-reference Quat input split to X/Y/Z/W floats. The decoder copy-back is in
+`repository-decoder-native-node-forms.eddgraph`; its contract proves every
+regenerated parent/sub-pin GUID is reciprocal. Codec graph generation must
+reuse these reviewed forms instead of guessing Quat pin serialization.
 
 ## 6. Ownership, visibility, and identity
 

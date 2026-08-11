@@ -43,6 +43,8 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         by_name = {field["name"]: field for field in SCHEMA["variables"]}
         expected = {
             "ScratchDocumentV1": "ST_EDD_FlypathDocument",
+            "ScratchSourceJsonV1": "String",
+            "ScratchSourceDocumentJsonV1": "String",
             "ScratchEncodedDocumentV1": "String",
             "ScratchEncodedRecordV1": "String",
             "ScratchRecordFlypathIdV1": "String",
@@ -72,6 +74,15 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             self.assertEqual(by_name[name]["container"], "Array")
         self.assertEqual(by_name["ScratchWaypointV1"]["type"], "ST_EDD_Waypoint")
         self.assertEqual(by_name["ScratchSegmentV1"]["type"], "ST_EDD_Segment")
+
+    def test_decoder_source_staging_is_not_overwritten_by_nested_encoders(self) -> None:
+        by_name = {field["name"]: field for field in SCHEMA["variables"]}
+        for name in ("ScratchSourceJsonV1", "ScratchSourceDocumentJsonV1"):
+            self.assertEqual(by_name[name]["type"], "String")
+            self.assertEqual(by_name[name]["container"], "None")
+            self.assertEqual(by_name[name]["default"], "")
+        self.assertNotEqual("ScratchSourceJsonV1", "ScratchEncodedDocumentV1")
+        self.assertNotEqual("ScratchSourceDocumentJsonV1", "ScratchEncodedDocumentV1")
 
     def test_only_automatable_variable_types_are_used(self) -> None:
         supported = {

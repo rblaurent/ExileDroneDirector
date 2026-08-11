@@ -1906,6 +1906,36 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   canonical quaternion document contract while the current authoring bridge
   still stores an Unreal `Transform`.
 
+## Repository decoder native forms accepted (2026-08-11)
+
+- The editor-accepted fixture is
+  `tools/blueprint/templates/repository-decoder-native-node-forms.eddgraph`.
+  It contains native `EqualEqual_StrStr`, `Quat_Rotator`, and array-item forms
+  copied back from a green Enhanced 5.6.1 compile. The disposable probe was
+  deleted in a fresh commandlet and no editor process remained.
+- An unlinked `K2Node_GetArrayItem` canonicalizes back to wildcard after
+  compilation. This is correct: the decoder builder must explicitly specialize
+  its input/output to PlayFab float, and the connected production compile must
+  prove that specialization. Do not reject the native wildcard copy-back or
+  mistake an unlinked speculative float annotation for runtime evidence.
+- The shared node cloner previously regenerated each `PinId` but left split-pin
+  `SubPins` and `ParentPin` references pointing at the source GUIDs. That can
+  produce a plausible text fixture which asserts during K2 reconstruction.
+  `Node.clone` now rewrites every internal old-node/old-pin reference to the new
+  node/new-pin pair. Decoder contracts require the Quat parent to enumerate the
+  exact four regenerated component GUIDs and every component to point back to
+  the regenerated parent.
+- A single click in My Blueprint selects a function but leaves the current graph
+  open. The first disposable copy-back therefore contained EventGraph Actor
+  events, and the node-count/graph-identity check rejected it. Functions require
+  an explicit double-click and breadcrumb verification.
+  `Export-BlueprintGraphClipboard.ps1` now supports `-ExpectedGraph` and
+  `-ExpectedNodeCount` so this mistake fails before writing an artifact.
+- `unreal.SystemLibrary.quit_editor()` is the reliable exact-process shutdown
+  after remote work. `Process.CloseMainWindow()` can report success while the
+  main editor remains alive. Avoid the PowerShell variable name `$pid` in Win32
+  enumeration callbacks because `$PID` is a read-only automatic variable.
+
 ## Repository transform and precision forms accepted (2026-08-11)
 
 - A second disposable probe compiled `BreakTransform` and `MakeTransform`

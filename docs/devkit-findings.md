@@ -2616,3 +2616,56 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `0FA85E9243035AF70AE311CC10B1406AFFF6E959422B42E90D10D3E97B38B0CD`.
 - Next: private create, save, list, and delete on the accepted writer. No cook
   and no polished UI.
+
+## Private-by-default Flypath creation accepted (2026-08-11)
+
+- Internal checkpoint `0.45.0-private-flypath-create` implements
+  `CreatePrivateFlypathV1` as a 113-node/422-pin compiled function (112/421
+  body-only). The server-staged `RequestFlypathIdV1` is deterministic and
+  collision-checked; creation fixes owner, `private` visibility, created/updated
+  time, draft revision 1, no published snapshot, and no source attribution.
+- The graph validates required scalar inputs, title length, allowed region,
+  owner count, complete record semantics, and serialized-size policy. It encodes
+  the record, prepares the copy-on-write candidate, appends the envelope, calls
+  the accepted two-phase writer, and changes active envelopes/derived indexes
+  only after `ScratchPersistenceCommitSavedV1`. Typed errors leave authority,
+  result envelope, and revision channels unchanged.
+- Generation is deterministic at the persistence boundary: the first accepted
+  create committed generation 1 to `EDD_Repository_A`; the second retained the
+  first record and committed generation 2 to `EDD_Repository_B`. Both returned
+  revision 1 and stable indexes 0 then 1. Reusing the first ID returned
+  `AlreadyExists / FlypathIdCollision` without advancing generation.
+- The compiled-actor executable suite passed invalid owner and ID, title limit,
+  region policy, pre-existing collision, owner limit before/after commits, and
+  serialized-size rejection. Every rejection proved unchanged authoritative
+  arrays and no physical SaveGame before the success cases. Both new records
+  were private, owner-a could immediately load them through `LoadDraftV1`, and
+  owner-b received `Forbidden` without an envelope or revision.
+- A clean editor shutdown was followed by a separate `-ModDevKit -NullRHI`
+  process. It recovered generation 2/slot B, exact ID/owner/private/timestamp
+  order, loaded both revision-1 drafts for owner-a, denied owner-b, and then
+  deleted both A/B fixtures. A second fresh cold-load commandlet loaded and
+  compiled all required assets and emitted `EDD_COLD_LOAD|RESULT|PASS`.
+- Python assignment to arrays inside Unreal user-defined structs is not a safe
+  typed Blueprint fixture boundary: raw `[]` values can lack the native array
+  identity expected by Blueprint, and nested struct mutation may read back in
+  Python while Blueprint receives the prior native value. Valid document
+  fixtures must round-trip through the shipped Blueprint encoder/decoder.
+  Negative document semantics remain enforced by generated/live graph contracts
+  and the engine-independent oracle; executable runtime negatives use reliable
+  scalar request boundaries unless a Blueprint-native fixture producer exists.
+- The serialized-size graph uses `KismetStringLibrary.Len`; this is a tested
+  UTF-16 code-unit ceiling, not exact UTF-8 byte accounting. The conservative
+  storage limit plus strict title limits keep version-1 records far below the
+  boundary. Do not describe it as cryptographic or byte-exact integrity.
+- Generated full/paste graphs are byte-deterministic. The exact post-compile
+  live export hash is
+  `66C27F151BDB6570DE079C9B0AFD0438966C8C8C72552CA5E9037A5597EE0EFA`.
+  FromDevKit preview reported 16 unchanged assets and exactly one reviewed
+  repository conflict; forced sync copied only that package. Live and mirror
+  repository SHA-256 is
+  `6FBB5204F23C6FDC113C50B335F89A2BACC3FF6EFB47FD17CFDC796F858237FC`.
+- Next ordered private CRUD slice: `SaveDraftV1` with owner authorization,
+  optimistic revision conflict, atomic candidate replacement, real SaveGame
+  restart evidence, cleanup, regression, commit, and push. No UI, cook, or
+  Workshop work.

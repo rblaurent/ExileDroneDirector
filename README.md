@@ -248,10 +248,16 @@ contracts; marked compile/save and fresh cold load are clean. Most importantly,
 an executable probe invokes the real compiled Blueprint writer on a repository
 actor, proves authority changes from generation 41 to 42, and a second fresh
 Unreal process reads the exact committed Unicode payload before cleanup. The
-first private-CRUD boundary is accepted too: `LoadDraftV1` proves missing,
-wrong-owner, corrupt-record, valid-owner, and denial-after-success behavior on
-the real compiled actor without stale payload leakage. Private create/save/
-list/delete and their restart/authorization cases are the next milestone.
+first private-CRUD boundaries are accepted too. `LoadDraftV1` proves missing,
+wrong-owner, corrupt-record, valid-owner, and denial-after-success behavior
+without stale payload leakage. `CreatePrivateFlypathV1` validates its request
+and policy limits, stages a private revision-1 record, uses the accepted
+copy-on-write writer, and mutates derived indexes only after the physical commit
+succeeds. The compiled actor passed scalar invalid-input and collision
+isolation, deterministic ID/index/revision behavior, two successive A/B
+SaveGame commits, immediate owner-only loads, fresh-process recovery and owner
+isolation, fixture cleanup, and a fresh cold compile. Private save, list, and
+delete are the next CRUD slices.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata
@@ -275,9 +281,9 @@ attribution. Their 230-node Unreal round-trips, full compile/save, and fresh
 headless cold compile pass. Canonical whitespace and UTC ordering remain an
 explicit parity gap owned by the next repository boundary. Alternating-slot
 state transitions, exact native SaveGame construction forms, connected raw slot
-reads, deterministic recovery, the two-phase writer, and owner-only private
-draft loading are accepted; private create/save/list/delete are the next runtime
-milestones.
+reads, deterministic recovery, the two-phase writer, owner-only private draft
+loading, and private-by-default creation are accepted; private save/list/delete
+are the next runtime milestones.
 
 ## Repository layout
 

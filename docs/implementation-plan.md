@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.44.0-private-draft-load`
+Current internal build: `0.45.0-private-flypath-create`
 
 ## 1. Delivery strategy
 
@@ -277,13 +277,24 @@ This section is the authoritative handoff. Detailed evidence remains in
   denial after a successful load cannot expose stale typed data. Generated
   full/paste graphs, exact post-compile exports, clean compile/save, a real
   compiled-actor five-case runtime probe, and fresh-process cold load all pass.
+- `CreatePrivateFlypathV1` is now the accepted private write boundary. The
+  server-staged ID is deterministic and collision-checked; new records are
+  owner-bound, private by default, revision 1, strictly validated and encoded,
+  and appended through the accepted copy-on-write persistence writer. Derived
+  indexes change only after a real committed SaveGame rewrite. Generated
+  full/paste graphs are deterministic, the exact compiled graph round-trip
+  passes its semantic contract, marked compile/save is clean, and the compiled
+  actor proves invalid scalar requests, title/region/owner/serialized limits,
+  collision isolation, deterministic A/B generations, owner-only readback, two
+  persisted records across a fresh restart, wrong-owner denial, fixture cleanup,
+  and cold loading. This checkpoint does not claim the remaining CRUD or mod.
 - Runtime persistence integrity is frozen as explicit `structural-v1` after an
   Enhanced reflection probe found no Blueprint/Python digest helper. Canonical
   envelopes now declare the mode, require reserved hash fields to remain empty,
   reject unknown/missing fields and all semantic inconsistencies, and recover
   past a corrupt newest committed generation. The 57-test document/repository
   suite, complete scaffold, and fresh-process cold asset load pass. This does
-  not claim cryptographic tamper detection; private CRUD graphs remain next.
+  not claim cryptographic tamper detection; private save/list/delete remain.
 - The physical two-slot SaveGame layout now has a dedicated 11-case executable
   oracle instead of relying on the logical per-record storage model. It locks
   deterministic inactive-slot selection, stage/commit ordering, generation
@@ -472,9 +483,9 @@ before any polished editor UI or cook is attempted:
    two-process Blueprint SaveGame round trip all pass. The executable probe
    changes authority from generation 41 to 42, verifies the exact committed
    Unicode payload in a fresh process, and removes its isolated fixture.
-4. **Current:** private owner-only load is accepted; implement private
-   create/save/list/delete on top of the accepted writer, then prove optimistic
-   revisions, atomic save behavior,
+4. **Current:** private owner-only load and private-by-default create are
+   accepted. Implement `SaveDraftV1` next, followed by private list and delete,
+   then prove optimistic revisions, atomic save behavior,
    corruption recovery, schema migration hooks, limit validation, and typed
    failures through executable tests.
 5. Implement server-authoritative ownership, privacy, publication, immutable

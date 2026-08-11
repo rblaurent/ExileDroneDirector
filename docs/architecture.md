@@ -437,6 +437,26 @@ revision, and `ResultDraftDocumentV1`. The shared result reset clears the typed
 document as well as scalar fields, preventing a denial after a successful call
 from leaking stale draft data.
 
+Private creation is a commit-gated write boundary. `CreatePrivateFlypathV1`
+accepts a server-staged deterministic `RequestFlypathIdV1`, rejects an existing
+identity before any work, validates required scalar fields, title/region/owner
+limits, and the complete staged record, then fixes visibility to `private` and
+both record/document revision semantics to revision 1. It encodes the record,
+enforces the configured serialized-size bound, calls
+`PreparePersistenceCandidateV1`, appends the envelope to candidate records, and
+delegates physical A/B writes to `PersistRepositoryV1`. Active record envelopes
+and the derived ID/owner/visibility/updated-time indexes are promoted only after
+`ScratchPersistenceCommitSavedV1` is true. Failures therefore return a typed
+result without advancing generation or exposing a partial record. Successful
+creation returns the committed index, canonical envelope, revision 1, and typed
+draft; the existing owner-only load boundary remains the only private read path.
+
+The current Enhanced graph uses `KismetStringLibrary.Len` for the serialized
+limit. This is an executable UTF-16 code-unit bound, not a claim of exact UTF-8
+byte counting; the conservative default and strict title limits keep version-1
+records far below the storage ceiling. Exact byte accounting remains an explicit
+future parity improvement if Enhanced exposes a safe Blueprint seam.
+
 ## 6. Ownership, visibility, and identity
 
 The server derives `RequesterAccountId` from the authenticated player/controller

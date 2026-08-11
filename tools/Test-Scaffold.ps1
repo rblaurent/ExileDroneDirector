@@ -84,6 +84,7 @@ $requiredFiles = @(
     'tools\blueprint\Build-RepositoryCoreGraphs.py',
     'tools\blueprint\Build-RepositoryJsonMissingNodeProbe.py',
     'tools\blueprint\Test-RepositoryJsonNodeForms.py',
+    'tools\blueprint\Test-RepositoryCodecMathNodeForms.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
@@ -138,6 +139,7 @@ $requiredFiles = @(
     'tools\blueprint\templates\path-preview-segment-node-forms.eddgraph',
     'tools\blueprint\templates\conan-clean-frame-node-forms.eddgraph',
     'tools\blueprint\templates\repository-json-node-forms.eddgraph',
+    'tools\blueprint\templates\repository-codec-math-node-forms.eddgraph',
     'tools\blueprint\snippets\toggle-input.eddgraph',
     'tools\blueprint\snippets\toggle-state.eddgraph',
     'tools\blueprint\snippets\enter-drone-mode.eddgraph',
@@ -547,6 +549,11 @@ if ($LASTEXITCODE -ne 0) {
     --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\repository-json-node-forms.eddgraph')
 if ($LASTEXITCODE -ne 0) {
     throw "Repository JSON native node-form contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryCodecMathNodeForms.py') `
+    --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\repository-codec-math-node-forms.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository codec quaternion node-form contracts failed with exit code $LASTEXITCODE."
 }
 
 $repositoryCoreNonce = [guid]::NewGuid().ToString('N')

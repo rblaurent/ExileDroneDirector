@@ -291,6 +291,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   and cold-load the final package once. Quaternion conversion reflection also
   proves the current Transform bridge can emit/consume the canonical normalized
   quaternion representation without changing the persisted schema.
+- The exact quaternion codec node forms are now harvested from a green Enhanced
+  compile. `Conv_RotatorToQuaternion` exposes split float X/Y/Z/W outputs and
+  `Quat_Rotator` accepts split float X/Y/Z/W inputs on its const-reference Quat
+  pin. The checked-in three-node/15-pin fixture passes graph syntax and semantic
+  contracts, and the disposable probe was deleted in a fresh process. This
+  removes the last native node-form discovery dependency from document codec
+  composition; it does not yet claim that the document/record codecs are live.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
   directly to G-Portal.
 

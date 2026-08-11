@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.33.0-runtime-integrity-contract`
+Current internal build: `0.34.0-record-codec-contract`
 
 ## 1. Delivery strategy
 
@@ -351,6 +351,19 @@ This section is the authoritative handoff. Detailed evidence remains in
   A new cold process loaded and compiled all nine core assets with zero errors;
   live and mirror repository SHA-256 is
   `DB56429B5F83CBC6923D0761FA6B62A01A858C526A8B6AE3C963ED13AE655A64`.
+- The matching strict record-envelope decoder is now accepted live. Published
+  fields are 16 nodes/53 pins, source attribution is 19/67, and the root is
+  50/180. The root resets validity, preserves the complete input, branches on
+  `DecodeJson`, rejects a non-object `record` before field reads, stages every
+  typed field through the accepted document decoders, and commits validity only
+  when `EncodeRecordV1` regenerates the exact canonical source. Full live
+  copy-backs pass before and after compile/save, and all eleven pre-existing
+  repository graphs pass fresh regression exports after the shared asset save.
+  The wide root body uses a compact folded paste-only layout so Unreal keeps its
+  first executable near the native entry without changing node identities or
+  links. A fresh commandlet compiled all nine core assets with zero errors; the
+  live and Git-mirror repository SHA-256 is
+  `DBCCCACC223F164276AAE887C804CCEB2F9F30F399019302BF72B7DAFCD22B2B`.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported
@@ -373,9 +386,9 @@ before any polished editor UI or cook is attempted:
 2. **Current:** implement private create/save/load/list/delete and deterministic
    restart recovery on top of the accepted record-envelope codecs.
    `EncodeWaypointV1`, `EncodeSegmentV1`, `EncodeDocumentV1`, all three matching
-   decoders, all three record encoders, repository core, and exact numeric/null
-   JSON node forms are accepted live-compiled proof, not remaining discovery
-   work.
+   document decoders, all three record encoders, all three record decoders,
+   repository core, and exact numeric/null/type JSON node forms are accepted
+   live-compiled proof, not remaining discovery work.
 3. Prove optimistic revisions, atomic save behavior, corruption recovery, schema
    migration hooks, limit validation, and typed failures through executable tests.
 4. Implement server-authoritative ownership, privacy, publication, immutable

@@ -2197,3 +2197,42 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `DB56429B5F83CBC6923D0761FA6B62A01A858C526A8B6AE3C963ED13AE655A64`.
 - Next backend slice: private CRUD and deterministic restart recovery. No cook
   or polished UI is authorized yet.
+
+## Repository record decoder accepted live (2026-08-11)
+
+- `ScratchSourceRecordJsonV1` and the three decoder functions were applied and
+  verified through the repository schema configurator before graph mutation.
+  Every target was exported as exactly one native function-entry node before its
+  body was pasted.
+- Accepted post-compile live shapes are
+  `DecodeRecordPublishedFieldsV1` 16 nodes/53 pins,
+  `DecodeRecordSourceAttributionV1` 19/67, and `DecodeRecordV1` 50/180.
+  Checked-in copy-backs live under `tools/blueprint/live-snippets/`, and the
+  full scaffold owns their structural and semantic contracts.
+- The PlayFab plugin source proves `GetField` returns a value wrapper whose
+  missing field has an invalid root and whose `GetTypeString()` is a Blueprint
+  `String`. The root decoder uses
+  `GetField("record") -> GetTypeString() == "Object" -> Branch`; malformed JSON,
+  missing records, null records, arrays, and scalar records terminate before any
+  typed record read.
+- Optional published and source-attribution helpers branch on explicit null,
+  stage their typed values only on the object path, and preserve false-path
+  termination. The root preserves the complete source, stages all record fields,
+  calls both helpers and the accepted document decoder, regenerates through
+  `EncodeRecordV1`, and sets validity only from exact canonical equality.
+- Unreal centers pasted selections by bounding box. The original long root
+  decoder placed its first setter 3,296 graph units from the native entry. The
+  generator now folds only the root paste representation into alternating rows
+  (49 nodes/179 pins, X span 0..1280) while leaving node identities, links, and
+  the full semantic graph unchanged. Offline full/paste contracts passed before
+  the compact body was attempted live.
+- Compile/save succeeded through the remote Unreal API. All three compiled
+  decoders re-exported at the exact expected sizes and passed again, including
+  reconstruction of the source-derived `GetTypeString` node. Fresh exports of
+  all eleven existing repository graphs also passed their core, document-codec,
+  and record-encoder suites; no new crash or K2 compiler error was produced. A
+  fresh `-ModDevKit -NullRHI` commandlet compiled all nine core assets with zero
+  errors. Sync copied exactly the repository package, and live/mirror SHA-256 is
+  `DBCCCACC223F164276AAE887C804CCEB2F9F30F399019302BF72B7DAFCD22B2B`.
+- Next backend slice remains private create/save/load/list/delete followed by
+  deterministic restart recovery. No cook and no polished UI yet.

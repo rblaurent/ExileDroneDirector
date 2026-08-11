@@ -225,8 +225,12 @@ in the live actor, compile successfully, survive a fresh-process cold load, and
 round-trip back to reviewed `.eddgraph` text with their native entry links intact.
 The complete native JSON fixture now covers 15 calls/60 pins, including compiled
 and Unreal-round-tripped `HasField`, `EncodeJson`, and `DecodeJson` forms that
-the unbound action menu does not expose reliably. Private CRUD remains the next
-runtime milestone.
+the unbound action menu does not expose reliably. The complete record-envelope
+codec is now accepted live as well: three encoders and three strict decoders
+compile in the repository actor, round-trip through Unreal, and reject malformed,
+mistyped, reordered, noncanonical, or non-object record envelopes before validity
+can be committed. Private create/save/load/list/delete and restart recovery are
+the next runtime milestone.
 
 ## Repository layout
 

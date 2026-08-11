@@ -417,6 +417,16 @@ and four PlayFab float elements before any array-item node can evaluate. Missing
 extra, reordered, mistyped, or noncanonical data is therefore rejected without
 committing a partial result or issuing an out-of-bounds read.
 
+Record-envelope decoding applies the same invariant one level higher. It first
+preserves the complete source envelope, requires `DecodeJson` success, then
+requires the `record` field's runtime JSON type string to be exactly `Object`
+before any record getter or optional-payload helper can run. Published revision
+and source-attribution helpers distinguish explicit null from an object, the root
+decoder stages every typed field and draft/published document, and
+`EncodeRecordV1` regenerates the canonical envelope. Only byte-for-byte equality
+between that regenerated envelope and the preserved source can set
+`ScratchValidV1=true`; every failure path terminates with validity already false.
+
 ## 6. Ownership, visibility, and identity
 
 The server derives `RequesterAccountId` from the authenticated player/controller

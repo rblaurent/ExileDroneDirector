@@ -104,6 +104,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryDocumentDecoderContracts.py',
     'tools\blueprint\Build-RepositoryRecordEncoderGraphs.py',
     'tools\blueprint\Test-RepositoryRecordEncoderContracts.py',
+    'tools\blueprint\Build-RepositoryRecordDecoderGraphs.py',
+    'tools\blueprint\Test-RepositoryRecordDecoderContracts.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
@@ -201,6 +203,9 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\encode-record-published-fields-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-record-source-attribution-v1.eddgraph',
     'tools\blueprint\live-snippets\encode-record-v1.eddgraph',
+    'tools\blueprint\live-snippets\decode-record-published-fields-v1.eddgraph',
+    'tools\blueprint\live-snippets\decode-record-source-attribution-v1.eddgraph',
+    'tools\blueprint\live-snippets\decode-record-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -724,6 +729,51 @@ foreach ($recordEncoderName in @(
     --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets')
 if ($LASTEXITCODE -ne 0) {
     throw "Live repository record encoder contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryRecordDecoderNonce = [guid]::NewGuid().ToString('N')
+$repositoryRecordDecoderRoot = Join-Path $scratchRoot "edd-repository-record-decoder-$repositoryRecordDecoderNonce"
+$repositoryRecordDecoderFull = Join-Path $repositoryRecordDecoderRoot 'full'
+$repositoryRecordDecoderPaste = Join-Path $repositoryRecordDecoderRoot 'paste'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryRecordDecoderGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryRecordDecoderFull `
+    --paste-dir $repositoryRecordDecoderPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository record decoder generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryRecordDecoderFull -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryRecordDecoderPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecordDecoderContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryRecordDecoderFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository record decoder contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecordDecoderContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryRecordDecoderPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository record decoder paste contracts failed with exit code $LASTEXITCODE."
+}
+foreach ($recordDecoderName in @(
+    'decode-record-published-fields-v1',
+    'decode-record-source-attribution-v1',
+    'decode-record-v1'
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+        -Path (Join-Path $ProjectRoot "tools\blueprint\live-snippets\$recordDecoderName.eddgraph")
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live $recordDecoderName graph structure failed with exit code $LASTEXITCODE."
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryRecordDecoderContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets')
+if ($LASTEXITCODE -ne 0) {
+    throw "Live repository record decoder contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')

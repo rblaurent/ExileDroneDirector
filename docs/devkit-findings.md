@@ -2088,3 +2088,28 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   scaffold now validates its structure and document semantics. Next work is
   document decoding, record-envelope codecs, private CRUD, and restart
   persistence. No cook or polished UI is authorized yet.
+
+## Repository document decoders closed offline (2026-08-11)
+
+- `Build-RepositoryDocumentDecoderGraphs.py` now deterministically emits full
+  and paste bodies for `DecodeWaypointV1`, `DecodeSegmentV1`, and
+  `DecodeDocumentV1`. All six graphs pass generic reciprocal-link validation
+  and exact semantic contracts in the complete scaffold.
+- Every decoder preserves the source before nested work, projects into its typed
+  scratch struct, calls the already accepted matching encoder, and commits
+  `ScratchValidV1` only from exact canonical string equality. This makes
+  PlayFab's permissive getter defaults fail closed for missing, extra,
+  mistyped, reordered, or otherwise noncanonical payloads.
+- The PlayFab 5.6 plugin source confirms `GetObjectField` returns a UObject
+  wrapper whose invalid internal JSON pointer makes subsequent getters return
+  defaults rather than exposing a Blueprint `None`. `DecodeJson` explicitly
+  returns failure and resets its object after malformed input.
+- Runtime guards now prevent noisy unsafe reads as well as logical acceptance:
+  `DecodeDocumentV1` resets validity and branches on `DecodeJson` before any
+  root field; `DecodeWaypointV1` resets validity and requires exact three-value
+  position and four-value quaternion arrays before any `GetArrayItem` can
+  evaluate. False branches terminate with validity already false.
+- Accepted offline sizes are 38 nodes/136 pins for waypoint, 21/67 for segment,
+  and 46/167 for document; body-only forms are one entry node and one pin less.
+  Live schema application, editor reconstruction, compile/save, cold load, and
+  mirror synchronization remain mandatory before these decoders are accepted.

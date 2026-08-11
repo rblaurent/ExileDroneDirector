@@ -72,6 +72,15 @@ Interactive editor automation uses a separate fail-closed seam:
   exact string equality, and split-input quaternion-to-rotator conversion.
   `Test-RepositoryDecoderNativeNodeForms.py` requires reciprocal split-pin GUIDs
   and validates both the speculative probe and Unreal's accepted copy-back.
+- `Build-RepositoryDocumentDecoderGraphs.py` composes complete and body-only
+  `DecodeWaypointV1`, `DecodeSegmentV1`, and `DecodeDocumentV1` graphs. Each
+  decoder stages typed data, reuses the accepted encoder, and commits validity
+  only from byte-for-byte canonical equality. The waypoint body resets validity
+  and gates all array-item reads on exact 3/4 vector/quaternion arity; the root
+  decoder resets validity and gates every field read on `DecodeJson` success.
+  `Test-RepositoryDocumentDecoderContracts.py` locks those failure paths,
+  execution order, every field/struct mapping, float array specialization,
+  split-Quat reciprocity, nested loops, and terminal canonical comparison.
 - `Export-BlueprintGraphClipboard.ps1` can fail closed on `-ExpectedGraph` and
   `-ExpectedNodeCount`; use both for every automated copy-back so a selected-but-
   unopened function cannot silently export the EventGraph.

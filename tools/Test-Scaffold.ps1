@@ -99,6 +99,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryCodecTransformNodeForms.py',
     'tools\blueprint\Build-RepositoryDocumentEncoderGraphs.py',
     'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py',
+    'tools\blueprint\Build-RepositoryDocumentDecoderGraphs.py',
+    'tools\blueprint\Test-RepositoryDocumentDecoderContracts.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
@@ -645,6 +647,32 @@ if ($LASTEXITCODE -ne 0) {
     --project-root $ProjectRoot --input-dir $repositoryEncoderPaste --paste
 if ($LASTEXITCODE -ne 0) {
     throw "Repository document encoder paste contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryDecoderNonce = [guid]::NewGuid().ToString('N')
+$repositoryDecoderRoot = Join-Path $scratchRoot "edd-repository-decoder-$repositoryDecoderNonce"
+$repositoryDecoderFull = Join-Path $repositoryDecoderRoot 'full'
+$repositoryDecoderPaste = Join-Path $repositoryDecoderRoot 'paste'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryDocumentDecoderGraphs.py') `
+    --project-root $ProjectRoot --output-dir $repositoryDecoderFull --paste-dir $repositoryDecoderPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository document decoder generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryDecoderFull -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryDecoderPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentDecoderContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryDecoderFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository document decoder contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentDecoderContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryDecoderPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository document decoder paste contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')

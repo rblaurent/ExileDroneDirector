@@ -407,6 +407,16 @@ const-reference Quat input split to X/Y/Z/W floats. The decoder copy-back is in
 regenerated parent/sub-pin GUID is reciprocal. Codec graph generation must
 reuse these reviewed forms instead of guessing Quat pin serialization.
 
+Document decoding is fail-closed and staged. Every decoder preserves its source,
+projects into typed scratch state, calls the corresponding accepted encoder, and
+sets `ScratchValidV1` only when the re-encoded canonical JSON is byte-for-byte
+identical to the source. `DecodeDocumentV1` resets validity before work and does
+not touch root fields unless `DecodeJson` succeeds. `DecodeWaypointV1` likewise
+resets validity and requires position and quaternion arrays to have exactly three
+and four PlayFab float elements before any array-item node can evaluate. Missing,
+extra, reordered, mistyped, or noncanonical data is therefore rejected without
+committing a partial result or issuing an out-of-bounds read.
+
 ## 6. Ownership, visibility, and identity
 
 The server derives `RequesterAccountId` from the authenticated player/controller

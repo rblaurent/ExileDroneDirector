@@ -326,6 +326,14 @@ This section is the authoritative handoff. Detailed evidence remains in
   overwrite the document text being validated. These two variables and the
   decoder bodies are deliberately not live yet; install them together, then
   re-export all repository graphs and cold-load once.
+- All three decoder bodies are now generated and semantically closed offline.
+  Full and body-only graphs pass structural validation and exact contracts:
+  `DecodeWaypointV1` is 38 nodes/136 pins (37/135 paste),
+  `DecodeSegmentV1` is 21/67 (20/66 paste), and `DecodeDocumentV1` is 46/167
+  (45/166 paste). Root JSON failure and numeric-array arity failure terminate
+  before field or item reads; valid paths stage typed structs, call accepted
+  encoders, and commit only canonical equality. The full scaffold owns these
+  tests. Live installation and editor reconstruction remain the next gate.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported
@@ -345,8 +353,8 @@ before any polished editor UI or cook is attempted:
 1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
    owner identity, visibility, revision, attribution, published snapshot,
    structural integrity mode, and validation contracts.
-2. **Current:** complete the document decoders and record-envelope codecs; then
-   implement private
+2. **Current:** install and accept the completed offline document decoders, then
+   complete record-envelope codecs and implement private
    create/save/load/list/delete and deterministic restart recovery.
    `EncodeWaypointV1`, `EncodeSegmentV1`, `EncodeDocumentV1`, repository core,
    and exact

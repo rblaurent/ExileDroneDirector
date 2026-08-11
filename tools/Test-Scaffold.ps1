@@ -75,6 +75,8 @@ $requiredFiles = @(
     'tools\persistence\test_repository_savegame_schema.py',
     'tools\repository\blueprint_repository_service_schema.json',
     'tools\repository\test_blueprint_repository_service_schema.py',
+    'tools\blueprint\Build-RepositoryCoreGraphs.py',
+    'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -149,6 +151,10 @@ $requiredFiles = @(
     'tools\blueprint\snippets\apply-roll-and-horizon-input.eddgraph',
     'tools\blueprint\snippets\update-speed-controls.eddgraph',
     'tools\blueprint\snippets\drone-camera-event-graph.eddgraph',
+    'tools\blueprint\snippets\reset-repository-result-v1.eddgraph',
+    'tools\blueprint\snippets\reset-repository-result-v1-paste.eddgraph',
+    'tools\blueprint\snippets\find-record-index-v1.eddgraph',
+    'tools\blueprint\snippets\find-record-index-v1-paste.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -524,6 +530,53 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\repository\test_blueprint_repository_service_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Blueprint repository service schema contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryCoreNonce = [guid]::NewGuid().ToString('N')
+$repositoryCoreRoot = Join-Path $scratchRoot "edd-repository-core-$repositoryCoreNonce"
+$repositoryCoreFull = Join-Path $repositoryCoreRoot 'full'
+$repositoryCorePaste = Join-Path $repositoryCoreRoot 'paste'
+New-Item -ItemType Directory -Force -Path $repositoryCoreFull, $repositoryCorePaste | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryCoreGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryCoreFull `
+    --paste-dir $repositoryCorePaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository core graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryCoreFull, $repositoryCorePaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryCoreContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir $repositoryCoreFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository core full-graph contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryCoreContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir $repositoryCorePaste `
+    --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository core paste-graph contracts failed with exit code $LASTEXITCODE."
+}
+$repositoryCorePairs = @(
+    @('reset-repository-result-v1.eddgraph', 'reset-repository-result-v1.eddgraph'),
+    @('find-record-index-v1.eddgraph', 'find-record-index-v1.eddgraph')
+)
+foreach ($pair in $repositoryCorePairs) {
+    $generated = Join-Path $repositoryCoreFull $pair[0]
+    $checkedIn = Join-Path $ProjectRoot "tools\blueprint\snippets\$($pair[1])"
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $generated).Hash -ne
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $checkedIn).Hash) {
+        throw "Repository core full graph is not deterministic: $($pair[0])"
+    }
+    $generatedPaste = Join-Path $repositoryCorePaste $pair[0].Replace('.eddgraph', '-paste.eddgraph')
+    $checkedInPaste = Join-Path $ProjectRoot "tools\blueprint\snippets\$($pair[1].Replace('.eddgraph', '-paste.eddgraph'))"
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $generatedPaste).Hash -ne
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $checkedInPaste).Hash) {
+        throw "Repository core paste graph is not deterministic: $($pair[0])"
+    }
 }
 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-DocumentSyncStructForms.py') `

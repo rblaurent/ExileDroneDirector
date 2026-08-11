@@ -30,11 +30,21 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             self.assertTrue(any(name.startswith(prefix) for name in names))
         self.assertIn("ActiveRecordEnvelopesV1", names)
         self.assertIn("ActiveTombstoneFlypathIdsV1", names)
+        self.assertIn("ActiveFlypathIdsV1", names)
+        self.assertIn("CandidateRecordEnvelopesV1", names)
+        self.assertIn("CandidateTombstoneFlypathIdsV1", names)
         self.assertIn("RequestDraftDocumentV1", names)
         self.assertIn("ResultDraftDocumentV1", names)
 
     def test_only_automatable_variable_types_are_used(self) -> None:
-        supported = {"Boolean", "Integer", "String", "ST_EDD_FlypathDocument", "PlayFabJsonObject"}
+        supported = {
+            "Boolean",
+            "Integer",
+            "String",
+            "ST_EDD_FlypathDocument",
+            "PlayFabJsonObject",
+            "SG_EDD_RepositoryStorage",
+        }
         for field in SCHEMA["variables"]:
             self.assertIn(field["type"], supported)
             self.assertIn(field["container"], {"None", "Array"})
@@ -47,6 +57,7 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         for required in (
             "LoadRepositoryV1",
             "PersistRepositoryV1",
+            "RebuildMetadataIndexV1",
             "EncodeDocumentV1",
             "DecodeDocumentV1",
             "EncodeRecordV1",

@@ -1801,6 +1801,10 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - A fresh commandlet proved nested object, boolean, string array, numeric values
   encoded as strings, and exact Unicode (`Unicode flight — 北風`) survive an
   encode/decode round trip.
+- `EncodeJson` is compact but preserves insertion order: adding `zeta` then
+  `alpha` produced `{"zeta":"last","alpha":"first"}`, while the reverse
+  insertion produced the reverse byte order. Canonical encoder graphs must add
+  every object field in a fixed ascending-key execution chain.
 - Deliberately decoding malformed JSON returns false but logs a PlayFab engine
   error, which makes an otherwise successful Python commandlet exit nonzero.
   Do not poison a commandlet acceptance log with expected malformed input;

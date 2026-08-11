@@ -44,6 +44,10 @@ The tools in this directory never launch Unreal:
 - `Build-PathPreviewIntegrationGraphs.py` upgrades the reviewed Enter, Exit,
   Capture, Replace, and Delete baselines with full-document sync and preview
   lifecycle calls while preserving body-only paste forms.
+- `Build-RepositoryCoreGraphs.py` deterministically composes the repository
+  result-reset and flypath-ID lookup functions from reviewed mod-owned node
+  forms. It emits complete contract graphs and body-only paste graphs; the
+  latter intentionally require one explicit native function-entry exec wire.
 - `Test-WaypointCaptureContracts.py` verifies exact array types, data sources,
   append order, selected-index assignment, ID increment, and available
   EventGraph dispatch semantics.
@@ -59,6 +63,9 @@ The tools in this directory never launch Unreal:
 - `Test-PathPreviewIntegrationContracts.py` verifies all five production roots,
   every success-path refresh, full-document sync, feedback ordering, and
   destroy-before-view-restoration.
+- `Test-RepositoryCoreContracts.py` verifies exact result defaults, metadata
+  clearing, derived-index lookup, staged request use, execution reachability,
+  and closed graph links for both complete and paste-safe forms.
 
 Validated snippets:
 

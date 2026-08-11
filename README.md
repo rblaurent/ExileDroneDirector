@@ -212,12 +212,14 @@ arrays, canonical payload text, and Unicode, then removed the probe slot. This i
 the verified storage seam.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
-boundary: active snapshot state, explicit request/result staging, policy limits,
-typed draft-document exchange, JSON scratch state, and separate codec,
-validation, storage, and CRUD function graphs. Enhanced's bundled PlayFab JSON
-object has also passed nested-object, array, boolean, numeric-text, and Unicode
-round trips. The functions are deliberately still empty seams; checked-in graph
-sources and runtime CRUD acceptance are the next milestone.
+boundary: active and copy-on-write candidate snapshot state, a derived metadata
+index, explicit request/result staging, policy limits, typed draft-document and
+SaveGame exchange, JSON scratch state, and separate codec, validation, storage,
+and CRUD function graphs. Enhanced's bundled PlayFab JSON object has passed
+nested-object, array, boolean, numeric-text, Unicode, and insertion-order
+acceptance. Deterministic source and paste-safe bodies now exist for result reset
+and ID lookup, but they are not yet installed in the live `.uasset`; runtime CRUD
+remains the next milestone.
 
 ## Repository layout
 

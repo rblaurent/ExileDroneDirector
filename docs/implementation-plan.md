@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.30.0-repository-service-seam`
+Current internal build: `0.31.0-repository-core-source`
 
 ## 1. Delivery strategy
 
@@ -256,9 +256,16 @@ This section is the authoritative handoff. Detailed evidence remains in
 - The server-only `BP_EDD_FlypathRepository` actor now compiles with versioned
   active state, request/result staging, bounded policy, typed draft-document
   exchange, JSON scratch objects, and separate codec/validation/storage/CRUD
-  function seams. The bundled PlayFab JSON object passed a nested Unicode round
-  trip. Those function bodies remain intentionally empty until their complete
-  graph sources and semantic contracts are generated and accepted.
+  function seams. Its evolved state now also includes derived metadata-index,
+  copy-on-write candidate, and typed SaveGame scratch channels. The bundled
+  PlayFab JSON object passed a nested Unicode round trip and its insertion-order
+  behavior is fixed by acceptance tests.
+- Deterministic, complete and body-only graph sources now exist for
+  `ResetRepositoryResultV1` and `FindRecordIndexV1`. Structural and semantic
+  contracts prove exact reset defaults, metadata clearing, derived-ID lookup,
+  staged request use, closed links, and byte-for-byte regeneration. These two
+  bodies are **not yet installed in the live `.uasset`**, so this checkpoint is
+  repository-core source/tooling, not functional CRUD.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
   directly to G-Portal.
 
@@ -270,7 +277,8 @@ before any polished editor UI or cook is attempted:
 
 1. Freeze and version the persistent Flypath envelope, metadata, owner identity,
    visibility, revision, attribution, published-snapshot, and validation contracts.
-2. Implement modular Blueprint repository and storage seams, beginning with
+2. Install and native-round-trip the proven repository core graphs, then
+   implement modular Blueprint repository/storage functions beginning with
    private create/save/load/list/delete and deterministic restart recovery.
 3. Prove optimistic revisions, atomic save behavior, corruption recovery, schema
    migration hooks, limit validation, and typed failures through executable tests.

@@ -74,12 +74,16 @@ else:
 document = unreal.EditorAssetLibrary.load_asset(schema["dependencies"][0])
 if document is None:
     raise RuntimeError("Flypath document struct dependency is missing")
+storage_class = unreal.EditorAssetLibrary.load_blueprint_class(schema["dependencies"][1])
+if storage_class is None:
+    raise RuntimeError("Repository SaveGame class dependency is missing")
 types = {
     "Boolean": unreal.BlueprintEditorLibrary.get_basic_type_by_name("bool"),
     "Integer": unreal.BlueprintEditorLibrary.get_basic_type_by_name("int"),
     "String": unreal.BlueprintEditorLibrary.get_basic_type_by_name("string"),
     "ST_EDD_FlypathDocument": unreal.BlueprintEditorLibrary.get_struct_type(document),
     "PlayFabJsonObject": unreal.BlueprintEditorLibrary.get_object_reference_type(unreal.PlayFabJsonObject),
+    "SG_EDD_RepositoryStorage": unreal.BlueprintEditorLibrary.get_object_reference_type(storage_class),
 }
 
 for field in schema["variables"]:

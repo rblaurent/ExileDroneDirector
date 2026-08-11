@@ -42,5 +42,23 @@ expected = ("1", "17", "Unicode flight — 北風", True, ["one", "two", "three"
 if actual != expected:
     raise RuntimeError(f"JSON round trip mismatch: {actual!r}")
 
+ordered_a = unreal.PlayFabJsonObject.construct_json_object(None)
+ordered_b = unreal.PlayFabJsonObject.construct_json_object(None)
+if ordered_a is None or ordered_b is None:
+    raise RuntimeError("Could not construct canonical-order fixtures")
+ordered_a.set_string_field("zeta", "last")
+ordered_a.set_string_field("alpha", "first")
+ordered_b.set_string_field("alpha", "first")
+ordered_b.set_string_field("zeta", "last")
+order_a = ordered_a.encode_json()
+order_b = ordered_b.encode_json()
+if order_a != '{"zeta":"last","alpha":"first"}':
+    raise RuntimeError(f"Unexpected first insertion order: {order_a!r}")
+if order_b != '{"alpha":"first","zeta":"last"}':
+    raise RuntimeError(f"Unexpected second insertion order: {order_b!r}")
+if order_a == order_b:
+    raise RuntimeError("PlayFab field-order probe no longer distinguishes insertion order")
+
 emit("ROUND_TRIP_VERIFIED", actual)
+emit("INSERTION_ORDER_VERIFIED", f"{order_a}|{order_b}")
 emit("COMPLETE", True)

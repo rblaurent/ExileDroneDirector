@@ -496,6 +496,11 @@ numeric-text, and Unicode round trip has been proven locally. No Blueprint SHA-2
 helper was exposed; cryptographic content hashing remains a codec implementation
 gate rather than being silently replaced by a weaker hash.
 
+`EncodeJson` preserves insertion order rather than sorting object keys. Every
+canonical encoder graph must therefore set fields in explicit ascending-key
+order, and semantic graph contracts must lock that execution chain. Generic
+iteration over a JSON object's fields is forbidden for canonical output.
+
 ### 8.3 Atomicity and recovery
 
 Where the storage adapter lacks transactions, use copy-on-write records:

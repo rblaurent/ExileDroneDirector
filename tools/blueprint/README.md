@@ -48,6 +48,12 @@ The tools in this directory never launch Unreal:
   result-reset and flypath-ID lookup functions from reviewed mod-owned node
   forms. It emits complete contract graphs and body-only paste graphs; the
   latter intentionally require one explicit native function-entry exec wire.
+- `repository-json-node-forms.eddgraph` is the native-round-trip Enhanced 5.6
+  PlayFab JSON fixture. `Test-RepositoryJsonNodeForms.py` locks its 15 callable
+  signatures, pin types, purity, and impure array-getter behavior.
+- `Build-RepositoryJsonMissingNodeProbe.py` reconstructs the three reflected
+  calls that the global action menu hides (`HasField`, `EncodeJson`, and
+  `DecodeJson`) for disposable compile/copy-back validation.
 - `Test-WaypointCaptureContracts.py` verifies exact array types, data sources,
   append order, selected-index assignment, ID increment, and available
   EventGraph dispatch semantics.

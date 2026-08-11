@@ -223,7 +223,10 @@ nested-object, array, boolean, numeric-text, Unicode, and insertion-order
 acceptance. The deterministic result-reset and ID-lookup graphs are now installed
 in the live actor, compile successfully, survive a fresh-process cold load, and
 round-trip back to reviewed `.eddgraph` text with their native entry links intact.
-Private CRUD remains the next runtime milestone.
+The complete native JSON fixture now covers 15 calls/60 pins, including compiled
+and Unreal-round-tripped `HasField`, `EncodeJson`, and `DecodeJson` forms that
+the unbound action menu does not expose reliably. Private CRUD remains the next
+runtime milestone.
 
 ## Repository layout
 

@@ -57,6 +57,9 @@ $requiredFiles = @(
     'tools\unreal\Open-RepositoryServiceEditor.py',
     'tools\unreal\Validate-RepositoryJsonCodec.py',
     'tools\unreal\Probe-HashEncodingApi.py',
+    'tools\unreal\Prepare-RepositoryJsonNodeProbe.py',
+    'tools\unreal\Inspect-RepositoryJsonBlueprintApi.py',
+    'tools\unreal\Delete-RepositoryJsonNodeProbe.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
     'tools\preview\linear_preview.py',
@@ -78,6 +81,8 @@ $requiredFiles = @(
     'tools\repository\blueprint_repository_service_schema.json',
     'tools\repository\test_blueprint_repository_service_schema.py',
     'tools\blueprint\Build-RepositoryCoreGraphs.py',
+    'tools\blueprint\Build-RepositoryJsonMissingNodeProbe.py',
+    'tools\blueprint\Test-RepositoryJsonNodeForms.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
@@ -131,6 +136,7 @@ $requiredFiles = @(
     'tools\blueprint\templates\path-preview-marker-node-forms.eddgraph',
     'tools\blueprint\templates\path-preview-segment-node-forms.eddgraph',
     'tools\blueprint\templates\conan-clean-frame-node-forms.eddgraph',
+    'tools\blueprint\templates\repository-json-node-forms.eddgraph',
     'tools\blueprint\snippets\toggle-input.eddgraph',
     'tools\blueprint\snippets\toggle-state.eddgraph',
     'tools\blueprint\snippets\enter-drone-mode.eddgraph',
@@ -534,6 +540,12 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\repository\test_blueprint_repository_service_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Blueprint repository service schema contracts failed with exit code $LASTEXITCODE."
+}
+
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryJsonNodeForms.py') `
+    --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\repository-json-node-forms.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository JSON native node-form contracts failed with exit code $LASTEXITCODE."
 }
 
 $repositoryCoreNonce = [guid]::NewGuid().ToString('N')

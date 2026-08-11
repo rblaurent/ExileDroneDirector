@@ -1860,6 +1860,30 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   re-export and semantically validate every installed graph, cold-load the final
   package, and only then accept and synchronize its new hash.
 
+## Repository JSON native node forms (2026-08-11)
+
+- A disposable `Developer/Automation/BP_EDD_JsonNodeProbe` harvested the exact
+  Enhanced 5.6 PlayFab JSON call-node forms. The checked-in fixture contains 15
+  calls and 60 pins covering construction, string/bool/object fields, string and
+  object arrays, field-name enumeration, existence checks, encode, and decode.
+- `HasField`, `EncodeJson`, and `DecodeJson` exist as native UFunctions and are
+  Python-visible, but the unbound Blueprint action menu does not list them
+  reliably. Their nodes were derived from reflected sibling signatures, pasted
+  into the probe, compiled to a green Blueprint, and copied back out by Unreal.
+  The native round-trip confirmed `HasField(FieldName) -> bool`, pure
+  `EncodeJson() -> string`, and impure `DecodeJson(JsonString) -> bool`.
+- Array getters (`GetStringArrayField` and `GetObjectArrayField`) are impure in
+  this build and own execution pins. Treating all JSON getters as pure produces
+  an invalid execution contract.
+- The action menu is a separate Slate top-level HWND. Reliable harvesting uses
+  the exact Blueprint HWND for graph focus, the popup HWND for search, disables
+  Context Sensitive once, and accepts clipboard data only after native compile
+  and copy-back. `PrintWindow` does not include the separate popup; capture the
+  screen region or popup HWND when diagnosing the search menu.
+- The probe asset is disposable and was deleted after export. Production graphs
+  consume `repository-json-node-forms.eddgraph`; they never depend on a
+  Developer/Automation asset.
+
 ## Pending local reconnaissance
 
 - Concrete Conan-character view restoration in a gameplay-map PIE run

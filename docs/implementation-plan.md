@@ -276,6 +276,12 @@ This section is the authoritative handoff. Detailed evidence remains in
   past a corrupt newest committed generation. The 57-test document/repository
   suite, complete scaffold, and fresh-process cold asset load pass. This does
   not claim cryptographic tamper detection; private CRUD graphs remain next.
+- The complete Enhanced PlayFab JSON Blueprint fixture is now harvested,
+  compiled, natively round-tripped, and semantically tested: 15 calls/60 pins
+  cover canonical construction, fields, arrays, `HasField`, `EncodeJson`, and
+  `DecodeJson`. The disposable probe asset was deleted. Repository codec graph
+  composition can now proceed deterministically without further action-menu
+  discovery.
 - No cooked `.pak` or Steam Workshop item exists. GitHub source cannot be added
   directly to G-Portal.
 

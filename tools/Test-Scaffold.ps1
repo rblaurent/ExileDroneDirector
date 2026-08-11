@@ -64,6 +64,8 @@ $requiredFiles = @(
     'tools\unreal\Read-RepositorySaveGameProbe.py',
     'tools\unreal\Configure-RepositoryService.py',
     'tools\unreal\Compile-And-SaveRepository.py',
+    'tools\unreal\Validate-RepositoryPersistenceWriter.py',
+    'tools\unreal\Read-RepositoryPersistenceWriter.py',
     'tools\unreal\Open-RepositoryServiceEditor.py',
     'tools\unreal\Validate-RepositoryJsonCodec.py',
     'tools\unreal\Probe-HashEncodingApi.py',
@@ -115,6 +117,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryValidationContracts.py',
     'tools\blueprint\Build-RepositoryPersistenceStateGraphs.py',
     'tools\blueprint\Test-RepositoryPersistenceStateContracts.py',
+    'tools\blueprint\Build-RepositoryPersistenceWriterGraphs.py',
+    'tools\blueprint\Test-RepositoryPersistenceWriterContracts.py',
     'tools\blueprint\Build-RepositorySaveGameAdapterGraphs.py',
     'tools\blueprint\Test-RepositorySaveGameAdapterContracts.py',
     'tools\blueprint\Build-RepositoryRecoverySelectionGraphs.py',
@@ -239,6 +243,11 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\validate-storage-headers-v1.eddgraph',
     'tools\blueprint\live-snippets\prepare-persistence-candidate-v1.eddgraph',
     'tools\blueprint\live-snippets\commit-persistence-candidate-v1.eddgraph',
+    'tools\blueprint\live-snippets\reset-persistence-write-v1.eddgraph',
+    'tools\blueprint\live-snippets\build-persistence-write-storage-v1.eddgraph',
+    'tools\blueprint\live-snippets\stage-persistence-write-v1.eddgraph',
+    'tools\blueprint\live-snippets\commit-persistence-write-v1.eddgraph',
+    'tools\blueprint\live-snippets\persist-repository-v1.eddgraph',
     'tools\blueprint\live-snippets\read-repository-storage-slot-a-v1.eddgraph',
     'tools\blueprint\live-snippets\read-repository-storage-slot-b-v1.eddgraph',
     'tools\blueprint\live-snippets\read-repository-storage-slots-v1.eddgraph',
@@ -316,6 +325,15 @@ $manifestPath = Join-Path $ProjectRoot 'project.json'
 $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
 if ($manifest.modFolder -ne 'ExileDroneDirector') {
     throw "Unexpected modFolder in project.json: $($manifest.modFolder)"
+}
+
+$editorInputPath = Join-Path $ProjectRoot 'tools\unreal\Invoke-EnhancedEditorInput.ps1'
+$editorInputSource = [IO.File]::ReadAllText($editorInputPath)
+if ($editorInputSource -notmatch 'IsIconic\(hWnd\)') {
+    throw 'Editor input helper must test IsIconic before restoring a window.'
+}
+if ($editorInputSource -notmatch 'if \(IsIconic\(hWnd\)\) ShowWindow\(hWnd, 9\);') {
+    throw 'Editor input helper must preserve maximized windows instead of unconditionally restoring them.'
 }
 
 $movementConfigPath = Join-Path $ProjectRoot 'tools\unreal\Configure-DroneMovement.py'
@@ -914,6 +932,46 @@ if ($LASTEXITCODE -ne 0) {
     --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets')
 if ($LASTEXITCODE -ne 0) {
     throw "Repository persistence-state live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+$repositoryPersistenceWriterNonce = [guid]::NewGuid().ToString('N')
+$repositoryPersistenceWriterRoot = Join-Path $scratchRoot "edd-repository-persistence-writer-$repositoryPersistenceWriterNonce"
+$repositoryPersistenceWriterFull = Join-Path $repositoryPersistenceWriterRoot 'full'
+$repositoryPersistenceWriterPaste = Join-Path $repositoryPersistenceWriterRoot 'paste'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryPersistenceWriterGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryPersistenceWriterFull `
+    --paste-dir $repositoryPersistenceWriterPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository persistence-writer generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryPersistenceWriterFull,$repositoryPersistenceWriterPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPersistenceWriterContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryPersistenceWriterFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository persistence-writer contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPersistenceWriterContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryPersistenceWriterPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository persistence-writer paste contracts failed with exit code $LASTEXITCODE."
+}
+$repositoryPersistenceWriterLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets'
+foreach ($graphName in @(
+    'reset-persistence-write-v1.eddgraph',
+    'build-persistence-write-storage-v1.eddgraph',
+    'stage-persistence-write-v1.eddgraph',
+    'commit-persistence-write-v1.eddgraph',
+    'persist-repository-v1.eddgraph'
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+        -Path (Join-Path $repositoryPersistenceWriterLive $graphName)
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPersistenceWriterContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryPersistenceWriterLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository persistence-writer live contracts failed with exit code $LASTEXITCODE."
 }
 $repositorySaveGameAdapterNonce = [guid]::NewGuid().ToString('N')
 $repositorySaveGameAdapterRoot = Join-Path $scratchRoot "edd-repository-savegame-adapter-$repositorySaveGameAdapterNonce"

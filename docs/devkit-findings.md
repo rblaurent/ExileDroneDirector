@@ -2530,3 +2530,45 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Next: inactive-slot two-phase writer, then private create/save/load/list/delete.
   Ownership, privacy/publication/cloning, cinematic tracks, cook, and polished
   UI remain pending.
+
+## Two-phase persistence writer accepted (2026-08-11)
+
+- Internal checkpoint `0.43.0-persistence-writer` adds five compiled functions:
+  `ResetPersistenceWriteV1` 5 nodes,
+  `BuildPersistenceWriteStorageV1` 19,
+  `StagePersistenceWriteV1` 8,
+  `CommitPersistenceWriteV1` 10, and `PersistRepositoryV1` 9.
+- The caller prepares and validates its copy-on-write candidate before invoking
+  the writer. The writer never calls `PreparePersistenceCandidateV1` itself,
+  because doing so after CRUD mutation would overwrite the candidate.
+- The typed storage object is populated uncommitted and saved to
+  `CandidateTargetSlotV1`; the same object is then marked committed and saved to
+  the same slot. Authority is promoted only after both saves return true.
+  Create/stage/commit failures keep authority unchanged and emit stable
+  `PersistenceUnavailable` details.
+- Full and paste generators, exact first-live exports, and exact post-compile
+  exports pass the same structural and semantic contracts. The semantic oracle
+  covers create, stage, and commit failure plus successful promotion.
+- Compile/save returned true with no Blueprint/K2/FileManager/SavePackage
+  diagnostics. Guarded quit was clean; a fresh nine-asset commandlet emitted
+  `EDD_COLD_LOAD|RESULT|PASS` with zero errors.
+- A controlled executable probe spawned the real compiled repository actor,
+  changed prior authority generation 41 to candidate 42, called
+  `PersistRepositoryV1`, and verified all three physical-write flags plus the
+  exact committed Unicode payload. A second fresh Unreal process read the same
+  payload and removed the isolated automation slot. Native SaveGame failure
+  injection remains covered by the semantic oracle because the DevKit exposes
+  no safe `SaveGameToSlot` failure seam.
+- `Invoke-EnhancedEditorInput.ps1` previously called `ShowWindow(...,
+  SW_RESTORE)` on every focus request. That silently unmaximized Blueprint
+  windows and invalidated known coordinates. It now checks `IsIconic` and only
+  restores minimized windows; maximized placement is preserved and enforced by
+  the scaffold source contract. Editor input uses client coordinates, while
+  screenshot crops are physical pixels; `ClientToScreen` measured an `-8,-8`
+  client origin in this layout, so pin centers require the corresponding offset.
+- FromDevKit preview found 16 unchanged assets and exactly one reviewed
+  repository conflict. Forced sync copied only that package. Live and mirror
+  SHA-256 is
+  `F25458BC4D3B0FB7EF962A970FE39F42882606AF9453E09A6423BC8DF1C153DE`.
+- Next: private create/save/load/list/delete using the accepted writer. No cook
+  and no polished UI.

@@ -238,9 +238,17 @@ ordered record/tombstone arrays, stages one or two eligible generations, picks
 newest-first deterministically, accepts identical equal-generation peers with a
 B tie-break, and fails closed on divergent equal-generation peers. Exact live
 exports pass before and after compile/save plus a fresh nine-asset cold load.
-Tombstone validation/merge, per-record corrupt-newest fallback, authoritative
-memory replacement, and the two-phase writer remain required before runtime
-persistence is claimed.
+Tombstone validation/merge, per-record corrupt-newest fallback, and guarded
+authoritative replacement are now compiled live as separate recovery layers.
+The write half is accepted too: five narrow functions reset write state, create
+and populate a typed snapshot, save it uncommitted, rewrite the same inactive
+slot committed, and promote authority only after both saves succeed. Generated
+full/paste graphs and exact initial/post-compile Unreal exports pass the same
+contracts; marked compile/save and fresh cold load are clean. Most importantly,
+an executable probe invokes the real compiled Blueprint writer on a repository
+actor, proves authority changes from generation 41 to 42, and a second fresh
+Unreal process reads the exact committed Unicode payload before cleanup. Private
+CRUD and its restart/authorization cases are the next persistence milestone.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata

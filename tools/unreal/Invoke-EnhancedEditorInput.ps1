@@ -83,6 +83,9 @@ public static class EddEnhancedEditorInput {
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(IntPtr hWnd, int command);
 
+    [DllImport("user32.dll")]
+    private static extern bool IsIconic(IntPtr hWnd);
+
     public static bool FocusWindow(IntPtr hWnd) {
         if (GetForegroundWindow() == hWnd) return true;
         IntPtr foreground = GetForegroundWindow();
@@ -92,7 +95,11 @@ public static class EddEnhancedEditorInput {
         bool attachedForeground = foregroundThread != 0 && foregroundThread != currentThread && AttachThreadInput(currentThread, foregroundThread, true);
         bool attachedTarget = targetThread != 0 && targetThread != currentThread && targetThread != foregroundThread && AttachThreadInput(currentThread, targetThread, true);
         try {
-            ShowWindow(hWnd, 9);
+            // SW_RESTORE also unmaximizes an already-maximized window, which
+            // invalidates every verified client coordinate mid-operation.
+            // Restore only an actually minimized target; otherwise preserve
+            // its current normal/maximized placement.
+            if (IsIconic(hWnd)) ShowWindow(hWnd, 9);
             BringWindowToTop(hWnd);
             SetForegroundWindow(hWnd);
             return GetForegroundWindow() == hWnd;

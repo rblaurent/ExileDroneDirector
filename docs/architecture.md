@@ -600,6 +600,21 @@ generation, recover individual records, replace repository memory, or report a
 successful repository load. Those responsibilities remain in the recovery
 layer, keeping raw I/O failure terminals separate from semantic recovery.
 
+The write adapter is split into five accepted functions.
+`ResetPersistenceWriteV1` clears only writer scratch flags;
+`BuildPersistenceWriteStorageV1` creates `SG_EDD_RepositoryStorage` and fills
+schema, candidate generation, uncommitted state, reserved empty hash, record
+envelopes, and tombstones; `StagePersistenceWriteV1` writes that object to the
+candidate inactive slot; `CommitPersistenceWriteV1` flips the same object to
+committed and rewrites the same slot; `PersistRepositoryV1` coordinates those
+steps and calls `CommitPersistenceCandidateV1` only after both physical writes
+succeed. Create, stage, and commit failures return `PersistenceUnavailable`
+with stable details and leave the previous authority unchanged. A real compiled
+Blueprint invocation and a second fresh Unreal process prove success-path
+authority promotion and exact physical payload persistence. Native disk-failure
+injection remains a semantic-oracle test because Enhanced exposes no safe
+failure-injection seam for `SaveGameToSlot`.
+
 Recovery ordering is a second accepted layer, deliberately separate from raw
 I/O and record decoding. `ResetRecoverySelectionV1` clears every recovery
 scratch channel. `CompareRecoveryStringArraysV1` compares ordered arrays by

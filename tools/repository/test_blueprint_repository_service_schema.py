@@ -170,6 +170,10 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "ValidateStorageHeadersV1",
             "PreparePersistenceCandidateV1",
             "CommitPersistenceCandidateV1",
+            "ResetPersistenceWriteV1",
+            "BuildPersistenceWriteStorageV1",
+            "StagePersistenceWriteV1",
+            "CommitPersistenceWriteV1",
             "LoadRepositoryV1",
             "PersistRepositoryV1",
             "RebuildMetadataIndexV1",
@@ -223,6 +227,17 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         by_name = {field["name"]: field for field in SCHEMA["variables"]}
         self.assertTrue(by_name["CandidateSnapshotHashV1"]["reserved"])
         self.assertEqual(by_name["CandidateSnapshotHashV1"]["default"], "")
+
+    def test_persistence_writer_state_is_explicit(self) -> None:
+        by_name = {field["name"]: field for field in SCHEMA["variables"]}
+        for name in (
+            "ScratchPersistenceStorageCreatedV1",
+            "ScratchPersistenceStageSavedV1",
+            "ScratchPersistenceCommitSavedV1",
+        ):
+            self.assertEqual(by_name[name]["type"], "Boolean")
+            self.assertEqual(by_name[name]["container"], "None")
+            self.assertFalse(by_name[name]["default"])
 
     def test_result_codes_match_the_repository_oracle(self) -> None:
         self.assertEqual(

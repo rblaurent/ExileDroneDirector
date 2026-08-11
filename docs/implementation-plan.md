@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.42.0-record-recovery`
+Current internal build: `0.43.0-persistence-writer`
 
 ## 1. Delivery strategy
 
@@ -457,11 +457,17 @@ before any polished editor UI or cook is attempted:
    document decoders, all three record encoders, all three record decoders,
    repository core, and exact numeric/null/type JSON node forms are accepted
    live-compiled proof, not remaining discovery work.
-3. **Current:** connect and prove the inactive-slot uncommitted/committed
-   SaveGame writer, then implement private create/save/load/list/delete on top
-   of it.
-4. Prove optimistic revisions, atomic save behavior, corruption recovery, schema
-   migration hooks, limit validation, and typed failures through executable tests.
+3. **Complete:** the inactive-slot writer creates a typed snapshot, writes it
+   uncommitted, rewrites the same slot committed, and promotes authority only
+   after both saves succeed. Generated full/paste graphs, exact initial and
+   post-compile Unreal exports, marked compile/save, cold load, and a real
+   two-process Blueprint SaveGame round trip all pass. The executable probe
+   changes authority from generation 41 to 42, verifies the exact committed
+   Unicode payload in a fresh process, and removes its isolated fixture.
+4. **Current:** implement private create/save/load/list/delete on top of the
+   accepted writer, then prove optimistic revisions, atomic save behavior,
+   corruption recovery, schema migration hooks, limit validation, and typed
+   failures through executable tests.
 5. Implement server-authoritative ownership, privacy, publication, immutable
    snapshots, discovery, playback fetch, and private cloning with attribution.
 6. Implement the complete trajectory compiler: linear and cinematic curves,

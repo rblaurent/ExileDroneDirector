@@ -259,6 +259,19 @@ only proves that the clipboard held a syntactically valid graph, so semantic
 contracts must also confirm the expected current function and links. This
 avoids accidentally validating a stale but valid earlier copy.
 
+Before `Ctrl+A` in a Blueprint graph, click verified empty canvas space. If a
+pasted selection or node still owns focus, Unreal may copy only that selection
+and omit the native function entry even though `Ctrl+A` was sent. The SaveGame
+slot-reader acceptance caught this as an 18-node export instead of 19. The
+required cycle is: click empty canvas, select all, copy, assert function name and
+exact node/pin counts, and assert the reciprocal native-entry execution link.
+
+When locating a node block in generated `.eddgraph` text, anchor the search to
+its `Begin Object Class=...` line. Searching only for a linked pin or function
+name can match an unrelated node that merely references the target. The
+SaveGame adapter generator now anchors Branch, DynamicCast, and VariableGet
+blocks by their concrete serialized node classes.
+
 Treat numeric defaults semantically rather than matching one textual spelling.
 UE 5.6 can round-trip an authored `3.0` as `3.000000`. Validators should parse
 the serialized scalar, compare it within a strict tolerance, and still require

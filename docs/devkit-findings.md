@@ -2368,3 +2368,38 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Next: generate, install, compile, and runtime-test the actual alternating-slot
   load/write adapter and record-granular recovery. Node-form acceptance alone is
   not disk persistence. No private CRUD, cook, or polished UI is claimed.
+
+## Raw repository SaveGame readers accepted (2026-08-11)
+
+- Internal checkpoint `0.39.0-savegame-read-adapter` connects the accepted
+  Enhanced SaveGame forms into the read half of the physical adapter.
+- `ReadRepositoryStorageSlotAV1` and `ReadRepositoryStorageSlotBV1` are each 19
+  nodes/75 pins. Each performs existence -> load -> executed typed cast, then
+  stages schema, generation, committed, reserved hash, record envelopes, and
+  tombstones into its explicit slot channel. Missing-slot and cast-failure paths
+  terminate without mutating another slot. A failed load leaves reset defaults
+  and is rejected by later header validation.
+- `ReadRepositoryStorageSlotsV1` is 5 nodes/13 pins and owns only
+  `ResetRepositoryStateV1 -> Slot A -> Slot B -> ValidateStorageHeadersV1`.
+  It does not choose authority, recover records, replace active memory, or set
+  `RepositoryLoadedV1`; those are separate recovery contracts.
+- The guarded install cycle caught two subtle editor hazards. A first paste
+  overlapped the native entry and was undone before moving the entry and
+  repasting. A first export contained only 18 nodes because the pasted body
+  retained selection; clicking empty canvas before `Ctrl+A` restored the native
+  entry to the export. Exact count plus entry-link contracts prevented both
+  transient canvases from being accepted.
+- Generator block discovery must anchor concrete `Begin Object Class` lines.
+  Loose searches initially selected nodes merely linked to a Branch or Cast;
+  the accepted generator anchors `K2Node_IfThenElse`, `K2Node_DynamicCast`, and
+  `K2Node_VariableGet` explicitly.
+- All three live exports passed semantic contracts before compile/save and
+  again after Unreal reconstructed them. The marked compile interval had zero
+  Blueprint/K2/SavePackage warnings or errors. A fresh `-ModDevKit -NullRHI`
+  commandlet loaded all nine core assets and emitted
+  `EDD_COLD_LOAD|RESULT|PASS` with zero errors.
+- Sync copied exactly the repository package. Live and Git-mirror SHA-256 is
+  `8A9882A355DFB2FA634E857AFC6D18E58AFF577117F38FC9DF862F938AC0B45F`.
+- Next: deterministic authority selection and per-record corrupt-newest
+  fallback, then the inactive-slot two-phase writer, then private CRUD. No cook
+  or polished UI.

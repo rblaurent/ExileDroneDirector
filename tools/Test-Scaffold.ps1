@@ -115,6 +115,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryValidationContracts.py',
     'tools\blueprint\Build-RepositoryPersistenceStateGraphs.py',
     'tools\blueprint\Test-RepositoryPersistenceStateContracts.py',
+    'tools\blueprint\Build-RepositorySaveGameAdapterGraphs.py',
+    'tools\blueprint\Test-RepositorySaveGameAdapterContracts.py',
     'tools\blueprint\Test-RepositorySaveGameNodeForms.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
@@ -228,6 +230,9 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\validate-storage-headers-v1.eddgraph',
     'tools\blueprint\live-snippets\prepare-persistence-candidate-v1.eddgraph',
     'tools\blueprint\live-snippets\commit-persistence-candidate-v1.eddgraph',
+    'tools\blueprint\live-snippets\read-repository-storage-slot-a-v1.eddgraph',
+    'tools\blueprint\live-snippets\read-repository-storage-slot-b-v1.eddgraph',
+    'tools\blueprint\live-snippets\read-repository-storage-slots-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -879,6 +884,44 @@ if ($LASTEXITCODE -ne 0) {
     --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets')
 if ($LASTEXITCODE -ne 0) {
     throw "Repository persistence-state live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+$repositorySaveGameAdapterNonce = [guid]::NewGuid().ToString('N')
+$repositorySaveGameAdapterRoot = Join-Path $scratchRoot "edd-repository-savegame-adapter-$repositorySaveGameAdapterNonce"
+$repositorySaveGameAdapterFull = Join-Path $repositorySaveGameAdapterRoot 'full'
+$repositorySaveGameAdapterPaste = Join-Path $repositorySaveGameAdapterRoot 'paste'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositorySaveGameAdapterGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositorySaveGameAdapterFull `
+    --paste-dir $repositorySaveGameAdapterPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository SaveGame adapter generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositorySaveGameAdapterFull,$repositorySaveGameAdapterPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositorySaveGameAdapterContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositorySaveGameAdapterFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository SaveGame adapter contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositorySaveGameAdapterContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositorySaveGameAdapterPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository SaveGame adapter paste contracts failed with exit code $LASTEXITCODE."
+}
+foreach ($graphName in @(
+    'read-repository-storage-slot-a-v1.eddgraph',
+    'read-repository-storage-slot-b-v1.eddgraph',
+    'read-repository-storage-slots-v1.eddgraph'
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') `
+        -Path (Join-Path $ProjectRoot "tools\blueprint\live-snippets\$graphName")
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositorySaveGameAdapterContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository SaveGame adapter live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')

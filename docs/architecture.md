@@ -587,6 +587,19 @@ every success/failure edge back into these functions. Recovery then decodes
 records individually according to the oracle above before replacing active
 memory.
 
+The read adapter is split into three accepted functions.
+`ReadRepositoryStorageSlotAV1` and `ReadRepositoryStorageSlotBV1` each perform
+their own existence check, load, executed cast to `SG_EDD_RepositoryStorage`,
+and copy of schema version, generation, committed flag, reserved hash, record
+envelopes, and tombstones into the corresponding scratch channel.
+`ReadRepositoryStorageSlotsV1` resets both channels, invokes A then B, and
+validates the two headers. Missing slots and failed casts terminate that slot
+reader; a load failure leaves the reset defaults, so header validation rejects
+the candidate. This layer deliberately does not select the authoritative
+generation, recover individual records, replace repository memory, or report a
+successful repository load. Those responsibilities remain in the recovery
+layer, keeping raw I/O failure terminals separate from semantic recovery.
+
 The accepted Enhanced 5.6 construction seam is deliberately version-specific.
 All four `GameplayStatics` calls (`DoesSaveGameExist`, `LoadGameFromSlot`,
 `CreateSaveGameObject`, `SaveGameToSlot`) carry execution pins. Configuring

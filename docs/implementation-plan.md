@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.38.0-savegame-node-forms`
+Current internal build: `0.39.0-savegame-read-adapter`
 
 ## 1. Delivery strategy
 
@@ -408,6 +408,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   specializes Create's return pin, while Load still returns base `SaveGame` and
   requires an executed typed cast. Typed storage property get/set forms are
   captured too. This proves node construction, not connected repository I/O.
+- Raw alternating-slot reads are now accepted live. The 19-node
+  `ReadRepositoryStorageSlotAV1` and `ReadRepositoryStorageSlotBV1` functions
+  each own existence, load, executed typed cast, and staging of all six storage
+  fields. The 5-node `ReadRepositoryStorageSlotsV1` coordinator owns only
+  reset -> A -> B -> header validation. All three exact exports pass semantic
+  contracts before and after compile/save and survive a fresh headless cold
+  compile. Missing slots and cast failures terminate locally; an existing slot
+  whose load fails remains reset and is rejected by header validation. These
+  functions do not choose authority, decode/recover records, replace active
+  memory, or set `RepositoryLoadedV1`.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported
@@ -427,9 +437,9 @@ before any polished editor UI or cook is attempted:
 1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
    owner identity, visibility, revision, attribution, published snapshot,
    structural integrity mode, codecs, and live Blueprint validation contracts.
-2. **Current:** use the accepted native `GameplayStatics` forms to connect and
-   prove the alternating-slot SaveGame adapter and deterministic record-granular
-   restart recovery, then
+2. **Current:** build deterministic authority selection and record-granular
+   restart recovery on the accepted raw A/B slot readers, then connect and
+   prove the inactive-slot uncommitted/committed SaveGame writer, then
    implement private create/save/load/list/delete on top of it.
    `EncodeWaypointV1`, `EncodeSegmentV1`, `EncodeDocumentV1`, all three matching
    document decoders, all three record encoders, all three record decoders,

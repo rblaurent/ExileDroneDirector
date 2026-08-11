@@ -228,10 +228,13 @@ exact Enhanced 5.6 `GameplayStatics` SaveGame node forms are now harvested from
 a green compile and contract-tested as well. All four calls are impure in this
 build; Create specializes its return after selecting
 `SG_EDD_RepositoryStorage`, while Load remains base `SaveGame` and needs an
-executed typed cast. The next persistence slice connects those accepted forms
-into the alternating-slot load/write adapter plus record-granular recovery; no
-runtime persistence is claimed until those calls and every failure branch are
-connected and proven.
+executed typed cast. The read half is now connected live: two narrow slot
+readers perform existence/load/typed-cast/property staging, and a coordinator
+resets state, reads A then B, and validates both headers. Exact Unreal exports
+pass before and after compile/save plus a fresh cold compile. These functions
+intentionally stop at raw slot staging; authority selection, per-record
+fallback, authoritative memory replacement, and the two-phase writer remain
+required before runtime persistence is claimed.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata
@@ -254,8 +257,9 @@ duration accounting, visibility/publication rules, revision ordering, and clone
 attribution. Their 230-node Unreal round-trips, full compile/save, and fresh
 headless cold compile pass. Canonical whitespace and UTC ordering remain an
 explicit parity gap owned by the next repository boundary. Alternating-slot
-state transitions and the exact native SaveGame construction forms are
-accepted; connected SaveGame I/O, record recovery, and private
+state transitions, exact native SaveGame construction forms, and connected raw
+slot reads are accepted; authority selection, record recovery, the write
+adapter, and private
 create/save/load/list/delete are the next runtime milestones.
 
 ## Repository layout

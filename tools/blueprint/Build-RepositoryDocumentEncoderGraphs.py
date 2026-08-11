@@ -36,6 +36,11 @@ SEGMENT_STRUCT = (
     "/Game/Mods/ExileDroneDirector/Data/Structs/"
     "ST_EDD_Segment.ST_EDD_Segment'"
 )
+STORAGE_CLASS = (
+    "/Script/Engine.BlueprintGeneratedClass'"
+    "/Game/Mods/ExileDroneDirector/Server/Persistence/"
+    "SG_EDD_RepositoryStorage.SG_EDD_RepositoryStorage_C'"
+)
 REPOSITORY_GENERATED_CLASS = (
     "/Script/Engine.BlueprintGeneratedClass'"
     "/Game/Mods/ExileDroneDirector/Server/Repository/"
@@ -104,6 +109,8 @@ def type_parts(kind: str) -> tuple[str, str, str]:
         return "struct", "", f'"{WAYPOINT_STRUCT}"'
     if kind == "segment":
         return "struct", "", f'"{SEGMENT_STRUCT}"'
+    if kind == "storage":
+        return "object", "", f'"{STORAGE_CLASS}"'
     raise RuntimeError(f"Unsupported pin kind: {kind}")
 
 

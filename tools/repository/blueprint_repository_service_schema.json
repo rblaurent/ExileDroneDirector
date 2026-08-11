@@ -7,6 +7,8 @@
   "jsonObjectClass": "PlayFabJsonObject",
   "dependencies": [
     "/Game/Mods/ExileDroneDirector/Data/Structs/ST_EDD_FlypathDocument",
+    "/Game/Mods/ExileDroneDirector/Data/Structs/ST_EDD_Waypoint",
+    "/Game/Mods/ExileDroneDirector/Data/Structs/ST_EDD_Segment",
     "/Game/Mods/ExileDroneDirector/Server/Persistence/SG_EDD_RepositoryStorage"
   ],
   "variables": [
@@ -50,6 +52,10 @@
     { "name": "ScratchNestedJsonV1", "type": "PlayFabJsonObject", "container": "None" },
     { "name": "ScratchJsonObjectsV1", "type": "PlayFabJsonObject", "container": "Array" },
     { "name": "ScratchStringArrayV1", "type": "String", "container": "Array" },
+    { "name": "ScratchWaypointsV1", "type": "ST_EDD_Waypoint", "container": "Array" },
+    { "name": "ScratchSegmentsV1", "type": "ST_EDD_Segment", "container": "Array" },
+    { "name": "ScratchWaypointV1", "type": "ST_EDD_Waypoint", "container": "None" },
+    { "name": "ScratchSegmentV1", "type": "ST_EDD_Segment", "container": "None" },
     { "name": "ScratchDocumentV1", "type": "ST_EDD_FlypathDocument", "container": "None" },
     { "name": "ScratchEncodedDocumentV1", "type": "String", "container": "None", "default": "" },
     { "name": "ScratchEncodedRecordV1", "type": "String", "container": "None", "default": "" },
@@ -94,6 +100,10 @@
     "PersistRepositoryV1",
     "RebuildMetadataIndexV1",
     "FindRecordIndexV1",
+    "EncodeWaypointV1",
+    "DecodeWaypointV1",
+    "EncodeSegmentV1",
+    "DecodeSegmentV1",
     "EncodeDocumentV1",
     "DecodeDocumentV1",
     "EncodeRecordV1",

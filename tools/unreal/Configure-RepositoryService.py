@@ -72,9 +72,11 @@ else:
     emit("ASSET_REUSED", asset_path)
 
 document = unreal.EditorAssetLibrary.load_asset(schema["dependencies"][0])
-if document is None:
-    raise RuntimeError("Flypath document struct dependency is missing")
-storage_class = unreal.EditorAssetLibrary.load_blueprint_class(schema["dependencies"][1])
+waypoint = unreal.EditorAssetLibrary.load_asset(schema["dependencies"][1])
+segment = unreal.EditorAssetLibrary.load_asset(schema["dependencies"][2])
+if document is None or waypoint is None or segment is None:
+    raise RuntimeError("Flypath document codec struct dependencies are missing")
+storage_class = unreal.EditorAssetLibrary.load_blueprint_class(schema["dependencies"][3])
 if storage_class is None:
     raise RuntimeError("Repository SaveGame class dependency is missing")
 types = {
@@ -82,6 +84,8 @@ types = {
     "Integer": unreal.BlueprintEditorLibrary.get_basic_type_by_name("int"),
     "String": unreal.BlueprintEditorLibrary.get_basic_type_by_name("string"),
     "ST_EDD_FlypathDocument": unreal.BlueprintEditorLibrary.get_struct_type(document),
+    "ST_EDD_Waypoint": unreal.BlueprintEditorLibrary.get_struct_type(waypoint),
+    "ST_EDD_Segment": unreal.BlueprintEditorLibrary.get_struct_type(segment),
     "PlayFabJsonObject": unreal.BlueprintEditorLibrary.get_object_reference_type(unreal.PlayFabJsonObject),
     "SG_EDD_RepositoryStorage": unreal.BlueprintEditorLibrary.get_object_reference_type(storage_class),
 }

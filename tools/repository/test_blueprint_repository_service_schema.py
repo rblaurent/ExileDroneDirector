@@ -22,6 +22,8 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "/Game/Mods/ExileDroneDirector/Server/Repository/BP_EDD_FlypathRepository",
         )
         self.assertIn("ST_EDD_FlypathDocument", " ".join(SCHEMA["dependencies"]))
+        self.assertIn("ST_EDD_Waypoint", " ".join(SCHEMA["dependencies"]))
+        self.assertIn("ST_EDD_Segment", " ".join(SCHEMA["dependencies"]))
         self.assertIn("SG_EDD_RepositoryStorage", " ".join(SCHEMA["dependencies"]))
 
     def test_state_request_result_scratch_and_policy_names_do_not_overlap(self) -> None:
@@ -62,6 +64,14 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         self.assertEqual(by_name["ScratchRecordVisibilityV1"]["default"], "private")
         self.assertFalse(by_name["ScratchRecordHasPublishedRevisionV1"]["default"])
         self.assertFalse(by_name["ScratchRecordHasSourceAttributionV1"]["default"])
+        for name, field_type in (
+            ("ScratchWaypointsV1", "ST_EDD_Waypoint"),
+            ("ScratchSegmentsV1", "ST_EDD_Segment"),
+        ):
+            self.assertEqual(by_name[name]["type"], field_type)
+            self.assertEqual(by_name[name]["container"], "Array")
+        self.assertEqual(by_name["ScratchWaypointV1"]["type"], "ST_EDD_Waypoint")
+        self.assertEqual(by_name["ScratchSegmentV1"]["type"], "ST_EDD_Segment")
 
     def test_only_automatable_variable_types_are_used(self) -> None:
         supported = {
@@ -69,6 +79,8 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "Integer",
             "String",
             "ST_EDD_FlypathDocument",
+            "ST_EDD_Waypoint",
+            "ST_EDD_Segment",
             "PlayFabJsonObject",
             "SG_EDD_RepositoryStorage",
         }
@@ -85,6 +97,10 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "LoadRepositoryV1",
             "PersistRepositoryV1",
             "RebuildMetadataIndexV1",
+            "EncodeWaypointV1",
+            "DecodeWaypointV1",
+            "EncodeSegmentV1",
+            "DecodeSegmentV1",
             "EncodeDocumentV1",
             "DecodeDocumentV1",
             "EncodeRecordV1",

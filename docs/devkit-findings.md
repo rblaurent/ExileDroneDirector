@@ -1930,6 +1930,32 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   the current implementation slice; no private CRUD, collaboration, cinematic
   trajectory, lens/event backend, polished UI, or cook is claimed by it.
 
+## Split quaternion clipboard reconstruction failure (2026-08-11)
+
+- Linked-subset bisection proved that Enhanced 5.6.1 can paste the native array
+  nodes, repository variable nodes, waypoint Break Struct, PlayFab JSON calls,
+  Break Transform, Break Vector, and each corresponding data/exec bridge.
+  The full 21-node `EncodeWaypointV1` body without the quaternion conversion
+  also survives in a real repository function graph.
+- A split `Conv_RotatorToQuaternion` node asserts in `K2Node.cpp:1360` with
+  `NumNewPins == InNewPins.Num()` when imported with, or subsequently pasted
+  into, that populated graph. Removing Rotation->Quat and X/Y/Z/W->array links
+  does not prevent the assertion. The mod asset remains safe because every
+  failed run was isolated and unsaved.
+- Do not treat repeated full-editor paste attempts as testing. Generated probe
+  files under the session scratch directory isolate node families and linked
+  seams, and canonical/paste contract suites must pass before any live attempt.
+- Production installation must avoid the toxic clipboard shape: validate an
+  unsplit Rotator->Quaternion plus explicit Break Quat node form, or create and
+  split that one conversion node natively after the safe body is installed.
+  Export, semantic validation, compile/save, fresh cold load, and runtime value
+  round trips remain mandatory before accepting the encoder.
+- A derived native unsplit `Conv_RotatorToQuaternion` form (three pins) pasted
+  successfully into the populated 21-node body, confirming that the split call
+  pin—not quaternion conversion—is the failing representation. Before any live
+  paste, the runner must copy the active graph and verify the intended function
+  name; a visual row click or coordinate alone is not accepted evidence.
+
 ## Pending local reconnaissance
 
 - Concrete Conan-character view restoration in a gameplay-map PIE run

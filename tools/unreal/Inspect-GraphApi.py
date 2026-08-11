@@ -65,5 +65,16 @@ for name in candidate_names:
         )
 
 emit("blueprint_library_symbols", public_symbols(unreal.BlueprintEditorLibrary))
+
+pin_library = getattr(unreal, "BlueprintGraphPinLibrary", None)
+emit("pin_library_present", pin_library is not None)
+if pin_library is not None:
+    emit("pin_library_symbols", public_symbols(pin_library))
+
+try:
+    graph_nodes = event_graph.get_editor_property("nodes") if event_graph else None
+    emit("graph_nodes_property", [value.get_path_name() for value in graph_nodes] if graph_nodes else [])
+except Exception as error:
+    emit("graph_nodes_property_error", str(error))
 emit("complete", True)
 

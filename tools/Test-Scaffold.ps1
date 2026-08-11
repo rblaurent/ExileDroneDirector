@@ -86,6 +86,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryJsonNodeForms.py',
     'tools\blueprint\Test-RepositoryCodecMathNodeForms.py',
     'tools\blueprint\Test-RepositoryCodecTransformNodeForms.py',
+    'tools\blueprint\Build-RepositoryDocumentEncoderGraphs.py',
+    'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
@@ -142,9 +144,14 @@ $requiredFiles = @(
     'tools\blueprint\templates\repository-json-node-forms.eddgraph',
     'tools\blueprint\templates\repository-codec-math-node-forms.eddgraph',
     'tools\blueprint\templates\repository-codec-transform-node-forms.eddgraph',
+    'tools\blueprint\templates\repository-codec-vector-node-forms.eddgraph',
+    'tools\blueprint\templates\repository-codec-array-node-forms.eddgraph',
     'tools\blueprint\snippets\toggle-input.eddgraph',
     'tools\blueprint\snippets\toggle-state.eddgraph',
     'tools\blueprint\snippets\enter-drone-mode.eddgraph',
+    'tools\blueprint\snippets\encode-waypoint-v1.eddgraph',
+    'tools\blueprint\snippets\encode-segment-v1.eddgraph',
+    'tools\blueprint\snippets\encode-document-v1.eddgraph',
     'tools\blueprint\snippets\place-drone-at-current-view.eddgraph',
     'tools\blueprint\snippets\activate-drone-view.eddgraph',
     'tools\blueprint\snippets\switch-to-drone-view.eddgraph',
@@ -561,6 +568,42 @@ if ($LASTEXITCODE -ne 0) {
     --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\repository-codec-transform-node-forms.eddgraph')
 if ($LASTEXITCODE -ne 0) {
     throw "Repository codec Transform node-form contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryCodecArrayNodeForms.py') `
+    --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\repository-codec-array-node-forms.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository codec Make Array node-form contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryEncoderNonce = [guid]::NewGuid().ToString('N')
+$repositoryEncoderRoot = Join-Path $scratchRoot "edd-repository-encoder-$repositoryEncoderNonce"
+$repositoryEncoderFull = Join-Path $repositoryEncoderRoot 'full'
+$repositoryEncoderPaste = Join-Path $repositoryEncoderRoot 'paste'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryDocumentEncoderGraphs.py') `
+    --project-root $ProjectRoot --output-dir $repositoryEncoderFull --paste-dir $repositoryEncoderPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository document encoder generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryEncoderFull -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryEncoderPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryEncoderFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository document encoder contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryEncoderPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository document encoder paste contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
+    --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')
+if ($LASTEXITCODE -ne 0) {
+    throw "Checked-in repository document encoder contracts failed with exit code $LASTEXITCODE."
 }
 
 $repositoryCoreNonce = [guid]::NewGuid().ToString('N')

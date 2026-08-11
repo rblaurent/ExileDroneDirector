@@ -125,6 +125,10 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         functions = SCHEMA["functions"]
         self.assertEqual(len(functions), len(set(functions)))
         for required in (
+            "ResetRepositoryStateV1",
+            "ValidateStorageHeadersV1",
+            "PreparePersistenceCandidateV1",
+            "CommitPersistenceCandidateV1",
             "LoadRepositoryV1",
             "PersistRepositoryV1",
             "RebuildMetadataIndexV1",

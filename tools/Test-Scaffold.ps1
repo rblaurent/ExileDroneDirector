@@ -63,6 +63,7 @@ $requiredFiles = @(
     'tools\unreal\Write-RepositorySaveGameProbe.py',
     'tools\unreal\Read-RepositorySaveGameProbe.py',
     'tools\unreal\Configure-RepositoryService.py',
+    'tools\unreal\Compile-And-SaveRepository.py',
     'tools\unreal\Open-RepositoryServiceEditor.py',
     'tools\unreal\Validate-RepositoryJsonCodec.py',
     'tools\unreal\Probe-HashEncodingApi.py',
@@ -110,6 +111,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryRecordDecoderContracts.py',
     'tools\blueprint\Build-RepositoryValidationGraphs.py',
     'tools\blueprint\Test-RepositoryValidationContracts.py',
+    'tools\blueprint\Build-RepositoryPersistenceStateGraphs.py',
+    'tools\blueprint\Test-RepositoryPersistenceStateContracts.py',
     'tools\blueprint\Test-RepositoryCoreContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
@@ -216,6 +219,10 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\validate-record-published-v1.eddgraph',
     'tools\blueprint\live-snippets\validate-record-source-attribution-v1.eddgraph',
     'tools\blueprint\live-snippets\validate-record-v1.eddgraph',
+    'tools\blueprint\live-snippets\reset-repository-state-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-storage-headers-v1.eddgraph',
+    'tools\blueprint\live-snippets\prepare-persistence-candidate-v1.eddgraph',
+    'tools\blueprint\live-snippets\commit-persistence-candidate-v1.eddgraph',
     'tools\blueprint\snippets\cache-original-pawn.eddgraph',
     'tools\blueprint\snippets\possess-drone-camera.eddgraph',
     'tools\blueprint\snippets\restore-original-possession.eddgraph',
@@ -822,6 +829,39 @@ if ($LASTEXITCODE -ne 0) {
     --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets')
 if ($LASTEXITCODE -ne 0) {
     throw "Repository validation live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+$repositoryPersistenceStateNonce = [guid]::NewGuid().ToString('N')
+$repositoryPersistenceStateRoot = Join-Path $scratchRoot "edd-repository-persistence-state-$repositoryPersistenceStateNonce"
+$repositoryPersistenceStateFull = Join-Path $repositoryPersistenceStateRoot 'full'
+$repositoryPersistenceStatePaste = Join-Path $repositoryPersistenceStateRoot 'paste'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryPersistenceStateGraphs.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryPersistenceStateFull `
+    --paste-dir $repositoryPersistenceStatePaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository persistence-state generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryPersistenceStateFull -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryPersistenceStatePaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPersistenceStateContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryPersistenceStateFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository persistence-state contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPersistenceStateContracts.py') `
+    --project-root $ProjectRoot --input-dir $repositoryPersistenceStatePaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository persistence-state paste contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPersistenceStateContracts.py') `
+    --project-root $ProjectRoot `
+    --input-dir (Join-Path $ProjectRoot 'tools\blueprint\live-snippets')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository persistence-state live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryDocumentEncoderContracts.py') `
     --project-root $ProjectRoot --input-dir (Join-Path $ProjectRoot 'tools\blueprint\snippets')

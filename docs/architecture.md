@@ -577,6 +577,16 @@ uncommitted stage write and its committed rewrite both succeed. The exact
 Blueprint contract is mirrored by
 `tools/persistence/alternating_snapshot_oracle.py`.
 
+The live Blueprint state layer splits this contract into four narrow functions:
+`ResetRepositoryStateV1`, `ValidateStorageHeadersV1`,
+`PreparePersistenceCandidateV1`, and `CommitPersistenceCandidateV1`. They own
+only deterministic scratch-state transitions and never imply that disk I/O has
+succeeded. A separate adapter must perform `DoesSaveGameExist`, load/cast both
+slots, stage the inactive uncommitted object, rewrite it committed, and feed
+every success/failure edge back into these functions. Recovery then decodes
+records individually according to the oracle above before replacing active
+memory.
+
 ### 8.4 Limits
 
 Server policy sets conservative limits for paths per owner/server, waypoint and

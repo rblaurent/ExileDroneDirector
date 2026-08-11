@@ -218,6 +218,15 @@ borrowing the logical per-record model: stage and commit failures preserve the
 last authority, uncommitted candidates are ignored, corrupt newest envelopes
 fall back per record, committed tombstones mask every older copy, malformed
 tombstone channels fail closed, and equal-generation split brain is rejected.
+The first live Blueprint implementation of that layout is now compiled into the
+repository actor. Sixteen explicit A/B slot-state members and four small
+functions reset repository state, validate both slot headers, prepare an
+inactive-slot candidate with the next generation, and promote a candidate only
+after its committed rewrite succeeds. Generated graphs, exact Unreal exports,
+repository-wide compile/save, and a fresh headless cold compile all pass. The
+next persistence slice is the native `GameplayStatics` SaveGame load/write
+adapter plus record-granular recovery; no runtime persistence is claimed until
+those calls and failure branches are connected and proven.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata
@@ -239,8 +248,9 @@ values, unique positive IDs, exact segment adjacency, document topology and
 duration accounting, visibility/publication rules, revision ordering, and clone
 attribution. Their 230-node Unreal round-trips, full compile/save, and fresh
 headless cold compile pass. Canonical whitespace and UTC ordering remain an
-explicit parity gap owned by the next repository boundary. Private
-create/save/load/list/delete and restart recovery are the next runtime milestone.
+explicit parity gap owned by the next repository boundary. Alternating-slot
+state transitions are accepted live; native SaveGame I/O, record recovery, and
+private create/save/load/list/delete are the next runtime milestones.
 
 ## Repository layout
 

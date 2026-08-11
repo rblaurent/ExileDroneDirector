@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.36.0-snapshot-oracle-contract`
+Current internal build: `0.37.0-persistence-state-contract`
 
 ## 1. Delivery strategy
 
@@ -389,6 +389,18 @@ This section is the authoritative handoff. Detailed evidence remains in
   still enforced by the executable repository oracle but not yet by these
   Blueprint validator graphs; persistence/CRUD must not claim full oracle
   parity until those checks are implemented or placed at a proven boundary.
+- The modular alternating-slot state layer is now accepted in the live
+  repository actor. `ResetRepositoryStateV1` is 25 nodes,
+  `ValidateStorageHeadersV1` 31, `PreparePersistenceCandidateV1` 14, and
+  `CommitPersistenceCandidateV1` 10. Sixteen explicit A/B scratch members hold
+  existence, schema, generation, commit, reserved hash, record envelopes,
+  tombstones, and derived header validity. Generated full/paste graphs, exact
+  live exports before and after compile/save, the complete semantic suite, and
+  a fresh `-ModDevKit -NullRHI` cold compile all pass. The synchronized live and
+  Git-mirror repository SHA-256 is
+  `DCE427182D85FAECEEBB78B209A9DD5CF120689635D2F9ECDEA959E801596F88`.
+  These functions deliberately own state transitions only: native SaveGame
+  load/write calls and record-granular recovery remain the next slice.
 - The exact Enhanced `BreakTransform` and `MakeTransform` forms are also
   harvested from a green compile and contract-tested. Unreal 5.6 represents
   Blueprint floating-point pins as precision subtypes and inserts supported
@@ -408,8 +420,9 @@ before any polished editor UI or cook is attempted:
 1. **Complete:** freeze and version the persistent Flypath envelope, metadata,
    owner identity, visibility, revision, attribution, published snapshot,
    structural integrity mode, codecs, and live Blueprint validation contracts.
-2. **Current:** implement private create/save/load/list/delete and deterministic
-   restart recovery on top of the accepted record-envelope codecs.
+2. **Current:** connect and prove the native `GameplayStatics` alternating-slot
+   SaveGame adapter and deterministic record-granular restart recovery, then
+   implement private create/save/load/list/delete on top of it.
    `EncodeWaypointV1`, `EncodeSegmentV1`, `EncodeDocumentV1`, all three matching
    document decoders, all three record encoders, all three record decoders,
    repository core, and exact numeric/null/type JSON node forms are accepted

@@ -2299,3 +2299,40 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Full scaffold passes at `0.36.0-snapshot-oracle-contract`. Next work is the
   modular Blueprint staging/selection/commit graphs and the native
   `GameplayStatics` SaveGame node seam, followed by private CRUD. No cook/UI.
+
+## Repository persistence state graphs accepted live (2026-08-11)
+
+- Checkpoint `0.37.0-persistence-state-contract` adds sixteen explicit scratch
+  members to `BP_EDD_FlypathRepository`: existence, schema version, generation,
+  committed flag, reserved snapshot hash, record envelopes, tombstone IDs, and
+  derived header validity for each A/B slot.
+- Four deliberately small functions are installed and accepted:
+  `ResetRepositoryStateV1` 25 nodes, `ValidateStorageHeadersV1` 31,
+  `PreparePersistenceCandidateV1` 14, and `CommitPersistenceCandidateV1` 10.
+  Their compact paste bodies are respectively 24, 30, 13, and 9 nodes before
+  connection to the native function entry.
+- Boolean member getters do not expose a generic `ReturnValue` pin in copied
+  Blueprint text. The deterministic generator therefore compares `Exists` and
+  `Committed` explicitly to `true` with `EqualEqual_BoolBool`; never infer a
+  value-pin name from arithmetic node conventions.
+- The guarded installation cycle is now mandatory: exact function search,
+  export the empty target and prove exactly one native entry, paste, export and
+  prove exact node count, connect only the native entry edge, then run the live
+  semantic contract. All four functions passed this cycle without omitted
+  nodes or reroute insertion.
+- Do not send multiline Python to Enhanced remote execution with literal `\\n`
+  shell escaping. That form failed before mutation. The reusable
+  `tools/unreal/Compile-And-SaveRepository.py` performs repository-wide compile
+  and save with explicit markers and a checkable log interval.
+- Repository-wide compile/save completed with zero Blueprint, K2 compiler, or
+  SavePackage warnings/errors in its interval. All four graphs were re-exported
+  and passed again after the save. The editor was closed through the guarded
+  quit helper; a separate `-ModDevKit -NullRHI` process loaded and compiled all
+  nine core assets with `EDD_COLD_LOAD|RESULT|PASS`, exit code 0, and zero
+  errors. Known missing base-game DLC packages remain unrelated DevKit warnings.
+- Sync copied exactly one package. Live and Git-mirror repository SHA-256 is
+  `DCE427182D85FAECEEBB78B209A9DD5CF120689635D2F9ECDEA959E801596F88`.
+- These graphs prove state transitions, not persistence I/O. Next: harvest and
+  accept `DoesSaveGameExist`, `LoadGameFromSlot`, `CreateSaveGameObject`,
+  `SaveGameToSlot`, the storage cast/property forms, then implement
+  record-granular recovery and private CRUD. No cook or polished UI.

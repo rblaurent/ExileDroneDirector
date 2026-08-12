@@ -3499,3 +3499,37 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `99BACEF4455F43FB0321F294BD13FC8C7743BA2D6693C6EBF8FBA7B32FC64055`.
   Next is the five-stage `BuildAdaptiveArcTableV1` orchestrator; no UI, cook,
   or Workshop.
+
+## Ordered adaptive arc compilation accepted (2026-08-12)
+
+- Internal checkpoint `0.71.0-adaptive-arc-compiler` adds compiled
+  `BuildAdaptiveArcTableV1`. Its only executable path is reset -> validate ->
+  initialize -> process -> commit, so invalid inputs and exhausted budgets
+  cannot bypass reset or expose an intermediate candidate.
+- Deterministic full/paste graphs contain 6/5 nodes with SHA-256
+  `1E298C4807518EDB97AB587DD632823CFB9C2164E50C75153B13F883A08C7429` /
+  `FD55E8E2CE0B5E835DDD07361CEE043BA072FEE25F71A786A4BA3AD8038F1034`.
+  The exact post-compile six-node graph has SHA-256
+  `1CCCA47D53B3FE0AC439735384A3B86147BFA66CD7E2913C3F10A30A9601D7CD`.
+  All three exact contracts prove the complete reciprocal execution chain.
+- Warm and fresh NullRHI runtime each compile 32 seeded linear/cinematic
+  tables, replace an earlier valid result, reject six scalar/depth/budget
+  cases including a one-operation-short request, clear every public channel on
+  rejection, match exact operation counts, and restore every touched CDO
+  property. Maximum distance and length errors versus the double-precision
+  oracle are `1.08002496e-12` and `6.82121026e-13`.
+- The first orchestrator harness incorrectly required Python-double identity
+  for distances stored by Blueprint. The accepted lower-level boundary already
+  owns a strict `3e-4` float tolerance. The corrected end-to-end harness keeps
+  exact cardinality, ordering, operation, failure, replacement, and restoration
+  assertions, reports the measured maximum error, and rejects any error above
+  that established boundary. A test's numeric representation must match the
+  runtime contract; an impossible assertion is not stronger evidence.
+- Guarded exit reached `LogExit: Exiting.`. Closed-editor FromDevKit preview
+  found 16 unchanged assets and only Client Director changed; the reviewed
+  copy moved one package. Reverse preview with the absolute project root found
+  all 17 assets unchanged. Live/mirror Client Director SHA-256 is
+  `433A3461D56686AB539033201F58E5E4D4F8FAAFC73DAF64E3CBEA9915E75565`.
+  Fresh runtime, cold load of all nine core assets, and compilation of all six
+  Blueprint assets pass. Position-route integration is next; no UI, cook, or
+  Workshop.

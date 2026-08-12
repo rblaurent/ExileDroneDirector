@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.70.0-adaptive-arc-publication`
+Current internal build: `0.71.0-adaptive-arc-compiler`
 
 ## 1. Delivery strategy
 
@@ -155,10 +155,21 @@ This section is the authoritative handoff. Detailed evidence remains in
   package SHA-256
   `99BACEF4455F43FB0321F294BD13FC8C7743BA2D6693C6EBF8FBA7B32FC64055`
   pass.
-- Reset, validation, initialization, bounded processing, and atomic publication
-  are accepted. Next is the thin `BuildAdaptiveArcTableV1` orchestrator that
-  invokes those five stages in order. Route integration and the complete
-  trajectory engine remain; no UI, cook, or Workshop work is implied.
+- `BuildAdaptiveArcTableV1` now provides the thin, ordered transaction boundary:
+  reset -> validate -> initialize -> process -> commit, with no bypass or
+  intermediate publication. Deterministic source/paste graphs contain 6/5
+  nodes and the exact post-compile graph contains 6.
+- Warm and fresh NullRHI execution each pass 32 seeded oracle tables, six
+  invalid or insufficient-budget requests, replacement of an earlier valid
+  publication, exact operation counts, atomic clearing, and complete CDO
+  restoration. Maximum observed distance/length errors are
+  `1.08002496e-12` / `6.82121026e-13`; all nine core assets cold-load and all
+  six Blueprint assets compile. Live/mirror Client Director SHA-256 is
+  `433A3461D56686AB539033201F58E5E4D4F8FAAFC73DAF64E3CBEA9915E75565`.
+- Adaptive per-segment table compilation is accepted end to end. Next is
+  position-route composition/publication and its absolute-time/distance
+  evaluator. The complete trajectory engine still remains; no UI, cook, or
+  Workshop work is implied.
 
 ### Cinematic orientation oracle checkpoint
 

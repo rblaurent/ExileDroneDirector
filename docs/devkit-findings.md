@@ -3034,3 +3034,29 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   still rejecting non-empty hashes. Screenshots remain navigation evidence;
   the exact exported reciprocal graph is authoritative. No polished UI, cook,
   or Workshop work begins at this checkpoint.
+
+## Cinematic position/timing oracle frozen (2026-08-12)
+
+- `tools/trajectory/cinematic_reference.py` freezes the next Blueprint slice
+  before graph construction. Version 1 supports deliberate `linear` space and
+  bounded `auto_cinematic` quintic space, plus `linear`, `smoothstep`,
+  `smootherstep`, seventh-order `cinematic_s_curve`, `accelerate_through`, and
+  `brake_into` monotonic distance profiles.
+- Auto-cinematic segments share velocity and zero acceleration at compatible
+  joins for C2 continuity. Component-wise monotonic limiting stops an axis when
+  adjacent secants reverse or one side is flat; this deliberately favors no
+  loop/overshoot over forcing nonzero fly-through motion at incompatible exact
+  corners. Later persisted corner modes may explicitly select a different
+  tradeoff.
+- Arc tables use a deterministic six-level sampling floor plus bounded adaptive
+  geometric refinement. The floor is required because a spatially straight
+  quintic may still have nonlinear parameter speed even when chord error is
+  zero. Distance inversion uses ordered cumulative samples and local linear
+  interpolation.
+- Sixteen executable contracts cover exact endpoints, C2 derivatives,
+  reverse-corner stop, per-axis local bounds on adversarial fixtures, 100 seeded
+  randomized paths, finite/bounded tables, zero-length stability, approximate
+  constant-distance traversal, all timing presets, direct-scrub/frame-rate
+  independence, deterministic compilation, and invalid/non-finite rejection.
+  The complete project scaffold and repository budget remain green. This is a
+  reference checkpoint only; compiled Blueprint parity is the next gate.

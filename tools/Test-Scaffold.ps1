@@ -101,6 +101,8 @@ $requiredFiles = @(
     'tools\unreal\Delete-RepositorySaveGameNodeProbe.py',
     'tools\playback\linear_reference.py',
     'tools\playback\test_linear_reference.py',
+    'tools\trajectory\cinematic_reference.py',
+    'tools\trajectory\test_cinematic_reference.py',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
     'tools\history\draft_history.py',
@@ -509,6 +511,10 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\playback\test_linear_reference.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Linear playback reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_cinematic_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Cinematic trajectory reference contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')

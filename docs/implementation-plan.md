@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.74.0-position-route-velocities`
+Current internal build: `0.75.0-position-route-segments`
 
 ## 1. Delivery strategy
 
@@ -225,6 +225,40 @@ This section is the authoritative handoff. Detailed evidence remains in
 - Velocity construction alone is accepted here. Position segment assembly,
   candidate publication, absolute-time/distance evaluation, lens/effect
   tracks, dogfood shortcuts, UI, cook, and Workshop remain ordered work.
+- `BuildPositionRouteSegmentsV1` is now accepted as the candidate-only position
+  assembly stage. It clears every segment/flat-arc candidate channel first,
+  refuses a prior-invalid stage or wrong velocity cardinality, converts each
+  time-domain waypoint velocity into the segment's normalized-u domain, builds
+  an exact per-segment arc table, and appends only complete segments. Early
+  failure stays empty; late failure exposes only the deterministic completed
+  prefix and never publishes compiled state.
+- Deterministic full/paste graphs contain 78/77 nodes with SHA-256
+  `BC9DB6FDF1229E1DFEAF5DEDC6404576DDD6B271CBBF813DF2187C1F270503EE` /
+  `CE2801316AC6419580CB26C0BB801383B202AA1C77709FF2A8195B3F31790788`.
+  The exact post-compile 78-node graph has SHA-256
+  `6C437135BD353F0409D4D4ACDA43233352AFEC76613E7A9FC522769ABC305B9B`.
+- Composition exposed two real Blueprint VM hazards in the accepted adaptive
+  primitive. `ProcessAdaptiveArcBuildV1` now uses the native breakable loop so
+  it stops when its synchronized stack is empty, and explicitly accepts a
+  spatially linear interval after one pop. A linear segment therefore has the
+  mathematically exact two-endpoint arc table instead of performing 127
+  redundant quintic samples. Its deterministic full/paste graphs contain
+  117/116 nodes with SHA-256
+  `5E478579EA324EA4B35CEB7E579D3F9150135EB545E452E79AC0D90F15FD6F8D` /
+  `C461CA26B8B765291EBE10B1EE6701218F3A17E263C2834467BCE1FBB8B7ED0E`;
+  the exact compiled graph hash is
+  `825B22142367BA64F19CD3EEAF23C1F6B556E364C92F2030C8C71753D9EAB222`.
+- Warm and three independent fresh NullRHI runs prove 23 adaptive-process
+  cases, 32 full adaptive compilations, and 32 position routes containing 662
+  segments and 7,498 flat samples. The route suite includes 512 waypoints,
+  exact `u`, maximum distance error `9.10e-13`, maximum length error
+  `3.13e-13`, four fail-closed boundaries, and full CDO restoration. Every
+  fresh log contains zero runaway/infinite-loop warnings. Cold load again
+  loads nine assets and compiles six Blueprints; the complete scaffold passes.
+- Live/mirror Client Director SHA-256 is
+  `8AF62111F2235A8840CE02719A6920B96D45B51CC05D9912FE7FFC15634E4E25`.
+  Atomic candidate publication is next. No compiled-route evaluation,
+  dogfood controls, UI, cook, or Workshop readiness is claimed here.
 
 ### Cinematic orientation oracle checkpoint
 

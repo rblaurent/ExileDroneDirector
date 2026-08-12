@@ -3641,3 +3641,80 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `976374E79CF3E156AF20C283D612CD51B3EF801C8763742645534AB7168162B8`.
 - Position segment assembly is next. This checkpoint does not claim route
   publication, evaluation, dogfood controls, UI, cook, or Workshop readiness.
+
+## Position-route segment assembly accepted (2026-08-13)
+
+- Internal checkpoint `0.75.0-position-route-segments` compiles
+  `BuildPositionRouteSegmentsV1` on Client Director. The stage begins by
+  clearing all six segment/flat-arc arrays and all three totals, then requires
+  the sticky position-stage verdict and exact waypoint-velocity cardinality.
+  For each segment it stages endpoint positions, duration-scaled u-domain
+  velocities, zero accelerations, curve kind, tolerance, depth, and operation
+  budget into the already accepted adaptive-arc compiler. Only a completely
+  valid primitive is appended to the candidate prefix.
+- Candidate starts, flat offsets/counts, `u` values, local distances, segment
+  lengths, total time, total distance, and exact operation count are therefore
+  deterministic. Failure before the first completed segment leaves the
+  candidate empty; failure on a later segment leaves only the exact completed
+  prefix and keeps validity false. This stage cannot touch any compiled route
+  field; only the next atomic publication function may do that.
+- Deterministic position-segment full/paste graphs contain 78/77 nodes with
+  SHA-256
+  `BC9DB6FDF1229E1DFEAF5DEDC6404576DDD6B271CBBF813DF2187C1F270503EE` /
+  `CE2801316AC6419580CB26C0BB801383B202AA1C77709FF2A8195B3F31790788`.
+  The exact post-compile live graph contains 78 nodes and hashes to
+  `6C437135BD353F0409D4D4ACDA43233352AFEC76613E7A9FC522769ABC305B9B`.
+- Fresh composition testing caught a real regression that source topology and
+  ordinary cases could not: the old adaptive processor exhausted every
+  configured `ForLoop` iteration as a no-op after its work stack emptied.
+  Replacing it with the DevKit-native `ForLoopWithBreak` removed that waste,
+  but the 512-linear-segment boundary still crossed Unreal's one-million-step
+  Blueprint watchdog because every explicitly linear interval was needlessly
+  evaluated and subdivided to depth six.
+- Version 1 now makes spatial linearity an exact primitive fast path. One pop
+  publishes `(u,distance) = (0,0)` and `(1,|end-start|)` without calling the
+  quintic evaluator or refining. Nonlinear segments retain the complete
+  minimum-depth, tolerance, max-depth, and operation-budget contract. The
+  frozen Python oracle, scalar tests, warm runtime, and fresh runtime all use
+  this same distinction.
+- The corrected adaptive process deterministic full/paste graphs contain
+  117/116 nodes with hashes
+  `5E478579EA324EA4B35CEB7E579D3F9150135EB545E452E79AC0D90F15FD6F8D` /
+  `C461CA26B8B765291EBE10B1EE6701218F3A17E263C2834467BCE1FBB8B7ED0E`.
+  The exact compiled 117-node export hashes to
+  `825B22142367BA64F19CD3EEAF23C1F6B556E364C92F2030C8C71753D9EAB222`.
+  Its contract proves one breakable loop, exact empty-stack break wiring, an
+  explicit linear branch directly into endpoint acceptance, and that only the
+  nonlinear branch can execute `EvaluateQuinticVectorV1`.
+- Warm execution passes 23 adaptive process cases (463 samples), 32 full
+  adaptive compiler tables, and 32 position routes. Route evidence covers 662
+  segments, 7,498 flattened samples, the 512-waypoint ceiling, exact `u`,
+  maximum distance error `9.094947017729282e-13`, maximum length error
+  `3.126388037344441e-13`, prior-invalid and velocity-cardinality rejection,
+  early primitive failure, deterministic late-prefix failure, and complete
+  CDO restoration.
+- Three separate fresh NullRHI processes repeat adaptive-process, full-compiler,
+  and route-assembly execution. Each log was checked immediately and contained
+  zero `Runaway loop detected` and zero `Infinite loop detected` matches. Fresh
+  cold load then loaded all nine core assets and compiled all six Blueprints;
+  the full `-RequireMvpAssets` scaffold, deterministic regeneration, schemas,
+  graph contracts, and repository regression suite passed.
+- Warm runtime harnesses now explicitly reload the frozen oracle module. This
+  prevents a long-lived editor process from comparing new Blueprint semantics
+  against a stale Python module cached by an earlier remote run. The one-short
+  adaptive failure fixture also selects a nonlinear table whose exact budget
+  is greater than one; it cannot accidentally turn into a successful linear
+  fast-path case.
+- The action-menu automation helper gained `KeysAfterClick` while harvesting
+  the native breakable-loop node. Text is sent while the popup still owns
+  focus, avoiding the old second-invocation refocus that dismissed the menu.
+  Exact export caught one initially miswired native entry seam; it was corrected
+  before acceptance. Visual wire appearance was never treated as proof.
+- Guarded exit reached `LogExit: Exiting.` with crash directories unchanged at
+  25. Closed-editor FromDevKit preview found exactly Client Director changed and
+  16 files unchanged; forced sync copied one package and reverse preview found
+  all 17 unchanged. Live/mirror SHA-256 is
+  `8AF62111F2235A8840CE02719A6920B96D45B51CC05D9912FE7FFC15634E4E25`.
+- Atomic publication through `CommitCompiledPositionRouteV1` is next. This
+  checkpoint does not claim compiled-route evaluation, cinematic dogfood,
+  polished UI, cook, or Workshop readiness.

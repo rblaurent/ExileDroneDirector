@@ -255,6 +255,14 @@ def build_arc_table_iterative(
     if segment.spatial_curve_type not in SUPPORTED_SPATIAL_CURVES:
         raise TrajectoryCompileError("arc spatial curve type is unsupported")
 
+    # A spatially linear segment has an exact two-point arc-length table.
+    # Sending it through the minimum-depth quintic sampler is mathematically
+    # redundant and multiplies Blueprint VM work by 127 per segment.  The
+    # explicit fast path is therefore part of the v1 runtime contract, not an
+    # approximation.
+    if segment.spatial_curve_type == "linear":
+        return (ArcSample(0.0, 0.0), ArcSample(1.0, _distance(segment.start, segment.end)))
+
     points: list[tuple[float, Vector3]] = [(0.0, segment.start)]
     minimum_depth = min(6, max_depth)
     stack: list[tuple[float, Vector3, float, Vector3, int]] = [
@@ -298,6 +306,8 @@ def trace_arc_table_iterative(
     budgets observable without weakening the public compiler API.
     """
     table = build_arc_table_iterative(segment, tolerance, max_depth, max_operations)
+    if segment.spatial_curve_type == "linear":
+        return table, 1
     stack = [(0.0, segment.start, 1.0, segment.end, 0)]
     operations = 0
     minimum_depth = min(6, max_depth)
@@ -317,6 +327,8 @@ def trace_arc_table_iterative(
 
 
 def _arc_table(segment: CompiledSegment, tolerance: float, max_depth: int) -> tuple[ArcSample, ...]:
+    if segment.spatial_curve_type == "linear":
+        return (ArcSample(0.0, 0.0), ArcSample(1.0, _distance(segment.start, segment.end)))
     points: list[tuple[float, Vector3]] = [(0.0, segment.start)]
     minimum_depth = min(6, max_depth)
 

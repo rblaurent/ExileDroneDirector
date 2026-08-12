@@ -106,9 +106,9 @@ class CompileContracts(unittest.TestCase):
         linear=compile_trajectory(((0.,0.,0.),(3.,4.,0.)),(AuthoredSegment(2,"linear","linear"),)).segments[0]
         table,operations=trace_arc_table_iterative(linear,.01,12,8191)
         self.assertEqual(table,linear.arc_table)
-        self.assertEqual(len(table),65)
-        self.assertEqual(operations,127)
-        shallow=CompiledSegment(**{**linear.__dict__,"arc_table":()})
+        self.assertEqual(len(table),2)
+        self.assertEqual(operations,1)
+        shallow=CompiledSegment(**{**linear.__dict__,"spatial_curve_type":"auto_cinematic","arc_table":()})
         table,operations=trace_arc_table_iterative(shallow,.01,1,3)
         self.assertEqual(len(table),3)
         self.assertEqual(operations,3)

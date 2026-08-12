@@ -68,6 +68,9 @@ param(
     [ValidateRange(1, 3)]
     [int]$ClickCount = 1,
 
+    [Parameter(ParameterSetName = 'Click')]
+    [string]$KeysAfterClick = '',
+
     [ValidateRange(0, 5000)]
     [int]$PostDelayMilliseconds = 300
 )
@@ -211,7 +214,14 @@ elseif ($PSCmdlet.ParameterSetName -eq 'Click') {
             [EddEnhancedEditorInput]::keybd_event($modifierKey, 0, 0x0002, [UIntPtr]::Zero)
         }
     }
-    $result = "CLICK:${ClickButton}:${ClickModifier}:${ClientX},${ClientY}:${ClickCount}"
+    if ($KeysAfterClick) {
+        # Keep the popup/menu owner focused between the synthesized click and
+        # its follow-up text.  A second helper invocation would refocus the
+        # Blueprint asset window and dismiss a transient action menu first.
+        Start-Sleep -Milliseconds 120
+        [System.Windows.Forms.SendKeys]::SendWait($KeysAfterClick)
+    }
+    $result = "CLICK:${ClickButton}:${ClickModifier}:${ClientX},${ClientY}:${ClickCount}:AFTER:$KeysAfterClick"
 }
 elseif ($PSCmdlet.ParameterSetName -eq 'Drag') {
     $start = New-Object EddEnhancedEditorInput+POINT

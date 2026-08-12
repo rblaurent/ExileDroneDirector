@@ -1,6 +1,6 @@
 """Execute the full adaptive arc compiler against the frozen oracle."""
 from __future__ import annotations
-import random,sys
+import importlib,random,sys
 from pathlib import Path
 import unreal
 
@@ -8,7 +8,7 @@ PREFIX="EDD_ADAPTIVE_ARC_COMPILE_RUNTIME";CLASS="/Game/Mods/ExileDroneDirector/C
 INPUTS=("TrajectoryArcBuildInputStartPositionV1","TrajectoryArcBuildInputEndPositionV1","TrajectoryArcBuildInputStartVelocityUV1","TrajectoryArcBuildInputEndVelocityUV1","TrajectoryArcBuildInputStartAccelerationUV1","TrajectoryArcBuildInputEndAccelerationUV1","TrajectoryArcBuildInputLinearV1","TrajectoryArcBuildInputToleranceV1","TrajectoryArcBuildInputMaxDepthV1","TrajectoryArcBuildInputMaxOperationsV1")
 PUBLISHED=("TrajectoryArcBuiltUsV1","TrajectoryArcBuiltDistancesV1","TrajectoryArcBuiltLengthV1","TrajectoryArcBuildValidV1")
 STAGE=("TrajectoryArcBuildStageValidV1","TrajectoryArcBuildOperationCountV1")
-root=Path(__file__).resolve().parents[2];sys.path.insert(0,str(root/"tools"/"trajectory"));from cinematic_reference import CompiledSegment,trace_arc_table_iterative
+root=Path(__file__).resolve().parents[2];sys.path.insert(0,str(root/"tools"/"trajectory"));import cinematic_reference as _cinematic_reference;importlib.reload(_cinematic_reference);from cinematic_reference import CompiledSegment,trace_arc_table_iterative
 def emit(n,v):unreal.log(f"{PREFIX}|{n}|{v}")
 def require(c,m):
     if not c:raise RuntimeError(f"{PREFIX}|FAIL|{m}")
@@ -53,13 +53,16 @@ try:
     snapshot=list(get(obj,PUBLISHED[1]))
     run(last[0],last[1])
     require(snapshot!=list(get(obj,PUBLISHED[1])),"replacement")
-    invalid=(("zero-tolerance",0.,8,8191),("negative-tolerance",-.1,8,8191),("depth-low",.01,0,8191),("depth-high",.01,13,8191),("budget-low",.01,8,0),("one-short",first[1],8,max(1,first[3]-1)))
+    invalid=(("zero-tolerance",0.,8,8191),("negative-tolerance",-.1,8,8191),("depth-low",.01,0,8191),("depth-high",.01,13,8191),("budget-low",.01,8,0))
     for label,tolerance,depth,budget in invalid:
         run(first[0],first[1])
         require(get(obj,PUBLISHED[3]),label+":precondition")
         run(first[0],tolerance,depth,budget)
         cleared(label)
-    emit("VALID_TABLES",len(fixtures));emit("INVALID_CASES",len(invalid));emit("REPLACEMENT_CASES",1);emit("MAX_DISTANCE_ERROR",f"{maximum_distance_error:.9g}");emit("MAX_LENGTH_ERROR",f"{maximum_length_error:.9g}");emit("COMPLETE","PASS")
+    budget_segment,budget_tolerance,_budget_table,budget_operations=next(fixture for fixture in fixtures if fixture[3]>1)
+    run(budget_segment,budget_tolerance);require(get(obj,PUBLISHED[3]),"one-short:precondition")
+    run(budget_segment,budget_tolerance,8,budget_operations-1);cleared("one-short")
+    emit("VALID_TABLES",len(fixtures));emit("INVALID_CASES",len(invalid)+1);emit("REPLACEMENT_CASES",1);emit("MAX_DISTANCE_ERROR",f"{maximum_distance_error:.9g}");emit("MAX_LENGTH_ERROR",f"{maximum_length_error:.9g}");emit("COMPLETE","PASS")
 finally:
     for n,v in saved.items():set_(obj,n,v)
     emit("STATE_RESTORED",True)

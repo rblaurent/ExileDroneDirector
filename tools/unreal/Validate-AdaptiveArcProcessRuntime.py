@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import random
 import sys
+import importlib
 from pathlib import Path
 
 import unreal
@@ -14,6 +15,8 @@ PREFIX = "EDD_ADAPTIVE_ARC_PROCESS_RUNTIME"
 CLASS = "/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector_C"
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "trajectory"))
+import cinematic_reference as _cinematic_reference  # noqa: E402
+importlib.reload(_cinematic_reference)
 from cinematic_reference import (  # noqa: E402
     CompiledSegment,
     TrajectoryCompileError,

@@ -4,7 +4,7 @@
   "target": "Conan Exiles Enhanced",
   "engine": "Unreal Engine 5.6.1",
   "implementation": "Blueprint-only",
-  "version": "0.74.0-position-route-velocities",
+  "version": "0.75.0-position-route-segments",
   "mvpAssets": [
     "Local/BP_EDD_ModController.uasset",
     "Local/Core/Client/BPC_EDD_ClientDirector.uasset",

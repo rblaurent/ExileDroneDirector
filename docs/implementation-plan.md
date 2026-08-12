@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.63.0-orientation-track-commit`
+Current internal build: `0.64.0-orientation-track-compile`
 
 ## 1. Delivery strategy
 
@@ -167,8 +167,18 @@ This section is the authoritative handoff. Detailed evidence remains in
   SHA-256 is
   `BD82BF4AE047A4BBE2E365CDBDD6AB393E2AE65F6F5383D6DF3F0AA4D95A6BF8`;
   guarded exit, one-package sync, fresh runtime, and cold compilation pass.
-- The next ordered slice is the thin `CompileOrientationTrackV1` orchestrator,
-  followed by absolute-time segment evaluation. This checkpoint does not yet
+- `CompileOrientationTrackV1` now runs the seven accepted stages in strict
+  order: reset, input validation, key alignment, forward deltas, tangent rates,
+  segment assembly, and atomic publication. Its deterministic source/paste/
+  exact post-compile graphs contain 8/7/8 nodes with no branches or alternate
+  publication path. Warm and two fresh-process runs compile 64 seeded tracks,
+  replace a previously compiled track, reject eight malformed inputs, clear all
+  stale compiled/evaluation state, and restore the CDO. Fresh oracle maxima are
+  `2.48e-7` radians for quaternions and `1.04e-6` per tangent component. Cold
+  compilation of every core asset and byte-identical reverse mirroring pass;
+  Client Director SHA-256 is
+  `D2962520E15F52A6993B3BB3274935EB75A6DBF3ED5915A38D1B026FBBC71CA7`.
+- The next ordered slice is absolute-time segment evaluation. This checkpoint does not yet
   claim complete cinematic playback, UI, cook, or Workshop readiness.
 
 ### Live in the Enhanced DevKit

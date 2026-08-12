@@ -3216,6 +3216,31 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   Fresh runtime and cold compilation of all core assets pass. This accepts only
   atomic publication; ordered orchestration and absolute-time evaluation remain.
 
+## Ordered orientation track compilation accepted (2026-08-12)
+
+- Internal checkpoint `0.64.0-orientation-track-compile` adds compiled
+  `CompileOrientationTrackV1`. It is deliberately thin: one native entry and
+  seven self calls, strictly reset -> validate -> align -> forward deltas ->
+  tangent rates -> segments -> commit. Source/paste/exact post-compile graphs
+  contain 8/7/8 nodes, and the exact contract proves the complete reciprocal
+  exec chain with no bypass.
+- Warm and fresh NullRHI runtime each compile 64 seeded oracle tracks, prove
+  replacement of an earlier compiled track, reject eight malformed inputs, and
+  clear all stale compiled arrays, total, validity, and evaluator outputs.
+  Hardened fresh acceptance additionally compares every tangent-rate component:
+  maximum quaternion/control angular error is `2.475566823160076e-7` radians;
+  maximum tangent component error is `1.0380794996933673e-6`. Full CDO restore
+  passes.
+- The native entry's tiny exec pin was unreliable at 1:1 zoom. Move only the
+  entry through an empty lane, then connect the seam at whole-graph overview
+  zoom and export immediately. Compile only after the exact 8-node reciprocal
+  contract passes. Switch the active editor tab to a small function before
+  compile to avoid dense-graph formatting side effects.
+- Guarded exit, reverse sync, fresh runtime, and cold compilation of all core
+  assets pass. Live/mirror Client Director SHA-256 is
+  `D2962520E15F52A6993B3BB3274935EB75A6DBF3ED5915A38D1B026FBBC71CA7`.
+  Absolute-time orientation evaluation remains next; no UI, cook, or Workshop.
+
 ## Quaternion orientation controls accepted (2026-08-12)
 
 - Internal checkpoint `0.57.0-orientation-compiler` adds compiled

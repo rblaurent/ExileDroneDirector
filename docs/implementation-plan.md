@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.60.0-orientation-forward-deltas`
+Current internal build: `0.61.0-orientation-track-tangents`
 
 ## 1. Delivery strategy
 
@@ -123,6 +123,20 @@ This section is the authoritative handoff. Detailed evidence remains in
   tracks at `2.32e-7` maximum Vector error; prior-invalid, early primitive
   failure, later primitive failure, deterministic prefix, and CDO restoration
   cases pass.
+- `ComputeOrientationTrackTangentRatesV1` is now the compiled fifth stage. It
+  clears stale candidate rates, refuses a false prior stage, and constructs one
+  time-domain angular tangent per aligned waypoint. Endpoints reuse their only
+  adjacent delta/duration while interior keys use the previous and next pair;
+  every calculation calls the already-proven tangent primitive. Stage failure
+  remains sticky and exposes only a deterministic diagnostic prefix.
+- Deterministic source/paste and exact post-compile contracts contain 60/59/60
+  nodes. Warm and fresh compiled runtime each match 64 frozen-oracle tracks at
+  `9.89e-13` maximum Vector error and pass prior-invalid, early primitive
+  failure, later primitive failure, deterministic-prefix, stale-output, and
+  full CDO-restoration cases. Guarded shutdown, exact one-package reverse sync,
+  byte-identical live/mirror SHA-256
+  `9630A366A78946A260DA4CDDB0D73C56DCDB6F8A638A5720FD29A67D6E06F583`,
+  and fresh cold compilation of all core assets pass.
 
 ### Live in the Enhanced DevKit
 

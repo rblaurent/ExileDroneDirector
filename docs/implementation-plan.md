@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.53.0-private-clone`
+Current internal build: `0.54.0-trajectory-scalars`
 
 ## 1. Delivery strategy
 
@@ -27,6 +27,25 @@ output. Subsequent UI work exposes this proven backend without redefining it.
 This section is the authoritative handoff. Detailed evidence remains in
 `devkit-findings.md`; exact clipboard procedure remains in
 `blueprint-workflow.md`.
+
+### Cinematic scalar evaluator checkpoint
+
+- `EvaluateTimeProfileV1` and `EvaluateQuinticScalarV1` are compiled and saved
+  on `BPC_EDD_ClientDirector`. The first evaluates six bounded monotonic timing
+  profiles; the second evaluates a clamped quintic Hermite scalar plus its
+  first and second derivatives.
+- Both functions fail closed on every non-finite staged scalar. Enhanced has no
+  reflected scalar `IsFinite` Blueprint node, so version 1 uses the compiler-
+  stable bound `-DBL_MAX <= x && x <= DBL_MAX`; the earlier `x - x == 0`
+  predicate was rejected after compiled bytecode accepted NaN.
+- Exact post-compile graphs contain 67 and 117 nodes with zero reroute nodes.
+  Live and fresh-process compiled execution both pass 48 valid/5 invalid time
+  cases and 69 valid/21 invalid quintic cases, restoring all staged properties
+  afterward. Deterministic full and paste-form executable graph contracts are
+  part of the complete scaffold.
+- This checkpoint is the scalar kernel only. Position-vector composition,
+  quaternion orientation, segment/route evaluation, lens/focus/effect tracks,
+  shortcut dogfood, polished UI, cook, and Workshop remain ordered work.
 
 ### Live in the Enhanced DevKit
 

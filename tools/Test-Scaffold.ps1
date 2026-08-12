@@ -103,6 +103,14 @@ $requiredFiles = @(
     'tools\playback\test_linear_reference.py',
     'tools\trajectory\cinematic_reference.py',
     'tools\trajectory\test_cinematic_reference.py',
+    'tools\unreal\Configure-TrajectoryScalarEvaluators.py',
+    'tools\unreal\Compile-And-SaveClientDirector.py',
+    'tools\unreal\Open-ClientDirectorEditor.py',
+    'tools\unreal\Validate-TrajectoryScalarEvaluatorsRuntime.py',
+    'tools\blueprint\Build-TrajectoryScalarEvaluatorGraphs.py',
+    'tools\blueprint\Test-TrajectoryScalarEvaluatorContracts.py',
+    'tools\blueprint\snippets\evaluate-time-profile-v1.eddgraph',
+    'tools\blueprint\snippets\evaluate-quintic-scalar-v1.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
     'tools\history\draft_history.py',
@@ -515,6 +523,45 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_cinematic_reference.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Cinematic trajectory reference contracts failed with exit code $LASTEXITCODE."
+}
+
+$trajectoryScalarNonce = [guid]::NewGuid().ToString('N')
+$trajectoryScalarRoot = Join-Path $scratchRoot "edd-trajectory-scalar-$trajectoryScalarNonce"
+$trajectoryScalarFull = Join-Path $trajectoryScalarRoot 'full'
+$trajectoryScalarPaste = Join-Path $trajectoryScalarRoot 'paste'
+$trajectoryScalarRepeat = Join-Path $trajectoryScalarRoot 'repeat'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-TrajectoryScalarEvaluatorGraphs.py') `
+    --project-root $ProjectRoot --output-dir $trajectoryScalarFull --paste-dir $trajectoryScalarPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Trajectory scalar graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-TrajectoryScalarEvaluatorGraphs.py') `
+    --project-root $ProjectRoot --output-dir $trajectoryScalarRepeat
+if ($LASTEXITCODE -ne 0) {
+    throw "Repeated trajectory scalar graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($name in @('evaluate-time-profile-v1.eddgraph', 'evaluate-quintic-scalar-v1.eddgraph')) {
+    $generated = Join-Path $trajectoryScalarFull $name
+    $repeated = Join-Path $trajectoryScalarRepeat $name
+    $checked = Join-Path $ProjectRoot "tools\blueprint\snippets\$name"
+    if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $repeated).Hash) {
+        throw "$name generation is not deterministic."
+    }
+    if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+        throw "$name has drifted from its deterministic generator."
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $generated
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path (Join-Path $trajectoryScalarPaste $name)
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-TrajectoryScalarEvaluatorContracts.py') `
+    --project-root $ProjectRoot --input-dir $trajectoryScalarFull
+if ($LASTEXITCODE -ne 0) {
+    throw "Trajectory scalar full-graph contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-TrajectoryScalarEvaluatorContracts.py') `
+    --project-root $ProjectRoot --input-dir $trajectoryScalarPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Trajectory scalar paste-graph contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')

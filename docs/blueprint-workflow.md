@@ -311,6 +311,14 @@ window handle and supports focused SendKeys, client-coordinate clicks, drags,
 and wheel zoom. Visual coordinates remain provisional: after every root-pin
 drag, export the complete graph and require a reciprocal native-entry link.
 
+Blueprint Assist may insert `K2Node_Knot` reroutes into a dense graph while it
+is active. Before compiling a newly installed dense function, export it and
+require the exact expected node count plus zero knots, then activate a small
+stable function such as `EnterDroneMode`. After compile/save, reopen and export
+the dense function again and repeat both checks. If knots have already been
+injected, replace the whole non-entry body from the deterministic paste artifact
+instead of attempting a fragile manual knot cleanup.
+
 Enhanced's pure string-normalization node is
 `KismetStringLibrary.Trim(SourceString) -> ReturnValue`. The harvested native
 form is `repository-string-trim-node-form.eddgraph`. Use it for persisted

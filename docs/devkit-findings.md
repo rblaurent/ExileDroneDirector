@@ -3060,3 +3060,52 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   independence, deterministic compilation, and invalid/non-finite rejection.
   The complete project scaffold and repository budget remain green. This is a
   reference checkpoint only; compiled Blueprint parity is the next gate.
+
+## Cinematic scalar Blueprint evaluators accepted (2026-08-12)
+
+- Internal checkpoint `0.54.0-trajectory-scalars` adds compiled and saved
+  `EvaluateTimeProfileV1` and `EvaluateQuinticScalarV1` to
+  `BPC_EDD_ClientDirector`. The first supports `linear`, `smoothstep`,
+  `smootherstep`, `cinematic_s_curve`, `accelerate_through`, and `brake_into`;
+  the second evaluates the clamped quintic Hermite value plus first and second
+  derivatives from six boundary scalars.
+- Enhanced 5.6 exposes no scalar `IsFinite` function through the reflected
+  Blueprint API. The initially plausible predicate `x - x == 0` passed the
+  serialized interpreter but failed compiled runtime because optimization made
+  NaN appear valid. The accepted finite predicate is
+  `-1.7976931348623157e+308 <= x && x <= 1.7976931348623157e+308`. It rejects
+  NaN and both infinities in actual compiled Blueprint bytecode.
+- Deterministic full graph hashes are
+  `81E387C80A5A69BEFD1640488DD5B5AF74B62D83948BA3296C526A7B5E940C09`
+  (time, 67 nodes) and
+  `12BF3BBD889BC5C5D78CC954301AF76DAB80CCD2A7EA47FA054231697D50B8FE`
+  (quintic, 117 nodes). Exact post-compile live exports are
+  `6DEEB5194F4AC8792B2EDB3863428BCA1C9030ACE223F0D28320A40DBD20F30D`
+  and
+  `6C3F9380E0B9069CBFCF09130E0D58D56760EC214C6319E087446CCACB224DA2`.
+  Both post-compile graphs retain their exact node counts, reciprocal native
+  entry seams, executable contracts, and zero `K2Node_Knot` nodes.
+- Live compiled execution passed 48 supported time-profile cases, five invalid
+  profile/non-finite cases, 69 deterministic quintic fixtures, and all 21
+  combinations of NaN/positive infinity/negative infinity across the seven
+  scalar inputs. Every invalid case reset stale outputs and validity; the
+  validator restored every staged CDO property in `finally`.
+- Guarded editor quit completed cleanly. A fresh `NullRHI` commandlet repeated
+  the same 48/5/69/21 runtime evidence from the saved package, and the separate
+  cold asset-load suite returned zero errors. Closed-editor mirror preview
+  found 16 unchanged files and only the reviewed Client Director conflict;
+  forced sync copied exactly one package, then all 17 files were unchanged.
+  Live/mirror package SHA-256 is
+  `7171DE5393C1F2F466B9769FC5EA673208FCC4ECA6AD378948911CB13768C48C`.
+- Blueprint Assist can inject reroute nodes when a dense graph is active during
+  formatting/compile. One unsaved quintic graph grew from 117 to 171 nodes;
+  diagnostic export proved all 54 extras were `K2Node_Knot`. The accepted
+  recovery is wholesale replacement from the deterministic paste graph,
+  native-entry reconnection, exact export validation, then switching to a small
+  function such as `EnterDroneMode` before compile. Never accept screenshots or
+  visual plausibility in place of the exact post-compile export.
+- Complete scaffold regression passes, including deterministic repeat
+  generation, full and paste executable interpretation, all existing backend
+  contracts, and the 17-file source mirror. This accepts only the scalar
+  trajectory kernel; vector position composition and quaternion orientation are
+  the next ordered backend work. UI, cook, and Workshop remain out of scope.

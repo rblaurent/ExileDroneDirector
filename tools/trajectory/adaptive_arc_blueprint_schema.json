@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Transactional bounded work-stack boundary for deterministic adaptive arc-table construction.",
+  "limits": {
+    "minimumDepth": 1,
+    "maximumDepth": 12,
+    "minimumOperations": 1,
+    "maximumOperations": 8191,
+    "minimumToleranceExclusive": 0.0
+  },
+  "variables": [
+    {"name":"TrajectoryArcBuildInputStartPositionV1","type":"Vector","container":"None","role":"input","default":[0,0,0]},
+    {"name":"TrajectoryArcBuildInputEndPositionV1","type":"Vector","container":"None","role":"input","default":[0,0,0]},
+    {"name":"TrajectoryArcBuildInputStartVelocityUV1","type":"Vector","container":"None","role":"input","default":[0,0,0]},
+    {"name":"TrajectoryArcBuildInputEndVelocityUV1","type":"Vector","container":"None","role":"input","default":[0,0,0]},
+    {"name":"TrajectoryArcBuildInputStartAccelerationUV1","type":"Vector","container":"None","role":"input","default":[0,0,0]},
+    {"name":"TrajectoryArcBuildInputEndAccelerationUV1","type":"Vector","container":"None","role":"input","default":[0,0,0]},
+    {"name":"TrajectoryArcBuildInputLinearV1","type":"Boolean","container":"None","role":"input","default":false},
+    {"name":"TrajectoryArcBuildInputToleranceV1","type":"Float","container":"None","role":"input","default":0.01},
+    {"name":"TrajectoryArcBuildInputMaxDepthV1","type":"Integer","container":"None","role":"input","default":12},
+    {"name":"TrajectoryArcBuildInputMaxOperationsV1","type":"Integer","container":"None","role":"input","default":8191},
+    {"name":"TrajectoryArcBuildWorkU0V1","type":"Float","container":"Array","role":"work"},
+    {"name":"TrajectoryArcBuildWorkU1V1","type":"Float","container":"Array","role":"work"},
+    {"name":"TrajectoryArcBuildWorkP0V1","type":"Vector","container":"Array","role":"work"},
+    {"name":"TrajectoryArcBuildWorkP1V1","type":"Vector","container":"Array","role":"work"},
+    {"name":"TrajectoryArcBuildWorkDepthV1","type":"Integer","container":"Array","role":"work"},
+    {"name":"TrajectoryArcBuildCurrentU0V1","type":"Float","container":"None","role":"scratch","default":0.0},
+    {"name":"TrajectoryArcBuildCurrentU1V1","type":"Float","container":"None","role":"scratch","default":0.0},
+    {"name":"TrajectoryArcBuildCurrentP0V1","type":"Vector","container":"None","role":"scratch","default":[0,0,0]},
+    {"name":"TrajectoryArcBuildCurrentP1V1","type":"Vector","container":"None","role":"scratch","default":[0,0,0]},
+    {"name":"TrajectoryArcBuildCurrentDepthV1","type":"Integer","container":"None","role":"scratch","default":0},
+    {"name":"TrajectoryArcBuildMidpointUV1","type":"Float","container":"None","role":"scratch","default":0.0},
+    {"name":"TrajectoryArcBuildMidpointPositionV1","type":"Vector","container":"None","role":"scratch","default":[0,0,0]},
+    {"name":"TrajectoryArcBuildOperationCountV1","type":"Integer","container":"None","role":"scratch","default":0},
+    {"name":"TrajectoryArcBuildCandidateUsV1","type":"Float","container":"Array","role":"candidate"},
+    {"name":"TrajectoryArcBuildCandidatePositionsV1","type":"Vector","container":"Array","role":"candidate"},
+    {"name":"TrajectoryArcBuildCandidateDistancesV1","type":"Float","container":"Array","role":"candidate"},
+    {"name":"TrajectoryArcBuildCandidateLengthV1","type":"Float","container":"None","role":"candidate","default":0.0},
+    {"name":"TrajectoryArcBuildStageValidV1","type":"Boolean","container":"None","role":"candidate","default":false},
+    {"name":"TrajectoryArcBuiltUsV1","type":"Float","container":"Array","role":"result"},
+    {"name":"TrajectoryArcBuiltDistancesV1","type":"Float","container":"Array","role":"result"},
+    {"name":"TrajectoryArcBuiltLengthV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"TrajectoryArcBuildValidV1","type":"Boolean","container":"None","role":"result","default":false}
+  ],
+  "functions": [
+    {"name":"ResetAdaptiveArcBuildV1","stage":0},
+    {"name":"ValidateAdaptiveArcBuildInputsV1","stage":1,"uses":["EvaluateQuinticVectorV1"]},
+    {"name":"InitializeAdaptiveArcBuildV1","stage":2},
+    {"name":"ProcessAdaptiveArcBuildV1","stage":3,"uses":["EvaluateQuinticVectorV1"]},
+    {"name":"CommitAdaptiveArcBuildV1","stage":4},
+    {"name":"BuildAdaptiveArcTableV1","stage":5}
+  ],
+  "contracts": {
+    "atomicity":"Only CommitAdaptiveArcBuildV1 may replace the published table.",
+    "failure":"Any failure clears published arrays, length, and validity.",
+    "ordering":"The work stack pushes right then left so accepted samples are emitted in strictly increasing u.",
+    "budget":"Every popped interval consumes one operation; exhaustion fails closed.",
+    "publication":"A valid table starts at (0,0), ends at (1,length), has strictly increasing u, and nondecreasing cumulative distance."
+  }
+}

@@ -7,9 +7,10 @@ import random
 import unittest
 
 from cinematic_reference import (
-    AuthoredSegment, TrajectoryCompileError, compile_trajectory,
+    AuthoredSegment, CompiledSegment, TrajectoryCompileError, compile_trajectory,
     evaluate_position, evaluate_spatial, evaluate_spatial_derivatives,
     evaluate_time_profile, invert_arc_length, invert_arc_table,
+    build_arc_table_iterative,
 )
 
 
@@ -68,6 +69,38 @@ class CompileContracts(unittest.TestCase):
             self.assertEqual(segment.arc_table[-1].u,1.0)
             self.assertTrue(all(a.u < b.u for a,b in zip(segment.arc_table,segment.arc_table[1:])))
             self.assertTrue(all(a.distance <= b.distance for a,b in zip(segment.arc_table,segment.arc_table[1:])))
+
+    def test_iterative_blueprint_table_matches_recursive_oracle_exactly(self):
+        rng=random.Random(0xEDD068)
+        compared=0
+        for _ in range(80):
+            points=tuple(tuple(rng.uniform(-500,500) for _ in range(3)) for _ in range(rng.randint(2,8)))
+            authored=tuple(AuthoredSegment(rng.uniform(.1,5)) for _ in range(len(points)-1))
+            compiled=compile_trajectory(points,authored,arc_tolerance=.01,max_arc_depth=12)
+            for segment in compiled.segments:
+                self.assertEqual(
+                    build_arc_table_iterative(segment,.01,12,8191),
+                    segment.arc_table,
+                )
+                compared += 1
+        self.assertGreater(compared,200)
+
+    def test_iterative_blueprint_table_has_explicit_budget_and_input_failures(self):
+        segment=compile_trajectory(
+            ((0.,0.,0.),(10.,10.,5.),(30.,-10.,0.)),
+            (AuthoredSegment(1),AuthoredSegment(1)),
+            arc_tolerance=.001,
+        ).segments[0]
+        with self.assertRaises(TrajectoryCompileError): build_arc_table_iterative(segment,0,12,8191)
+        with self.assertRaises(TrajectoryCompileError): build_arc_table_iterative(segment,.01,0,8191)
+        with self.assertRaises(TrajectoryCompileError): build_arc_table_iterative(segment,.01,13,8191)
+        with self.assertRaises(TrajectoryCompileError): build_arc_table_iterative(segment,.01,12,0)
+        with self.assertRaises(TrajectoryCompileError): build_arc_table_iterative(segment,.01,12,8192)
+        with self.assertRaises(TrajectoryCompileError): build_arc_table_iterative(segment,.001,12,1)
+        malformed=CompiledSegment(**{
+            **segment.__dict__, "start_velocity_u": (math.nan,0.,0.),
+        })
+        with self.assertRaises(TrajectoryCompileError): build_arc_table_iterative(malformed,.01,12,8191)
 
 
 class EvaluationContracts(unittest.TestCase):

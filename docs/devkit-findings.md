@@ -3348,3 +3348,45 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   Fresh runtime and cold compilation pass. Adaptive table construction and
   position-route integration remain; UI, cook, and Workshop are still out of
   scope.
+
+## Adaptive arc construction boundary accepted (2026-08-12)
+
+- Internal checkpoint `0.67.0-adaptive-arc-boundary` freezes a bounded iterative
+  construction oracle equivalent to the recursive reference across more than
+  200 seeded segments. Version 1 rejects non-finite controls, non-positive
+  tolerance, depth outside 1..12, and operation budgets outside 1..8191 or
+  exhausted before completion.
+- `ResetAdaptiveArcBuildV1` clears ten work/candidate/published arrays and
+  twelve scalar fields before any build. `ValidateAdaptiveArcBuildInputsV1`
+  stages the six quintic controls and alpha 0.5 through the accepted
+  `EvaluateQuinticVectorV1` primitive, then applies the scalar and budget
+  bounds. Linear/cinematic selection does not weaken validation.
+- Deterministic source graphs are 33/32 reset nodes and 36/35 validation nodes
+  in full/paste form. Exact post-compile live exports remain 33 and 36 nodes,
+  with SHA-256 `907E4C3E47DE96F0D8948C3322D69941BA647A3D69F9F1B50AF1D9874A055337`
+  and `A561FEF4334A1E1F4A984F97E6ECC0759C0D0FF630956C8ACF3F2D06E344F3C9`.
+- Warm and fresh NullRHI runtime prove all 22 reset fields, 64 valid seeded
+  inputs, eight invalid scalar/depth/operation families, stale validity
+  replacement, and full CDO restoration. Enhanced reflection sanitizes each of
+  the 18 NaN Vector-component placements before Blueprint receives them;
+  the harness detects and reports those separately instead of claiming an
+  unexecuted invalid-vector path.
+- Clipboard paste translated each graph body away from its native entry. Exact
+  exports identified the real first reset nodes; the verified sole native entry
+  was routed through empty space and joined once. A failed guarded move can
+  still move a node before detecting selection transfer, so export immediately,
+  undo once, and re-run the exact contract. Never infer the seam from the node
+  that merely looks nearest.
+- Enhanced's exposed Python graph API can add/find/remove/rename graphs but does
+  not expose protected node arrays or a safe pin-link operation. The disposable
+  reflection probe was removed. Editor input remains bounded by exact export,
+  class/marker guards, reciprocal graph contracts, compile/save, and compiled
+  runtime proof.
+- The input helper now supports bounded pre-drag hold and pre-release dwell.
+  This improves node/pin drag reliability without weakening post-action proof.
+  Fixed-coordinate graph exporters remain unsafe after layout changes; open the
+  exact function through Find Results.
+- Live and mirrored Client Director packages are byte-identical at SHA-256
+  `539401B52E672CDBE272AED19F76604C4BD36221F686182A1289814A2B37CE9A`.
+  Initialization, iterative processing, atomic publication, and the thin
+  orchestrator remain. No UI, cook, or Workshop work has started.

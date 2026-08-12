@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.66.0-arc-table-inversion`
+Current internal build: `0.67.0-adaptive-arc-boundary`
 
 ## 1. Delivery strategy
 
@@ -103,6 +103,22 @@ This section is the authoritative handoff. Detailed evidence remains in
 - This accepts inversion of an already-published cumulative table only.
   Adaptive table construction, position-route publication/evaluation, and the
   complete trajectory engine remain ordered work.
+- Adaptive construction now has its frozen bounded iterative oracle and its
+  first compiled transaction boundary. `ResetAdaptiveArcBuildV1` atomically
+  clears all 10 work/candidate/published arrays and 12 scalar build/result
+  fields. `ValidateAdaptiveArcBuildInputsV1` stages all six spatial controls
+  through the accepted quintic-vector evaluator and accepts only finite curve
+  data, positive finite tolerance, depth 1..12, and operation budget 1..8191.
+- Exact post-compile graphs contain 33 and 36 nodes. Warm and fresh compiled
+  runtime prove the 22-field reset, 64 valid seeded inputs, eight invalid
+  scalar/budget families, stale-output clearing, and complete CDO restoration.
+  Unreal reflection sanitizes NaN native Vector components before the
+  Blueprint call; all 18 component placements are reported separately and are not
+  misrepresented as executable Blueprint rejection evidence.
+- Scope is deliberately narrow: reset and validation are accepted. Initialization,
+  bounded stack processing, atomic table publication, route integration, and
+  the complete trajectory engine remain ordered work. The next slice is
+  `InitializeAdaptiveArcBuildV1`.
 
 ### Cinematic orientation oracle checkpoint
 

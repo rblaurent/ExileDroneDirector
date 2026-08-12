@@ -40,6 +40,14 @@ param(
     [ValidateSet('Left', 'Middle', 'Right')]
     [string]$DragButton = 'Left',
 
+    [Parameter(ParameterSetName = 'Drag')]
+    [ValidateRange(0, 2000)]
+    [int]$DragHoldMilliseconds = 0,
+
+    [Parameter(ParameterSetName = 'Drag')]
+    [ValidateRange(0, 2000)]
+    [int]$DragReleaseMilliseconds = 0,
+
     [Parameter(Mandatory = $true, ParameterSetName = 'Wheel')]
     [int]$WheelClientX,
 
@@ -220,6 +228,9 @@ elseif ($PSCmdlet.ParameterSetName -eq 'Drag') {
         'Right' { 0x0010 }
     }
     [EddEnhancedEditorInput]::mouse_event($buttonDown, 0, 0, 0, [UIntPtr]::Zero)
+    if ($DragHoldMilliseconds -gt 0) {
+        Start-Sleep -Milliseconds $DragHoldMilliseconds
+    }
     $steps = [Math]::Max(2, [int]($DragMilliseconds / 20))
     for ($index = 1; $index -le $steps; $index++) {
         $x = [int]($start.X + (($end.X - $start.X) * $index / $steps))
@@ -227,8 +238,11 @@ elseif ($PSCmdlet.ParameterSetName -eq 'Drag') {
         [void][EddEnhancedEditorInput]::SetCursorPos($x, $y)
         Start-Sleep -Milliseconds ([Math]::Max(1, [int]($DragMilliseconds / $steps)))
     }
+    if ($DragReleaseMilliseconds -gt 0) {
+        Start-Sleep -Milliseconds $DragReleaseMilliseconds
+    }
     [EddEnhancedEditorInput]::mouse_event($buttonUp, 0, 0, 0, [UIntPtr]::Zero)
-    $result = "DRAG:${DragButton}:${StartClientX},${StartClientY}:${EndClientX},${EndClientY}"
+    $result = "DRAG:${DragButton}:${StartClientX},${StartClientY}:${EndClientX},${EndClientY}:HOLD:${DragHoldMilliseconds}:RELEASE:${DragReleaseMilliseconds}"
 }
 elseif ($PSCmdlet.ParameterSetName -eq 'Wheel') {
     $point = New-Object EddEnhancedEditorInput+POINT

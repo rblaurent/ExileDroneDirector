@@ -109,6 +109,8 @@ $requiredFiles = @(
     'tools\trajectory\test_orientation_blueprint_schema.py',
     'tools\trajectory\arc_table_blueprint_schema.json',
     'tools\trajectory\test_arc_table_blueprint_schema.py',
+    'tools\trajectory\adaptive_arc_blueprint_schema.json',
+    'tools\trajectory\test_adaptive_arc_blueprint_schema.py',
     'tools\unreal\Configure-TrajectoryScalarEvaluators.py',
     'tools\unreal\Compile-And-SaveClientDirector.py',
     'tools\unreal\Open-ClientDirectorEditor.py',
@@ -144,6 +146,8 @@ $requiredFiles = @(
     'tools\unreal\Validate-OrientationTrackCommitRuntime.py',
     'tools\unreal\Configure-ArcTableInversion.py',
     'tools\unreal\Validate-ArcTableInversionRuntime.py',
+    'tools\unreal\Configure-AdaptiveArcAssembly.py',
+    'tools\unreal\Validate-AdaptiveArcBoundaryRuntime.py',
     'tools\unreal\Move-SelectedBlueprintNode.ps1',
     'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
     'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
@@ -167,6 +171,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-OrientationTrackCompileContracts.py',
     'tools\blueprint\Build-ArcTableInversionGraph.py',
     'tools\blueprint\Test-ArcTableInversionContracts.py',
+    'tools\blueprint\Build-AdaptiveArcResetGraph.py',
+    'tools\blueprint\Test-AdaptiveArcResetContracts.py',
+    'tools\blueprint\Build-AdaptiveArcValidationGraph.py',
+    'tools\blueprint\Test-AdaptiveArcValidationContracts.py',
     'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1-paste.eddgraph',
@@ -197,6 +205,12 @@ $requiredFiles = @(
     'tools\blueprint\snippets\invert-arc-length-table-v1.eddgraph',
     'tools\blueprint\snippets\invert-arc-length-table-v1-paste.eddgraph',
     'tools\blueprint\live-snippets\invert-arc-length-table-v1.eddgraph',
+    'tools\blueprint\snippets\reset-adaptive-arc-build-v1.eddgraph',
+    'tools\blueprint\snippets\reset-adaptive-arc-build-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-adaptive-arc-build-v1.eddgraph',
+    'tools\blueprint\snippets\validate-adaptive-arc-build-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-adaptive-arc-build-inputs-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\validate-adaptive-arc-build-inputs-v1.eddgraph',
     'tools\blueprint\live-snippets\compile-orientation-track-v1.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
@@ -635,6 +649,10 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Arc-table Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_adaptive_arc_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Adaptive arc Blueprint assembly-schema contracts failed with exit code $LASTEXITCODE."
+}
 
 $trajectoryScalarNonce = [guid]::NewGuid().ToString('N')
 $trajectoryScalarRoot = Join-Path $scratchRoot "edd-trajectory-scalar-$trajectoryScalarNonce"
@@ -977,6 +995,42 @@ if ($LASTEXITCODE -ne 0) { throw "Arc-table inversion paste contracts failed wit
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-ArcTableInversionContracts.py') `
     --project-root $ProjectRoot --graph (Join-Path $ProjectRoot 'tools\blueprint\live-snippets\invert-arc-length-table-v1.eddgraph')
 if ($LASTEXITCODE -ne 0) { throw "Arc-table inversion exact post-compile contracts failed with exit code $LASTEXITCODE." }
+
+$adaptiveArcRoot = Join-Path $scratchRoot "edd-adaptive-arc-$orientationCompilerNonce"
+New-Item -ItemType Directory -Path $adaptiveArcRoot -Force | Out-Null
+foreach ($spec in @(
+    @('Build-AdaptiveArcResetGraph.py', 'Test-AdaptiveArcResetContracts.py', 'reset-adaptive-arc-build-v1'),
+    @('Build-AdaptiveArcValidationGraph.py', 'Test-AdaptiveArcValidationContracts.py', 'validate-adaptive-arc-build-inputs-v1')
+)) {
+    $builder = Join-Path $ProjectRoot "tools\blueprint\$($spec[0])"
+    $contract = Join-Path $ProjectRoot "tools\blueprint\$($spec[1])"
+    $stem = $spec[2]
+    $full = Join-Path $adaptiveArcRoot "$stem.eddgraph"
+    $paste = Join-Path $adaptiveArcRoot "$stem-paste.eddgraph"
+    $repeat = Join-Path $adaptiveArcRoot "$stem-repeat.eddgraph"
+    $repeatPaste = Join-Path $adaptiveArcRoot "$stem-repeat-paste.eddgraph"
+    & python $builder --project-root $ProjectRoot --output $full --paste-output $paste
+    if ($LASTEXITCODE -ne 0) { throw "Adaptive arc graph generation failed for $stem with exit code $LASTEXITCODE." }
+    & python $builder --project-root $ProjectRoot --output $repeat --paste-output $repeatPaste
+    if ($LASTEXITCODE -ne 0) { throw "Repeated adaptive arc graph generation failed for $stem with exit code $LASTEXITCODE." }
+    foreach ($pair in @(
+        @($full, $repeat, "tools\blueprint\snippets\$stem.eddgraph"),
+        @($paste, $repeatPaste, "tools\blueprint\snippets\$stem-paste.eddgraph")
+    )) {
+        $checked = Join-Path $ProjectRoot $pair[2]
+        $hash = (Get-FileHash -Algorithm SHA256 $pair[0]).Hash
+        if ($hash -ne (Get-FileHash -Algorithm SHA256 $pair[1]).Hash -or
+            $hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+            throw "Adaptive arc graph is nondeterministic or drifted: $checked"
+        }
+    }
+    & python $contract --project-root $ProjectRoot --graph $full
+    if ($LASTEXITCODE -ne 0) { throw "Adaptive arc full contracts failed for $stem with exit code $LASTEXITCODE." }
+    & python $contract --project-root $ProjectRoot --graph $paste --paste
+    if ($LASTEXITCODE -ne 0) { throw "Adaptive arc paste contracts failed for $stem with exit code $LASTEXITCODE." }
+    & python $contract --project-root $ProjectRoot --graph (Join-Path $ProjectRoot "tools\blueprint\live-snippets\$stem.eddgraph")
+    if ($LASTEXITCODE -ne 0) { throw "Adaptive arc exact post-compile contracts failed for $stem with exit code $LASTEXITCODE." }
+}
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
 if ($LASTEXITCODE -ne 0) {

@@ -227,6 +227,64 @@ def _auto_velocities(points: Sequence[Vector3], segments: Sequence[AuthoredSegme
     return velocities
 
 
+def build_arc_table_iterative(
+    segment: CompiledSegment,
+    tolerance: float,
+    max_depth: int,
+    max_operations: int,
+) -> tuple[ArcSample, ...]:
+    """Build one deterministic table with the bounded Blueprint-v1 work stack.
+
+    The stack pushes right then left, reproducing recursive depth-first sample
+    order while making the operation budget and failure boundary explicit.
+    """
+
+    if not isfinite(tolerance) or tolerance <= 0.0:
+        raise TrajectoryCompileError("arc tolerance must be positive and finite")
+    if not isinstance(max_depth, int) or not 1 <= max_depth <= 12:
+        raise TrajectoryCompileError("Blueprint-v1 arc depth must be in 1..12")
+    if not isinstance(max_operations, int) or not 1 <= max_operations <= 8191:
+        raise TrajectoryCompileError("Blueprint-v1 arc operation budget must be in 1..8191")
+    controls = (
+        segment.start, segment.end, segment.start_velocity_u,
+        segment.end_velocity_u, segment.start_acceleration_u,
+        segment.end_acceleration_u,
+    )
+    if not all(_finite_vector(value) for value in controls):
+        raise TrajectoryCompileError("arc spatial controls must be finite vectors")
+    if segment.spatial_curve_type not in SUPPORTED_SPATIAL_CURVES:
+        raise TrajectoryCompileError("arc spatial curve type is unsupported")
+
+    points: list[tuple[float, Vector3]] = [(0.0, segment.start)]
+    minimum_depth = min(6, max_depth)
+    stack: list[tuple[float, Vector3, float, Vector3, int]] = [
+        (0.0, segment.start, 1.0, segment.end, 0)
+    ]
+    operations = 0
+    while stack:
+        if operations >= max_operations:
+            raise TrajectoryCompileError("arc operation budget exhausted")
+        u0, p0, u1, p1, depth = stack.pop()
+        operations += 1
+        midpoint_u = (u0 + u1) * 0.5
+        midpoint = evaluate_spatial(segment, midpoint_u)
+        chord = _distance(p0, p1)
+        polyline = _distance(p0, midpoint) + _distance(midpoint, p1)
+        if depth < max_depth and (depth < minimum_depth or polyline - chord > tolerance):
+            next_depth = depth + 1
+            stack.append((midpoint_u, midpoint, u1, p1, next_depth))
+            stack.append((u0, p0, midpoint_u, midpoint, next_depth))
+        else:
+            points.append((u1, p1))
+
+    result = [ArcSample(0.0, 0.0)]
+    cumulative = 0.0
+    for (_previous_u, previous), (u, position) in zip(points, points[1:]):
+        cumulative += _distance(previous, position)
+        result.append(ArcSample(u, cumulative))
+    return tuple(result)
+
+
 def _arc_table(segment: CompiledSegment, tolerance: float, max_depth: int) -> tuple[ArcSample, ...]:
     points: list[tuple[float, Vector3]] = [(0.0, segment.start)]
     minimum_depth = min(6, max_depth)

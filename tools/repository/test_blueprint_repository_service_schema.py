@@ -37,6 +37,7 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
         self.assertIn("CandidateRecordEnvelopesV1", names)
         self.assertIn("CandidateTombstoneFlypathIdsV1", names)
         self.assertIn("RequestDraftDocumentV1", names)
+        self.assertIn("RequestSourceFlypathIdV1", names)
         self.assertIn("ResultDraftDocumentV1", names)
         self.assertIn("ResultPageOffsetV1", names)
         self.assertIn("ResultTotalCountV1", names)
@@ -237,6 +238,7 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "ListMineV1",
             "ListPublicV1",
             "FetchPublishedRevisionV1",
+            "ClonePublishedV1",
             "DeleteFlypathV1",
             "PublishDraftV1",
             "UnpublishV1",

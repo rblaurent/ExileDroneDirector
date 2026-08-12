@@ -29,6 +29,7 @@
 
     { "name": "RequestRequesterAccountIdV1", "type": "String", "container": "None", "default": "" },
     { "name": "RequestRequesterDisplayNameV1", "type": "String", "container": "None", "default": "" },
+    { "name": "RequestSourceFlypathIdV1", "type": "String", "container": "None", "default": "" },
     { "name": "RequestFlypathIdV1", "type": "String", "container": "None", "default": "" },
     { "name": "RequestTitleV1", "type": "String", "container": "None", "default": "" },
     { "name": "RequestDescriptionV1", "type": "String", "container": "None", "default": "" },
@@ -238,6 +239,7 @@
     "ListMineV1",
     "ListPublicV1",
     "FetchPublishedRevisionV1",
+    "ClonePublishedV1",
     "DeleteFlypathV1",
     "PublishDraftV1",
     "UnpublishV1"

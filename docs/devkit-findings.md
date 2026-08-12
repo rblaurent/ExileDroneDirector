@@ -2992,3 +2992,45 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   correction, not a runtime behavior change.
 - Private clone with attribution is the next ordered backend slice. No polished
   UI, cook, or Workshop work begins at this checkpoint.
+
+## Private published clone with attribution accepted (2026-08-12)
+
+- Internal checkpoint `0.53.0-private-clone` adds compiled
+  `ClonePublishedV1`. The request names a logical requester, an exact positive
+  published source revision, a collision-checked target ID, title/description,
+  and timestamp. The source must pass aligned-index, decode, record,
+  decoded-public, publication, exact-revision, region, and waypoint checks.
+- Success deep-rebuilds the immutable published document as a revision-one
+  private draft with an empty content hash. The target is owned only by the
+  requester, has no published snapshot, and stores immutable source
+  ID/revision/title/creator attribution captured before scratch reuse. The
+  accepted copy-on-write A/B writer is the sole mutation boundary.
+- Executable acceptance proved all blank inputs, zero/negative source
+  revisions, title/region/waypoint/owner/serialized-size limits,
+  missing/private/corrupt/misaligned sources, exact-revision conflict, and
+  target collision. Every rejection preserved byte-identical authority and
+  physical SaveGame snapshots and cleared stale results.
+- The successful clone was deterministically appended as the second record at
+  generation 6/B, private by default, owned by player B, revision 1, and copied
+  the published duration-22 snapshot rather than the newer private draft.
+  Owner-only load, owner listing, public-list exclusion, full attribution, and
+  source-edit independence passed. A fresh process recovered generation 7/A,
+  repeated those boundaries, edited the clone to revision 2 at generation 8/B,
+  proved the source draft and published snapshot unchanged, and cleaned both
+  test slots.
+- A separate fresh commandlet loaded and compiled all core assets with
+  `EDD_COLD_LOAD|RESULT|PASS`. The complete scaffold, deterministic generation,
+  schema/oracle suite, live round-trip contract, repository budget, and exact
+  17-file source mirror pass. Deterministic SHA-256 values are
+  `5FA3022F03D45745BDB87D7DBE0DC974E8FD9B604D1E9A6A7F9ABEC459E1B984`
+  (full) and
+  `32D0E885A9D4D2614A60ECD5370674E791A031EA8762EF7408579272783F79EE`
+  (paste); the post-compile live export is
+  `693944A85CA50DBADD7350D39662A3EDB31BFFEA7A71C1EBF57F00C3B57E07CF`.
+  Live/mirror package SHA-256 is
+  `9392FCE07AE4F3CB0E5148219BFCAF9A77F52560AAD15100C24C80B3A9118411`.
+- Unreal omits an explicit `DefaultValue=""` token for an empty string pin
+  after paste/export. Contracts accept that native omission as empty while
+  still rejecting non-empty hashes. Screenshots remain navigation evidence;
+  the exact exported reciprocal graph is authoritative. No polished UI, cook,
+  or Workshop work begins at this checkpoint.

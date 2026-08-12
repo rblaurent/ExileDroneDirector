@@ -290,8 +290,8 @@ it is owner-only and optimistic, returns the record to private visibility,
 preserves both the current draft and the last immutable published snapshot,
 commits through the same copy-on-write A/B writer, and survives a real restart
 with resumed publish/unpublish alternation. Discovery, immutable public fetch,
-and private clone remain ordered sharing work; this is not a completed mod or
-a UI/cook checkpoint.
+and private clone are now accepted sharing boundaries; this is still not a
+completed mod or a UI/cook checkpoint.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata
@@ -331,7 +331,14 @@ mismatched storage atomically, clears stale payloads on every later denial, and
 never invokes persistence. A fresh process recovered the exact immutable
 snapshot after a newer private draft save, proved byte-identical repository
 state around all reads, cleaned both slots, and passed the independent cold-load
-gate. Private clone with attribution is now the next sharing milestone.
+gate. `ClonePublishedV1` is accepted too: it deep-copies one exact immutable
+published revision into a new private revision-one draft owned only by the
+requester, records immutable source ID/revision/title/creator attribution, and
+never links future source or clone edits. Invalid, private, corrupt,
+misaligned, conflicting, over-limit, and collision requests leave authority and
+both physical SaveGame slots unchanged. Fresh-process recovery proves the
+owner/visibility boundary, attribution, bidirectional independence, continued
+clone editing, and cleanup.
 
 ## Repository layout
 

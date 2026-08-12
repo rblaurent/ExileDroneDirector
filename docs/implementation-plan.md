@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.52.0-published-fetch`
+Current internal build: `0.53.0-private-clone`
 
 ## 1. Delivery strategy
 
@@ -1325,10 +1325,10 @@ and repeatable isolated PIE runner are complete. The immediate sequence is:
 3. **Complete:** the inactive-slot two-phase writer and modular private
    create/save/load/list/delete boundaries pass in-process and fresh-process
    SaveGame recovery acceptance.
-4. **In progress:** owner identity, privacy, immutable publication, bounded
-   public discovery, and immutable published playback fetch are accepted. Next
-   add private clone with attribution, then conflicts, limits, and typed failures
-   across the remaining sharing boundary.
+4. **Complete for the sharing repository slice:** owner identity, private CRUD,
+   immutable publication, bounded public discovery, immutable published fetch,
+   and private deep clone with immutable source attribution are accepted with
+   typed conflicts/limits/failures and fresh SaveGame recovery evidence.
 5. Complete cinematic position/timing/rotation, flight profiles, lens/focus/
    effect tracks, free-look carrier modes, and event execution.
 6. Give every operation a shortcut/debug route and run the complete automated

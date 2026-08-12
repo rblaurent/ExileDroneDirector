@@ -236,6 +236,7 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "LoadDraftV1",
             "ListMineV1",
             "DeleteFlypathV1",
+            "PublishDraftV1",
         ):
             self.assertIn(required, functions)
 

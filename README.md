@@ -275,7 +275,19 @@ acceptance proves every available no-write rejection, result-payload hygiene,
 aligned derived-index removal, physical A/B generations 3 and 4 across a fresh
 restart, deleted/survivor read boundaries, tombstone accumulation, final reload,
 fixture cleanup, and a separate cold compile. Publishing and sharing remain
-ordered backend work; this is not a completed mod or a UI/cook checkpoint.
+ordered backend work. `PublishDraftV1` is now accepted as the first sharing
+boundary: only the owner can publish an expected draft revision; the operation
+snapshots the validated draft, marks the record public, leaves the draft
+revision unchanged, and commits copy-on-write through the A/B writer. Runtime
+acceptance covers missing/wrong/blank owner, stale revision, invalid timestamp,
+corrupt or identity-mismatched storage, serialized-size rejection, initial
+publish, intervening draft save, republish, metadata parity, and unchanged
+authority/SaveGame state on every rejection. A fresh process recovered the
+public revision, advanced the private draft without changing that snapshot,
+republished the new revision through generations 5/A and 6/B, reloaded the
+physical payload, and cleaned both slots. Unpublish, discovery, immutable
+public fetch, and private clone remain ordered sharing work; this is not a
+completed mod or a UI/cook checkpoint.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata
@@ -301,7 +313,8 @@ explicit parity gap owned by the next repository boundary. Alternating-slot
 state transitions, exact native SaveGame construction forms, connected raw slot
 reads, deterministic recovery, the two-phase writer, owner-only private draft
 loading, private-by-default creation, owner-only optimistic private saving, and
-owner-filtered metadata listing are accepted; private delete is the next runtime
+owner-filtered metadata listing, owner-only optimistic delete, and owner-only
+optimistic publication are accepted. Owner-only unpublish is the next runtime
 milestone.
 
 ## Repository layout

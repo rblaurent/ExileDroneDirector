@@ -2807,3 +2807,59 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   count, and require reciprocal-link contracts before compiling.
 - Private create/load/save/list/delete is now accepted backend work. The next
   ordered slice is publication and sharing policy—not UI, cook, or Workshop.
+
+## Owner-only optimistic publication accepted (2026-08-12)
+
+- Internal checkpoint `0.49.0-publish-draft` implements `PublishDraftV1` as an
+  88-node/337-pin compiled function (87-node body-only). It resolves and caches
+  the derived record index, sanitizes the public result index before every
+  authorization branch, authorizes the exact owner before decode, validates the
+  decoded/index identities, and applies optimistic concurrency against the
+  current draft revision.
+- Publication is an immutable snapshot operation, not a draft save. The current
+  draft document is copied into `PublishedDocument`, published revision is set
+  equal to the current draft revision, `HasPublishedRevision` becomes true,
+  visibility becomes `public`, and the server timestamp is updated. The draft
+  revision and draft document do not advance. The staged record must validate,
+  encode, and satisfy the serialized ceiling before one copy-on-write candidate
+  envelope is replaced and passed to `PersistRepositoryV1`.
+- Only `ScratchPersistenceCommitSavedV1` promotes derived visibility/timestamp
+  and restores the success result envelope, cached index, current revision, and
+  typed draft. The writer-failure branch has no links. Every rejection proved
+  unchanged authoritative arrays and byte-for-byte unchanged physical A/B slot
+  snapshots; non-conflict rejections clear envelope, metadata, revision, index,
+  and typed-draft result channels.
+- Executable in-process acceptance passed NotFound, wrong owner, blank owner,
+  stale expected revision, blank timestamp, corrupt stored envelope,
+  decoded/index identity mismatch, serialized-size ceiling, first publication,
+  an intervening `SaveDraftV1`, republish, stale republish, and exact metadata.
+  The intervening save advanced draft revision 1 to 2 while the published
+  revision and typed published document remained at revision 1; republish moved
+  only the public snapshot to revision 2. Deterministic authority progression
+  was create `1/A`, first publish `2/B`, draft save `3/A`, republish `4/B`.
+- After guarded editor shutdown, a separate `-ModDevKit -NullRHI` process
+  recovered generation 4/slot B and the public revision-2 snapshot. It loaded
+  the owner draft and metadata, saved a materially different 44-second draft as
+  generation 5/slot A while proving the published zero-second revision-2
+  snapshot remained unchanged, then republished it as generation 6/slot B,
+  reloaded the exact physical payload, and deleted both acceptance slots. A
+  second fresh commandlet loaded all nine required assets, compiled every
+  Blueprint, and emitted `EDD_COLD_LOAD|RESULT|PASS` with zero errors.
+- Deterministic generated graph SHA-256 values are
+  `989AA13496DDE86412229A03A4C1E2DF3B0EA04FB7F8BED6D236CCB5E727764B`
+  (full) and
+  `8D95F18A1EB0C2CA60C4429652D23680D63FE2388E48570E89F824DA6D31BDC5`
+  (paste). Exact post-compile export SHA-256 is
+  `FDB762F3291BB043C4E50CAB1E034A55BA55D73BB3664C75FC3A53E31444B08E`.
+  Closed-editor FromDevKit preview found 16 unchanged assets and one reviewed
+  repository conflict; forced sync copied only that package. Live and mirror
+  repository SHA-256 is
+  `54B609B2665180D66B2BC878125FDB15238D59E4EFBE1412DFCC3F2E07AAB08B`;
+  the reverse diff check reported 17 unchanged assets and zero conflicts.
+- Publication's folded layout uses verified blank export point `(500,750)`.
+  The exact reciprocal native-entry link and post-compile graph contracts are
+  the authoritative seam proof; do not spend repeated editor cycles chasing a
+  tooltip when exact export already proves both ends of the link.
+- Next ordered sharing slice is owner-only unpublish, followed by public
+  discovery, immutable published fetch, and private clone with attribution. No
+  polished UI, cook, or Workshop work begins at this checkpoint.

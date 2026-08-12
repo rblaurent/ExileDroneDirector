@@ -74,6 +74,8 @@ $requiredFiles = @(
     'tools\unreal\Validate-RepositoryPrivateListRestart.py',
     'tools\unreal\Validate-RepositoryPrivateDelete.py',
     'tools\unreal\Validate-RepositoryPrivateDeleteRestart.py',
+    'tools\unreal\Validate-RepositoryPublishDraft.py',
+    'tools\unreal\Validate-RepositoryPublishDraftRestart.py',
     'tools\unreal\Read-RepositoryPersistenceWriter.py',
     'tools\unreal\Open-RepositoryServiceEditor.py',
     'tools\unreal\Validate-RepositoryJsonCodec.py',
@@ -112,6 +114,7 @@ $requiredFiles = @(
     'tools\blueprint\Build-RepositoryPrivateSaveGraph.py',
     'tools\blueprint\Build-RepositoryPrivateListGraph.py',
     'tools\blueprint\Build-RepositoryPrivateDeleteGraph.py',
+    'tools\blueprint\Build-RepositoryPublishDraftGraph.py',
     'tools\blueprint\Build-RepositoryJsonMissingNodeProbe.py',
     'tools\blueprint\Build-RepositoryDecoderNativeNodeProbe.py',
     'tools\blueprint\Test-RepositoryJsonNodeForms.py',
@@ -151,6 +154,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryPrivateSaveContracts.py',
     'tools\blueprint\Test-RepositoryPrivateListContracts.py',
     'tools\blueprint\Test-RepositoryPrivateDeleteContracts.py',
+    'tools\blueprint\Test-RepositoryPublishDraftContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -1519,6 +1523,53 @@ $repositoryPrivateDeleteLive = Join-Path $ProjectRoot 'tools\blueprint\live-snip
     --input $repositoryPrivateDeleteLive
 if ($LASTEXITCODE -ne 0) {
     throw "Repository private-delete live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryPublishDraftNonce = [guid]::NewGuid().ToString('N')
+$repositoryPublishDraftRoot = Join-Path $scratchRoot "edd-repository-publish-draft-$repositoryPublishDraftNonce"
+$repositoryPublishDraftFull = Join-Path $repositoryPublishDraftRoot 'full'
+$repositoryPublishDraftPaste = Join-Path $repositoryPublishDraftRoot 'paste'
+New-Item -ItemType Directory -Force -Path $repositoryPublishDraftFull, $repositoryPublishDraftPaste | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryPublishDraftGraph.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryPublishDraftFull `
+    --paste-dir $repositoryPublishDraftPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository publish-draft graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryPublishDraftFull, $repositoryPublishDraftPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPublishDraftContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPublishDraftFull 'publish-draft-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository publish-draft full contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPublishDraftContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPublishDraftPaste 'publish-draft-v1-paste.eddgraph') `
+    --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository publish-draft paste contracts failed with exit code $LASTEXITCODE."
+}
+foreach ($pair in @(
+    @((Join-Path $repositoryPublishDraftFull 'publish-draft-v1.eddgraph'), 'tools\blueprint\snippets\publish-draft-v1.eddgraph'),
+    @((Join-Path $repositoryPublishDraftPaste 'publish-draft-v1-paste.eddgraph'), 'tools\blueprint\snippets\publish-draft-v1-paste.eddgraph')
+)) {
+    $checkedIn = Join-Path $ProjectRoot $pair[1]
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $pair[0]).Hash -ne
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $checkedIn).Hash) {
+        throw "Repository publish-draft graph is not deterministic: $($pair[1])"
+    }
+}
+$repositoryPublishDraftLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets\publish-draft-v1.eddgraph'
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $repositoryPublishDraftLive
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPublishDraftContracts.py') `
+    --project-root $ProjectRoot `
+    --input $repositoryPublishDraftLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository publish-draft live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-DocumentSyncStructForms.py') `

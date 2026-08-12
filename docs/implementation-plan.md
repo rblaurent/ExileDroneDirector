@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.48.0-private-delete`
+Current internal build: `0.49.0-publish-draft`
 
 ## 1. Delivery strategy
 
@@ -514,10 +514,15 @@ before any polished editor UI or cook is attempted:
    independently proven after SaveGame restart. Delete writes an ordered
    tombstone, removes aligned derived state only after physical commit, survives
    a fresh-process recovery, and completes a second generation-4/slot-B delete.
-5. **Current:** extend the accepted corruption recovery, schema migration hooks,
-   limits, and typed failures across the publication and sharing boundaries.
-6. Implement server-authoritative ownership, privacy, publication, immutable
-   snapshots, discovery, playback fetch, and private cloning with attribution.
+5. **Complete for publication:** owner-only optimistic `PublishDraftV1` promotes
+   a validated private draft to a public immutable snapshot without advancing
+   the draft revision. It preserves the prior published snapshot across draft
+   edits, republishes only the caller's expected draft revision, commits through
+   the accepted A/B writer, survives a fresh process, and exposes only typed
+   conflict state on rejection.
+6. **Current:** add owner-only unpublish, public discovery, immutable playback
+   fetch, and private cloning with attribution. Extend corruption recovery,
+   limits, migration hooks, and typed failures across each sharing boundary.
 7. Implement the complete trajectory compiler: linear and cinematic curves,
    monotonic timing/speed profiles, smooth quaternion rotation, flight profiles,
    deterministic sampling, and discontinuity diagnostics.
@@ -1301,11 +1306,12 @@ and repeatable isolated PIE runner are complete. The immediate sequence is:
 2. **Complete:** record-granular newest-to-older recovery on the accepted
    authority ordering and tombstone merge; authoritative memory is replaced
    only after the complete candidate remains valid.
-3. **Current:** implement the inactive-slot two-phase writer, followed by private
-   create/save/load/list/delete through modular Blueprint service boundaries;
-   then prove reconnect and restart recovery.
-4. Add server identity, ownership, privacy, immutable publication, discovery,
-   playback snapshots, cloning, conflicts, limits, and typed failures.
+3. **Complete:** the inactive-slot two-phase writer and modular private
+   create/save/load/list/delete boundaries pass in-process and fresh-process
+   SaveGame recovery acceptance.
+4. **In progress:** owner identity, privacy, and immutable publication are
+   accepted. Next add unpublish, discovery, playback snapshots, cloning,
+   conflicts, limits, and typed failures across the remaining sharing boundary.
 5. Complete cinematic position/timing/rotation, flight profiles, lens/focus/
    effect tracks, free-look carrier modes, and event execution.
 6. Give every operation a shortcut/debug route and run the complete automated

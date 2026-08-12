@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.64.0-orientation-track-compile`
+Current internal build: `0.65.0-orientation-track-evaluation`
 
 ## 1. Delivery strategy
 
@@ -76,6 +76,18 @@ This section is the authoritative handoff. Detailed evidence remains in
   control primitives only. Multi-key assembly, segment/route evaluation,
   arc-length compilation, lens/focus/effect tracks, shortcut dogfood, polished
   UI, cook, and Workshop remain ordered work.
+- `CompileOrientationTrackV1` now completes deterministic multi-key assembly,
+  and `EvaluateCompiledOrientationTrackV1` consumes that published track by
+  absolute time. It clamps negative scrubs to the first key, uses exact segment
+  boundaries, returns the final key with completion at/after total time, and
+  never depends on prior evaluation history. The exact saved evaluator graph is
+  113 nodes with zero reroutes.
+- Warm and fresh compiled execution each pass 3,016 frozen-oracle evaluations
+  over 32 seeded tracks, plus 32 shuffled direct-scrub cases, nine malformed
+  compiled-state cases, and all three scalar non-finite elapsed values. Maximum
+  angular error is `3.2917740992269735e-7`; alpha error is exactly zero. This
+  accepts orientation-track time evaluation only, not position/arc-length route
+  compilation or the complete trajectory engine.
 
 ### Cinematic orientation oracle checkpoint
 

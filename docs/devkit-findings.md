@@ -3241,6 +3241,44 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `D2962520E15F52A6993B3BB3274935EB75A6DBF3ED5915A38D1B026FBBC71CA7`.
   Absolute-time orientation evaluation remains next; no UI, cook, or Workshop.
 
+## Absolute-time orientation track evaluation accepted (2026-08-12)
+
+- Internal checkpoint `0.65.0-orientation-track-evaluation` adds compiled
+  `EvaluateCompiledOrientationTrackV1` to `BPC_EDD_ClientDirector`. It resets
+  all public and primitive results before work, validates the compiled boundary,
+  chooses segments from absolute elapsed time, clamps negative scrubs to alpha
+  zero, emits the exact final key at/after total time, and delegates spherical
+  interpolation to the already-accepted quaternion primitive.
+- Deterministic source/paste graphs contain 113/112 nodes. The exact live graph
+  before and after compile is 113 nodes, zero reroutes, and SHA-256
+  `479AAE1B581E65D5EA72002D24E1CC3E61A709D5DCE300B9ADCA45462266C770`.
+  The executable contract proves the reciprocal native entry seam, atomic reset,
+  cardinality/finite guards, first-match segment selection, completion branch,
+  staged primitive call, success publication, and every fail-closed path.
+- Warm and fresh NullRHI compiled runtime each pass 32 seeded tracks and 3,016
+  oracle evaluations spanning negative time, every key boundary, near-boundary
+  values, mid-segment samples, completion, and random scrubs. Thirty-two shuffled
+  history-independence probes repeat exactly. Maximum angular error is
+  `3.2917740992269735e-7`; maximum alpha error is `0.0`.
+- Nine malformed compiled-state cases reject prior invalidity, every compiled
+  array cardinality family, zero total, and a selected zero-duration segment.
+  NaN, positive infinity, and negative infinity all reach Blueprint and reject.
+  Every rejection clears stale public and primitive outputs; every run restores
+  all touched CDO properties.
+- Exact live export caught the disconnected native entry before compile. Its
+  coordinates were moved through an empty lane with per-drag clipboard identity
+  checks, aligned beside the first reset, then connected once and immediately
+  re-exported. `CloseMainWindow()` again reported success without exiting; the
+  proven `Quit-EnhancedEditorSafely.py` closed the asset editor and exited in
+  seconds. Use safe quit directly after remote sessions instead of waiting on
+  the ineffective window-close request.
+- Closed-editor reverse sync copied exactly Client Director (16 unchanged).
+  Live/mirror package SHA-256 is
+  `DF6C28E9FD6314B88F82994200F237E862C12657E5F14B29F7C5002193AA733E`.
+  Fresh runtime, cold compilation of every core asset, and full scaffold pass.
+  Next is position-route composition and adaptive arc-length compilation; no UI,
+  cook, or Workshop.
+
 ## Quaternion orientation controls accepted (2026-08-12)
 
 - Internal checkpoint `0.57.0-orientation-compiler` adds compiled

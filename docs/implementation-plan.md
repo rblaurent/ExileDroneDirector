@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.65.0-orientation-track-evaluation`
+Current internal build: `0.66.0-arc-table-inversion`
 
 ## 1. Delivery strategy
 
@@ -88,6 +88,21 @@ This section is the authoritative handoff. Detailed evidence remains in
   angular error is `3.2917740992269735e-7`; alpha error is exactly zero. This
   accepts orientation-track time evaluation only, not position/arc-length route
   compilation or the complete trajectory engine.
+- `InvertArcLengthTableV1` now owns the validated serialized-table boundary for
+  mapping normalized world distance back to curve parameter `u`. It requires
+  equal arrays of at least two samples, exact `(u,distance)` endpoints
+  `(0,0)..(1,length)`, strictly increasing `u`, nondecreasing cumulative
+  distance, finite values, and nonnegative length. Alpha is clamped; a
+  zero-length path remains stable; cumulative plateaus choose their left edge.
+- The exact post-compile graph is 98 nodes with a reciprocal native-entry seam
+  and zero reroutes. Warm and fresh compiled runtime each pass 4,266 valid
+  table evaluations, including 195 segments from real adaptive linear and
+  auto-cinematic compilations, plus all 16 malformed families and a shuffled
+  direct-scrub case. Maximum error versus the frozen oracle is exactly `0.0`,
+  stale outputs clear, and all eight staged CDO properties restore.
+- This accepts inversion of an already-published cumulative table only.
+  Adaptive table construction, position-route publication/evaluation, and the
+  complete trajectory engine remain ordered work.
 
 ### Cinematic orientation oracle checkpoint
 
@@ -1040,6 +1055,8 @@ cinematic trajectories.
    acceleration boundary constraints for C2 cinematic continuity.
 5. Implement Stop, Glide, Fly-by, Tight, and Cut corner modes.
 6. Build adaptive arc-length tables and distance-to-parameter inversion.
+   The validated inversion primitive is accepted; deterministic adaptive table
+   construction and route integration remain.
 7. Implement monotonic Linear, Smoothstep, Smootherstep, and Cinematic S-curve
    time profiles.
 8. Implement duration and target-speed modes plus impossible-constraint warnings.

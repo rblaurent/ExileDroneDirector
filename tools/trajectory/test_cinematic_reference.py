@@ -9,7 +9,7 @@ import unittest
 from cinematic_reference import (
     AuthoredSegment, TrajectoryCompileError, compile_trajectory,
     evaluate_position, evaluate_spatial, evaluate_spatial_derivatives,
-    evaluate_time_profile, invert_arc_length,
+    evaluate_time_profile, invert_arc_length, invert_arc_table,
 )
 
 
@@ -135,6 +135,37 @@ class EvaluationContracts(unittest.TestCase):
     def test_nonfinite_runtime_queries_fail_closed(self):
         with self.assertRaises(TrajectoryCompileError): evaluate_position(self.compiled,math.inf)
         with self.assertRaises(TrajectoryCompileError): invert_arc_length(self.compiled.segments[0],math.nan)
+
+    def test_published_arc_table_boundary_rejects_every_malformed_family(self):
+        valid=((0.0,.25,.75,1.0),(0.0,2.0,8.0,10.0),10.0,.5)
+        self.assertAlmostEqual(invert_arc_table(*valid),.5)
+        malformed=(
+            ((),(),0.0,.5),
+            ((0.0,1.0),(0.0,),1.0,.5),
+            ((.1,1.0),(0.0,1.0),1.0,.5),
+            ((0.0,1.0),(.1,1.0),1.0,.5),
+            ((0.0,.5),(0.0,1.0),1.0,.5),
+            ((0.0,.75,.5,1.0),(0.0,.2,.8,1.0),1.0,.5),
+            ((0.0,.25,.75,1.0),(0.0,.8,.2,1.0),1.0,.5),
+            ((0.0,1.0),(0.0,1.0),-1.0,.5),
+            ((0.0,1.0),(0.0,1.0),math.inf,.5),
+            ((0.0,math.nan),(0.0,1.0),1.0,.5),
+            ((0.0,1.0),(0.0,math.inf),math.inf,.5),
+            ((0.0,1.0),(0.0,1.0),1.0,math.nan),
+        )
+        for case in malformed:
+            with self.subTest(case=case):
+                with self.assertRaises(TrajectoryCompileError): invert_arc_table(*case)
+
+    def test_arc_table_inversion_clamps_and_handles_plateaus_and_zero_length(self):
+        self.assertEqual(invert_arc_table((0.0,1.0),(0.0,5.0),5.0,-2.0),0.0)
+        self.assertEqual(invert_arc_table((0.0,1.0),(0.0,5.0),5.0,2.0),1.0)
+        self.assertEqual(invert_arc_table((0.0,.25,.75,1.0),(0.0,2.0,2.0,4.0),4.0,.5),.25)
+        for alpha in (-1.0,0.0,.125,.5,1.0,2.0):
+            self.assertEqual(
+                invert_arc_table((0.0,.5,1.0),(0.0,0.0,0.0),0.0,alpha),
+                max(0.0,min(1.0,alpha)),
+            )
 
     def test_bounded_auto_tangents_do_not_leave_local_chord_box_on_adversarial_paths(self):
         fixtures = (

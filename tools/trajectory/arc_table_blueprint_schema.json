@@ -1,0 +1,13 @@
+{
+  "variables": [
+    {"name": "TrajectoryArcInputUsV1", "type": "Float", "container": "Array"},
+    {"name": "TrajectoryArcInputDistancesV1", "type": "Float", "container": "Array"},
+    {"name": "TrajectoryArcInputLengthV1", "type": "Float", "container": "Scalar", "default": 0.0},
+    {"name": "TrajectoryArcInputDistanceAlphaV1", "type": "Float", "container": "Scalar", "default": 0.0},
+    {"name": "TrajectoryArcResultUV1", "type": "Float", "container": "Scalar", "default": 0.0},
+    {"name": "TrajectoryArcResultValidV1", "type": "Boolean", "container": "Scalar", "default": false},
+    {"name": "TrajectoryArcScratchUpperIndexV1", "type": "Integer", "container": "Scalar", "default": -1},
+    {"name": "TrajectoryArcScratchValidV1", "type": "Boolean", "container": "Scalar", "default": false}
+  ],
+  "functions": ["InvertArcLengthTableV1"]
+}

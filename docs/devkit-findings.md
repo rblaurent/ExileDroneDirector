@@ -3324,3 +3324,27 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   This completes only the per-segment control primitives. Multi-key assembly,
   route/arc-length integration, cinematic tracks, keyboard dogfood, UI, cook,
   and Workshop remain out of scope.
+## Arc-table inversion primitive accepted (2026-08-12)
+
+- Internal checkpoint `0.66.0-arc-table-inversion` adds compiled
+  `InvertArcLengthTableV1` to `BPC_EDD_ClientDirector`. It validates the exact
+  published cumulative-table representation before performing a bounded
+  linear scan and local interpolation. Zero length, plateaus, clamped alpha,
+  stale outputs, and history-independent direct scrubbing are explicit.
+- Deterministic full/paste graphs contain 98/97 nodes. The exact post-compile
+  export has 98 nodes, zero knots, reciprocal native-entry/reset wiring, and
+  SHA-256 `AE4FED2A84AFFE02845607918AC54AF9AEECF08C3089187639FBB1FC209FE4D7`.
+  Warm and fresh compiled runtime each pass 4,266 valid evaluations over 195
+  actual compiled segments, all 16 malformed families, and one shuffled scrub
+  proof with exactly `0.0` maximum `u` error and full CDO restoration.
+- Pasted Blueprint bodies are translated as a block. Here the generated reset
+  at `(256,1760)` landed at `(-4768,1504)`, while the native entry remained at
+  `(-64,1760)`. Do not infer the seam offset from generator coordinates. Export
+  the live graph, parse both exact positions, then move the verified sole
+  `K2Node_FunctionEntry` through an empty lane to 256 units left of the live
+  reset. Require the complete reciprocal graph contract before compile.
+- Live/mirror Client Director SHA-256 is
+  `EB2BE085DDA0693CFB5AEA0003EE9FFD542F0B6EEA967FAA031A2431526BF727`.
+  Fresh runtime and cold compilation pass. Adaptive table construction and
+  position-route integration remain; UI, cook, and Workshop are still out of
+  scope.

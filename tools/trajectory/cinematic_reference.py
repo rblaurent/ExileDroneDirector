@@ -304,20 +304,52 @@ def compile_trajectory(
     return CompiledTrajectory(tuple(compiled), start_seconds, sum(segment.length for segment in compiled))
 
 
-def invert_arc_length(segment: CompiledSegment, distance_alpha: float) -> float:
+def invert_arc_table(
+    us: Sequence[float], distances: Sequence[float], length: float,
+    distance_alpha: float,
+) -> float:
+    """Validate and invert one published cumulative arc table."""
+
     if not isfinite(distance_alpha):
         raise TrajectoryCompileError("distance alpha must be finite")
-    target = max(0.0, min(1.0, distance_alpha)) * segment.length
-    if segment.length <= 1.0e-12:
-        return max(0.0, min(1.0, distance_alpha))
-    distances = [sample.distance for sample in segment.arc_table]
-    upper = min(max(1, bisect_left(distances, target)), len(distances) - 1)
-    left, right = segment.arc_table[upper - 1], segment.arc_table[upper]
-    span = right.distance - left.distance
+    if not isfinite(length) or length < 0.0:
+        raise TrajectoryCompileError("arc length must be finite and nonnegative")
+    normalized_us = tuple(float(value) for value in us)
+    normalized_distances = tuple(float(value) for value in distances)
+    if len(normalized_us) < 2 or len(normalized_us) != len(normalized_distances):
+        raise TrajectoryCompileError("arc arrays must have equal cardinality of at least two")
+    if not all(isfinite(value) for value in normalized_us + normalized_distances):
+        raise TrajectoryCompileError("arc samples must be finite")
+    if normalized_us[0] != 0.0 or normalized_distances[0] != 0.0:
+        raise TrajectoryCompileError("arc table must start at zero")
+    if normalized_us[-1] != 1.0 or normalized_distances[-1] != float(length):
+        raise TrajectoryCompileError("arc table endpoint must match total length")
+    if any(left >= right for left, right in zip(normalized_us, normalized_us[1:])):
+        raise TrajectoryCompileError("arc parameters must be strictly increasing")
+    if any(left > right for left, right in zip(normalized_distances, normalized_distances[1:])):
+        raise TrajectoryCompileError("arc distances must be nondecreasing")
+
+    clamped_alpha = max(0.0, min(1.0, float(distance_alpha)))
+    target = clamped_alpha * float(length)
+    if length <= 1.0e-12:
+        return clamped_alpha
+    upper = min(max(1, bisect_left(normalized_distances, target)), len(normalized_distances) - 1)
+    left_u, right_u = normalized_us[upper - 1], normalized_us[upper]
+    left_distance, right_distance = normalized_distances[upper - 1], normalized_distances[upper]
+    span = right_distance - left_distance
     if span <= 1.0e-12:
-        return left.u
-    alpha = (target - left.distance) / span
-    return left.u + (right.u - left.u) * alpha
+        return left_u
+    alpha = (target - left_distance) / span
+    return left_u + (right_u - left_u) * alpha
+
+
+def invert_arc_length(segment: CompiledSegment, distance_alpha: float) -> float:
+    return invert_arc_table(
+        tuple(sample.u for sample in segment.arc_table),
+        tuple(sample.distance for sample in segment.arc_table),
+        segment.length,
+        distance_alpha,
+    )
 
 
 def evaluate_position(compiled: CompiledTrajectory, elapsed_seconds: float) -> PositionEvaluation:

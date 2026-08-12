@@ -107,6 +107,8 @@ $requiredFiles = @(
     'tools\trajectory\test_orientation_reference.py',
     'tools\trajectory\orientation_blueprint_schema.json',
     'tools\trajectory\test_orientation_blueprint_schema.py',
+    'tools\trajectory\arc_table_blueprint_schema.json',
+    'tools\trajectory\test_arc_table_blueprint_schema.py',
     'tools\unreal\Configure-TrajectoryScalarEvaluators.py',
     'tools\unreal\Compile-And-SaveClientDirector.py',
     'tools\unreal\Open-ClientDirectorEditor.py',
@@ -140,6 +142,8 @@ $requiredFiles = @(
     'tools\unreal\Validate-OrientationTrackTangentRatesRuntime.py',
     'tools\unreal\Validate-OrientationTrackSegmentsRuntime.py',
     'tools\unreal\Validate-OrientationTrackCommitRuntime.py',
+    'tools\unreal\Configure-ArcTableInversion.py',
+    'tools\unreal\Validate-ArcTableInversionRuntime.py',
     'tools\unreal\Move-SelectedBlueprintNode.ps1',
     'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
     'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
@@ -161,6 +165,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-OrientationTrackCommitContracts.py',
     'tools\blueprint\Build-OrientationTrackCompileGraph.py',
     'tools\blueprint\Test-OrientationTrackCompileContracts.py',
+    'tools\blueprint\Build-ArcTableInversionGraph.py',
+    'tools\blueprint\Test-ArcTableInversionContracts.py',
     'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1-paste.eddgraph',
@@ -188,6 +194,9 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\commit-compiled-orientation-track-v1.eddgraph',
     'tools\blueprint\snippets\compile-orientation-track-v1.eddgraph',
     'tools\blueprint\snippets\compile-orientation-track-v1-paste.eddgraph',
+    'tools\blueprint\snippets\invert-arc-length-table-v1.eddgraph',
+    'tools\blueprint\snippets\invert-arc-length-table-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\invert-arc-length-table-v1.eddgraph',
     'tools\blueprint\live-snippets\compile-orientation-track-v1.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
@@ -622,6 +631,10 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Orientation Blueprint assembly-schema contracts failed with exit code $LASTEXITCODE."
 }
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_arc_table_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Arc-table Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
 
 $trajectoryScalarNonce = [guid]::NewGuid().ToString('N')
 $trajectoryScalarRoot = Join-Path $scratchRoot "edd-trajectory-scalar-$trajectoryScalarNonce"
@@ -931,6 +944,39 @@ if ($LASTEXITCODE -ne 0) { throw "Orientation track compile paste contracts fail
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackCompileContracts.py') `
     --project-root $ProjectRoot --graph (Join-Path $ProjectRoot 'tools\blueprint\live-snippets\compile-orientation-track-v1.eddgraph')
 if ($LASTEXITCODE -ne 0) { throw "Orientation track compile exact post-compile contracts failed with exit code $LASTEXITCODE." }
+
+$arcTableRoot = Join-Path $scratchRoot "edd-arc-table-$orientationCompilerNonce"
+$arcTableFull = Join-Path $arcTableRoot 'invert-arc-length-table-v1.eddgraph'
+$arcTablePaste = Join-Path $arcTableRoot 'invert-arc-length-table-v1-paste.eddgraph'
+$arcTableRepeat = Join-Path $arcTableRoot 'invert-arc-length-table-v1-repeat.eddgraph'
+$arcTableRepeatPaste = Join-Path $arcTableRoot 'invert-arc-length-table-v1-repeat-paste.eddgraph'
+New-Item -ItemType Directory -Path $arcTableRoot -Force | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-ArcTableInversionGraph.py') `
+    --project-root $ProjectRoot --output $arcTableFull --paste-output $arcTablePaste
+if ($LASTEXITCODE -ne 0) { throw "Arc-table inversion graph generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-ArcTableInversionGraph.py') `
+    --project-root $ProjectRoot --output $arcTableRepeat --paste-output $arcTableRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated arc-table inversion graph generation failed with exit code $LASTEXITCODE." }
+foreach ($pair in @(
+    @($arcTableFull, $arcTableRepeat, 'tools\blueprint\snippets\invert-arc-length-table-v1.eddgraph'),
+    @($arcTablePaste, $arcTableRepeatPaste, 'tools\blueprint\snippets\invert-arc-length-table-v1-paste.eddgraph')
+)) {
+    $checked = Join-Path $ProjectRoot $pair[2]
+    $hash = (Get-FileHash -Algorithm SHA256 $pair[0]).Hash
+    if ($hash -ne (Get-FileHash -Algorithm SHA256 $pair[1]).Hash -or
+        $hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+        throw "Arc-table inversion graph is nondeterministic or drifted: $checked"
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-ArcTableInversionContracts.py') `
+    --project-root $ProjectRoot --graph $arcTableFull
+if ($LASTEXITCODE -ne 0) { throw "Arc-table inversion full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-ArcTableInversionContracts.py') `
+    --project-root $ProjectRoot --graph $arcTablePaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Arc-table inversion paste contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-ArcTableInversionContracts.py') `
+    --project-root $ProjectRoot --graph (Join-Path $ProjectRoot 'tools\blueprint\live-snippets\invert-arc-length-table-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) { throw "Arc-table inversion exact post-compile contracts failed with exit code $LASTEXITCODE." }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
 if ($LASTEXITCODE -ne 0) {

@@ -12,6 +12,14 @@ param(
     [Parameter(Mandatory = $true, ParameterSetName = 'Click')]
     [int]$ClientY,
 
+    [Parameter(ParameterSetName = 'Click')]
+    [ValidateSet('Left', 'Right')]
+    [string]$ClickButton = 'Left',
+
+    [Parameter(ParameterSetName = 'Click')]
+    [ValidateSet('None', 'Alt', 'Control', 'Shift')]
+    [string]$ClickModifier = 'None',
+
     [Parameter(Mandatory = $true, ParameterSetName = 'Drag')]
     [int]$StartClientX,
 
@@ -128,6 +136,9 @@ public static class EddEnhancedEditorInput {
 
     [DllImport("user32.dll")]
     public static extern void mouse_event(uint flags, uint dx, uint dy, uint data, UIntPtr extraInfo);
+
+    [DllImport("user32.dll")]
+    public static extern void keybd_event(byte virtualKey, byte scanCode, uint flags, UIntPtr extraInfo);
 }
 '@
 }
@@ -155,14 +166,32 @@ elseif ($PSCmdlet.ParameterSetName -eq 'Click') {
     if (-not [EddEnhancedEditorInput]::SetCursorPos($point.X, $point.Y)) {
         throw "Could not position cursor at client coordinate $ClientX,$ClientY"
     }
-    for ($index = 0; $index -lt $ClickCount; $index++) {
-        [EddEnhancedEditorInput]::mouse_event(0x0002, 0, 0, 0, [UIntPtr]::Zero)
-        [EddEnhancedEditorInput]::mouse_event(0x0004, 0, 0, 0, [UIntPtr]::Zero)
-        if ($index + 1 -lt $ClickCount) {
-            Start-Sleep -Milliseconds 80
+    $buttonDown = if ($ClickButton -eq 'Right') { 0x0008 } else { 0x0002 }
+    $buttonUp = if ($ClickButton -eq 'Right') { 0x0010 } else { 0x0004 }
+    $modifierKey = switch ($ClickModifier) {
+        'Alt' { 0x12 }
+        'Control' { 0x11 }
+        'Shift' { 0x10 }
+        default { 0 }
+    }
+    if ($modifierKey -ne 0) {
+        [EddEnhancedEditorInput]::keybd_event($modifierKey, 0, 0, [UIntPtr]::Zero)
+    }
+    try {
+        for ($index = 0; $index -lt $ClickCount; $index++) {
+            [EddEnhancedEditorInput]::mouse_event($buttonDown, 0, 0, 0, [UIntPtr]::Zero)
+            [EddEnhancedEditorInput]::mouse_event($buttonUp, 0, 0, 0, [UIntPtr]::Zero)
+            if ($index + 1 -lt $ClickCount) {
+                Start-Sleep -Milliseconds 80
+            }
         }
     }
-    $result = "CLICK:${ClientX},${ClientY}:${ClickCount}"
+    finally {
+        if ($modifierKey -ne 0) {
+            [EddEnhancedEditorInput]::keybd_event($modifierKey, 0, 0x0002, [UIntPtr]::Zero)
+        }
+    }
+    $result = "CLICK:${ClickButton}:${ClickModifier}:${ClientX},${ClientY}:${ClickCount}"
 }
 elseif ($PSCmdlet.ParameterSetName -eq 'Drag') {
     $start = New-Object EddEnhancedEditorInput+POINT

@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.55.0-trajectory-vector`
+Current internal build: `0.56.0-trajectory-quaternion`
 
 ## 1. Delivery strategy
 
@@ -28,7 +28,7 @@ This section is the authoritative handoff. Detailed evidence remains in
 `devkit-findings.md`; exact clipboard procedure remains in
 `blueprint-workflow.md`.
 
-### Cinematic scalar/vector evaluator checkpoint
+### Cinematic scalar/vector/quaternion evaluator checkpoint
 
 - `EvaluateTimeProfileV1` and `EvaluateQuinticScalarV1` are compiled and saved
   on `BPC_EDD_ClientDirector`. The first evaluates six bounded monotonic timing
@@ -53,8 +53,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   Python reflection sanitizes non-finite components of a native `Vector` before
   Blueprint execution (18 cases); that boundary is detected and reported by
   the harness rather than misclassified as evaluator acceptance.
-- This checkpoint completes position-vector composition only. Quaternion
-  orientation, segment/route evaluation, arc-length compilation,
+- `EvaluateSphericalBezierQuaternionV1` is now compiled and saved. Four
+  normalized finite quaternion controls and one clamped alpha are evaluated as
+  a spherical cubic Bezier with six native shortest-arc SLERPs. Invalid inputs
+  atomically clear validity and reset orientation to identity.
+- Deterministic full/paste executable contracts and the exact 37-node
+  post-compile live graph each pass 707 valid and 19 invalid fixtures. Warm and
+  fresh NullRHI compiled execution repeat those counts with zero reflection
+  sanitization and restore every staged class-default property.
+- This checkpoint completes the per-segment orientation evaluator only.
+  Quaternion control compilation, segment/route evaluation, arc-length compilation,
   lens/focus/effect tracks, shortcut dogfood, polished UI, cook, and Workshop
   remain ordered work.
 
@@ -69,8 +77,9 @@ This section is the authoritative handoff. Detailed evidence remains in
   unit outputs without sample sign flips, history-independent scrubbing,
   deterministic compilation, invalid-input rejection, and 100 seeded
   adversarial tracks.
-- This freezes the executable target for the next Blueprint slice. It does not
-  yet claim a compiled quaternion Blueprint evaluator.
+- This remains the frozen target for the upcoming multi-key quaternion control
+  compiler. The per-segment spherical evaluator now implements its runtime
+  kernel; track control compilation remains ordered work.
 
 ### Live in the Enhanced DevKit
 

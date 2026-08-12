@@ -3148,3 +3148,39 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   Quaternion orientation is the next ordered backend slice. Segment/route
   compilation, arc-length inversion, runtime shortcut dogfood, UI, cook, and
   Workshop remain out of scope.
+
+## Compiled spherical quaternion evaluator accepted (2026-08-12)
+
+- Internal checkpoint `0.56.0-trajectory-quaternion` adds compiled
+  `EvaluateSphericalBezierQuaternionV1` on `BPC_EDD_ClientDirector`. It validates
+  finite normalized start/control/control/end quaternions plus finite alpha,
+  clamps alpha, evaluates spherical cubic Bezier through six native
+  `Quat_Slerp` calls, and commits identity/false on every invalid path.
+- Enhanced exposes native unsplit `Quat_IsFinite`, `Quat_IsNormalized`,
+  `Quat_Normalized`, and `Quat_Slerp`. Preserve those exact live node forms;
+  split quaternion pins remain unsafe. The deterministic full/paste hashes are
+  `D0C92616DCBE270AC452FD921057C20F90B6F90E844399F4E227FC5B848C4E39`
+  and `47CCEEF27EFCADE2DE9E400273C982772FA988E0E1E48A67A0B968CCF542AB60`.
+  Exact post-compile live export is 37 nodes/zero knots with SHA-256
+  `C40E040DF53B116293A3897C0E5C0C294F3C8D4A34EAD8D76B26932AD8C315E8`.
+- All three serialized graphs pass 707 frozen-oracle valid evaluations and all
+  19 invalid/non-finite placements, including fail-closed stale-output proof.
+  Warm and fresh NullRHI compiled runtime independently repeat 707/19 with zero
+  reflection sanitization and restore every touched CDO property. Separate cold
+  loading compiles all six core Blueprints without errors.
+- Finicky seam lesson: native function entry and the first pasted setter can
+  overlap while appearing connected. Exact export caught an entry bypass that
+  would have leaked stale quaternion output. Move only the native entry, use
+  modifier-held Alt-click to break links deterministically, then accept only the
+  reciprocal entry -> identity reset -> validity reset chain. Unreal may
+  canonicalize identity as either `0, 0, 0, 1` or
+  `(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000)`; executable contracts support
+  both exact serializations.
+- Closed-editor mirror copied exactly the changed Client Director package;
+  live and mirror SHA-256 is
+  `8DF4A13DD0BE7742821CA844FB33CE47785AD2AE3087D07C585C7349BE99FF0A`.
+  The disposable JSON node probe was deleted in a fresh commandlet.
+- This accepts one quaternion segment evaluator, not the whole trajectory
+  engine or mod. Next is the time-aware multi-key quaternion control compiler,
+  followed by segment/route and arc-length integration. UI, cook, and Workshop
+  remain out of scope.

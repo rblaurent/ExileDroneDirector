@@ -119,6 +119,16 @@ $requiredFiles = @(
     'tools\blueprint\Test-TrajectoryVectorEvaluatorContracts.py',
     'tools\blueprint\snippets\evaluate-quintic-vector-v1.eddgraph',
     'tools\blueprint\live-snippets\evaluate-quintic-vector-v1.eddgraph',
+    'tools\unreal\Configure-TrajectoryQuaternionEvaluator.py',
+    'tools\unreal\Validate-TrajectoryQuaternionEvaluatorRuntime.py',
+    'tools\blueprint\Build-TrajectoryQuaternionNativeNodeForms.py',
+    'tools\blueprint\Test-TrajectoryQuaternionNativeNodeForms.py',
+    'tools\blueprint\templates\trajectory-quaternion-native-node-forms.eddgraph',
+    'tools\blueprint\Build-TrajectoryQuaternionEvaluatorGraph.py',
+    'tools\blueprint\Test-TrajectoryQuaternionEvaluatorContracts.py',
+    'tools\blueprint\snippets\evaluate-spherical-bezier-quaternion-v1.eddgraph',
+    'tools\blueprint\snippets\evaluate-spherical-bezier-quaternion-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\evaluate-spherical-bezier-quaternion-v1.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
     'tools\history\draft_history.py',
@@ -415,6 +425,18 @@ if ($editorInputSource -notmatch 'IsIconic\(hWnd\)') {
 if ($editorInputSource -notmatch 'if \(IsIconic\(hWnd\)\) ShowWindow\(hWnd, 9\);') {
     throw 'Editor input helper must preserve maximized windows instead of unconditionally restoring them.'
 }
+if ($editorInputSource -notmatch "ValidateSet\('Left', 'Right'\)") {
+    throw 'Editor input helper must expose an explicit right-click mode.'
+}
+if ($editorInputSource -notmatch "ClickButton -eq 'Right'") {
+    throw 'Editor input helper must map right-click to the native right mouse flags.'
+}
+if ($editorInputSource -notmatch "ValidateSet\('None', 'Alt', 'Control', 'Shift'\)") {
+    throw 'Editor input helper must expose modifier-held click gestures.'
+}
+if ($editorInputSource -notmatch 'keybd_event\(\$modifierKey, 0, 0x0002') {
+    throw 'Editor input helper must release held click modifiers in a finally block.'
+}
 
 $movementConfigPath = Join-Path $ProjectRoot 'tools\unreal\Configure-DroneMovement.py'
 $movementConfig = [IO.File]::ReadAllText($movementConfigPath)
@@ -605,6 +627,45 @@ $trajectoryVectorLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets\ev
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-TrajectoryVectorEvaluatorContracts.py') `
     --project-root $ProjectRoot --vector-path $trajectoryVectorLive
 if ($LASTEXITCODE -ne 0) { throw "Trajectory vector live-graph contracts failed with exit code $LASTEXITCODE." }
+
+$trajectoryQuaternionNonce = [guid]::NewGuid().ToString('N')
+$trajectoryQuaternionRoot = Join-Path $scratchRoot "edd-trajectory-quaternion-$trajectoryQuaternionNonce"
+$trajectoryQuaternionFull = Join-Path $trajectoryQuaternionRoot 'evaluate-spherical-bezier-quaternion-v1.eddgraph'
+$trajectoryQuaternionPaste = Join-Path $trajectoryQuaternionRoot 'evaluate-spherical-bezier-quaternion-v1-paste.eddgraph'
+$trajectoryQuaternionRepeat = Join-Path $trajectoryQuaternionRoot 'evaluate-spherical-bezier-quaternion-v1-repeat.eddgraph'
+$trajectoryQuaternionRepeatPaste = Join-Path $trajectoryQuaternionRoot 'evaluate-spherical-bezier-quaternion-v1-repeat-paste.eddgraph'
+New-Item -ItemType Directory -Path $trajectoryQuaternionRoot -Force | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-TrajectoryQuaternionEvaluatorGraph.py') `
+    --project-root $ProjectRoot --output $trajectoryQuaternionFull --paste-output $trajectoryQuaternionPaste
+if ($LASTEXITCODE -ne 0) { throw "Trajectory quaternion graph generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-TrajectoryQuaternionEvaluatorGraph.py') `
+    --project-root $ProjectRoot --output $trajectoryQuaternionRepeat --paste-output $trajectoryQuaternionRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated trajectory quaternion graph generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($trajectoryQuaternionFull, $trajectoryQuaternionRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-spherical-bezier-quaternion-v1.eddgraph')),
+    @($trajectoryQuaternionPaste, $trajectoryQuaternionRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-spherical-bezier-quaternion-v1-paste.eddgraph'))
+)) {
+    $generated, $repeated, $checked = $comparison
+    if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $repeated).Hash) {
+        throw "Trajectory quaternion graph generation is not deterministic: $generated"
+    }
+    if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+        throw "Trajectory quaternion checked-in graph has drifted: $checked"
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-TrajectoryQuaternionNativeNodeForms.py') `
+    --forms (Join-Path $ProjectRoot 'tools\blueprint\templates\trajectory-quaternion-native-node-forms.eddgraph')
+if ($LASTEXITCODE -ne 0) { throw "Trajectory quaternion native node-form contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-TrajectoryQuaternionEvaluatorContracts.py') `
+    --project-root $ProjectRoot --graph $trajectoryQuaternionFull
+if ($LASTEXITCODE -ne 0) { throw "Trajectory quaternion full-graph contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-TrajectoryQuaternionEvaluatorContracts.py') `
+    --project-root $ProjectRoot --graph $trajectoryQuaternionPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Trajectory quaternion paste-graph contracts failed with exit code $LASTEXITCODE." }
+$trajectoryQuaternionLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets\evaluate-spherical-bezier-quaternion-v1.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-TrajectoryQuaternionEvaluatorContracts.py') `
+    --project-root $ProjectRoot --graph $trajectoryQuaternionLive
+if ($LASTEXITCODE -ne 0) { throw "Trajectory quaternion live-graph contracts failed with exit code $LASTEXITCODE." }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
 if ($LASTEXITCODE -ne 0) {

@@ -58,6 +58,20 @@ This section is the authoritative handoff. Detailed evidence remains in
   lens/focus/effect tracks, shortcut dogfood, polished UI, cook, and Workshop
   remain ordered work.
 
+### Cinematic orientation oracle checkpoint
+
+- Version 1 now has an engine-independent multi-key quaternion compiler and
+  evaluator. It normalizes and sign-aligns authored keys once, computes one
+  time-domain angular tangent rate per waypoint, and evaluates time-aware
+  spherical cubic Bezier segments by absolute time.
+- The oracle proves exact keys, two-key shortest-arc constant-speed reduction,
+  unequal-duration angular-velocity continuity, antipodal-key equivalence,
+  unit outputs without sample sign flips, history-independent scrubbing,
+  deterministic compilation, invalid-input rejection, and 100 seeded
+  adversarial tracks.
+- This freezes the executable target for the next Blueprint slice. It does not
+  yet claim a compiled quaternion Blueprint evaluator.
+
 ### Live in the Enhanced DevKit
 
 - Project source is `T:\Projects\ExileDroneDirector`; the installed Enhanced

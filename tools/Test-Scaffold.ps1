@@ -103,6 +103,8 @@ $requiredFiles = @(
     'tools\playback\test_linear_reference.py',
     'tools\trajectory\cinematic_reference.py',
     'tools\trajectory\test_cinematic_reference.py',
+    'tools\trajectory\orientation_reference.py',
+    'tools\trajectory\test_orientation_reference.py',
     'tools\unreal\Configure-TrajectoryScalarEvaluators.py',
     'tools\unreal\Compile-And-SaveClientDirector.py',
     'tools\unreal\Open-ClientDirectorEditor.py',
@@ -529,6 +531,10 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_cinematic_reference.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Cinematic trajectory reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_orientation_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Cinematic orientation reference contracts failed with exit code $LASTEXITCODE."
 }
 
 $trajectoryScalarNonce = [guid]::NewGuid().ToString('N')

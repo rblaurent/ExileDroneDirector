@@ -319,6 +319,22 @@ the dense function again and repeat both checks. If knots have already been
 injected, replace the whole non-entry body from the deterministic paste artifact
 instead of attempting a fragile manual knot cleanup.
 
+Do not use fixed My Blueprint/search coordinates after the saved Blueprint
+layout changes. On the current Client Director layout, those coordinates can
+focus the graph canvas and type the query as a comment node. Open functions
+through `tools/unreal/Open-BlueprintFunctionViaFindResults.ps1`, which focuses
+the persistent Find Results field, explicitly presses Enter, and opens the
+exact result. If a coordinate attempt ever mutates the graph, undo immediately
+and require the original exact node count plus the executable contract before
+continuing.
+
+Use `tools/unreal/Move-SelectedBlueprintNode.ps1` for finicky native-entry
+placement. Give it the exported start coordinates, grid-aligned target, and an
+`ExpectedNodeMarker` when possible. It exports the selected node after every
+bounded drag, rejects non-converging or off-grid movement, and catches selection
+transfer caused by overlap. Always move an entry into empty graph space before
+connecting it; do not traverse the dense calculation body.
+
 Enhanced's pure string-normalization node is
 `KismetStringLibrary.Trim(SourceString) -> ReturnValue`. The harvested native
 form is `repository-string-trim-node-form.eddgraph`. Use it for persisted

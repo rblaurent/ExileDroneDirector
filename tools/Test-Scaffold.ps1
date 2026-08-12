@@ -129,6 +129,23 @@ $requiredFiles = @(
     'tools\blueprint\snippets\evaluate-spherical-bezier-quaternion-v1.eddgraph',
     'tools\blueprint\snippets\evaluate-spherical-bezier-quaternion-v1-paste.eddgraph',
     'tools\blueprint\live-snippets\evaluate-spherical-bezier-quaternion-v1.eddgraph',
+    'tools\unreal\Configure-OrientationCompiler.py',
+    'tools\unreal\Validate-OrientationCompilerRuntime.py',
+    'tools\unreal\Move-SelectedBlueprintNode.ps1',
+    'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
+    'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
+    'tools\blueprint\Build-OrientationCompilerGraphs.py',
+    'tools\blueprint\Test-OrientationCompilerContracts.py',
+    'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph',
+    'tools\blueprint\snippets\compute-orientation-log-delta-v1.eddgraph',
+    'tools\blueprint\snippets\compute-orientation-log-delta-v1-paste.eddgraph',
+    'tools\blueprint\snippets\compute-orientation-tangent-rate-v1.eddgraph',
+    'tools\blueprint\snippets\compute-orientation-tangent-rate-v1-paste.eddgraph',
+    'tools\blueprint\snippets\build-orientation-segment-controls-v1.eddgraph',
+    'tools\blueprint\snippets\build-orientation-segment-controls-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\compute-orientation-log-delta-v1.eddgraph',
+    'tools\blueprint\live-snippets\compute-orientation-tangent-rate-v1.eddgraph',
+    'tools\blueprint\live-snippets\build-orientation-segment-controls-v1.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
     'tools\history\draft_history.py',
@@ -666,6 +683,60 @@ $trajectoryQuaternionLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippet
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-TrajectoryQuaternionEvaluatorContracts.py') `
     --project-root $ProjectRoot --graph $trajectoryQuaternionLive
 if ($LASTEXITCODE -ne 0) { throw "Trajectory quaternion live-graph contracts failed with exit code $LASTEXITCODE." }
+
+$orientationCompilerNonce = [guid]::NewGuid().ToString('N')
+$orientationCompilerRoot = Join-Path $scratchRoot "edd-orientation-compiler-$orientationCompilerNonce"
+$orientationCompilerNative = Join-Path $orientationCompilerRoot 'native-node-forms.eddgraph'
+$orientationCompilerFull = Join-Path $orientationCompilerRoot 'full'
+$orientationCompilerPaste = Join-Path $orientationCompilerRoot 'paste'
+$orientationCompilerRepeatFull = Join-Path $orientationCompilerRoot 'repeat-full'
+$orientationCompilerRepeatPaste = Join-Path $orientationCompilerRoot 'repeat-paste'
+foreach ($path in @($orientationCompilerFull, $orientationCompilerPaste, $orientationCompilerRepeatFull, $orientationCompilerRepeatPaste)) {
+    New-Item -ItemType Directory -Path $path -Force | Out-Null
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py') `
+    --project-root $ProjectRoot --output $orientationCompilerNative
+if ($LASTEXITCODE -ne 0) { throw "Orientation compiler native-node generation failed with exit code $LASTEXITCODE." }
+$orientationCompilerNativeChecked = Join-Path $ProjectRoot 'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph'
+if ((Get-FileHash -Algorithm SHA256 $orientationCompilerNative).Hash -ne (Get-FileHash -Algorithm SHA256 $orientationCompilerNativeChecked).Hash) {
+    throw "Orientation compiler checked-in native-node forms have drifted: $orientationCompilerNativeChecked"
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-OrientationCompilerGraphs.py') `
+    --project-root $ProjectRoot --output-dir $orientationCompilerFull --paste-dir $orientationCompilerPaste
+if ($LASTEXITCODE -ne 0) { throw "Orientation compiler graph generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-OrientationCompilerGraphs.py') `
+    --project-root $ProjectRoot --output-dir $orientationCompilerRepeatFull --paste-dir $orientationCompilerRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated orientation compiler graph generation failed with exit code $LASTEXITCODE." }
+$orientationCompilerStems = @(
+    'compute-orientation-log-delta-v1',
+    'compute-orientation-tangent-rate-v1',
+    'build-orientation-segment-controls-v1'
+)
+foreach ($stem in $orientationCompilerStems) {
+    foreach ($suffix in @('.eddgraph', '-paste.eddgraph')) {
+        $generatedRoot = if ($suffix -eq '.eddgraph') { $orientationCompilerFull } else { $orientationCompilerPaste }
+        $repeatRoot = if ($suffix -eq '.eddgraph') { $orientationCompilerRepeatFull } else { $orientationCompilerRepeatPaste }
+        $generated = Join-Path $generatedRoot "$stem$suffix"
+        $repeated = Join-Path $repeatRoot "$stem$suffix"
+        $checked = Join-Path $ProjectRoot "tools\blueprint\snippets\$stem$suffix"
+        if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $repeated).Hash) {
+            throw "Orientation compiler graph generation is not deterministic: $generated"
+        }
+        if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+            throw "Orientation compiler checked-in graph has drifted: $checked"
+        }
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationCompilerContracts.py') `
+    --project-root $ProjectRoot --input-dir $orientationCompilerFull
+if ($LASTEXITCODE -ne 0) { throw "Orientation compiler full-graph contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationCompilerContracts.py') `
+    --project-root $ProjectRoot --input-dir $orientationCompilerPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Orientation compiler paste-graph contracts failed with exit code $LASTEXITCODE." }
+$orientationCompilerLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationCompilerContracts.py') `
+    --project-root $ProjectRoot --input-dir $orientationCompilerLive
+if ($LASTEXITCODE -ne 0) { throw "Orientation compiler exact post-compile contracts failed with exit code $LASTEXITCODE." }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
 if ($LASTEXITCODE -ne 0) {

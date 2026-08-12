@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.56.0-trajectory-quaternion`
+Current internal build: `0.57.0-orientation-compiler`
 
 ## 1. Delivery strategy
 
@@ -28,7 +28,7 @@ This section is the authoritative handoff. Detailed evidence remains in
 `devkit-findings.md`; exact clipboard procedure remains in
 `blueprint-workflow.md`.
 
-### Cinematic scalar/vector/quaternion evaluator checkpoint
+### Cinematic scalar/vector/quaternion evaluator and control-compiler checkpoint
 
 - `EvaluateTimeProfileV1` and `EvaluateQuinticScalarV1` are compiled and saved
   on `BPC_EDD_ClientDirector`. The first evaluates six bounded monotonic timing
@@ -61,10 +61,21 @@ This section is the authoritative handoff. Detailed evidence remains in
   post-compile live graph each pass 707 valid and 19 invalid fixtures. Warm and
   fresh NullRHI compiled execution repeat those counts with zero reflection
   sanitization and restore every staged class-default property.
-- This checkpoint completes the per-segment orientation evaluator only.
-  Quaternion control compilation, segment/route evaluation, arc-length compilation,
-  lens/focus/effect tracks, shortcut dogfood, polished UI, cook, and Workshop
-  remain ordered work.
+- `ComputeOrientationLogDeltaV1`, `ComputeOrientationTangentRateV1`, and
+  `BuildOrientationSegmentControlsV1` now compile the sign-aligned log-space
+  delta, bounded time-domain angular tangent rate, and spherical Bezier control
+  quaternions for one segment. The exact saved graphs contain 26, 85, and 76
+  executable Blueprint nodes respectively.
+- Deterministic source and paste graphs pass 554 valid plus 18 invalid fixtures;
+  exact post-compile exports repeat the full suite. Warm and fresh compiled
+  execution pass 142 valid plus 16 invalid cases, including zero/non-unit
+  endpoint quaternions and invalid durations, while restoring every staged CDO
+  property. Maximum observed errors are `1.604e-7` for log vectors,
+  `9.357e-13` for tangent vectors, and `2.724e-7` radians for controls.
+- This checkpoint completes the per-segment quaternion evaluator and its
+  control primitives only. Multi-key assembly, segment/route evaluation,
+  arc-length compilation, lens/focus/effect tracks, shortcut dogfood, polished
+  UI, cook, and Workshop remain ordered work.
 
 ### Cinematic orientation oracle checkpoint
 
@@ -77,9 +88,10 @@ This section is the authoritative handoff. Detailed evidence remains in
   unit outputs without sample sign flips, history-independent scrubbing,
   deterministic compilation, invalid-input rejection, and 100 seeded
   adversarial tracks.
-- This remains the frozen target for the upcoming multi-key quaternion control
-  compiler. The per-segment spherical evaluator now implements its runtime
-  kernel; track control compilation remains ordered work.
+- This remains the frozen target for multi-key track assembly. The per-segment
+  spherical evaluator and its log/tangent/control primitives now implement the
+  mathematical kernel; deterministic waypoint-to-segment assembly remains
+  ordered work.
 
 ### Live in the Enhanced DevKit
 

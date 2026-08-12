@@ -340,6 +340,16 @@ both physical SaveGame slots unchanged. Fresh-process recovery proves the
 owner/visibility boundary, attribution, bidirectional independence, continued
 clone editing, and cleanup.
 
+The cinematic math backend now includes compiled scalar timing/quintic kernels,
+atomic X/Y/Z quintic composition, spherical cubic quaternion evaluation, and
+the quaternion control primitives that sign-align endpoints, compute bounded
+time-domain angular tangents, and build segment control quaternions. Exact
+post-compile Blueprint exports, executable serialized-graph oracles, warm
+compiled execution, fresh NullRHI execution, cold asset loading, and state
+restoration are green for this slice. Multi-key/route assembly, arc-length
+integration, the remaining cinematic tracks and shortcut dogfood are still
+ordered backend work; this is not a completed mod, UI, cook, or Workshop gate.
+
 ## Repository layout
 
 - `project.json` — stable project identity and first-slice asset contract.

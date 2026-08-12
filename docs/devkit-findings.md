@@ -3184,3 +3184,49 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   engine or mod. Next is the time-aware multi-key quaternion control compiler,
   followed by segment/route and arc-length integration. UI, cook, and Workshop
   remain out of scope.
+
+## Quaternion orientation controls accepted (2026-08-12)
+
+- Internal checkpoint `0.57.0-orientation-compiler` adds compiled
+  `ComputeOrientationLogDeltaV1`, `ComputeOrientationTangentRateV1`, and
+  `BuildOrientationSegmentControlsV1` to `BPC_EDD_ClientDirector`. Quaternion
+  values remain native Quats; logarithmic deltas and angular rates use Vectors.
+  Controls are built through native `Quat_SetComponents` scratch variables and
+  `Quat_Exp`, avoiding the invalid reflected Make Quat struct node.
+- Exact post-compile graphs contain 26, 85, and 76 Blueprint nodes. Their
+  SHA-256 values are `AB16B8F030C7CE3495896ED27CBCEF5525F34A360F5B0FC2433B2FB2FA303FCD`,
+  `BA229EB5F9CA1131C508CC005B3414E3B75CAE0E2F2BC567715CD51BC115B708`,
+  and `3E9B94DE0259675272D976F1FE74176227F230C665F8E8BA83CE25B185171A78`.
+  Full and paste executable contracts pass 554 valid plus 18 invalid fixtures;
+  the exact post-compile exports repeat the full suite.
+- Warm and fresh compiled execution pass 142 valid and 16 invalid cases with
+  stale-output clearing and full CDO restoration. Maximum observed errors are
+  `1.6038519136203196e-07` (log Vector),
+  `9.356918024671317e-13` (tangent Vector), and
+  `2.7236137991954443e-07` radians (control Quat). The `1e-6` runtime tolerance
+  is therefore a measured engine-precision boundary, not an algorithm waiver.
+- Pure Blueprint math is eagerly evaluated. A conditional scale expression
+  still emitted divide-by-zero warnings on a zero tangent, so the accepted
+  denominator is `magnitude + 1e-12`; the semantic zero path stays exact and
+  the warning disappears. A synthetic `Max_DoubleDouble` retarget was rejected
+  during paste; reuse a known serialized arithmetic form instead of inventing
+  an unproven function reference.
+- Graph movement is now bounded and observable through
+  `Move-SelectedBlueprintNode.ps1`: it reads the selected node back after every
+  grid-aligned drag, requires convergence, and can require a stable node marker
+  so overlapping nodes cannot silently transfer selection. Move native entries
+  into an empty lane before connecting them; never drag them through the dense
+  computation field.
+- Coordinate-based search failed after the saved layout changed: text was typed
+  into the graph and created one unsaved comment. The transaction was undone,
+  exact 26/85/76 exports proved restoration, and the durable path is now
+  `Open-BlueprintFunctionViaFindResults.ps1`, which explicitly submits the Find
+  Results query and opens the exact result. Do not use the older fixed search
+  coordinates on this layout.
+- Compile/save, warm runtime, guarded editor exit, exact post-compile contracts,
+  closed-editor mirror equality, fresh NullRHI runtime, and cold core-asset load
+  all pass. Live/mirror Client Director SHA-256 is
+  `71EFD4779C6B526C9E006664B0E9C852A446A9188CF16BA39D82AA7D57793952`.
+  This completes only the per-segment control primitives. Multi-key assembly,
+  route/arc-length integration, cinematic tracks, keyboard dogfood, UI, cook,
+  and Workshop remain out of scope.

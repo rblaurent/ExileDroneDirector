@@ -319,7 +319,12 @@ reads, deterministic recovery, the two-phase writer, owner-only private draft
 loading, private-by-default creation, owner-only optimistic private saving,
 owner-filtered metadata listing, owner-only optimistic delete, owner-only
 optimistic publication, and history-preserving owner-only unpublish are
-accepted. Public discovery is the next runtime milestone.
+accepted. Bounded, deterministic, metadata-only public discovery is accepted
+too: private derived rows are never decoded or disclosed, selected public rows
+are revalidated against the full stored record, result pages carry no document
+payloads or durable owner account IDs, and fresh SaveGame recovery preserves
+the same read-only ordering and privacy boundary. Immutable published playback
+fetch is the next runtime milestone.
 
 ## Repository layout
 

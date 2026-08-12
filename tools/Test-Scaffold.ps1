@@ -78,6 +78,8 @@ $requiredFiles = @(
     'tools\unreal\Validate-RepositoryPublishDraftRestart.py',
     'tools\unreal\Validate-RepositoryUnpublish.py',
     'tools\unreal\Validate-RepositoryUnpublishRestart.py',
+    'tools\unreal\Validate-RepositoryPublicList.py',
+    'tools\unreal\Validate-RepositoryPublicListRestart.py',
     'tools\unreal\Enable-EnhancedEditorRemoteExecution.ps1',
     'tools\unreal\Test-EnhancedEditorRemoteExecutionConfig.ps1',
     'tools\unreal\Get-EnhancedEditorWindows.ps1',
@@ -120,6 +122,7 @@ $requiredFiles = @(
     'tools\blueprint\Build-RepositoryPrivateCreateGraph.py',
     'tools\blueprint\Build-RepositoryPrivateSaveGraph.py',
     'tools\blueprint\Build-RepositoryPrivateListGraph.py',
+    'tools\blueprint\Build-RepositoryPublicListGraph.py',
     'tools\blueprint\Build-RepositoryPrivateDeleteGraph.py',
     'tools\blueprint\Build-RepositoryPublishDraftGraph.py',
     'tools\blueprint\Build-RepositoryUnpublishGraph.py',
@@ -161,6 +164,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryPrivateCreateContracts.py',
     'tools\blueprint\Test-RepositoryPrivateSaveContracts.py',
     'tools\blueprint\Test-RepositoryPrivateListContracts.py',
+    'tools\blueprint\Test-RepositoryPublicListContracts.py',
     'tools\blueprint\Test-RepositoryPrivateDeleteContracts.py',
     'tools\blueprint\Test-RepositoryPublishDraftContracts.py',
     'tools\blueprint\Test-RepositoryUnpublishContracts.py',
@@ -1491,6 +1495,53 @@ foreach ($graph in @(
     --input-dir $repositoryCoreLive
 if ($LASTEXITCODE -ne 0) {
     throw "Repository private-list live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryPublicListNonce = [guid]::NewGuid().ToString('N')
+$repositoryPublicListRoot = Join-Path $scratchRoot "edd-repository-public-list-$repositoryPublicListNonce"
+$repositoryPublicListFull = Join-Path $repositoryPublicListRoot 'full'
+$repositoryPublicListPaste = Join-Path $repositoryPublicListRoot 'paste'
+New-Item -ItemType Directory -Force -Path $repositoryPublicListFull, $repositoryPublicListPaste | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryPublicListGraph.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryPublicListFull `
+    --paste-dir $repositoryPublicListPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository public-list graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryPublicListFull, $repositoryPublicListPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPublicListContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPublicListFull 'list-public-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository public-list full contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPublicListContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPublicListPaste 'list-public-v1-paste.eddgraph') `
+    --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository public-list paste contracts failed with exit code $LASTEXITCODE."
+}
+foreach ($pair in @(
+    @((Join-Path $repositoryPublicListFull 'list-public-v1.eddgraph'), 'tools\blueprint\snippets\list-public-v1.eddgraph'),
+    @((Join-Path $repositoryPublicListPaste 'list-public-v1-paste.eddgraph'), 'tools\blueprint\snippets\list-public-v1-paste.eddgraph')
+)) {
+    $checkedIn = Join-Path $ProjectRoot $pair[1]
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $pair[0]).Hash -ne
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $checkedIn).Hash) {
+        throw "Repository public-list graph is not deterministic: $($pair[1])"
+    }
+}
+$repositoryPublicListLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets\list-public-v1.eddgraph'
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $repositoryPublicListLive
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPublicListContracts.py') `
+    --project-root $ProjectRoot `
+    --input $repositoryPublicListLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository public-list live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 
 $repositoryPrivateDeleteNonce = [guid]::NewGuid().ToString('N')

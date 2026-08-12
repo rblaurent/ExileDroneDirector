@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.50.0-unpublish`
+Current internal build: `0.51.0-public-discovery`
 
 ## 1. Delivery strategy
 
@@ -523,22 +523,28 @@ before any polished editor UI or cook is attempted:
    it makes the record private while retaining the immutable published snapshot
    and draft history, uses the same owner/revision boundary and A/B writer, and
    survives fresh recovery plus resumed publish/unpublish writes.
-6. **Current:** add public discovery, immutable playback fetch, and private
-   cloning with attribution. Extend corruption recovery, limits, migration
-   hooks, and typed failures across each sharing boundary.
-7. Implement the complete trajectory compiler: linear and cinematic curves,
+6. **Complete for discovery:** `ListPublicV1` exposes only bounded metadata
+   for records whose derived and decoded visibility are both public. It reuses
+   the accepted deterministic `(updatedUtc, flypathId)` ordering and paging,
+   clamps limits to 1..100, atomically rejects selected-record corruption or
+   index disagreement, never decodes private rows, performs no writes, and
+   preserves the same result after a fresh SaveGame recovery.
+7. **Current:** add immutable playback fetch and private cloning with
+   attribution. Extend corruption recovery, limits, migration hooks, and typed
+   failures across each sharing boundary.
+8. Implement the complete trajectory compiler: linear and cinematic curves,
    monotonic timing/speed profiles, smooth quaternion rotation, flight profiles,
    deterministic sampling, and discontinuity diagnostics.
-8. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
+9. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
    event tracks with bounded target adapters and authorization.
-9. Expose every backend operation through temporary shortcuts, compact debug
+10. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.
-10. Run an attended end-to-end keyboard/debug dogfood pass. Only after that pass
+11. Run an attended end-to-end keyboard/debug dogfood pass. Only after that pass
    may polished library/editor/timeline UX begin.
-11. Cook/package only after the full backend prototype and its dogfood workflow
+12. Cook/package only after the full backend prototype and its dogfood workflow
    are accepted. Workshop and G-Portal remain later deployment gates.
-12. Close, sync, run the complete repository suite, commit, and push after every
+13. Close, sync, run the complete repository suite, commit, and push after every
    meaningful compiled feature milestone.
 
 ### UX investment gate

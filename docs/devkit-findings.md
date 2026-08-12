@@ -2917,3 +2917,39 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Public discovery is the next ordered sharing slice, followed by immutable
   published fetch and private clone with attribution. No polished UI, cook, or
   Workshop work begins at this checkpoint.
+
+## Bounded metadata-only public discovery accepted (2026-08-12)
+
+- Internal checkpoint `0.51.0-public-discovery` adds compiled `ListPublicV1`
+  as a 145-node query. Its generator transforms the accepted `ListMineV1`
+  graph, retaining one implementation lineage for ordinal sorting, paging,
+  selected-record decoding/validation, metadata encoding, and atomic failure.
+  The transform removes requester input entirely and replaces owner filtering
+  and authorization with derived-plus-decoded public visibility checks.
+- Public results are deterministically ordered by `(updatedUtc, flypathId)`
+  descending, offsets are clamped nonnegative, limits are clamped to 1..100,
+  and every page reports total/offset/has-more without carrying draft or
+  published documents, descriptions, or durable owner account IDs.
+- Executable acceptance created five records through `CreatePrivateFlypathV1`,
+  published three through `PublishDraftV1`, and hid one through
+  `UnpublishV1`. It proved exact ordering, low/high clamps, middle and
+  beyond-end pages, metadata shape, private-row non-disclosure, ignored corrupt
+  private payloads, atomic selected-public decode and identity failures,
+  derived-private hiding, aligned-index failure, and byte-identical authority
+  plus physical A/B SaveGame state around every query.
+- A fresh `-ModDevKit -NullRHI` process recovered generation 9/A, returned
+  exactly the two still-public records in deterministic order, repeated the
+  read-only physical-state proof, and cleaned both acceptance slots. A separate
+  cold process loaded and compiled all nine core assets with
+  `EDD_COLD_LOAD|RESULT|PASS`.
+- Deterministic graph hashes are
+  `E3797B800A32BE951BC7BD6EF4C6827745B3A28D2020ED38A34F0AD035E29473`
+  (full) and
+  `2615D6840B5ABF8FEF71718ECD02CF7F2F9A1819ABBD089BD5C431733079F06E`
+  (paste). The exact post-compile live export hash is
+  `97DDF84500DF12EBBD4A2818EEC57B4F601A8091E8B49785652A038E965A7879`;
+  synchronized live/mirror package hash is
+  `ED905741A83736ADBD16E3C661C3560958DE349AFFE0C95772227C21D40DBDFB`.
+- Immutable published playback fetch is the next ordered backend slice,
+  followed by private clone with attribution. No polished UI, cook, or Workshop
+  work begins at this checkpoint.

@@ -235,6 +235,7 @@ class BlueprintRepositoryServiceSchemaContracts(unittest.TestCase):
             "SaveDraftV1",
             "LoadDraftV1",
             "ListMineV1",
+            "ListPublicV1",
             "DeleteFlypathV1",
             "PublishDraftV1",
             "UnpublishV1",

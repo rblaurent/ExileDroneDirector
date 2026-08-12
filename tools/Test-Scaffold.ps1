@@ -105,6 +105,8 @@ $requiredFiles = @(
     'tools\trajectory\test_cinematic_reference.py',
     'tools\trajectory\orientation_reference.py',
     'tools\trajectory\test_orientation_reference.py',
+    'tools\trajectory\orientation_blueprint_schema.json',
+    'tools\trajectory\test_orientation_blueprint_schema.py',
     'tools\unreal\Configure-TrajectoryScalarEvaluators.py',
     'tools\unreal\Compile-And-SaveClientDirector.py',
     'tools\unreal\Open-ClientDirectorEditor.py',
@@ -130,12 +132,18 @@ $requiredFiles = @(
     'tools\blueprint\snippets\evaluate-spherical-bezier-quaternion-v1-paste.eddgraph',
     'tools\blueprint\live-snippets\evaluate-spherical-bezier-quaternion-v1.eddgraph',
     'tools\unreal\Configure-OrientationCompiler.py',
+    'tools\unreal\Configure-OrientationTrackAssembly.py',
     'tools\unreal\Validate-OrientationCompilerRuntime.py',
+    'tools\unreal\Validate-OrientationTrackValidationRuntime.py',
     'tools\unreal\Move-SelectedBlueprintNode.ps1',
     'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
     'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
     'tools\blueprint\Build-OrientationCompilerGraphs.py',
     'tools\blueprint\Test-OrientationCompilerContracts.py',
+    'tools\blueprint\Build-OrientationTrackResetGraph.py',
+    'tools\blueprint\Test-OrientationTrackResetContracts.py',
+    'tools\blueprint\Build-OrientationTrackValidationGraph.py',
+    'tools\blueprint\Test-OrientationTrackValidationContracts.py',
     'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1-paste.eddgraph',
@@ -146,6 +154,10 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\compute-orientation-log-delta-v1.eddgraph',
     'tools\blueprint\live-snippets\compute-orientation-tangent-rate-v1.eddgraph',
     'tools\blueprint\live-snippets\build-orientation-segment-controls-v1.eddgraph',
+    'tools\blueprint\snippets\reset-orientation-track-candidate-v1.eddgraph',
+    'tools\blueprint\snippets\reset-orientation-track-candidate-v1-paste.eddgraph',
+    'tools\blueprint\snippets\validate-orientation-track-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-orientation-track-inputs-v1-paste.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
     'tools\history\draft_history.py',
@@ -575,6 +587,10 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Cinematic orientation reference contracts failed with exit code $LASTEXITCODE."
 }
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_orientation_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Orientation Blueprint assembly-schema contracts failed with exit code $LASTEXITCODE."
+}
 
 $trajectoryScalarNonce = [guid]::NewGuid().ToString('N')
 $trajectoryScalarRoot = Join-Path $scratchRoot "edd-trajectory-scalar-$trajectoryScalarNonce"
@@ -737,6 +753,42 @@ $orientationCompilerLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationCompilerContracts.py') `
     --project-root $ProjectRoot --input-dir $orientationCompilerLive
 if ($LASTEXITCODE -ne 0) { throw "Orientation compiler exact post-compile contracts failed with exit code $LASTEXITCODE." }
+
+$orientationResetFull = Join-Path $orientationCompilerRoot 'reset-orientation-track-candidate-v1.eddgraph'
+$orientationResetPaste = Join-Path $orientationCompilerRoot 'reset-orientation-track-candidate-v1-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-OrientationTrackResetGraph.py') `
+    --project-root $ProjectRoot --output $orientationResetFull --paste-output $orientationResetPaste
+if ($LASTEXITCODE -ne 0) { throw "Orientation track reset graph generation failed with exit code $LASTEXITCODE." }
+foreach ($generated in @($orientationResetFull, $orientationResetPaste)) {
+    $checked = Join-Path $ProjectRoot "tools\blueprint\snippets\$([IO.Path]::GetFileName($generated))"
+    if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+        throw "Orientation track reset checked-in graph has drifted: $checked"
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackResetContracts.py') `
+    --project-root $ProjectRoot --graph $orientationResetFull
+if ($LASTEXITCODE -ne 0) { throw "Orientation track reset full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackResetContracts.py') `
+    --project-root $ProjectRoot --graph $orientationResetPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Orientation track reset paste contracts failed with exit code $LASTEXITCODE." }
+
+$orientationValidationFull = Join-Path $orientationCompilerRoot 'validate-orientation-track-inputs-v1.eddgraph'
+$orientationValidationPaste = Join-Path $orientationCompilerRoot 'validate-orientation-track-inputs-v1-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-OrientationTrackValidationGraph.py') `
+    --project-root $ProjectRoot --output $orientationValidationFull --paste-output $orientationValidationPaste
+if ($LASTEXITCODE -ne 0) { throw "Orientation track validation graph generation failed with exit code $LASTEXITCODE." }
+foreach ($generated in @($orientationValidationFull, $orientationValidationPaste)) {
+    $checked = Join-Path $ProjectRoot "tools\blueprint\snippets\$([IO.Path]::GetFileName($generated))"
+    if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+        throw "Orientation track validation checked-in graph has drifted: $checked"
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackValidationContracts.py') `
+    --project-root $ProjectRoot --graph $orientationValidationFull
+if ($LASTEXITCODE -ne 0) { throw "Orientation track validation full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackValidationContracts.py') `
+    --project-root $ProjectRoot --graph $orientationValidationPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Orientation track validation paste contracts failed with exit code $LASTEXITCODE." }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
 if ($LASTEXITCODE -ne 0) {

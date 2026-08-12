@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.57.0-orientation-compiler`
+Current internal build: `0.58.0-orientation-track-boundary`
 
 ## 1. Delivery strategy
 
@@ -92,6 +92,21 @@ This section is the authoritative handoff. Detailed evidence remains in
   spherical evaluator and its log/tangent/control primitives now implement the
   mathematical kernel; deterministic waypoint-to-segment assembly remains
   ordered work.
+- The next Blueprint boundary is frozen in
+  `tools/trajectory/orientation_blueprint_schema.json`: nine small ordered
+  stages validate, align, compute deltas/rates/controls, atomically commit, and
+  evaluate by absolute time. Candidate arrays are deliberately separate from
+  compiled arrays so no failed loop can expose a partial track.
+- The first two assembly stages are now compiled: a 34-node fail-closed reset
+  clears every candidate, compiled, and evaluation channel, and a 29-node
+  validator enforces `2..512` keys, exact `durations = keys - 1`, finite
+  nonzero normalizable quaternions, and finite positive durations. Exact
+  source/paste/post-compile contracts pass. Compiled runtime passes 4 valid
+  boundary cases and 13 malformed/edge cases, including maximum cardinality
+  and earlier-invalid/later-valid monotonic failure, with CDO restoration.
+- This is a boundary checkpoint, not completed multi-key compilation. Alignment,
+  deltas, rates, controls, atomic commit, and absolute-time evaluation remain
+  the next ordered stages.
 
 ### Live in the Enhanced DevKit
 

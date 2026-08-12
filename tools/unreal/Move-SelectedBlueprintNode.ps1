@@ -34,10 +34,15 @@ function Get-SelectedNodePosition {
     }
     $xMatches = [regex]::Matches($clipboard, '(?m)^\s*NodePosX=(-?\d+)\s*$')
     $yMatches = [regex]::Matches($clipboard, '(?m)^\s*NodePosY=(-?\d+)\s*$')
-    if ($xMatches.Count -ne 1 -or $yMatches.Count -ne 1) {
+    # Unreal omits zero-valued NodePos fields from a copied native entry. An
+    # absent axis is therefore exactly zero, while duplicate fields remain an
+    # invalid multi-node selection.
+    if ($xMatches.Count -gt 1 -or $yMatches.Count -gt 1) {
         throw "Expected exactly one selected Blueprint node; clipboard contained $($xMatches.Count) X positions and $($yMatches.Count) Y positions."
     }
-    return @([int]$xMatches[0].Groups[1].Value, [int]$yMatches[0].Groups[1].Value)
+    $x = if ($xMatches.Count -eq 1) { [int]$xMatches[0].Groups[1].Value } else { 0 }
+    $y = if ($yMatches.Count -eq 1) { [int]$yMatches[0].Groups[1].Value } else { 0 }
+    return @($x, $y)
 }
 
 if (($TargetX % 16) -ne 0 -or ($TargetY % 16) -ne 0) {

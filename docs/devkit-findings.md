@@ -3109,3 +3109,42 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   contracts, and the 17-file source mirror. This accepts only the scalar
   trajectory kernel; vector position composition and quaternion orientation are
   the next ordered backend work. UI, cook, and Workshop remain out of scope.
+
+## Compiled quintic vector composition accepted (2026-08-12)
+
+- Internal checkpoint `0.55.0-trajectory-vector` adds the compiled and saved
+  `EvaluateQuinticVectorV1` wrapper on `BPC_EDD_ClientDirector`. Six native
+  vector boundary members are split into X/Y/Z, evaluated through the accepted
+  scalar quintic kernel with one shared alpha, staged in nine scalar scratch
+  members, and committed atomically as position plus first and second
+  derivatives only after all axes report valid.
+- Native Blueprint member creation must use
+  `/Script/CoreUObject.Vector` with `get_struct_type`. Passing the primitive
+  name `vector` to `get_basic_type_by_name` is unsupported in Enhanced 5.6 and
+  silently defaults to integer. The failed configuration process never saved;
+  the corrected process verified every native vector default before saving.
+- The deterministic source graph is 78 nodes/296 pins and the entryless paste
+  body is 77 nodes/295 pins. Full and paste forms pass 103 valid and all 57
+  non-finite-placement executable fixtures. The exact Unreal post-compile
+  export remains 78 nodes, has a reciprocal native entry seam and zero
+  `K2Node_Knot` nodes, and has SHA-256
+  `788DAB6DDEDA3CBE9865AE50C2DC935AB40E5AFDAD98639166652293167039A9`.
+- Live compiled runtime passed 67 deterministic/boundary vector trajectories.
+  Of 57 attempted non-finite placements, all 39 values that reached Blueprint
+  were rejected with cleared outputs. Enhanced's Python property bridge
+  sanitized the other 18 non-finite native-vector components to finite values
+  before Blueprint execution; the permanent harness reads properties back and
+  reports those cases separately. The independent serialized-graph interpreter
+  still exercises and rejects all 57 placements. Both live and fresh NullRHI
+  runs restore every touched class-default property in `finally`.
+- Guarded editor quit completed cleanly. A separate NullRHI process loaded and
+  compiled every core asset with zero errors, and another fresh process repeated
+  the exact 67/39/18/PASS runtime markers. Closed-editor mirror preview found
+  16 unchanged assets and only the reviewed Client Director conflict; forced
+  sync copied exactly one package, after which all 17 files were unchanged.
+  Live and mirror package SHA-256 is
+  `A6F5EBEECD1D5536194A9B33DE2CFA4E439AF25F0C72AFC0CB88D2B6D44D7057`.
+- This accepts vector position composition, not the complete trajectory engine.
+  Quaternion orientation is the next ordered backend slice. Segment/route
+  compilation, arc-length inversion, runtime shortcut dogfood, UI, cook, and
+  Workshop remain out of scope.

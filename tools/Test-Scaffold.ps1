@@ -111,6 +111,12 @@ $requiredFiles = @(
     'tools\blueprint\Test-TrajectoryScalarEvaluatorContracts.py',
     'tools\blueprint\snippets\evaluate-time-profile-v1.eddgraph',
     'tools\blueprint\snippets\evaluate-quintic-scalar-v1.eddgraph',
+    'tools\unreal\Configure-TrajectoryVectorEvaluator.py',
+    'tools\unreal\Validate-TrajectoryVectorEvaluatorRuntime.py',
+    'tools\blueprint\Build-TrajectoryVectorEvaluatorGraph.py',
+    'tools\blueprint\Test-TrajectoryVectorEvaluatorContracts.py',
+    'tools\blueprint\snippets\evaluate-quintic-vector-v1.eddgraph',
+    'tools\blueprint\live-snippets\evaluate-quintic-vector-v1.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
     'tools\history\draft_history.py',
@@ -563,6 +569,36 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Trajectory scalar paste-graph contracts failed with exit code $LASTEXITCODE."
 }
+
+$trajectoryVectorRoot = Join-Path $scratchRoot "edd-trajectory-vector-$trajectoryScalarNonce"
+$trajectoryVectorFull = Join-Path $trajectoryVectorRoot 'evaluate-quintic-vector-v1.eddgraph'
+$trajectoryVectorPaste = Join-Path $trajectoryVectorRoot 'evaluate-quintic-vector-v1-paste.eddgraph'
+$trajectoryVectorRepeat = Join-Path $trajectoryVectorRoot 'evaluate-quintic-vector-v1-repeat.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-TrajectoryVectorEvaluatorGraph.py') `
+    --project-root $ProjectRoot --output $trajectoryVectorFull --paste-output $trajectoryVectorPaste
+if ($LASTEXITCODE -ne 0) { throw "Trajectory vector graph generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-TrajectoryVectorEvaluatorGraph.py') `
+    --project-root $ProjectRoot --output $trajectoryVectorRepeat
+if ($LASTEXITCODE -ne 0) { throw "Repeated trajectory vector graph generation failed with exit code $LASTEXITCODE." }
+$trajectoryVectorChecked = Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-quintic-vector-v1.eddgraph'
+foreach ($comparison in @($trajectoryVectorRepeat, $trajectoryVectorChecked)) {
+    if ((Get-FileHash -Algorithm SHA256 $trajectoryVectorFull).Hash -ne (Get-FileHash -Algorithm SHA256 $comparison).Hash) {
+        throw "Trajectory vector graph is not deterministic or has drifted."
+    }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $trajectoryVectorFull
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $trajectoryVectorPaste
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-TrajectoryVectorEvaluatorContracts.py') `
+    --project-root $ProjectRoot --vector-path $trajectoryVectorFull
+if ($LASTEXITCODE -ne 0) { throw "Trajectory vector full-graph contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-TrajectoryVectorEvaluatorContracts.py') `
+    --project-root $ProjectRoot --vector-path $trajectoryVectorPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Trajectory vector paste-graph contracts failed with exit code $LASTEXITCODE." }
+$trajectoryVectorLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets\evaluate-quintic-vector-v1.eddgraph'
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $trajectoryVectorLive
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-TrajectoryVectorEvaluatorContracts.py') `
+    --project-root $ProjectRoot --vector-path $trajectoryVectorLive
+if ($LASTEXITCODE -ne 0) { throw "Trajectory vector live-graph contracts failed with exit code $LASTEXITCODE." }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
 if ($LASTEXITCODE -ne 0) {

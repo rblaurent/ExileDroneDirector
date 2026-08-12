@@ -58,11 +58,20 @@ def retarget_function(node, member: str) -> None:
 
 def set_pin_type(node, pin: str, kind: str) -> None:
     category, subcategory = {
-        "bool": ("bool", ""), "real": ("real", "double"), "string": ("string", "")
+        "bool": ("bool", ""), "real": ("real", "double"), "string": ("string", ""),
+        "vector": ("struct", ""),
     }[kind]
     def mutate(line: str) -> str:
         line = re.sub(r'PinType\.PinCategory="[^"]+"', f'PinType.PinCategory="{category}"', line, count=1)
-        return re.sub(r'PinType\.PinSubCategory="[^"]*"', f'PinType.PinSubCategory="{subcategory}"', line, count=1)
+        line = re.sub(r'PinType\.PinSubCategory="[^"]*"', f'PinType.PinSubCategory="{subcategory}"', line, count=1)
+        if kind == "vector":
+            line = re.sub(
+                r'PinType\.PinSubCategoryObject=(?:None|"[^"]+")',
+                'PinType.PinSubCategoryObject="/Script/CoreUObject.ScriptStruct\'/Script/CoreUObject.Vector\'"',
+                line,
+                count=1,
+            )
+        return line
     node.mutate_pin(pin, mutate)
 
 

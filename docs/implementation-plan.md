@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.54.0-trajectory-scalars`
+Current internal build: `0.55.0-trajectory-vector`
 
 ## 1. Delivery strategy
 
@@ -28,7 +28,7 @@ This section is the authoritative handoff. Detailed evidence remains in
 `devkit-findings.md`; exact clipboard procedure remains in
 `blueprint-workflow.md`.
 
-### Cinematic scalar evaluator checkpoint
+### Cinematic scalar/vector evaluator checkpoint
 
 - `EvaluateTimeProfileV1` and `EvaluateQuinticScalarV1` are compiled and saved
   on `BPC_EDD_ClientDirector`. The first evaluates six bounded monotonic timing
@@ -43,9 +43,20 @@ This section is the authoritative handoff. Detailed evidence remains in
   cases and 69 valid/21 invalid quintic cases, restoring all staged properties
   afterward. Deterministic full and paste-form executable graph contracts are
   part of the complete scaffold.
-- This checkpoint is the scalar kernel only. Position-vector composition,
-  quaternion orientation, segment/route evaluation, lens/focus/effect tracks,
-  shortcut dogfood, polished UI, cook, and Workshop remain ordered work.
+- `EvaluateQuinticVectorV1` now composes that scalar kernel across X/Y/Z with
+  one shared alpha. It atomically commits position, first derivative, and
+  second derivative only after all three axes succeed; otherwise it clears all
+  vector outputs and validity. Its exact post-compile graph is 78 nodes with
+  zero reroutes and passes 103 valid plus 57 invalid executable graph fixtures.
+- Live and fresh-process compiled execution independently pass 67 valid vector
+  trajectories and all non-finite values that reach Blueprint. Enhanced's
+  Python reflection sanitizes non-finite components of a native `Vector` before
+  Blueprint execution (18 cases); that boundary is detected and reported by
+  the harness rather than misclassified as evaluator acceptance.
+- This checkpoint completes position-vector composition only. Quaternion
+  orientation, segment/route evaluation, arc-length compilation,
+  lens/focus/effect tracks, shortcut dogfood, polished UI, cook, and Workshop
+  remain ordered work.
 
 ### Live in the Enhanced DevKit
 

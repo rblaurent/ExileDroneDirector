@@ -139,6 +139,7 @@ $requiredFiles = @(
     'tools\unreal\Validate-OrientationForwardDeltasRuntime.py',
     'tools\unreal\Validate-OrientationTrackTangentRatesRuntime.py',
     'tools\unreal\Validate-OrientationTrackSegmentsRuntime.py',
+    'tools\unreal\Validate-OrientationTrackCommitRuntime.py',
     'tools\unreal\Move-SelectedBlueprintNode.ps1',
     'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
     'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
@@ -156,6 +157,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-OrientationTrackTangentRatesContracts.py',
     'tools\blueprint\Build-OrientationTrackSegmentsGraph.py',
     'tools\blueprint\Test-OrientationTrackSegmentsContracts.py',
+    'tools\blueprint\Build-OrientationTrackCommitGraph.py',
+    'tools\blueprint\Test-OrientationTrackCommitContracts.py',
     'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1-paste.eddgraph',
@@ -178,6 +181,9 @@ $requiredFiles = @(
     'tools\blueprint\snippets\compute-orientation-track-tangent-rates-v1-paste.eddgraph',
     'tools\blueprint\snippets\build-orientation-track-segments-v1.eddgraph',
     'tools\blueprint\snippets\build-orientation-track-segments-v1-paste.eddgraph',
+    'tools\blueprint\snippets\commit-compiled-orientation-track-v1.eddgraph',
+    'tools\blueprint\snippets\commit-compiled-orientation-track-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\commit-compiled-orientation-track-v1.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
     'tools\history\draft_history.py',
@@ -881,6 +887,24 @@ if ($LASTEXITCODE -ne 0) { throw "Orientation track segment full contracts faile
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackSegmentsContracts.py') `
     --project-root $ProjectRoot --graph $orientationSegmentsPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Orientation track segment paste contracts failed with exit code $LASTEXITCODE." }
+
+$orientationCommitFull = Join-Path $orientationCompilerRoot 'commit-compiled-orientation-track-v1.eddgraph'
+$orientationCommitPaste = Join-Path $orientationCompilerRoot 'commit-compiled-orientation-track-v1-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-OrientationTrackCommitGraph.py') `
+    --project-root $ProjectRoot --output $orientationCommitFull --paste-output $orientationCommitPaste
+if ($LASTEXITCODE -ne 0) { throw "Orientation track commit graph generation failed with exit code $LASTEXITCODE." }
+foreach ($generated in @($orientationCommitFull, $orientationCommitPaste)) {
+    $checked = Join-Path $ProjectRoot "tools\blueprint\snippets\$([IO.Path]::GetFileName($generated))"
+    if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+        throw "Orientation track commit checked-in graph has drifted: $checked"
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackCommitContracts.py') `
+    --project-root $ProjectRoot --graph $orientationCommitFull
+if ($LASTEXITCODE -ne 0) { throw "Orientation track commit full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackCommitContracts.py') `
+    --project-root $ProjectRoot --graph $orientationCommitPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Orientation track commit paste contracts failed with exit code $LASTEXITCODE." }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
 if ($LASTEXITCODE -ne 0) {

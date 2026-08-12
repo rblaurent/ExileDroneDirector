@@ -3185,6 +3185,37 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   followed by segment/route and arc-length integration. UI, cook, and Workshop
   remain out of scope.
 
+## Atomic orientation track publication accepted (2026-08-12)
+
+- Internal checkpoint `0.63.0-orientation-track-commit` adds compiled
+  `CommitCompiledOrientationTrackV1` to `BPC_EDD_ClientDirector`. It begins by
+  clearing all compiled arrays, total/validity, and evaluation outputs. Only a
+  complete candidate with exact array cardinalities, two or more keys, finite
+  positive durations/total, exact cumulative starts, and an exact accumulated
+  final total is published. Failure leaves no stale or partial compiled track.
+- Deterministic full/paste graphs contain 85/84 nodes; the exact post-compile
+  live export contains 85. Full, paste, and post-compile contracts assert the
+  native entry seam, six resets, full validation chain, sticky-false failure,
+  duration loop, and all six publication copies.
+- Warm and fresh NullRHI compiled runtime each publish 48 seeded candidates
+  with component-exact waypoint/control copies (`0.0` maximum publication
+  error), exact duration/rate/start/total copies, and complete evaluation-result
+  reset. Eleven malformed cases cover prior-invalid state, duration/tangent/
+  start/start-control/end-control cardinality, first and late start corruption,
+  wrong and non-finite total, and zero duration. All clear compiled/evaluation
+  state, set stage false, and restore every touched CDO property afterward.
+- Exact export caught the pasted graph's disconnected native entry before any
+  compile/save. The visible Clear chain was internally connected, but the
+  entry itself was not. Zoom the whole graph, locate the small purple entry and
+  the first Clear, wire the single exec seam, then re-export and require the
+  85-node contract. Spatial proximity is never acceptance evidence.
+- Guarded shutdown emitted `EDITORS_CLOSED|0` and `LogExit: Exiting`; reverse
+  sync copied exactly ClientDirector (16 unchanged). Live/mirror package
+  SHA-256 is
+  `BD82BF4AE047A4BBE2E365CDBDD6AB393E2AE65F6F5383D6DF3F0AA4D95A6BF8`.
+  Fresh runtime and cold compilation of all core assets pass. This accepts only
+  atomic publication; ordered orchestration and absolute-time evaluation remain.
+
 ## Quaternion orientation controls accepted (2026-08-12)
 
 - Internal checkpoint `0.57.0-orientation-compiler` adds compiled

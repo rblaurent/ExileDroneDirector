@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.62.0-orientation-track-segments`
+Current internal build: `0.63.0-orientation-track-commit`
 
 ## 1. Delivery strategy
 
@@ -150,6 +150,26 @@ This section is the authoritative handoff. Detailed evidence remains in
   with full CDO restoration. Live/mirror package SHA-256 is
   `D93720E9BDD1F6777272A41E28B34ED09E5D1BC2360EF3B14E5C742837451F5A`;
   guarded exit, one-package sync, and fresh cold compilation all pass.
+- `CommitCompiledOrientationTrackV1` is now the compiled atomic-publication
+  stage. It resets all six compiled arrays, total/validity, and every evaluation
+  output before validating the complete candidate. Publication requires exact
+  candidate cardinalities, at least two aligned keys, finite positive durations
+  and total, exact cumulative starts, and exact accumulated/candidate totals.
+  Any failure clears the entire compiled/evaluation state and makes stage
+  validity sticky-false; no partial track can become visible.
+- Deterministic source/paste/post-compile contracts contain 85/84/85 nodes.
+  Warm and fresh compiled runtime each publish 48 seeded candidates with exact
+  component-for-component copies of waypoints and both control arrays (maximum
+  publication error `0.0`), exact durations/rates/starts/total, and full result
+  reset. Eleven malformed cases cover prior failure, every array-cardinality
+  family, first/late cumulative-start corruption, wrong/non-finite total, and
+  zero duration; all fail closed with CDO restoration. Live/mirror package
+  SHA-256 is
+  `BD82BF4AE047A4BBE2E365CDBDD6AB393E2AE65F6F5383D6DF3F0AA4D95A6BF8`;
+  guarded exit, one-package sync, fresh runtime, and cold compilation pass.
+- The next ordered slice is the thin `CompileOrientationTrackV1` orchestrator,
+  followed by absolute-time segment evaluation. This checkpoint does not yet
+  claim complete cinematic playback, UI, cook, or Workshop readiness.
 
 ### Live in the Enhanced DevKit
 

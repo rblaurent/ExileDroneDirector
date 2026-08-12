@@ -2953,3 +2953,42 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Immutable published playback fetch is the next ordered backend slice,
   followed by private clone with attribution. No polished UI, cook, or Workshop
   work begins at this checkpoint.
+
+## Immutable published playback fetch accepted (2026-08-12)
+
+- Internal checkpoint `0.52.0-published-fetch` adds compiled
+  `FetchPublishedRevisionV1`. Request revision `0` selects the current published
+  snapshot; a positive revision must match exactly; a negative revision returns
+  `ValidationFailed|InvalidPublishedRevisionRequest`. Private derived rows are
+  hidden as `NotFound|FlypathNotFound` before record decoding.
+- The query validates the selected envelope, record identity, decoded public
+  visibility, published-state flag, and document/revision consistency. It
+  returns only `ResultPublishedDocumentV1`, `ResultCurrentRevisionV1`, and
+  `ResultHasCurrentRevisionV1`; it cannot return the record envelope, private
+  draft, or owner ID and has no writer/persistence call path. The shared result
+  reset now clears the published document as well, preventing stale payload
+  disclosure after a later denial.
+- Live runtime proved private hiding, latest and exact fetch, immutable playback
+  after a materially different private save, negative/wrong/missing revisions,
+  corrupt public storage, derived-private hiding, and selected-row index
+  misalignment. It left a generation-3/slot-A fixture. A fresh headless process
+  recovered it, proved the published snapshot immutable and the query read-only,
+  proved stale-payload reset, then cleaned both A/B slots. A separate fresh
+  process loaded and compiled every core asset with `EDD_COLD_LOAD|RESULT|PASS`.
+- Deterministic graph hashes are
+  `8CC6C608E0C818AD54D88A05CD0398ACD3C12FDCF3FAABBD2E78BC6BD2ABEA5E`
+  (full) and
+  `965276E6DC279C19A7382A71AA36457EE75D7CD8ABD343868D4DB02AFD1846BE`
+  (paste). Exact post-compile live hashes are
+  `EB707AA6F4D01FE9177A5365B520B3EDACA6400ACD5CAD72E7D58A43D0EF927C`
+  for fetch and
+  `4EE6A9504F754118EF939E05DDA85BFB07925D66BD8F247E38FEF0705685FE26`
+  for shared result reset. The synchronized package hash is
+  `3F0E53730C3E072C89DD14B238D2D26439531F45C59B9BAED36D8CD08C3182C6`.
+- The full scaffold caught an obsolete deterministic baseline for
+  `FindRecordIndexV1` after the reset graph gained one node. Regenerating the
+  checked-in full/paste helper snippets restored byte determinism; all semantic
+  contracts and the complete regression then passed. This is a tooling-hygiene
+  correction, not a runtime behavior change.
+- Private clone with attribution is the next ordered backend slice. No polished
+  UI, cook, or Workshop work begins at this checkpoint.

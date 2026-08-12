@@ -50,6 +50,7 @@
     { "name": "ResultTotalCountV1", "type": "Integer", "container": "None", "default": 0 },
     { "name": "ResultHasMoreV1", "type": "Boolean", "container": "None", "default": false },
     { "name": "ResultDraftDocumentV1", "type": "ST_EDD_FlypathDocument", "container": "None" },
+    { "name": "ResultPublishedDocumentV1", "type": "ST_EDD_FlypathDocument", "container": "None" },
 
     { "name": "ScratchRootJsonV1", "type": "PlayFabJsonObject", "container": "None" },
     { "name": "ScratchNestedJsonV1", "type": "PlayFabJsonObject", "container": "None" },
@@ -236,6 +237,7 @@
     "LoadDraftV1",
     "ListMineV1",
     "ListPublicV1",
+    "FetchPublishedRevisionV1",
     "DeleteFlypathV1",
     "PublishDraftV1",
     "UnpublishV1"

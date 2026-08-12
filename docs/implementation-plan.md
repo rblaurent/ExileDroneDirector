@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.51.0-public-discovery`
+Current internal build: `0.52.0-published-fetch`
 
 ## 1. Delivery strategy
 
@@ -529,22 +529,29 @@ before any polished editor UI or cook is attempted:
    clamps limits to 1..100, atomically rejects selected-record corruption or
    index disagreement, never decodes private rows, performs no writes, and
    preserves the same result after a fresh SaveGame recovery.
-7. **Current:** add immutable playback fetch and private cloning with
-   attribution. Extend corruption recovery, limits, migration hooks, and typed
-   failures across each sharing boundary.
-8. Implement the complete trajectory compiler: linear and cinematic curves,
+7. **Complete for playback fetch:** `FetchPublishedRevisionV1` returns only a
+   validated immutable published document and its revision. Private rows are
+   indistinguishable from missing rows, `0` selects the latest published
+   revision, a positive revision must match exactly, negative revisions fail
+   validation, and every path is read-only. Exact compiled-graph, live runtime,
+   fresh SaveGame restart, stale-payload reset, cleanup, and cold-load evidence
+   pass.
+8. **Current:** add private cloning with immutable source attribution. Extend
+   corruption recovery, limits, migration hooks, and typed failures across the
+   final sharing boundary.
+9. Implement the complete trajectory compiler: linear and cinematic curves,
    monotonic timing/speed profiles, smooth quaternion rotation, flight profiles,
    deterministic sampling, and discontinuity diagnostics.
-9. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
+10. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
    event tracks with bounded target adapters and authorization.
-10. Expose every backend operation through temporary shortcuts, compact debug
+11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.
-11. Run an attended end-to-end keyboard/debug dogfood pass. Only after that pass
+12. Run an attended end-to-end keyboard/debug dogfood pass. Only after that pass
    may polished library/editor/timeline UX begin.
-12. Cook/package only after the full backend prototype and its dogfood workflow
+13. Cook/package only after the full backend prototype and its dogfood workflow
    are accepted. Workshop and G-Portal remain later deployment gates.
-13. Close, sync, run the complete repository suite, commit, and push after every
+14. Close, sync, run the complete repository suite, commit, and push after every
    meaningful compiled feature milestone.
 
 ### UX investment gate
@@ -1318,9 +1325,10 @@ and repeatable isolated PIE runner are complete. The immediate sequence is:
 3. **Complete:** the inactive-slot two-phase writer and modular private
    create/save/load/list/delete boundaries pass in-process and fresh-process
    SaveGame recovery acceptance.
-4. **In progress:** owner identity, privacy, and immutable publication are
-   accepted. Next add unpublish, discovery, playback snapshots, cloning,
-   conflicts, limits, and typed failures across the remaining sharing boundary.
+4. **In progress:** owner identity, privacy, immutable publication, bounded
+   public discovery, and immutable published playback fetch are accepted. Next
+   add private clone with attribution, then conflicts, limits, and typed failures
+   across the remaining sharing boundary.
 5. Complete cinematic position/timing/rotation, flight profiles, lens/focus/
    effect tracks, free-look carrier modes, and event execution.
 6. Give every operation a shortcut/debug route and run the complete automated

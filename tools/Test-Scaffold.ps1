@@ -80,6 +80,8 @@ $requiredFiles = @(
     'tools\unreal\Validate-RepositoryUnpublishRestart.py',
     'tools\unreal\Validate-RepositoryPublicList.py',
     'tools\unreal\Validate-RepositoryPublicListRestart.py',
+    'tools\unreal\Validate-RepositoryPublishedFetch.py',
+    'tools\unreal\Validate-RepositoryPublishedFetchRestart.py',
     'tools\unreal\Enable-EnhancedEditorRemoteExecution.ps1',
     'tools\unreal\Test-EnhancedEditorRemoteExecutionConfig.ps1',
     'tools\unreal\Get-EnhancedEditorWindows.ps1',
@@ -123,6 +125,7 @@ $requiredFiles = @(
     'tools\blueprint\Build-RepositoryPrivateSaveGraph.py',
     'tools\blueprint\Build-RepositoryPrivateListGraph.py',
     'tools\blueprint\Build-RepositoryPublicListGraph.py',
+    'tools\blueprint\Build-RepositoryPublishedFetchGraph.py',
     'tools\blueprint\Build-RepositoryPrivateDeleteGraph.py',
     'tools\blueprint\Build-RepositoryPublishDraftGraph.py',
     'tools\blueprint\Build-RepositoryUnpublishGraph.py',
@@ -165,6 +168,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryPrivateSaveContracts.py',
     'tools\blueprint\Test-RepositoryPrivateListContracts.py',
     'tools\blueprint\Test-RepositoryPublicListContracts.py',
+    'tools\blueprint\Test-RepositoryPublishedFetchContracts.py',
     'tools\blueprint\Test-RepositoryPrivateDeleteContracts.py',
     'tools\blueprint\Test-RepositoryPublishDraftContracts.py',
     'tools\blueprint\Test-RepositoryUnpublishContracts.py',
@@ -260,6 +264,8 @@ $requiredFiles = @(
     'tools\blueprint\snippets\find-record-index-v1-paste.eddgraph',
     'tools\blueprint\snippets\load-draft-v1.eddgraph',
     'tools\blueprint\snippets\load-draft-v1-paste.eddgraph',
+    'tools\blueprint\snippets\fetch-published-revision-v1.eddgraph',
+    'tools\blueprint\snippets\fetch-published-revision-v1-paste.eddgraph',
     'tools\blueprint\snippets\create-private-flypath-v1.eddgraph',
     'tools\blueprint\snippets\create-private-flypath-v1-paste.eddgraph',
     'tools\blueprint\snippets\save-draft-v1.eddgraph',
@@ -269,6 +275,7 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\reset-repository-result-v1.eddgraph',
     'tools\blueprint\live-snippets\find-record-index-v1.eddgraph',
     'tools\blueprint\live-snippets\load-draft-v1.eddgraph',
+    'tools\blueprint\live-snippets\fetch-published-revision-v1.eddgraph',
     'tools\blueprint\live-snippets\create-private-flypath-v1.eddgraph',
     'tools\blueprint\live-snippets\save-draft-v1.eddgraph',
     'tools\blueprint\live-snippets\delete-flypath-v1.eddgraph',
@@ -1344,6 +1351,53 @@ $repositoryPrivateLoadLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippe
     --input $repositoryPrivateLoadLive
 if ($LASTEXITCODE -ne 0) {
     throw "Repository private-load live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryPublishedFetchNonce = [guid]::NewGuid().ToString('N')
+$repositoryPublishedFetchRoot = Join-Path $scratchRoot "edd-repository-published-fetch-$repositoryPublishedFetchNonce"
+$repositoryPublishedFetchFull = Join-Path $repositoryPublishedFetchRoot 'full'
+$repositoryPublishedFetchPaste = Join-Path $repositoryPublishedFetchRoot 'paste'
+New-Item -ItemType Directory -Force -Path $repositoryPublishedFetchFull, $repositoryPublishedFetchPaste | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryPublishedFetchGraph.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryPublishedFetchFull `
+    --paste-dir $repositoryPublishedFetchPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository published-fetch graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryPublishedFetchFull, $repositoryPublishedFetchPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPublishedFetchContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPublishedFetchFull 'fetch-published-revision-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository published-fetch full contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPublishedFetchContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryPublishedFetchPaste 'fetch-published-revision-v1-paste.eddgraph') `
+    --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository published-fetch paste contracts failed with exit code $LASTEXITCODE."
+}
+foreach ($pair in @(
+    @((Join-Path $repositoryPublishedFetchFull 'fetch-published-revision-v1.eddgraph'), 'tools\blueprint\snippets\fetch-published-revision-v1.eddgraph'),
+    @((Join-Path $repositoryPublishedFetchPaste 'fetch-published-revision-v1-paste.eddgraph'), 'tools\blueprint\snippets\fetch-published-revision-v1-paste.eddgraph')
+)) {
+    $checkedIn = Join-Path $ProjectRoot $pair[1]
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $pair[0]).Hash -ne
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $checkedIn).Hash) {
+        throw "Repository published-fetch graph is not deterministic: $($pair[1])"
+    }
+}
+$repositoryPublishedFetchLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets\fetch-published-revision-v1.eddgraph'
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $repositoryPublishedFetchLive
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryPublishedFetchContracts.py') `
+    --project-root $ProjectRoot `
+    --input $repositoryPublishedFetchLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository published-fetch live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 
 $repositoryPrivateCreateNonce = [guid]::NewGuid().ToString('N')

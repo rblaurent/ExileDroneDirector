@@ -324,7 +324,14 @@ too: private derived rows are never decoded or disclosed, selected public rows
 are revalidated against the full stored record, result pages carry no document
 payloads or durable owner account IDs, and fresh SaveGame recovery preserves
 the same read-only ordering and privacy boundary. Immutable published playback
-fetch is the next runtime milestone.
+fetch is accepted too: `FetchPublishedRevisionV1` exposes only the validated
+published document and revision, hides private records as missing, supports
+latest or exact-revision reads, rejects invalid requests and corrupt/index-
+mismatched storage atomically, clears stale payloads on every later denial, and
+never invokes persistence. A fresh process recovered the exact immutable
+snapshot after a newer private draft save, proved byte-identical repository
+state around all reads, cleaned both slots, and passed the independent cold-load
+gate. Private clone with attribution is now the next sharing milestone.
 
 ## Repository layout
 

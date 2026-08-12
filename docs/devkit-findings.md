@@ -3461,3 +3461,41 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `581544AF09F830B2BD2945E0DF332088DF9DC63D10C0B24C1E4AEED2A1059A40`.
   Next is atomic candidate publication in `CommitAdaptiveArcBuildV1`; no UI,
   cook, or Workshop.
+
+## Adaptive arc atomic publication accepted (2026-08-12)
+
+- Internal checkpoint `0.70.0-adaptive-arc-publication` compiles and saves
+  `CommitAdaptiveArcBuildV1`. It first clears both published arrays, published
+  length, and public validity. Publication then requires sticky stage success,
+  all five work stacks empty, exact candidate cardinalities, at least two
+  samples, finite nonnegative length, exact `(0,0)..(1,length)` endpoints,
+  strictly increasing `u`, and nondecreasing cumulative distance.
+- Full/paste graphs contain 95/94 nodes with SHA-256
+  `7F70F61C4EEA81206ED32C21BC7923B8AF806D2C6902D1ECB843C7E666731F8E` /
+  `425910293A83F5754CFA48AA43DD29A10EBEC23076A7161CD8A2C05DCDE38011`.
+  The exact post-compile 95-node graph has SHA-256
+  `69FFF166DFE3351919D3A28C5700AE0EECBE148DC92B00EA27EC45E9EFD03E71`.
+- Warm and fresh compiled runtime each publish 32 seeded oracle tables with
+  exact `u`, distance, and length copies. Nineteen failures cover false prior
+  stage, each nonempty work stack, too few samples, both candidate-cardinality
+  mismatches, all four endpoint/length corruptions, negative/non-finite length,
+  duplicate `u`, decreasing distance, and non-finite interior values. Every
+  failure clears a poisoned prior publication, makes stage validity false, and
+  restores all CDO properties afterward.
+- The empty native function retained its entry when the validated paste body
+  replaced its old selection, so the first live export correctly contained 95
+  nodes rather than the 94 pasted nodes. Exact export proved only the reciprocal
+  entry seam missing. The guarded mover placed the verified entry at
+  `(-3696,208)`, 256 units left of the first clear, one measured pin drag joined
+  it, and the complete contract passed before compile.
+- The runtime harness initially used obsolete `CompiledSegment` keyword names;
+  it failed before Blueprint execution and still restored state. Align harness
+  fixtures with the frozen oracle dataclass, and do not classify setup failures
+  as Blueprint failures or successes.
+- Guarded shutdown reached `LogExit: Exiting.`; FromDevKit found exactly Client
+  Director changed (16 unchanged), reverse preview found all 17 assets equal,
+  and fresh NullRHI runtime plus cold compilation passed. Live/mirror Client
+  Director SHA-256 is
+  `99BACEF4455F43FB0321F294BD13FC8C7743BA2D6693C6EBF8FBA7B32FC64055`.
+  Next is the five-stage `BuildAdaptiveArcTableV1` orchestrator; no UI, cook,
+  or Workshop.

@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.69.0-adaptive-arc-processing`
+Current internal build: `0.70.0-adaptive-arc-publication`
 
 ## 1. Delivery strategy
 
@@ -140,9 +140,25 @@ This section is the authoritative handoff. Detailed evidence remains in
   passes, and the live/mirror Client Director SHA-256 is
   `581544AF09F830B2BD2945E0DF332088DF9DC63D10C0B24C1E4AEED2A1059A40`.
 - Reset, validation, initialization, and bounded processing are accepted. Next
-  is `CommitAdaptiveArcBuildV1`, which must atomically validate and publish the
-  completed candidate table; route integration and the complete trajectory
-  engine remain. No UI, cook, or Workshop work is implied by this checkpoint.
+  was atomic candidate publication.
+- `CommitAdaptiveArcBuildV1` now clears the prior public table before checking
+  the candidate, requires successful bounded processing, five empty work
+  stacks, exact candidate cardinalities, at least two samples, finite
+  nonnegative length, exact `(u,distance)` endpoints `(0,0)..(1,length)`,
+  strictly increasing `u`, and nondecreasing cumulative distance. Only a fully
+  valid candidate replaces the public arrays/length and sets validity true.
+- Deterministic full/paste graphs contain 95/94 nodes and the exact saved
+  post-compile graph contains 95. Warm and fresh compiled runtime each publish
+  32 oracle-built tables exactly and fail closed across 19 malformed/prior-state
+  families, clearing poisoned public state and preserving sticky failure. Full
+  CDO restoration, fresh core compilation, and byte-identical live/mirror
+  package SHA-256
+  `99BACEF4455F43FB0321F294BD13FC8C7743BA2D6693C6EBF8FBA7B32FC64055`
+  pass.
+- Reset, validation, initialization, bounded processing, and atomic publication
+  are accepted. Next is the thin `BuildAdaptiveArcTableV1` orchestrator that
+  invokes those five stages in order. Route integration and the complete
+  trajectory engine remain; no UI, cook, or Workshop work is implied.
 
 ### Cinematic orientation oracle checkpoint
 

@@ -150,6 +150,7 @@ $requiredFiles = @(
     'tools\unreal\Validate-AdaptiveArcBoundaryRuntime.py',
     'tools\unreal\Validate-AdaptiveArcInitializationRuntime.py',
     'tools\unreal\Validate-AdaptiveArcProcessRuntime.py',
+    'tools\unreal\Validate-AdaptiveArcCommitRuntime.py',
     'tools\unreal\Move-SelectedBlueprintNode.ps1',
     'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
     'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
@@ -181,6 +182,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-AdaptiveArcInitializationContracts.py',
     'tools\blueprint\Build-AdaptiveArcProcessGraph.py',
     'tools\blueprint\Test-AdaptiveArcProcessContracts.py',
+    'tools\blueprint\Build-AdaptiveArcCommitGraph.py',
+    'tools\blueprint\Test-AdaptiveArcCommitContracts.py',
     'tools\blueprint\templates\adaptive-arc-forloop-node-form.eddgraph',
     'tools\blueprint\templates\adaptive-arc-process-node-forms.eddgraph',
     'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph',
@@ -225,6 +228,9 @@ $requiredFiles = @(
     'tools\blueprint\snippets\process-adaptive-arc-build-v1.eddgraph',
     'tools\blueprint\snippets\process-adaptive-arc-build-v1-paste.eddgraph',
     'tools\blueprint\live-snippets\process-adaptive-arc-build-v1.eddgraph',
+    'tools\blueprint\snippets\commit-adaptive-arc-build-v1.eddgraph',
+    'tools\blueprint\snippets\commit-adaptive-arc-build-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\commit-adaptive-arc-build-v1.eddgraph',
     'tools\blueprint\live-snippets\compile-orientation-track-v1.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
@@ -1016,7 +1022,8 @@ foreach ($spec in @(
     @('Build-AdaptiveArcResetGraph.py', 'Test-AdaptiveArcResetContracts.py', 'reset-adaptive-arc-build-v1'),
     @('Build-AdaptiveArcValidationGraph.py', 'Test-AdaptiveArcValidationContracts.py', 'validate-adaptive-arc-build-inputs-v1'),
     @('Build-AdaptiveArcInitializationGraph.py', 'Test-AdaptiveArcInitializationContracts.py', 'initialize-adaptive-arc-build-v1'),
-    @('Build-AdaptiveArcProcessGraph.py', 'Test-AdaptiveArcProcessContracts.py', 'process-adaptive-arc-build-v1')
+    @('Build-AdaptiveArcProcessGraph.py', 'Test-AdaptiveArcProcessContracts.py', 'process-adaptive-arc-build-v1'),
+    @('Build-AdaptiveArcCommitGraph.py', 'Test-AdaptiveArcCommitContracts.py', 'commit-adaptive-arc-build-v1')
 )) {
     $builder = Join-Path $ProjectRoot "tools\blueprint\$($spec[0])"
     $contract = Join-Path $ProjectRoot "tools\blueprint\$($spec[1])"

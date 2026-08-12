@@ -17,6 +17,8 @@ param(
 
     [string]$ExpectedNodeMarker = '',
 
+    [string]$ExpectedNodeClass = '',
+
     [int]$HeaderClientX = 630,
     [int]$HeaderClientY = 440
 )
@@ -29,6 +31,13 @@ $inputHelper = Join-Path $PSScriptRoot 'Invoke-EnhancedEditorInput.ps1'
 function Get-SelectedNodePosition {
     & $inputHelper -WindowHandle $WindowHandle -Keys '^c' -PostDelayMilliseconds 100 | Out-Null
     $clipboard = Get-Clipboard -Raw
+    if ($ExpectedNodeClass) {
+        $classMatch = [regex]::Match($clipboard, '(?m)^Begin Object Class=/Script/BlueprintGraph\.([A-Za-z0-9_]+) ')
+        if (-not $classMatch.Success -or $classMatch.Groups[1].Value -ne $ExpectedNodeClass) {
+            $actualClass = if ($classMatch.Success) { $classMatch.Groups[1].Value } else { '<unknown>' }
+            throw "Selected Blueprint node class is '$actualClass'; expected '$ExpectedNodeClass'. Selection likely transferred to an overlapping node."
+        }
+    }
     if ($ExpectedNodeMarker -and -not $clipboard.Contains($ExpectedNodeMarker)) {
         throw "Selected Blueprint node no longer matches marker '$ExpectedNodeMarker'. Selection likely transferred to an overlapping node."
     }

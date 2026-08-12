@@ -136,6 +136,7 @@ $requiredFiles = @(
     'tools\unreal\Validate-OrientationCompilerRuntime.py',
     'tools\unreal\Validate-OrientationTrackValidationRuntime.py',
     'tools\unreal\Validate-OrientationTrackAlignmentRuntime.py',
+    'tools\unreal\Validate-OrientationForwardDeltasRuntime.py',
     'tools\unreal\Move-SelectedBlueprintNode.ps1',
     'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
     'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
@@ -147,6 +148,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-OrientationTrackValidationContracts.py',
     'tools\blueprint\Build-OrientationTrackAlignmentGraph.py',
     'tools\blueprint\Test-OrientationTrackAlignmentContracts.py',
+    'tools\blueprint\Build-OrientationForwardDeltasGraph.py',
+    'tools\blueprint\Test-OrientationForwardDeltasContracts.py',
     'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1-paste.eddgraph',
@@ -163,6 +166,8 @@ $requiredFiles = @(
     'tools\blueprint\snippets\validate-orientation-track-inputs-v1-paste.eddgraph',
     'tools\blueprint\snippets\align-orientation-waypoints-v1.eddgraph',
     'tools\blueprint\snippets\align-orientation-waypoints-v1-paste.eddgraph',
+    'tools\blueprint\snippets\compute-orientation-forward-deltas-v1.eddgraph',
+    'tools\blueprint\snippets\compute-orientation-forward-deltas-v1-paste.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
     'tools\history\draft_history.py',
@@ -812,6 +817,24 @@ if ($LASTEXITCODE -ne 0) { throw "Orientation track alignment full contracts fai
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackAlignmentContracts.py') `
     --project-root $ProjectRoot --graph $orientationAlignmentPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Orientation track alignment paste contracts failed with exit code $LASTEXITCODE." }
+
+$orientationDeltaFull = Join-Path $orientationCompilerRoot 'compute-orientation-forward-deltas-v1.eddgraph'
+$orientationDeltaPaste = Join-Path $orientationCompilerRoot 'compute-orientation-forward-deltas-v1-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-OrientationForwardDeltasGraph.py') `
+    --project-root $ProjectRoot --output $orientationDeltaFull --paste-output $orientationDeltaPaste
+if ($LASTEXITCODE -ne 0) { throw "Orientation forward-delta graph generation failed with exit code $LASTEXITCODE." }
+foreach ($generated in @($orientationDeltaFull, $orientationDeltaPaste)) {
+    $checked = Join-Path $ProjectRoot "tools\blueprint\snippets\$([IO.Path]::GetFileName($generated))"
+    if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+        throw "Orientation forward-delta checked-in graph has drifted: $checked"
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationForwardDeltasContracts.py') `
+    --project-root $ProjectRoot --graph $orientationDeltaFull
+if ($LASTEXITCODE -ne 0) { throw "Orientation forward-delta full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationForwardDeltasContracts.py') `
+    --project-root $ProjectRoot --graph $orientationDeltaPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Orientation forward-delta paste contracts failed with exit code $LASTEXITCODE." }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
 if ($LASTEXITCODE -ne 0) {

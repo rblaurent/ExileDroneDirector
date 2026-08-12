@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.59.0-orientation-track-alignment`
+Current internal build: `0.60.0-orientation-forward-deltas`
 
 ## 1. Delivery strategy
 
@@ -114,6 +114,15 @@ This section is the authoritative handoff. Detailed evidence remains in
   post-compile contracts pass. Warm runtime matches 42 seeded oracle tracks,
   including antipodal and non-unit input, at `8.95e-8` radians maximum error;
   prior-invalid clearing and CDO restoration pass.
+- `ComputeOrientationForwardDeltasV1` is now the compiled fourth stage. It
+  clears stale candidate deltas, gates both entry and every loop iteration on
+  sticky stage validity, stages each adjacent aligned quaternion pair into the
+  proven `ComputeOrientationLogDeltaV1` primitive, and appends exactly one
+  Vector delta per successful segment. Exact 20/19-node full/paste and
+  post-compile contracts pass. Warm and fresh runtime match 64 seeded oracle
+  tracks at `2.32e-7` maximum Vector error; prior-invalid, early primitive
+  failure, later primitive failure, deterministic prefix, and CDO restoration
+  cases pass.
 
 ### Live in the Enhanced DevKit
 

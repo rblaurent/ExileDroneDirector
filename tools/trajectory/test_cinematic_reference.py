@@ -157,6 +157,29 @@ class EvaluationContracts(unittest.TestCase):
         self.assertLess(math.sqrt(sum(v*v for v in v_left)),1e-10)
         self.assertLess(math.sqrt(sum(v*v for v in v_right)),1e-10)
 
+    def test_auto_velocity_is_componentwise_monotone_and_time_normalized(self):
+        compiled=compile_trajectory(((0.,0.,0.),(10.,-20.,5.),(30.,-30.,25.)),(
+            AuthoredSegment(1,"auto_cinematic","linear"),
+            AuthoredSegment(2,"auto_cinematic","linear"),
+        ))
+        self.assertEqual(compiled.segments[0].end_velocity_u,(10.,-5.,5.))
+        self.assertEqual(compiled.segments[1].start_velocity_u,(20.,-10.,10.))
+        left,_=evaluate_spatial_derivatives(compiled.segments[0],1.0)
+        right,_=evaluate_spatial_derivatives(compiled.segments[1],0.0)
+        self.assertEqual(left,right)
+        self.assertEqual(left,(10.,-5.,5.))
+
+    def test_flat_component_and_mixed_linear_neighbor_force_zero_velocity(self):
+        flat=compile_trajectory(((0.,0.,0.),(10.,10.,10.),(20.,10.,30.)),(
+            AuthoredSegment(1),AuthoredSegment(1),
+        ))
+        self.assertEqual(flat.segments[0].end_velocity_u,(10.,0.,10.))
+        mixed=compile_trajectory(((0.,0.,0.),(10.,10.,10.),(20.,20.,20.)),(
+            AuthoredSegment(1,"linear","linear"),AuthoredSegment(1,"auto_cinematic","linear"),
+        ))
+        self.assertEqual(mixed.segments[0].end_velocity_u,(0.,0.,0.))
+        self.assertEqual(mixed.segments[1].start_velocity_u,(0.,0.,0.))
+
     def test_arc_inversion_approximates_equal_world_distance_on_curve(self):
         segment=self.compiled.segments[0]
         positions=[evaluate_spatial(segment,invert_arc_length(segment,i/10)) for i in range(11)]

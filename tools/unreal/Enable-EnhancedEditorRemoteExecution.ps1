@@ -8,12 +8,29 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-if ([string]::IsNullOrWhiteSpace($ConfigPath)) {
+$usingDefaultConfig = [string]::IsNullOrWhiteSpace($ConfigPath)
+if ($usingDefaultConfig) {
     $ConfigPath = Join-Path $DevKitRoot 'UE4\Saved\Config\WindowsEditor\Engine.ini'
 }
 $resolvedConfig = [IO.Path]::GetFullPath($ConfigPath)
 if (-not [IO.File]::Exists($resolvedConfig)) {
     throw "Enhanced editor Engine.ini is missing: $resolvedConfig"
+}
+
+# Unreal persists the in-memory settings object during shutdown. Editing the
+# live Engine.ini first appears to succeed, then the closing editor silently
+# writes its stale copy over the new bRemoteExecution value. The real DevKit
+# configuration must therefore be provisioned only across a closed-editor
+# boundary. Fixture ConfigPath calls remain available to the contract tests.
+if ($usingDefaultConfig) {
+    $resolvedDevKitRoot = [IO.Path]::GetFullPath($DevKitRoot).TrimEnd('\')
+    $liveEditors = @(Get-Process UnrealEditor -ErrorAction SilentlyContinue | Where-Object {
+        try { $_.Path -and [IO.Path]::GetFullPath($_.Path).StartsWith($resolvedDevKitRoot, [StringComparison]::OrdinalIgnoreCase) }
+        catch { $false }
+    })
+    if ($liveEditors.Count -gt 0) {
+        throw "Close the Enhanced editor before provisioning remote execution; live settings would overwrite Engine.ini on shutdown (PID(s): $($liveEditors.Id -join ', '))."
+    }
 }
 
 $section = '[/Script/PythonScriptPlugin.PythonScriptPluginSettings]'

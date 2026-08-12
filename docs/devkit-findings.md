@@ -3594,3 +3594,50 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Live/mirror Client Director SHA-256 is
   `C8FCBF4A21B65D67FD85AB4FE62D3E1BEE37FD4ED8B85A62BF4E5EFDC8178F07`.
   Velocity construction is next. No UI, cook, or Workshop work has started.
+
+## Position-route velocity construction accepted (2026-08-13)
+
+- Internal checkpoint `0.74.0-position-route-velocities` compiles
+  `ComputePositionRouteVelocitiesV1`. It clears candidate velocities before
+  inspecting the sticky stage verdict, leaves invalid stages invalid and empty,
+  emits zero endpoint velocities, and emits exactly one velocity per interior
+  waypoint. Interior velocities are nonzero only when both adjacent spatial
+  curves are `auto_cinematic`.
+- Each interior component compares the time-normalized incoming and outgoing
+  secants. Equal-sign positive slopes choose the smaller value, equal-sign
+  negative slopes choose the larger value (the value closer to zero), and
+  reversal or flat-side cases choose zero. This is the frozen cinematic oracle,
+  not a geometric average which would change speed when authored durations
+  differ.
+- Deterministic full/paste graphs contain 83/82 nodes with SHA-256
+  `03160E2376B1CA457EC08B8CAB2B24322DFA5D5D0B860883C7698751E009DB12` /
+  `486FC1EC9421BFC8FA45009AFEE72C2DC8A8032E7859FB9D9154DFEF2F8AE6CB`.
+  The exact post-compile 83-node export has SHA-256
+  `3759271529E7B769064D3EEB4BC45A2305119EA0875AB06F2DE9B617FD2E19B1`.
+- The native entry could not connect to the first impure array clear while the
+  function's `Pure` flag remained checked. Uncheck `Pure` first, then separate
+  the entry from the generated body, connect the two execution-pin centers at
+  1:1 zoom, and immediately re-export the complete graph. This run accepted
+  only after the exact 83-node contract proved the reciprocal entry-to-clear
+  seam.
+- Owned Blueprint windows require explicit activation and keyboard focus after
+  bringing them forward; focusing only the root owner can send verified keys
+  into the main editor instead. `Invoke-EnhancedEditorInput.ps1` now attaches
+  the target thread and explicitly calls `SetActiveWindow`/`SetFocus`.
+- Do not write `bRemoteExecution=True` into the default Enhanced DevKit config
+  while an editor from that DevKit is running. The live editor can later flush
+  its stale settings and silently erase the change on shutdown. The provisioner
+  now refuses that unsafe state; close the editor, provision, verify the flag,
+  and only then relaunch.
+- Warm and fresh NullRHI execution independently pass 101 valid routes, 10,968
+  component checks, and a 512-waypoint route with maximum component error
+  exactly zero. Both runs prove stale-output clearing on a prior-invalid stage
+  and restore every touched CDO property. Fresh cold load loads all nine core
+  assets and compiles all six Blueprints. The complete scaffold passes.
+- Guarded editor shutdown added no crash directory. FromDevKit preview found
+  exactly one conflict and 16 unchanged files; forced sync copied only Client
+  Director, and reverse preview found all 17 files unchanged. Live/mirror
+  SHA-256 is
+  `976374E79CF3E156AF20C283D612CD51B3EF801C8763742645534AB7168162B8`.
+- Position segment assembly is next. This checkpoint does not claim route
+  publication, evaluation, dogfood controls, UI, cook, or Workshop readiness.

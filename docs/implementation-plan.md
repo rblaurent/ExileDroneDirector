@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.73.0-position-route-validation`
+Current internal build: `0.74.0-position-route-velocities`
 
 ## 1. Delivery strategy
 
@@ -204,6 +204,27 @@ This section is the authoritative handoff. Detailed evidence remains in
   components were sanitized by Enhanced reflection before Blueprint execution
   and are reported separately. Every touched CDO property restores. Next is
   waypoint-velocity construction; no UI, cook, or Workshop work is implied.
+- `ComputePositionRouteVelocitiesV1` is now accepted as the next position-route
+  transaction. It clears the candidate velocity array first, preserves the
+  sticky validation verdict, emits one zero endpoint velocity per boundary,
+  and emits one time-normalized monotone velocity per eligible interior key.
+  Any adjacent `linear` segment forces that key to zero; `auto_cinematic`
+  neighbors use the component-wise slope closest to zero when their signs
+  agree and zero across a reversal or flat side.
+- Deterministic full/paste graphs contain 83/82 nodes with SHA-256
+  `03160E2376B1CA457EC08B8CAB2B24322DFA5D5D0B860883C7698751E009DB12` /
+  `486FC1EC9421BFC8FA45009AFEE72C2DC8A8032E7859FB9D9154DFEF2F8AE6CB`.
+  The exact post-compile 83-node graph has SHA-256
+  `3759271529E7B769064D3EEB4BC45A2305119EA0875AB06F2DE9B617FD2E19B1`.
+- Warm and fresh NullRHI execution independently prove 101 valid routes,
+  10,968 axis values, the 512-waypoint ceiling, zero component error against
+  the frozen oracle, prior-invalid stale-output clearing, and full CDO
+  restoration. Fresh cold load again loads all nine core assets and compiles
+  all six Blueprints. Live/mirror Client Director SHA-256 is
+  `976374E79CF3E156AF20C283D612CD51B3EF801C8763742645534AB7168162B8`.
+- Velocity construction alone is accepted here. Position segment assembly,
+  candidate publication, absolute-time/distance evaluation, lens/effect
+  tracks, dogfood shortcuts, UI, cook, and Workshop remain ordered work.
 
 ### Cinematic orientation oracle checkpoint
 

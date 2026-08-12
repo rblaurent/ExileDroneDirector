@@ -162,6 +162,7 @@ $requiredFiles = @(
     'tools\unreal\Configure-PositionRouteAssembly.py',
     'tools\unreal\Validate-PositionRouteResetRuntime.py',
     'tools\unreal\Validate-PositionRouteValidationRuntime.py',
+    'tools\unreal\Validate-PositionRouteVelocitiesRuntime.py',
     'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
     'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
     'tools\blueprint\Build-OrientationCompilerGraphs.py',
@@ -200,6 +201,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-PositionRouteResetContracts.py',
     'tools\blueprint\Build-PositionRouteValidationGraph.py',
     'tools\blueprint\Test-PositionRouteValidationContracts.py',
+    'tools\blueprint\Build-PositionRouteVelocitiesGraph.py',
+    'tools\blueprint\Test-PositionRouteVelocitiesContracts.py',
     'tools\blueprint\templates\adaptive-arc-forloop-node-form.eddgraph',
     'tools\blueprint\templates\adaptive-arc-process-node-forms.eddgraph',
     'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph',
@@ -256,6 +259,9 @@ $requiredFiles = @(
     'tools\blueprint\snippets\validate-position-route-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-position-route-inputs-v1-paste.eddgraph',
     'tools\blueprint\live-snippets\validate-position-route-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\compute-position-route-velocities-v1.eddgraph',
+    'tools\blueprint\snippets\compute-position-route-velocities-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\compute-position-route-velocities-v1.eddgraph',
     'tools\blueprint\live-snippets\compile-orientation-track-v1.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
@@ -1089,7 +1095,8 @@ $positionRouteRoot = Join-Path $scratchRoot "edd-position-route-$orientationComp
 New-Item -ItemType Directory -Path $positionRouteRoot -Force | Out-Null
 foreach ($spec in @(
     @('Build-PositionRouteResetGraph.py', 'Test-PositionRouteResetContracts.py', 'reset-position-route-candidate-v1'),
-    @('Build-PositionRouteValidationGraph.py', 'Test-PositionRouteValidationContracts.py', 'validate-position-route-inputs-v1')
+    @('Build-PositionRouteValidationGraph.py', 'Test-PositionRouteValidationContracts.py', 'validate-position-route-inputs-v1'),
+    @('Build-PositionRouteVelocitiesGraph.py', 'Test-PositionRouteVelocitiesContracts.py', 'compute-position-route-velocities-v1')
 )) {
     $builder = Join-Path $ProjectRoot "tools\blueprint\$($spec[0])"
     $contract = Join-Path $ProjectRoot "tools\blueprint\$($spec[1])"

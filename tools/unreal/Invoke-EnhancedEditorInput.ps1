@@ -107,6 +107,12 @@ public static class EddEnhancedEditorInput {
     private static extern bool BringWindowToTop(IntPtr hWnd);
 
     [DllImport("user32.dll")]
+    private static extern IntPtr SetActiveWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr SetFocus(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
     private static extern bool ShowWindow(IntPtr hWnd, int command);
 
     [DllImport("user32.dll")]
@@ -128,6 +134,12 @@ public static class EddEnhancedEditorInput {
             if (IsIconic(hWnd)) ShowWindow(hWnd, 9);
             BringWindowToTop(hWnd);
             SetForegroundWindow(hWnd);
+            // Owned Unreal asset windows can bring their root owner forward
+            // while leaving the intended Blueprint child inactive. Explicit
+            // activation/focus is safe while the target thread is attached
+            // and keeps SendKeys from landing in the owner editor.
+            SetActiveWindow(hWnd);
+            SetFocus(hWnd);
             return GetForegroundWindow() == hWnd;
         }
         finally {

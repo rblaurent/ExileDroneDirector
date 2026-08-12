@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.61.0-orientation-track-tangents`
+Current internal build: `0.62.0-orientation-track-segments`
 
 ## 1. Delivery strategy
 
@@ -137,6 +137,19 @@ This section is the authoritative handoff. Detailed evidence remains in
   byte-identical live/mirror SHA-256
   `9630A366A78946A260DA4CDDB0D73C56DCDB6F8A638A5720FD29A67D6E06F583`,
   and fresh cold compilation of all core assets pass.
+- `BuildOrientationTrackSegmentsV1` is now the compiled sixth stage. For every
+  duration it stages aligned keys `i/i+1`, tangent rates `i/i+1`, and the
+  segment duration into the proven spherical-control primitive. A successful
+  item appends its cumulative start time and both controls, then advances the
+  candidate total; primitive failure is sticky and leaves a deterministic
+  successful prefix for diagnostics.
+- Source/paste/exact post-compile graphs contain 37/36/37 nodes. Warm and fresh
+  compiled runtime each match 64 multi-key oracle tracks, including cumulative
+  segment starts and total duration, at `1.58e-7` radians maximum control error.
+  Prior-invalid clearing and early/late primitive failure-prefix cases pass
+  with full CDO restoration. Live/mirror package SHA-256 is
+  `D93720E9BDD1F6777272A41E28B34ED09E5D1BC2360EF3B14E5C742837451F5A`;
+  guarded exit, one-package sync, and fresh cold compilation all pass.
 
 ### Live in the Enhanced DevKit
 

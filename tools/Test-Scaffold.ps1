@@ -138,6 +138,7 @@ $requiredFiles = @(
     'tools\unreal\Validate-OrientationTrackAlignmentRuntime.py',
     'tools\unreal\Validate-OrientationForwardDeltasRuntime.py',
     'tools\unreal\Validate-OrientationTrackTangentRatesRuntime.py',
+    'tools\unreal\Validate-OrientationTrackSegmentsRuntime.py',
     'tools\unreal\Move-SelectedBlueprintNode.ps1',
     'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
     'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
@@ -153,6 +154,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-OrientationForwardDeltasContracts.py',
     'tools\blueprint\Build-OrientationTrackTangentRatesGraph.py',
     'tools\blueprint\Test-OrientationTrackTangentRatesContracts.py',
+    'tools\blueprint\Build-OrientationTrackSegmentsGraph.py',
+    'tools\blueprint\Test-OrientationTrackSegmentsContracts.py',
     'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1-paste.eddgraph',
@@ -173,6 +176,8 @@ $requiredFiles = @(
     'tools\blueprint\snippets\compute-orientation-forward-deltas-v1-paste.eddgraph',
     'tools\blueprint\snippets\compute-orientation-track-tangent-rates-v1.eddgraph',
     'tools\blueprint\snippets\compute-orientation-track-tangent-rates-v1-paste.eddgraph',
+    'tools\blueprint\snippets\build-orientation-track-segments-v1.eddgraph',
+    'tools\blueprint\snippets\build-orientation-track-segments-v1-paste.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
     'tools\history\draft_history.py',
@@ -858,6 +863,24 @@ if ($LASTEXITCODE -ne 0) { throw "Orientation track tangent-rate full contracts 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackTangentRatesContracts.py') `
     --project-root $ProjectRoot --graph $orientationTangentPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Orientation track tangent-rate paste contracts failed with exit code $LASTEXITCODE." }
+
+$orientationSegmentsFull = Join-Path $orientationCompilerRoot 'build-orientation-track-segments-v1.eddgraph'
+$orientationSegmentsPaste = Join-Path $orientationCompilerRoot 'build-orientation-track-segments-v1-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-OrientationTrackSegmentsGraph.py') `
+    --project-root $ProjectRoot --output $orientationSegmentsFull --paste-output $orientationSegmentsPaste
+if ($LASTEXITCODE -ne 0) { throw "Orientation track segment graph generation failed with exit code $LASTEXITCODE." }
+foreach ($generated in @($orientationSegmentsFull, $orientationSegmentsPaste)) {
+    $checked = Join-Path $ProjectRoot "tools\blueprint\snippets\$([IO.Path]::GetFileName($generated))"
+    if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+        throw "Orientation track segment checked-in graph has drifted: $checked"
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackSegmentsContracts.py') `
+    --project-root $ProjectRoot --graph $orientationSegmentsFull
+if ($LASTEXITCODE -ne 0) { throw "Orientation track segment full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackSegmentsContracts.py') `
+    --project-root $ProjectRoot --graph $orientationSegmentsPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Orientation track segment paste contracts failed with exit code $LASTEXITCODE." }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
 if ($LASTEXITCODE -ne 0) {

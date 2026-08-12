@@ -135,6 +135,7 @@ $requiredFiles = @(
     'tools\unreal\Configure-OrientationTrackAssembly.py',
     'tools\unreal\Validate-OrientationCompilerRuntime.py',
     'tools\unreal\Validate-OrientationTrackValidationRuntime.py',
+    'tools\unreal\Validate-OrientationTrackAlignmentRuntime.py',
     'tools\unreal\Move-SelectedBlueprintNode.ps1',
     'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
     'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
@@ -144,6 +145,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-OrientationTrackResetContracts.py',
     'tools\blueprint\Build-OrientationTrackValidationGraph.py',
     'tools\blueprint\Test-OrientationTrackValidationContracts.py',
+    'tools\blueprint\Build-OrientationTrackAlignmentGraph.py',
+    'tools\blueprint\Test-OrientationTrackAlignmentContracts.py',
     'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1.eddgraph',
     'tools\blueprint\snippets\compute-orientation-log-delta-v1-paste.eddgraph',
@@ -158,6 +161,8 @@ $requiredFiles = @(
     'tools\blueprint\snippets\reset-orientation-track-candidate-v1-paste.eddgraph',
     'tools\blueprint\snippets\validate-orientation-track-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-orientation-track-inputs-v1-paste.eddgraph',
+    'tools\blueprint\snippets\align-orientation-waypoints-v1.eddgraph',
+    'tools\blueprint\snippets\align-orientation-waypoints-v1-paste.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
     'tools\history\draft_history.py',
@@ -789,6 +794,24 @@ if ($LASTEXITCODE -ne 0) { throw "Orientation track validation full contracts fa
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackValidationContracts.py') `
     --project-root $ProjectRoot --graph $orientationValidationPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Orientation track validation paste contracts failed with exit code $LASTEXITCODE." }
+
+$orientationAlignmentFull = Join-Path $orientationCompilerRoot 'align-orientation-waypoints-v1.eddgraph'
+$orientationAlignmentPaste = Join-Path $orientationCompilerRoot 'align-orientation-waypoints-v1-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-OrientationTrackAlignmentGraph.py') `
+    --project-root $ProjectRoot --output $orientationAlignmentFull --paste-output $orientationAlignmentPaste
+if ($LASTEXITCODE -ne 0) { throw "Orientation track alignment graph generation failed with exit code $LASTEXITCODE." }
+foreach ($generated in @($orientationAlignmentFull, $orientationAlignmentPaste)) {
+    $checked = Join-Path $ProjectRoot "tools\blueprint\snippets\$([IO.Path]::GetFileName($generated))"
+    if ((Get-FileHash -Algorithm SHA256 $generated).Hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+        throw "Orientation track alignment checked-in graph has drifted: $checked"
+    }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackAlignmentContracts.py') `
+    --project-root $ProjectRoot --graph $orientationAlignmentFull
+if ($LASTEXITCODE -ne 0) { throw "Orientation track alignment full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-OrientationTrackAlignmentContracts.py') `
+    --project-root $ProjectRoot --graph $orientationAlignmentPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Orientation track alignment paste contracts failed with exit code $LASTEXITCODE." }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')
 if ($LASTEXITCODE -ne 0) {

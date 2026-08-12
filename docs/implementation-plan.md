@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.58.0-orientation-track-boundary`
+Current internal build: `0.59.0-orientation-track-alignment`
 
 ## 1. Delivery strategy
 
@@ -107,6 +107,13 @@ This section is the authoritative handoff. Detailed evidence remains in
 - This is a boundary checkpoint, not completed multi-key compilation. Alignment,
   deltas, rates, controls, atomic commit, and absolute-time evaluation remain
   the next ordered stages.
+- `AlignOrientationWaypointsV1` is now the compiled third stage. It clears its
+  candidate array, refuses to execute when prior validation is false, normalizes
+  each authored key, and sign-aligns every later key against the prior accepted
+  key using shortest-arc SLERP at alpha 1. Exact 15/14-node full/paste and
+  post-compile contracts pass. Warm runtime matches 42 seeded oracle tracks,
+  including antipodal and non-unit input, at `8.95e-8` radians maximum error;
+  prior-invalid clearing and CDO restoration pass.
 
 ### Live in the Enhanced DevKit
 

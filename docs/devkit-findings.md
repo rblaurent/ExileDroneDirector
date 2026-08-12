@@ -3390,3 +3390,31 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `539401B52E672CDBE272AED19F76604C4BD36221F686182A1289814A2B37CE9A`.
   Initialization, iterative processing, atomic publication, and the thin
   orchestrator remain. No UI, cook, or Workshop work has started.
+
+## Adaptive arc initialization accepted (2026-08-12)
+
+- Internal checkpoint `0.68.0-adaptive-arc-initialization` compiles
+  `InitializeAdaptiveArcBuildV1`. It always clears all five stack arrays and
+  three candidate arrays, operation count, and candidate length before gating
+  on prior stage validity. A valid stage seeds the single root interval and the
+  `(u=0, position=start, distance=0)` candidate; invalid prior state stays false
+  and exposes no partial work.
+- Deterministic full/paste graphs contain 31/30 nodes with hashes
+  `47CE7E54D70DC14870B2B1BF7CCA9F635FB195F1A838277A629851C8DA696A21`
+  and `E1918C08B091B52965D494A33F66C1FEF5A20231D192964F62A1DCD6D3C4E801`.
+  Exact post-compile live graph is 31 nodes with SHA-256
+  `C83A1D3552320793ABDBDC8D78B9D9BD07AD8BBF8E6E0A76857EB7871070663A`.
+- Warm and fresh compiled runtime each pass 64 randomized start/end pairs and
+  one invalid-prior-stage case, proving exact stack/candidate replacement,
+  sticky failure, and complete default restoration. Cold compilation of all
+  core assets passes. Live/mirror package SHA-256 is
+  `FA73C614869EA9B18831C072527A2BCDA9DD68AB69B32C22D604453875E567EC`.
+- The guarded entry move caught a real selection transfer into a variable
+  getter. One bounded undo restored the exact graph, export proved the entry at
+  `(-1904,-608)`, and a shorter collision-free route aligned it at
+  `(-1904,224)`, 256 units left of the true first clear. The single pin drag
+  used bounded hold/release dwell and the immediate 31-node contract passed.
+- Unreal canonicalizes zero `Array_Add.NewItem` defaults by omitting the
+  `DefaultValue` field. Exact contracts must treat omission as the type's zero
+  only where the generator explicitly requires zero. Bounded stack processing,
+  commit, and orchestration remain; no UI, cook, or Workshop.

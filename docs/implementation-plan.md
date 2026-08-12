@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.67.0-adaptive-arc-boundary`
+Current internal build: `0.68.0-adaptive-arc-initialization`
 
 ## 1. Delivery strategy
 
@@ -115,10 +115,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   Unreal reflection sanitizes NaN native Vector components before the
   Blueprint call; all 18 component placements are reported separately and are not
   misrepresented as executable Blueprint rejection evidence.
-- Scope is deliberately narrow: reset and validation are accepted. Initialization,
-  bounded stack processing, atomic table publication, route integration, and
-  the complete trajectory engine remain ordered work. The next slice is
-  `InitializeAdaptiveArcBuildV1`.
+- `InitializeAdaptiveArcBuildV1` now clears all eight work/candidate arrays and
+  resets operation count and candidate length before checking prior validity.
+  A valid stage seeds exactly one interval `(0,start)..(1,end), depth 0` and the
+  initial candidate sample `(0,start,0)`; an invalid stage leaves every array
+  empty and never heals validity.
+- Exact post-compile initialization is 31 nodes. Warm and fresh runtime each
+  pass 64 randomized endpoint cases plus the invalid-prior-stage clearing case,
+  with full CDO restoration. Reset, validation, and initialization are accepted;
+  bounded processing, atomic publication, route integration, and the complete
+  trajectory engine remain. Next is `ProcessAdaptiveArcBuildV1`.
 
 ### Cinematic orientation oracle checkpoint
 

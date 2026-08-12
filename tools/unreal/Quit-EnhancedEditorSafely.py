@@ -19,6 +19,8 @@ MINIMUM_TICKS = 3
 MAXIMUM_TICKS = 120
 DEFAULT_ASSET_PATHS = (
     "/Game/Mods/ExileDroneDirector/Server/Repository/BP_EDD_FlypathRepository",
+    "/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector",
+    "/Game/Mods/ExileDroneDirector/Developer/Automation/BP_EDD_JsonNodeProbe",
 )
 
 
@@ -43,7 +45,8 @@ else:
     for asset_path in configured_paths:
         asset = unreal.EditorAssetLibrary.load_asset(asset_path)
         if asset is None:
-            raise RuntimeError(f"Safe-quit asset could not be loaded: {asset_path}")
+            emit("OPTIONAL_ASSET_MISSING", asset_path)
+            continue
         edited_assets.append(asset)
     emit("ENUMERATION_UNAVAILABLE", len(edited_assets))
 

@@ -10,7 +10,7 @@ from cinematic_reference import (
     AuthoredSegment, CompiledSegment, TrajectoryCompileError, compile_trajectory,
     evaluate_position, evaluate_spatial, evaluate_spatial_derivatives,
     evaluate_time_profile, invert_arc_length, invert_arc_table,
-    build_arc_table_iterative,
+    build_arc_table_iterative, trace_arc_table_iterative,
 )
 
 
@@ -101,6 +101,17 @@ class CompileContracts(unittest.TestCase):
             **segment.__dict__, "start_velocity_u": (math.nan,0.,0.),
         })
         with self.assertRaises(TrajectoryCompileError): build_arc_table_iterative(malformed,.01,12,8191)
+
+    def test_iterative_trace_reports_exact_operation_count(self):
+        linear=compile_trajectory(((0.,0.,0.),(3.,4.,0.)),(AuthoredSegment(2,"linear","linear"),)).segments[0]
+        table,operations=trace_arc_table_iterative(linear,.01,12,8191)
+        self.assertEqual(table,linear.arc_table)
+        self.assertEqual(len(table),65)
+        self.assertEqual(operations,127)
+        shallow=CompiledSegment(**{**linear.__dict__,"arc_table":()})
+        table,operations=trace_arc_table_iterative(shallow,.01,1,3)
+        self.assertEqual(len(table),3)
+        self.assertEqual(operations,3)
 
 
 class EvaluationContracts(unittest.TestCase):

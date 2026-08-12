@@ -3418,3 +3418,46 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `DefaultValue` field. Exact contracts must treat omission as the type's zero
   only where the generator explicitly requires zero. Bounded stack processing,
   commit, and orchestration remain; no UI, cook, or Workshop.
+
+## Adaptive arc bounded processing accepted (2026-08-12)
+
+- Internal checkpoint `0.69.0-adaptive-arc-processing` compiles and saves
+  `ProcessAdaptiveArcBuildV1`. One bounded ForLoop consumes the synchronized
+  five-array interval stack, evaluates the midpoint through the accepted
+  quintic-vector primitive, selects the linear midpoint only for linear input,
+  refines right-then-left to preserve recursive left-first LIFO order, and
+  appends accepted `u`, position, and cumulative-distance samples.
+- Deterministic full/paste graphs contain 119/118 nodes with SHA-256
+  `6F34719F13EF4D6391FA5ED7E8E30A53ABD4E933D8F2C9F8CDFCDB8DA708C479` /
+  `B47CA5C7D282199A3EAB48547E1B46DFF71E484343D0068CA4F1E573C19F2984`.
+  The exact post-compile graph contains 119 nodes with SHA-256
+  `9E0FAA811EF5B8AF149F1AA8BA8B3B361B857DFC54C5AAB1C5E17983722E1524`.
+- Warm and fresh compiled runtime each pass 23 deterministic linear/cinematic
+  cases, 1,017 exact oracle samples, operation counts up to 127, exact-budget
+  success, one-short budget exhaustion, all eight array-cardinality
+  malformations plus prior-invalid state, sticky failure, and full CDO
+  restoration. A separate fresh process loads and compiles every core asset;
+  the complete scaffold passes.
+- Pure `Array_Length(U0) - 1` is reevaluated between impure nodes. Removing U0
+  first shrank the array and changed later remove indices to `-1`. The accepted
+  pop transaction removes U1, P0, P1, and Depth before removing U0 last. The
+  exact contract fixes this order; never treat a pure Blueprint value as an
+  eager snapshot across mutations unless it is explicitly staged.
+- The initially pasted current-value setters overlapped the root branch/loop,
+  making the native seam unreliable. The generator now places those setters in
+  a separate lane, and its exact contract rejects any variable-set collision
+  with the root or loop. A duplicate `Array_Add.NewItem` source, a wrong result
+  property name, and a Vector multiply default serialized as a Vector instead
+  of scalar were likewise caught before acceptance.
+- Removing and adding the same function graph through Enhanced's Python API in
+  one command invalidates the live tab and can return a falsey add. Use separate
+  remote transactions. `reload_packages(..., ASSUME_POSITIVE)` safely restored
+  the last saved package after a known bad unsaved graph. Prefer direct
+  `BlueprintEditorLibrary.compile_blueprint` over an ambiguous toolbar click.
+- The disposable JSON probe was deleted through `EditorAssetLibrary`, guarded
+  shutdown ended at `LogExit: Exiting.`, FromDevKit copied exactly Client
+  Director (16 unchanged), and reverse preview found all 17 assets unchanged.
+  Live/mirror Client Director SHA-256 is
+  `581544AF09F830B2BD2945E0DF332088DF9DC63D10C0B24C1E4AEED2A1059A40`.
+  Next is atomic candidate publication in `CommitAdaptiveArcBuildV1`; no UI,
+  cook, or Workshop.

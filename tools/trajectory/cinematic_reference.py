@@ -285,6 +285,37 @@ def build_arc_table_iterative(
     return tuple(result)
 
 
+def trace_arc_table_iterative(
+    segment: CompiledSegment,
+    tolerance: float,
+    max_depth: int,
+    max_operations: int,
+) -> tuple[tuple[ArcSample, ...], int]:
+    """Return the accepted table and exact Blueprint-v1 pop count.
+
+    This independent diagnostic trace intentionally repeats the compact stack
+    state machine used by the Blueprint runtime tests.  It makes operation
+    budgets observable without weakening the public compiler API.
+    """
+    table = build_arc_table_iterative(segment, tolerance, max_depth, max_operations)
+    stack = [(0.0, segment.start, 1.0, segment.end, 0)]
+    operations = 0
+    minimum_depth = min(6, max_depth)
+    while stack:
+        if operations >= max_operations:
+            raise TrajectoryCompileError("arc operation budget exhausted")
+        u0, p0, u1, p1, depth = stack.pop(); operations += 1
+        midpoint_u = (u0 + u1) * 0.5
+        midpoint = evaluate_spatial(segment, midpoint_u)
+        chord = _distance(p0, p1)
+        polyline = _distance(p0, midpoint) + _distance(midpoint, p1)
+        if depth < max_depth and (depth < minimum_depth or polyline - chord > tolerance):
+            next_depth = depth + 1
+            stack.append((midpoint_u, midpoint, u1, p1, next_depth))
+            stack.append((u0, p0, midpoint_u, midpoint, next_depth))
+    return table, operations
+
+
 def _arc_table(segment: CompiledSegment, tolerance: float, max_depth: int) -> tuple[ArcSample, ...]:
     points: list[tuple[float, Vector3]] = [(0.0, segment.start)]
     minimum_depth = min(6, max_depth)

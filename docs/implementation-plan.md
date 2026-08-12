@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.68.0-adaptive-arc-initialization`
+Current internal build: `0.69.0-adaptive-arc-processing`
 
 ## 1. Delivery strategy
 
@@ -124,7 +124,25 @@ This section is the authoritative handoff. Detailed evidence remains in
   pass 64 randomized endpoint cases plus the invalid-prior-stage clearing case,
   with full CDO restoration. Reset, validation, and initialization are accepted;
   bounded processing, atomic publication, route integration, and the complete
-  trajectory engine remain. Next is `ProcessAdaptiveArcBuildV1`.
+  trajectory engine remain.
+- `ProcessAdaptiveArcBuildV1` now consumes the synchronized interval stack with
+  a bounded iterative loop, evaluates true quintic or selected linear
+  midpoints, refines right-then-left for deterministic left-first traversal,
+  and appends accepted samples and cumulative distance to candidate arrays.
+  It fails closed on invalid prior state, malformed stack/candidate
+  cardinalities, primitive failure, or an exhausted operation budget.
+- Deterministic full/paste graphs contain 119/118 nodes; the exact saved
+  post-compile graph contains 119 nodes. Warm and fresh compiled runtime each
+  pass 23 deterministic linear/cinematic paths with 1,017 samples, exact
+  operation counts up to 127, exact-budget success, one-short exhaustion, nine
+  malformed/preflight cases, sticky failure, stale-state replacement, and full
+  CDO restoration. All core assets cold-load and compile, the full scaffold
+  passes, and the live/mirror Client Director SHA-256 is
+  `581544AF09F830B2BD2945E0DF332088DF9DC63D10C0B24C1E4AEED2A1059A40`.
+- Reset, validation, initialization, and bounded processing are accepted. Next
+  is `CommitAdaptiveArcBuildV1`, which must atomically validate and publish the
+  completed candidate table; route integration and the complete trajectory
+  engine remain. No UI, cook, or Workshop work is implied by this checkpoint.
 
 ### Cinematic orientation oracle checkpoint
 

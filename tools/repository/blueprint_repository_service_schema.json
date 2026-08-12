@@ -236,7 +236,8 @@
     "LoadDraftV1",
     "ListMineV1",
     "DeleteFlypathV1",
-    "PublishDraftV1"
+    "PublishDraftV1",
+    "UnpublishV1"
   ],
   "resultCodes": [
     "Success",

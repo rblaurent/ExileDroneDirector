@@ -18,6 +18,20 @@ Launch the interactive editor with the Conan project **and** `-ModDevKit`.
 Without that flag the editor does not mount `/Game/Mods/ExileDroneDirector`, so
 Blueprint automation will report that valid mod assets cannot be loaded.
 
+Before launching a fresh Enhanced editor installation, provision the persistent
+local remote endpoint once (the helper is idempotent):
+
+```powershell
+.\tools\unreal\Enable-EnhancedEditorRemoteExecution.ps1 `
+  -DevKitRoot F:\CEUE5Devkit
+```
+
+The effective section is `PythonScriptPluginSettings` in generated
+`WindowsEditor/Engine.ini`. Do not place these values under the similarly named
+user-settings class or `EditorPerProjectUserSettings.ini`; both were observed to
+load Python without starting the remote endpoint. After launch, require exactly
+one matching `ConanSandbox` discovery node before sending any mutating script.
+
 1. Create the smallest new node pattern in a mod-owned Blueprint using the
    visible editor.
 2. Compile and prove that pattern in PIE before turning it into a template.

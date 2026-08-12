@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.49.0-publish-draft`
+Current internal build: `0.50.0-unpublish`
 
 ## 1. Delivery strategy
 
@@ -514,15 +514,18 @@ before any polished editor UI or cook is attempted:
    independently proven after SaveGame restart. Delete writes an ordered
    tombstone, removes aligned derived state only after physical commit, survives
    a fresh-process recovery, and completes a second generation-4/slot-B delete.
-5. **Complete for publication:** owner-only optimistic `PublishDraftV1` promotes
+5. **Complete for publication control:** owner-only optimistic `PublishDraftV1` promotes
    a validated private draft to a public immutable snapshot without advancing
    the draft revision. It preserves the prior published snapshot across draft
    edits, republishes only the caller's expected draft revision, commits through
    the accepted A/B writer, survives a fresh process, and exposes only typed
-   conflict state on rejection.
-6. **Current:** add owner-only unpublish, public discovery, immutable playback
-   fetch, and private cloning with attribution. Extend corruption recovery,
-   limits, migration hooks, and typed failures across each sharing boundary.
+   conflict state on rejection. `UnpublishV1` reverses only discoverability:
+   it makes the record private while retaining the immutable published snapshot
+   and draft history, uses the same owner/revision boundary and A/B writer, and
+   survives fresh recovery plus resumed publish/unpublish writes.
+6. **Current:** add public discovery, immutable playback fetch, and private
+   cloning with attribution. Extend corruption recovery, limits, migration
+   hooks, and typed failures across each sharing boundary.
 7. Implement the complete trajectory compiler: linear and cinematic curves,
    monotonic timing/speed profiles, smooth quaternion rotation, flight profiles,
    deterministic sampling, and discontinuity diagnostics.

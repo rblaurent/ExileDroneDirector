@@ -2863,3 +2863,57 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Next ordered sharing slice is owner-only unpublish, followed by public
   discovery, immutable published fetch, and private clone with attribution. No
   polished UI, cook, or Workshop work begins at this checkpoint.
+
+## Owner-only history-preserving unpublish accepted (2026-08-11)
+
+- Internal checkpoint `0.50.0-unpublish` implements `UnpublishV1` as an
+  85-node compiled function (84-node paste body). It applies the same
+  owner-first authorization, strict stored-record identity, optimistic draft
+  revision, result sanitation, serialized-size ceiling, and copy-on-write A/B
+  persistence boundary as publication.
+- Unpublish changes only `visibility` to `private` and the server-owned update
+  timestamp. It deliberately does not clear `HasPublishedRevision`, does not
+  alter `PublishedRevisionNumber` or `PublishedDocument`, and does not advance
+  or replace the private draft. The staged record is revalidated and encoded
+  before one candidate envelope is replaced; derived visibility/timestamp and
+  success results change only after `ScratchPersistenceCommitSavedV1` is true.
+- The executable runtime oracle created revision 1 privately (`1/A`), published
+  it (`2/B`), saved a materially different 22-second revision-2 draft (`3/A`),
+  and proved the original zero-second published snapshot was unchanged. It then
+  passed mutation-free NotFound, wrong-owner, blank-owner, stale-revision,
+  blank-timestamp, corrupt-envelope, decoded/index mismatch, and serialized-size
+  rejection cases with clean result payloads and byte-identical physical slots.
+- The first accepted unpublish committed `4/B`, made metadata private, retained
+  draft revision 2 plus published revision 1, and retained the original
+  published payload. Republish committed `5/A` and promoted the 22-second
+  revision-2 snapshot; a second unpublish committed `6/B` while retaining that
+  snapshot. After guarded shutdown, a fresh `-ModDevKit -NullRHI` process
+  recovered private generation 6/B, owner-loaded and listed it, republished to
+  `7/A`, unpublished to `8/B`, reloaded the exact physical payload, and removed
+  both acceptance slots.
+- Deterministic generated SHA-256 values are
+  `15587C052DCE11ABB67A46AD7FF2A967422100A9F232AFB4F682AFD131A0345F`
+  (full) and
+  `42D9BB2F699E27AB13F7B604F178B40804497F1C3145467DB65B72DFFF5715BE`
+  (paste). Exact post-compile export SHA-256 is
+  `9E21EC9C78239B2CB4B721D7E4D89F9D24ECBC1640BDF3AECA97279AB6F85F58`.
+  Live and closed-editor mirror package SHA-256 is
+  `86DA629F0C695EF422CFD93A9CAF065F02FD47A4BA4A257FEBE8F6E305EE5369`.
+  A separate cold commandlet loaded all nine required assets, compiled every
+  Blueprint, emitted `EDD_COLD_LOAD|RESULT|PASS`, and reported zero errors.
+- Interactive remote automation is now provisioned without preference-window
+  navigation. The effective config owner is
+  `[/Script/PythonScriptPlugin.PythonScriptPluginSettings]` in the project's
+  generated `WindowsEditor/Engine.ini`; the similarly named user-settings
+  section and `EditorPerProjectUserSettings.ini` do not enable the endpoint.
+  `Enable-EnhancedEditorRemoteExecution.ps1` idempotently preserves unrelated
+  section values while enforcing Epic's local defaults; its automated fixture
+  regression also covers missing sections and rejects duplicate sections or
+  required keys. A live editor then
+  advertised exactly one `ConanSandbox` node and executed a marked command.
+  `Get-EnhancedEditorWindows.ps1` and `Save-WindowScreenshot.ps1` make window
+  selection and endpoint inspection explicit instead of rebuilding fragile
+  one-off UI probes.
+- Public discovery is the next ordered sharing slice, followed by immutable
+  published fetch and private clone with attribution. No polished UI, cook, or
+  Workshop work begins at this checkpoint.

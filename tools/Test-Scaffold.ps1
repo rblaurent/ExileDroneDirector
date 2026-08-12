@@ -76,6 +76,13 @@ $requiredFiles = @(
     'tools\unreal\Validate-RepositoryPrivateDeleteRestart.py',
     'tools\unreal\Validate-RepositoryPublishDraft.py',
     'tools\unreal\Validate-RepositoryPublishDraftRestart.py',
+    'tools\unreal\Validate-RepositoryUnpublish.py',
+    'tools\unreal\Validate-RepositoryUnpublishRestart.py',
+    'tools\unreal\Enable-EnhancedEditorRemoteExecution.ps1',
+    'tools\unreal\Test-EnhancedEditorRemoteExecutionConfig.ps1',
+    'tools\unreal\Get-EnhancedEditorWindows.ps1',
+    'tools\unreal\Save-WindowScreenshot.ps1',
+    'tools\unreal\Inspect-PythonRemoteExecutionSettings.py',
     'tools\unreal\Read-RepositoryPersistenceWriter.py',
     'tools\unreal\Open-RepositoryServiceEditor.py',
     'tools\unreal\Validate-RepositoryJsonCodec.py',
@@ -115,6 +122,7 @@ $requiredFiles = @(
     'tools\blueprint\Build-RepositoryPrivateListGraph.py',
     'tools\blueprint\Build-RepositoryPrivateDeleteGraph.py',
     'tools\blueprint\Build-RepositoryPublishDraftGraph.py',
+    'tools\blueprint\Build-RepositoryUnpublishGraph.py',
     'tools\blueprint\Build-RepositoryJsonMissingNodeProbe.py',
     'tools\blueprint\Build-RepositoryDecoderNativeNodeProbe.py',
     'tools\blueprint\Test-RepositoryJsonNodeForms.py',
@@ -155,6 +163,7 @@ $requiredFiles = @(
     'tools\blueprint\Test-RepositoryPrivateListContracts.py',
     'tools\blueprint\Test-RepositoryPrivateDeleteContracts.py',
     'tools\blueprint\Test-RepositoryPublishDraftContracts.py',
+    'tools\blueprint\Test-RepositoryUnpublishContracts.py',
     'tools\unreal\Generate-MvpScaffold.py',
     'tools\blueprint\Export-BlueprintGraphClipboard.ps1',
     'tools\blueprint\Set-BlueprintGraphClipboard.ps1',
@@ -451,6 +460,12 @@ $scratchRoot = if ($env:REDLEAF_SCRATCH_DIR) {
     $env:REDLEAF_SCRATCH_DIR
 } else {
     [IO.Path]::GetTempPath()
+}
+& (Join-Path $ProjectRoot 'tools\unreal\Test-EnhancedEditorRemoteExecutionConfig.ps1') `
+    -ProjectRoot $ProjectRoot `
+    -ScratchRoot $scratchRoot
+if ($LASTEXITCODE -ne 0) {
+    throw "Enhanced editor remote-execution config contracts failed with exit code $LASTEXITCODE."
 }
 $syncNonce = [guid]::NewGuid().ToString('N')
 $generatedSync = Join-Path $scratchRoot "edd-sync-$syncNonce.eddgraph"
@@ -1570,6 +1585,53 @@ $repositoryPublishDraftLive = Join-Path $ProjectRoot 'tools\blueprint\live-snipp
     --input $repositoryPublishDraftLive
 if ($LASTEXITCODE -ne 0) {
     throw "Repository publish-draft live-round-trip contracts failed with exit code $LASTEXITCODE."
+}
+
+$repositoryUnpublishNonce = [guid]::NewGuid().ToString('N')
+$repositoryUnpublishRoot = Join-Path $scratchRoot "edd-repository-unpublish-$repositoryUnpublishNonce"
+$repositoryUnpublishFull = Join-Path $repositoryUnpublishRoot 'full'
+$repositoryUnpublishPaste = Join-Path $repositoryUnpublishRoot 'paste'
+New-Item -ItemType Directory -Force -Path $repositoryUnpublishFull, $repositoryUnpublishPaste | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-RepositoryUnpublishGraph.py') `
+    --project-root $ProjectRoot `
+    --output-dir $repositoryUnpublishFull `
+    --paste-dir $repositoryUnpublishPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository unpublish graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($graph in Get-ChildItem -LiteralPath $repositoryUnpublishFull, $repositoryUnpublishPaste -Filter '*.eddgraph') {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graph.FullName
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryUnpublishContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryUnpublishFull 'unpublish-v1.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository unpublish full contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryUnpublishContracts.py') `
+    --project-root $ProjectRoot `
+    --input (Join-Path $repositoryUnpublishPaste 'unpublish-v1-paste.eddgraph') `
+    --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository unpublish paste contracts failed with exit code $LASTEXITCODE."
+}
+foreach ($pair in @(
+    @((Join-Path $repositoryUnpublishFull 'unpublish-v1.eddgraph'), 'tools\blueprint\snippets\unpublish-v1.eddgraph'),
+    @((Join-Path $repositoryUnpublishPaste 'unpublish-v1-paste.eddgraph'), 'tools\blueprint\snippets\unpublish-v1-paste.eddgraph')
+)) {
+    $checkedIn = Join-Path $ProjectRoot $pair[1]
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $pair[0]).Hash -ne
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $checkedIn).Hash) {
+        throw "Repository unpublish graph is not deterministic: $($pair[1])"
+    }
+}
+$repositoryUnpublishLive = Join-Path $ProjectRoot 'tools\blueprint\live-snippets\unpublish-v1.eddgraph'
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $repositoryUnpublishLive
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-RepositoryUnpublishContracts.py') `
+    --project-root $ProjectRoot `
+    --input $repositoryUnpublishLive
+if ($LASTEXITCODE -ne 0) {
+    throw "Repository unpublish live-round-trip contracts failed with exit code $LASTEXITCODE."
 }
 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-DocumentSyncStructForms.py') `

@@ -285,9 +285,13 @@ publish, intervening draft save, republish, metadata parity, and unchanged
 authority/SaveGame state on every rejection. A fresh process recovered the
 public revision, advanced the private draft without changing that snapshot,
 republished the new revision through generations 5/A and 6/B, reloaded the
-physical payload, and cleaned both slots. Unpublish, discovery, immutable
-public fetch, and private clone remain ordered sharing work; this is not a
-completed mod or a UI/cook checkpoint.
+physical payload, and cleaned both slots. `UnpublishV1` is now accepted too:
+it is owner-only and optimistic, returns the record to private visibility,
+preserves both the current draft and the last immutable published snapshot,
+commits through the same copy-on-write A/B writer, and survives a real restart
+with resumed publish/unpublish alternation. Discovery, immutable public fetch,
+and private clone remain ordered sharing work; this is not a completed mod or
+a UI/cook checkpoint.
 
 `BP_EDD_FlypathRepository` now supplies the compiled server-only repository
 boundary: active and copy-on-write candidate snapshot state, a derived metadata
@@ -312,10 +316,10 @@ headless cold compile pass. Canonical whitespace and UTC ordering remain an
 explicit parity gap owned by the next repository boundary. Alternating-slot
 state transitions, exact native SaveGame construction forms, connected raw slot
 reads, deterministic recovery, the two-phase writer, owner-only private draft
-loading, private-by-default creation, owner-only optimistic private saving, and
-owner-filtered metadata listing, owner-only optimistic delete, and owner-only
-optimistic publication are accepted. Owner-only unpublish is the next runtime
-milestone.
+loading, private-by-default creation, owner-only optimistic private saving,
+owner-filtered metadata listing, owner-only optimistic delete, owner-only
+optimistic publication, and history-preserving owner-only unpublish are
+accepted. Public discovery is the next runtime milestone.
 
 ## Repository layout
 

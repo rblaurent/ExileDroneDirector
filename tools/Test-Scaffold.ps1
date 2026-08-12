@@ -12,6 +12,8 @@ if ($LASTEXITCODE -ne 0) {
     throw "Unreal remote-execution helper contracts failed with exit code $LASTEXITCODE."
 }
 
+& (Join-Path $ProjectRoot 'tools\Test-SyncDevKitContent.ps1') -ProjectRoot $ProjectRoot
+
 $requiredFiles = @(
     'README.md',
     'project.json',
@@ -25,6 +27,7 @@ $requiredFiles = @(
     '.gitattributes',
     '.gitignore',
     'tools\Sync-DevKitContent.ps1',
+    'tools\Test-SyncDevKitContent.ps1',
     'tools\unreal\Quit-EnhancedEditorSafely.py',
     'tools\Test-RepositoryBudget.ps1',
     'tools\Invoke-UnrealPython.ps1',
@@ -111,6 +114,8 @@ $requiredFiles = @(
     'tools\trajectory\test_arc_table_blueprint_schema.py',
     'tools\trajectory\adaptive_arc_blueprint_schema.json',
     'tools\trajectory\test_adaptive_arc_blueprint_schema.py',
+    'tools\trajectory\position_route_blueprint_schema.json',
+    'tools\trajectory\test_position_route_blueprint_schema.py',
     'tools\unreal\Configure-TrajectoryScalarEvaluators.py',
     'tools\unreal\Compile-And-SaveClientDirector.py',
     'tools\unreal\Open-ClientDirectorEditor.py',
@@ -153,6 +158,9 @@ $requiredFiles = @(
     'tools\unreal\Validate-AdaptiveArcCommitRuntime.py',
     'tools\unreal\Validate-AdaptiveArcCompileRuntime.py',
     'tools\unreal\Move-SelectedBlueprintNode.ps1',
+    'tools\unreal\Invoke-BlueprintRelativeDrag.ps1',
+    'tools\unreal\Configure-PositionRouteAssembly.py',
+    'tools\unreal\Validate-PositionRouteResetRuntime.py',
     'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
     'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
     'tools\blueprint\Build-OrientationCompilerGraphs.py',
@@ -187,6 +195,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-AdaptiveArcCommitContracts.py',
     'tools\blueprint\Build-AdaptiveArcCompileGraph.py',
     'tools\blueprint\Test-AdaptiveArcCompileContracts.py',
+    'tools\blueprint\Build-PositionRouteResetGraph.py',
+    'tools\blueprint\Test-PositionRouteResetContracts.py',
     'tools\blueprint\templates\adaptive-arc-forloop-node-form.eddgraph',
     'tools\blueprint\templates\adaptive-arc-process-node-forms.eddgraph',
     'tools\blueprint\templates\orientation-compiler-native-node-forms.eddgraph',
@@ -237,6 +247,9 @@ $requiredFiles = @(
     'tools\blueprint\snippets\build-adaptive-arc-table-v1.eddgraph',
     'tools\blueprint\snippets\build-adaptive-arc-table-v1-paste.eddgraph',
     'tools\blueprint\live-snippets\build-adaptive-arc-table-v1.eddgraph',
+    'tools\blueprint\snippets\reset-position-route-candidate-v1.eddgraph',
+    'tools\blueprint\snippets\reset-position-route-candidate-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-position-route-candidate-v1.eddgraph',
     'tools\blueprint\live-snippets\compile-orientation-track-v1.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
@@ -679,6 +692,10 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Adaptive arc Blueprint assembly-schema contracts failed with exit code $LASTEXITCODE."
 }
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_position_route_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Position-route Blueprint assembly-schema contracts failed with exit code $LASTEXITCODE."
+}
 
 $trajectoryScalarNonce = [guid]::NewGuid().ToString('N')
 $trajectoryScalarRoot = Join-Path $scratchRoot "edd-trajectory-scalar-$trajectoryScalarNonce"
@@ -1060,6 +1077,41 @@ foreach ($spec in @(
     if ($LASTEXITCODE -ne 0) { throw "Adaptive arc paste contracts failed for $stem with exit code $LASTEXITCODE." }
     & python $contract --project-root $ProjectRoot --graph (Join-Path $ProjectRoot "tools\blueprint\live-snippets\$stem.eddgraph")
     if ($LASTEXITCODE -ne 0) { throw "Adaptive arc exact post-compile contracts failed for $stem with exit code $LASTEXITCODE." }
+}
+
+$positionRouteRoot = Join-Path $scratchRoot "edd-position-route-$orientationCompilerNonce"
+New-Item -ItemType Directory -Path $positionRouteRoot -Force | Out-Null
+foreach ($spec in @(
+    ,@('Build-PositionRouteResetGraph.py', 'Test-PositionRouteResetContracts.py', 'reset-position-route-candidate-v1')
+)) {
+    $builder = Join-Path $ProjectRoot "tools\blueprint\$($spec[0])"
+    $contract = Join-Path $ProjectRoot "tools\blueprint\$($spec[1])"
+    $stem = $spec[2]
+    $full = Join-Path $positionRouteRoot "$stem.eddgraph"
+    $paste = Join-Path $positionRouteRoot "$stem-paste.eddgraph"
+    $repeat = Join-Path $positionRouteRoot "$stem-repeat.eddgraph"
+    $repeatPaste = Join-Path $positionRouteRoot "$stem-repeat-paste.eddgraph"
+    & python $builder --project-root $ProjectRoot --output $full --paste-output $paste
+    if ($LASTEXITCODE -ne 0) { throw "Position-route graph generation failed for $stem with exit code $LASTEXITCODE." }
+    & python $builder --project-root $ProjectRoot --output $repeat --paste-output $repeatPaste
+    if ($LASTEXITCODE -ne 0) { throw "Repeated position-route graph generation failed for $stem with exit code $LASTEXITCODE." }
+    foreach ($pair in @(
+        @($full, $repeat, "tools\blueprint\snippets\$stem.eddgraph"),
+        @($paste, $repeatPaste, "tools\blueprint\snippets\$stem-paste.eddgraph")
+    )) {
+        $checked = Join-Path $ProjectRoot $pair[2]
+        $hash = (Get-FileHash -Algorithm SHA256 $pair[0]).Hash
+        if ($hash -ne (Get-FileHash -Algorithm SHA256 $pair[1]).Hash -or
+            $hash -ne (Get-FileHash -Algorithm SHA256 $checked).Hash) {
+            throw "Position-route graph is nondeterministic or drifted: $checked"
+        }
+    }
+    & python $contract --project-root $ProjectRoot --graph $full
+    if ($LASTEXITCODE -ne 0) { throw "Position-route full contracts failed for $stem with exit code $LASTEXITCODE." }
+    & python $contract --project-root $ProjectRoot --graph $paste --paste
+    if ($LASTEXITCODE -ne 0) { throw "Position-route paste contracts failed for $stem with exit code $LASTEXITCODE." }
+    & python $contract --project-root $ProjectRoot --graph (Join-Path $ProjectRoot "tools\blueprint\live-snippets\$stem.eddgraph")
+    if ($LASTEXITCODE -ne 0) { throw "Position-route exact post-compile contracts failed for $stem with exit code $LASTEXITCODE." }
 }
 
 & python (Join-Path $ProjectRoot 'tools\preview\test_linear_preview.py')

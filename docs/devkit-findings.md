@@ -3533,3 +3533,34 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   Fresh runtime, cold load of all nine core assets, and compilation of all six
   Blueprint assets pass. Position-route integration is next; no UI, cook, or
   Workshop.
+
+## Position-route reset accepted (2026-08-12)
+
+- Internal checkpoint `0.72.0-position-route-reset` introduces the separated
+  candidate/compiled/evaluation storage contract and compiles
+  `ResetPositionRouteCandidateV1` on Client Director. The function clears 18
+  arrays and resets 14 scalars, including stale validity and evaluation output,
+  without touching the eight authored/evaluation inputs.
+- Deterministic full/paste graphs contain 51/50 nodes with SHA-256
+  `324E152D111E86C432CB80876307CE73DC6F2139B01CEC5B704AEDC1DEB00C1D` /
+  `AC382699DE96DFFBE94CC1742585FE51EE33AB6EE1BF7660CCA641B90AB8B2AB`.
+  The exact post-compile 51-node export has SHA-256
+  `D93A4110F2306910E75403A0B130D1BA00C5A283992C105C2468EDC64417D2B9`.
+- Warm and fresh compiled execution each prove 18 empty arrays, 14 exact scalar
+  defaults, eight preserved inputs, two idempotent calls, and complete CDO
+  restoration. Fresh cold load independently loads all nine core assets and
+  compiles all six Blueprint assets. Live and normal Git mirror match at
+  SHA-256 `FEC775EF7C15449B3170FBA9967326B4BA1823FF295D947FF0131FC1B6152B3E`.
+- Enhanced's graph surface ignored absolute-cursor `SetCursorPos` movement while
+  dragging at this zoom/state. Raw relative `mouse_event(MOVE)` deltas moved the
+  selected native entry reliably; the guarded mover now uses that primitive and
+  still requires exact clipboard position/marker readback after every attempt.
+  The entry moved to `(-5776,-224)`, 256 units left of the first clear, and one
+  measured pin drag created the reciprocal native seam.
+- The DevKit-created `KitContent` directory sits inside the mod root and must
+  never be recursively mirrored as authored mod content. The sync helper now
+  scopes transfer to root `modinfo.json` plus the `Local` asset tree. Its
+  reverse preview reports the expected 17 unchanged files, and the accidental
+  untracked nested duplicate was removed after hash verification.
+- This accepts only the reset transaction. Input validation is next; no UI,
+  cook, Workshop, or complete-route claim is implied.

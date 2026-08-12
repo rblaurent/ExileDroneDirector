@@ -64,11 +64,18 @@ if (-not (Test-Path -LiteralPath $destination)) {
 $copied = 0
 $unchanged = 0
 $conflicts = [System.Collections.Generic.List[string]]::new()
-$sourceFiles = Get-ChildItem -LiteralPath $source -File -Recurse |
-    Where-Object {
-        ($assetExtensions -contains $_.Extension.ToLowerInvariant()) -or
-        ($metadataNames -contains $_.Name.ToLowerInvariant())
+$sourceFiles = @()
+$sourceLocal = Join-Path $source 'Local'
+if (Test-Path -LiteralPath $sourceLocal -PathType Container) {
+    $sourceFiles += Get-ChildItem -LiteralPath $sourceLocal -File -Recurse |
+        Where-Object { $assetExtensions -contains $_.Extension.ToLowerInvariant() }
+}
+foreach ($metadataName in $metadataNames) {
+    $metadataPath = Join-Path $source $metadataName
+    if (Test-Path -LiteralPath $metadataPath -PathType Leaf) {
+        $sourceFiles += Get-Item -LiteralPath $metadataPath
     }
+}
 
 foreach ($file in $sourceFiles) {
     $relativePath = $file.FullName.Substring($source.Length).TrimStart([char[]]@('\', '/'))

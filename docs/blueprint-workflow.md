@@ -335,6 +335,20 @@ bounded drag, rejects non-converging or off-grid movement, and catches selection
 transfer caused by overlap. Always move an entry into empty graph space before
 connecting it; do not traverse the dense calculation body.
 
+Enhanced can ignore a drag synthesized only by repeatedly changing the absolute
+cursor position, even though the foreground window and coordinates are correct.
+`Invoke-BlueprintRelativeDrag.ps1` holds the requested mouse button and emits raw
+relative MOVE deltas; `Move-SelectedBlueprintNode.ps1` uses it for movement and
+then proves the selected node's exact serialized coordinates. A successful
+input call alone is never evidence that a node moved or that pins connected.
+
+The Enhanced mod root may contain DevKit-managed `Content`, `Shared`, and
+`KitContent` directories beside authored `Local`. Repository synchronization is
+deliberately allowlisted to `Local/**/*.{uasset,umap,ubulk,uexp}` and root
+`modinfo.json`; never recursively ingest every recognized extension beneath the
+whole mod root, or a mirrored `KitContent` tree can recursively duplicate the
+project.
+
 Enhanced's pure string-normalization node is
 `KismetStringLibrary.Trim(SourceString) -> ReturnValue`. The harvested native
 form is `repository-string-trim-node-form.eddgraph`. Use it for persisted

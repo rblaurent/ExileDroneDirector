@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.71.0-adaptive-arc-compiler`
+Current internal build: `0.72.0-position-route-reset`
 
 ## 1. Delivery strategy
 
@@ -170,6 +170,24 @@ This section is the authoritative handoff. Detailed evidence remains in
   position-route composition/publication and its absolute-time/distance
   evaluator. The complete trajectory engine still remains; no UI, cook, or
   Workshop work is implied.
+- Position-route composition has entered its first accepted transactional
+  stage. `ResetPositionRouteCandidateV1` clears all 18 candidate, compiled, and
+  evaluation arrays plus 14 scalar result fields while preserving all eight
+  authored/evaluation inputs. It is idempotent and fail-closed, so no later
+  validation or loop can expose stale data from an earlier route.
+- Deterministic source/paste graphs contain 51/50 nodes with SHA-256
+  `324E152D111E86C432CB80876307CE73DC6F2139B01CEC5B704AEDC1DEB00C1D` /
+  `AC382699DE96DFFBE94CC1742585FE51EE33AB6EE1BF7660CCA641B90AB8B2AB`.
+  The exact post-compile 51-node graph has SHA-256
+  `D93A4110F2306910E75403A0B130D1BA00C5A283992C105C2468EDC64417D2B9`.
+- Warm and fresh NullRHI execution independently prove all 32 output resets,
+  eight preserved inputs, two consecutive idempotent calls, and full CDO
+  restoration. A separate fresh process cold-loads all nine core assets and
+  compiles all six Blueprints. Live/mirror Client Director SHA-256 is
+  `FEC775EF7C15449B3170FBA9967326B4BA1823FF295D947FF0131FC1B6152B3E`.
+- Only reset is accepted here. Position input validation, velocity/segment
+  assembly, atomic publication, absolute-time/distance evaluation, lens and
+  effect tracks, dogfood shortcuts, UI, cook, and Workshop remain ordered work.
 
 ### Cinematic orientation oracle checkpoint
 

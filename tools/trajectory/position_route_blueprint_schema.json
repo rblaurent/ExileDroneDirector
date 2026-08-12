@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Transactional Blueprint boundary for deterministic multi-segment position compilation and absolute-time evaluation.",
+  "limits": {
+    "minimumWaypoints": 2,
+    "maximumWaypoints": 512,
+    "minimumArcDepth": 1,
+    "maximumArcDepth": 12,
+    "minimumArcOperations": 1,
+    "maximumArcOperations": 8191,
+    "minimumArcToleranceExclusive": 0.0,
+    "finiteScalarBound": 1.7976931348623157e+308
+  },
+  "variables": [
+    { "name": "PositionRouteInputWaypointPositionsV1", "type": "Vector", "container": "Array", "role": "input" },
+    { "name": "PositionRouteInputDurationsV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "PositionRouteInputSpatialCurveTypesV1", "type": "String", "container": "Array", "role": "input" },
+    { "name": "PositionRouteInputTimeProfilesV1", "type": "String", "container": "Array", "role": "input" },
+    { "name": "PositionRouteInputArcToleranceV1", "type": "Float", "container": "None", "role": "input", "default": 0.01 },
+    { "name": "PositionRouteInputMaxArcDepthV1", "type": "Integer", "container": "None", "role": "input", "default": 12 },
+    { "name": "PositionRouteInputMaxArcOperationsV1", "type": "Integer", "container": "None", "role": "input", "default": 8191 },
+
+    { "name": "PositionRouteCandidateWaypointVelocitiesV1", "type": "Vector", "container": "Array", "role": "candidate" },
+    { "name": "PositionRouteCandidateSegmentStartsV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "PositionRouteCandidateArcSampleStartsV1", "type": "Integer", "container": "Array", "role": "candidate" },
+    { "name": "PositionRouteCandidateArcSampleCountsV1", "type": "Integer", "container": "Array", "role": "candidate" },
+    { "name": "PositionRouteCandidateArcUsV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "PositionRouteCandidateArcDistancesV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "PositionRouteCandidateSegmentLengthsV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "PositionRouteCandidateTotalSecondsV1", "type": "Float", "container": "None", "role": "candidate", "default": 0.0 },
+    { "name": "PositionRouteCandidateTotalDistanceV1", "type": "Float", "container": "None", "role": "candidate", "default": 0.0 },
+    { "name": "PositionRouteCandidateOperationCountV1", "type": "Integer", "container": "None", "role": "candidate", "default": 0 },
+    { "name": "PositionRouteStageValidV1", "type": "Boolean", "container": "None", "role": "candidate", "default": false },
+
+    { "name": "PositionRouteCompiledWaypointPositionsV1", "type": "Vector", "container": "Array", "role": "result" },
+    { "name": "PositionRouteCompiledDurationsV1", "type": "Float", "container": "Array", "role": "result" },
+    { "name": "PositionRouteCompiledSpatialCurveTypesV1", "type": "String", "container": "Array", "role": "result" },
+    { "name": "PositionRouteCompiledTimeProfilesV1", "type": "String", "container": "Array", "role": "result" },
+    { "name": "PositionRouteCompiledWaypointVelocitiesV1", "type": "Vector", "container": "Array", "role": "result" },
+    { "name": "PositionRouteCompiledSegmentStartsV1", "type": "Float", "container": "Array", "role": "result" },
+    { "name": "PositionRouteCompiledArcSampleStartsV1", "type": "Integer", "container": "Array", "role": "result" },
+    { "name": "PositionRouteCompiledArcSampleCountsV1", "type": "Integer", "container": "Array", "role": "result" },
+    { "name": "PositionRouteCompiledArcUsV1", "type": "Float", "container": "Array", "role": "result" },
+    { "name": "PositionRouteCompiledArcDistancesV1", "type": "Float", "container": "Array", "role": "result" },
+    { "name": "PositionRouteCompiledSegmentLengthsV1", "type": "Float", "container": "Array", "role": "result" },
+    { "name": "PositionRouteCompiledTotalSecondsV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "PositionRouteCompiledTotalDistanceV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "PositionRouteCompileValidV1", "type": "Boolean", "container": "None", "role": "result", "default": false },
+
+    { "name": "PositionRouteInputElapsedSecondsV1", "type": "Float", "container": "None", "role": "evaluationInput", "default": 0.0 },
+    { "name": "PositionRouteResultSegmentIndexV1", "type": "Integer", "container": "None", "role": "evaluationResult", "default": -1 },
+    { "name": "PositionRouteResultLocalTimeAlphaV1", "type": "Float", "container": "None", "role": "evaluationResult", "default": 0.0 },
+    { "name": "PositionRouteResultDistanceAlphaV1", "type": "Float", "container": "None", "role": "evaluationResult", "default": 0.0 },
+    { "name": "PositionRouteResultCurveUV1", "type": "Float", "container": "None", "role": "evaluationResult", "default": 0.0 },
+    { "name": "PositionRouteResultPositionV1", "type": "Vector", "container": "None", "role": "evaluationResult", "default": [0.0, 0.0, 0.0] },
+    { "name": "PositionRouteResultCompleteV1", "type": "Boolean", "container": "None", "role": "evaluationResult", "default": false },
+    { "name": "PositionRouteResultValidV1", "type": "Boolean", "container": "None", "role": "evaluationResult", "default": false }
+  ],
+  "functions": [
+    { "name": "ResetPositionRouteCandidateV1", "stage": 0 },
+    { "name": "ValidatePositionRouteInputsV1", "stage": 1, "uses": ["EvaluateQuinticVectorV1", "EvaluateTimeProfileV1"] },
+    { "name": "ComputePositionRouteVelocitiesV1", "stage": 2 },
+    { "name": "BuildPositionRouteSegmentsV1", "stage": 3, "uses": ["BuildAdaptiveArcTableV1"] },
+    { "name": "CommitCompiledPositionRouteV1", "stage": 4 },
+    { "name": "CompilePositionRouteV1", "stage": 5 },
+    { "name": "EvaluateCompiledPositionRouteV1", "stage": 6, "uses": ["EvaluateTimeProfileV1", "InvertArcLengthTableV1", "EvaluateQuinticVectorV1"] }
+  ],
+  "contracts": {
+    "inputShape": "durations, spatial curve types, and time profiles each equal waypoint positions minus one.",
+    "flatArcTables": "Each segment owns one contiguous slice of the flat arc u/distance arrays through an exact start offset and positive count.",
+    "atomicity": "Only CommitCompiledPositionRouteV1 may replace compiled result arrays.",
+    "failure": "Any failure clears every compiled and evaluation result and leaves validity false.",
+    "segmentCardinality": "segment starts, durations, modes, arc starts, arc counts, and lengths equal waypoint positions minus one; waypoint velocities equal waypoint positions.",
+    "time": "Segment starts are cumulative from zero and total seconds is the positive finite duration sum.",
+    "evaluation": "Evaluation depends only on compiled arrays and absolute elapsed seconds; it never integrates prior frames."
+  }
+}

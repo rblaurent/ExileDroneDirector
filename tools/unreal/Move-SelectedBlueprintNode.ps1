@@ -27,6 +27,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $inputHelper = Join-Path $PSScriptRoot 'Invoke-EnhancedEditorInput.ps1'
+$relativeDragHelper = Join-Path $PSScriptRoot 'Invoke-BlueprintRelativeDrag.ps1'
 
 function Get-SelectedNodePosition {
     & $inputHelper -WindowHandle $WindowHandle -Keys '^c' -PostDelayMilliseconds 100 | Out-Null
@@ -77,10 +78,10 @@ while ($position[0] -ne $TargetX -or $position[1] -ne $TargetY) {
     $deltaY = [int]([Math]::Round($deltaY / 16.0) * 16)
 
     & $inputHelper -WindowHandle $WindowHandle -Keys '{HOME}' -PostDelayMilliseconds 250 | Out-Null
-    & $inputHelper -WindowHandle $WindowHandle `
-        -StartClientX $HeaderClientX -StartClientY $HeaderClientY `
-        -EndClientX ($HeaderClientX + $deltaX) -EndClientY ($HeaderClientY + $deltaY) `
-        -DragMilliseconds 650 -PostDelayMilliseconds 100 | Out-Null
+    & $relativeDragHelper -WindowHandle $WindowHandle `
+        -ClientX $HeaderClientX -ClientY $HeaderClientY `
+        -DeltaX $deltaX -DeltaY $deltaY -Button Left `
+        -DurationMilliseconds 650 | Out-Null
 
     $previous = $position
     $previousDistance = [Math]::Abs($TargetX - $previous[0]) + [Math]::Abs($TargetY - $previous[1])

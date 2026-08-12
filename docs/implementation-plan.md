@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.72.0-position-route-reset`
+Current internal build: `0.73.0-position-route-validation`
 
 ## 1. Delivery strategy
 
@@ -188,6 +188,22 @@ This section is the authoritative handoff. Detailed evidence remains in
 - Only reset is accepted here. Position input validation, velocity/segment
   assembly, atomic publication, absolute-time/distance evaluation, lens and
   effect tracks, dogfood shortcuts, UI, cook, and Workshop remain ordered work.
+- `ValidatePositionRouteInputsV1` now accepts only 2..512 finite waypoint
+  positions with exactly one positive finite duration, supported spatial mode,
+  and supported time profile per segment. Arc tolerance must be positive and
+  finite; depth is 1..12 and operation budget 1..8191. Geometry accepts only
+  `linear` or `auto_cinematic`; timing reuses the six already-proven profiles.
+- Deterministic full/paste graphs contain 72/71 nodes with SHA-256
+  `80DA4C892A9973BEF8DD945911994114CFEF081CCB96AFC444EF747F68659E73` /
+  `B281119C47B854CEE39727F2F3A5FD79C52FFE43382B54CEC445D1600EB7BC4E`.
+  The exact post-compile graph is 72 nodes with SHA-256
+  `45969BA00C0E662A2958D73DBC4F0710E62528BE0BAE7679D724334C6146D0AD`.
+- Warm and fresh compiled execution each pass five valid route sizes through
+  the 512-waypoint ceiling and reject 28 malformed shape, setting, duration,
+  curve, profile, and sticky-failure cases. All 12 injected NaN Vector
+  components were sanitized by Enhanced reflection before Blueprint execution
+  and are reported separately. Every touched CDO property restores. Next is
+  waypoint-velocity construction; no UI, cook, or Workshop work is implied.
 
 ### Cinematic orientation oracle checkpoint
 

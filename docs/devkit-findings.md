@@ -3564,3 +3564,33 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   untracked nested duplicate was removed after hash verification.
 - This accepts only the reset transaction. Input validation is next; no UI,
   cook, Workshop, or complete-route claim is implied.
+
+## Position-route input validation accepted (2026-08-12)
+
+- Internal checkpoint `0.73.0-position-route-validation` compiles
+  `ValidatePositionRouteInputsV1`. It validates 2..512 waypoint positions,
+  exact per-segment duration/curve/profile cardinality, finite positions,
+  positive finite durations/tolerance, depth 1..12, operation budget 1..8191,
+  `linear`/`auto_cinematic` geometry, and all six proven timing profiles.
+- Validation resets stage validity false, accepts only after every shape and
+  scalar setting passes, then uses four bounded ForEach loops. Per-position
+  finiteness is delegated to the proven quintic-vector primitive; time-profile
+  recognition is delegated to the proven timing primitive. Any element failure
+  only writes false, so a later valid element cannot heal an earlier rejection.
+- Full/paste graphs contain 72/71 nodes with hashes
+  `80DA4C892A9973BEF8DD945911994114CFEF081CCB96AFC444EF747F68659E73` /
+  `B281119C47B854CEE39727F2F3A5FD79C52FFE43382B54CEC445D1600EB7BC4E`.
+  Exact post-compile graph SHA-256 is
+  `45969BA00C0E662A2958D73DBC4F0710E62528BE0BAE7679D724334C6146D0AD`.
+- Warm and fresh NullRHI runtime each pass five valid cardinalities including
+  512 waypoints and reject 28 malformed cases. Enhanced reflection sanitized
+  all 12 injected NaN Vector-component cases before the graph received them;
+  the harness reports that boundary explicitly. Full CDO restoration passes.
+- Opening the function initially targeted the main editor HWND even though the
+  Blueprint lives in its own 1800x1000 top-level window. Export failed safely
+  with map text/empty clipboard. Enumerate windows and use the exact titled
+  Blueprint HWND; after that the one-node empty export, paste, guarded entry
+  move, reciprocal seam, compile/save, and post-compile contract all passed.
+- Live/mirror Client Director SHA-256 is
+  `C8FCBF4A21B65D67FD85AB4FE62D3E1BEE37FD4ED8B85A62BF4E5EFDC8178F07`.
+  Velocity construction is next. No UI, cook, or Workshop work has started.

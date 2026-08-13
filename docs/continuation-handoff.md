@@ -272,6 +272,16 @@ then use one-editor compile/save/runtime/PIE/cold acceptance. After the complete
 backend, expose temporary debug controls and logs, run the attended dogfood,
 and only then implement the polished UI.
 
+The first task-10 offline seam is now frozen in
+`camera_scalar_track_reference.py` and
+`camera_scalar_track_blueprint_schema.json`. It provides hold, linear, smooth,
+cinematic, and explicit-Hermite presets; value/velocity/acceleration output;
+linear physical units; reciprocal-distance optical focus; and bounded output
+without authored-key mutation. Eight reference and four schema tests pass. The
+next checkpoint is deterministic reset/validation/candidate/commit/evaluate
+Blueprint graphs for this common engine, followed by channel-owned lens/focus/
+effect storage and live acceptance.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

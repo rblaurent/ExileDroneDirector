@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Reusable absolute-time scalar-track compiler/evaluator for lens, focus, exposure, and effect channels.",
+  "architecture": {
+    "evaluation": "History-free absolute-time value, velocity, and acceleration evaluation with explicit segment/local-alpha publication.",
+    "domains": "Linear preserves physical authored units. Reciprocal interpolates positive focus distance in inverse-centimetre optical space and converts value/derivatives back to centimetres.",
+    "presets": "hold is explicitly discontinuous; linear is C0; smooth has zero endpoint velocity; cinematic has zero endpoint velocity and acceleration; hermite uses explicit interpolation-domain tangents per second.",
+    "ownership": "The generic compiler owns scratch/candidate state only. Later camera-channel assemblies copy successful compiled snapshots into channel-owned storage; no per-frame recompilation is allowed.",
+    "bounds": "Authored keys must satisfy declared bounds. Optional output clamping handles intentional Hermite overshoot without rewriting keys. A clamped sample publishes zero derivatives at the clamp boundary."
+  },
+  "limits": {
+    "minimumKeys": 1,
+    "maximumKeys": 512,
+    "domains": ["linear", "reciprocal"],
+    "interpolationModes": ["hold", "linear", "smooth", "cinematic", "hermite"]
+  },
+  "variables": [
+    { "name": "CameraScalarTrackInputDurationV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "CameraScalarTrackInputKeyTimesV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "CameraScalarTrackInputKeyValuesV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "CameraScalarTrackInputInterpolationModesV1", "type": "String", "container": "Array", "role": "input" },
+    { "name": "CameraScalarTrackInputArriveTangentsV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "CameraScalarTrackInputLeaveTangentsV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "CameraScalarTrackInputDomainV1", "type": "String", "container": "None", "role": "input", "default": "linear" },
+    { "name": "CameraScalarTrackInputHasMinimumV1", "type": "Boolean", "container": "None", "role": "input", "default": false },
+    { "name": "CameraScalarTrackInputMinimumV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "CameraScalarTrackInputHasMaximumV1", "type": "Boolean", "container": "None", "role": "input", "default": false },
+    { "name": "CameraScalarTrackInputMaximumV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "CameraScalarTrackInputClampOutputV1", "type": "Boolean", "container": "None", "role": "input", "default": false },
+
+    { "name": "CameraScalarTrackCandidateKeyTimesV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "CameraScalarTrackCandidateDomainValuesV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "CameraScalarTrackCandidateInterpolationModesV1", "type": "String", "container": "Array", "role": "candidate" },
+    { "name": "CameraScalarTrackCandidateArriveTangentsV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "CameraScalarTrackCandidateLeaveTangentsV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "CameraScalarTrackCompileValidV1", "type": "Boolean", "container": "None", "role": "result", "default": false },
+    { "name": "CameraScalarTrackFailureCodeV1", "type": "String", "container": "None", "role": "result", "default": "" },
+
+    { "name": "CameraScalarTrackQueryTimeV1", "type": "Float", "container": "None", "role": "query", "default": 0.0 },
+    { "name": "CameraScalarTrackResultValueV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "CameraScalarTrackResultVelocityV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "CameraScalarTrackResultAccelerationV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "CameraScalarTrackResultSegmentIndexV1", "type": "Integer", "container": "None", "role": "result", "default": -1 },
+    { "name": "CameraScalarTrackResultLocalAlphaV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "CameraScalarTrackResultCompleteV1", "type": "Boolean", "container": "None", "role": "result", "default": false },
+    { "name": "CameraScalarTrackResultValidV1", "type": "Boolean", "container": "None", "role": "result", "default": false },
+
+    { "name": "CameraScalarTrackScratchIndexV1", "type": "Integer", "container": "None", "role": "scratch", "default": 0 },
+    { "name": "CameraScalarTrackScratchValidV1", "type": "Boolean", "container": "None", "role": "scratch", "default": false },
+    { "name": "CameraScalarTrackScratchDomainValueV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "CameraScalarTrackScratchDomainVelocityV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "CameraScalarTrackScratchDomainAccelerationV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 }
+  ],
+  "functions": [
+    { "name": "ResetCameraScalarTrackCompileV1", "stage": 0 },
+    { "name": "ValidateCameraScalarTrackInputsV1", "stage": 1 },
+    { "name": "BuildCameraScalarTrackCandidatesV1", "stage": 2 },
+    { "name": "CommitCameraScalarTrackV1", "stage": 3 },
+    { "name": "CompileCameraScalarTrackV1", "stage": 4, "uses": ["ResetCameraScalarTrackCompileV1", "ValidateCameraScalarTrackInputsV1", "BuildCameraScalarTrackCandidatesV1", "CommitCameraScalarTrackV1"] },
+    { "name": "EvaluateCameraScalarTrackV1", "stage": 5 }
+  ],
+  "contracts": {
+    "shape": "Times, values, arrive tangents, and leave tangents share one 1..512 key count. Interpolation modes contain key count minus one entries.",
+    "time": "Times are finite, start at exactly zero, increase strictly, and end at exactly the non-negative duration; multi-key tracks require positive duration.",
+    "domain": "linear accepts finite values; reciprocal requires every physical value to be strictly positive before inverse conversion.",
+    "tangents": "Tangents are finite interpolation-domain units per second. Non-Hermite segments reject non-zero outgoing/incoming tangents instead of silently ignoring authored data.",
+    "atomicity": "Compile reset invalidates and clears candidates/results first. Candidate storage is published only after complete validation and conversion.",
+    "evaluation": "Every query clears result validity first, clamps finite absolute time to the compiled duration, publishes value/velocity/acceleration plus segment coordinates, and publishes validity last.",
+    "reuse": "Channel owners may copy a successful compiled snapshot; they must not alias the generic candidate arrays or compile the channel on every playback frame."
+  }
+}

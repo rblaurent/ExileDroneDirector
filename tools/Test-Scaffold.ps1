@@ -148,6 +148,10 @@ $requiredFiles = @(
     'tools\trajectory\test_compiled_document_source_adapter_reference.py',
     'tools\trajectory\compiled_document_source_adapter_blueprint_schema.json',
     'tools\trajectory\test_compiled_document_source_adapter_blueprint_schema.py',
+    'tools\trajectory\camera_scalar_track_reference.py',
+    'tools\trajectory\test_camera_scalar_track_reference.py',
+    'tools\trajectory\camera_scalar_track_blueprint_schema.json',
+    'tools\trajectory\test_camera_scalar_track_blueprint_schema.py',
     'tools\blueprint\Build-AirframeDocumentAdapterResetGraph.py',
     'tools\blueprint\Test-AirframeDocumentAdapterResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-document-source-adapter-v2.eddgraph',
@@ -1091,6 +1095,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_compiled_document_source_adapter_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Compiled-document source-adapter Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_scalar_track_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera scalar-track reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_scalar_track_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera scalar-track Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 $documentAdapterNonce = [guid]::NewGuid().ToString('N')
 $documentAdapterRoot = Join-Path $scratchRoot "edd-document-adapter-$documentAdapterNonce"

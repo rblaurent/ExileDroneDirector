@@ -669,6 +669,25 @@ This section is the authoritative handoff. Detailed evidence remains in
   passes with all five live exports under contract. Live/mirror SHA-256 is
   `6D6F964EFDA4D63BD7FE09F13077926AB2859A1F9B787D08CA8DC5DD08836A98`.
 
+### Common camera scalar-track contract (2026-08-14)
+
+- Phase 5 begins with one reusable, history-free absolute-time scalar oracle for
+  focal length, aperture, focus distance, exposure EV, and effect weights.
+  Supported presets are explicit: hold (discontinuous), linear (C0), smooth
+  (zero endpoint velocity), cinematic (zero endpoint velocity/acceleration),
+  and Hermite with authored interpolation-domain tangents per second.
+- Physical values remain in their authored units. Focus may opt into a positive
+  reciprocal-distance domain, so a pull from 100 cm to 400 cm evaluates to the
+  optical midpoint 160 cm rather than the linear-distance midpoint 250 cm.
+  Optional output bounds clamp intentional Hermite overshoot without mutating
+  keys and publish zero derivatives while clamped.
+- Eight reference tests cover every preset, value/velocity/acceleration boundary
+  behavior, reciprocal focus, bounded effects, invalid shapes/domains/ranges,
+  immutable keys, and 40 seeded forward/reverse query schedules. Four schema
+  tests freeze 32 Blueprint-safe variables, six ordered functions, scratch-only
+  generic compilation, and the rule that channel owners copy successful
+  snapshots instead of recompiling or aliasing generic arrays per frame.
+
 ### Position-route absolute-time evaluator checkpoint
 
 - `EvaluateCompiledPositionRouteV1` is compiled, saved, and warm-runtime

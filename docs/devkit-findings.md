@@ -4251,3 +4251,32 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   passes. This graph remains offline until the full four-function consumer set
   is frozen and installed together. Next is current/neighbor sample staging;
   no live reset, airframe/gimbal, UI, cook, or Workshop claim is made.
+
+### Smoothed flight-profile sample staging frozen (2026-08-13)
+
+- `StageSmoothedFlightProfileSamplesV1` is now a deterministic 119/118-node
+  full/paste graph. It reads the actual immutable compiled-ID array length,
+  requires valid compiled state, bounds count to 1..511 and requested index to
+  the array, and rejects non-finite or out-of-range local alpha before calling
+  the accepted indexed evaluator.
+- A valid current helper result is copied completely into current scratch. A
+  pure clamped previous/next/half-selection network chooses at most one
+  neighbor without `Max_IntInt` or `Min_IntInt`; a valid neighbor helper result
+  is copied completely into separate neighbor scratch. The two exact quintic
+  smootherstep half-kernels compute a weight in 0..0.5, and a self-neighbor at
+  either endpoint is forced to exact zero.
+- Four evaluator calls are deliberate: current, neighbor, restored current on
+  success, and restored current after neighbor failure. The helper input is set
+  to the requested index before validation and is explicitly restored on both
+  neighbor exits. Stage validity is the sole acceptance write and occurs last;
+  staging owns no public smoothed-result setter and mutates no array.
+- Exact contracts cover every reciprocal execution/data edge, guard/default,
+  complete eleven-field current and neighbor snapshots, all five Select nodes,
+  both quintic coefficient sets, both restoration paths, stage-valid-last, and
+  the absence of public publication. Full/paste SHA-256 is
+  `EE30B3EF0BCE7014567C0C37972F23C0246F6A3E3E17114EAF786031FE29BA61` /
+  `08A67673C84C5ABA26FE118AFDC3D2D92749913F1C317E4311F9AF704A5458CD`.
+  Repeated generation is byte-identical and the complete scaffold passes.
+- This graph remains offline with reset until atomic publication and the final
+  orchestrator are frozen. Next is `PublishSmoothedFlightProfileV1`; no live
+  smoothing, airframe/gimbal, UI, cook, or Workshop claim is made.

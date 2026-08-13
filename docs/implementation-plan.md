@@ -122,10 +122,27 @@ This section is the authoritative handoff. Detailed evidence remains in
   hull of validated presets, and remains history-free under direct scrubbing.
   Its explicit Blueprint schema separates current/neighbor scratch from atomic
   result publication and restores the indexed helper to the requested segment.
-- Next is generated reset/stage/publish/evaluate graphs for that smooth consumer,
-  followed by deterministic cinematic, hybrid, and FPV airframe/gimbal
-  behavior. Lens/focus/effect tracks and shortcut/debug dogfood follow. No
-  polished UI, cook, Workshop publication, or whole-mod completion is claimed.
+- The smooth consumer's reset and sample-staging graphs are now frozen offline.
+  Reset is 39/38 nodes; staging is 119/118 nodes. Staging bounds the requested
+  index against the immutable compiled-ID array, rejects non-finite or
+  out-of-range local alpha, evaluates and copies complete current/neighbor
+  records into disjoint scratch, computes the exact two-half quintic weight,
+  forces clamped endpoint neighbors to zero weight, and restores plus
+  re-evaluates the indexed helper on success and neighbor failure. It never
+  writes a public smoothed result.
+- Staging avoids the DevKit-fragile `Max_IntInt`/`Min_IntInt` nodes: three pure
+  integer `Select` nodes implement previous, next, and half selection. Exact
+  full/paste contracts prove 119/118 nodes, all guard and helper edges, both
+  quintic coefficient sets, complete eleven-field samples, validity-last stage
+  acceptance, no array mutation, and no public-result mutation. Repeated
+  generation is byte-identical; full/paste SHA-256 is
+  `EE30B3EF0BCE7014567C0C37972F23C0246F6A3E3E17114EAF786031FE29BA61` /
+  `08A67673C84C5ABA26FE118AFDC3D2D92749913F1C317E4311F9AF704A5458CD`.
+- Next is generated atomic publish and reset/stage/publish orchestration, then
+  joint live installation, compile/save, cold load, and executable warm/fresh
+  proof for all four functions. Deterministic cinematic, hybrid, and FPV
+  airframe/gimbal behavior follows. No polished UI, cook, Workshop publication,
+  or whole-mod completion is claimed.
 
 ### Position-route absolute-time evaluator checkpoint
 

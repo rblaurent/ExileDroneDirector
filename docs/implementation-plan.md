@@ -613,6 +613,36 @@ This section is the authoritative handoff. Detailed evidence remains in
   No UI, keyboard dogfood, cook, Workshop, G-Portal, deployment, or whole-mod
   claim is made here.
 
+### Compiled-document source adapter contract (2026-08-13)
+
+- The next backend boundary is explicitly versioned as a normalized v2
+  trajectory document. It carries waypoint IDs, positions, authored body
+  quaternions, and authored gimbal quaternions as four complete parallel
+  channels, plus seven adjacency-checked segment channels. This is the
+  Blueprint-safe ABI until dedicated v2 document structs exist.
+- The current `ST_EDD_Waypoint` v1 `CameraTransform` is deliberately not an
+  adapter input. There is no fallback that copies its single rotation into
+  both tracks. A future canonical decoder/migration must populate separate
+  `bodyRotation` and `gimbalRotation` values or reject the legacy document.
+- `compiled_document_source_adapter_reference.py` validates schema/engine
+  versions, 2..512 unique ordered waypoints, unique adjacent segments, exact
+  positive travel duration, separate normalized orientation channels, spatial
+  and timing modes, profile overrides, and fixed-step bounds before composing
+  the already accepted position, orientation, profile, source-sampling,
+  desired-stream, and prebake references.
+- Discontinuity reporting is downstream of successful adaptation and is
+  non-authoritative. One immutable row per internal waypoint reports position
+  C0 gap, velocity and acceleration jumps, body/gimbal C0 gaps, and authored
+  body/gimbal angular-rate jumps. Thresholds affect warnings only and cannot
+  modify or veto the accepted motion result.
+- Seven reference tests pass distinct authorship through accepted source and
+  desired outputs, reject v1/missing orientation fallbacks, cover shape/ID/
+  adjacency/duration/profile failures, prove value snapshots and diagnostic
+  independence, and execute 20 seeded cases in both orders. Five schema tests
+  freeze 30 variables, five ordered functions, nine exact downstream mappings,
+  separate diagnostic ownership, and the explicit legacy mismatch. This is an
+  offline reference/schema checkpoint; deterministic graph bodies follow.
+
 ### Position-route absolute-time evaluator checkpoint
 
 - `EvaluateCompiledPositionRouteV1` is compiled, saved, and warm-runtime

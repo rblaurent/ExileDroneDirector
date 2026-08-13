@@ -5086,3 +5086,28 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   gimbal inputs; that document adapter remains the next explicit design seam.
   No UI, keyboard dogfood, cook, Workshop, G-Portal, deployment, or whole-mod
   completion is claimed.
+
+### Lossless compiled-document adapter architecture frozen (2026-08-13)
+
+- The accepted architecture does not extend the lossy v1 `CameraTransform`
+  waypoint seam. It introduces an explicit normalized v2 trajectory-document
+  boundary using parallel typed arrays, with separate required body and gimbal
+  quaternion channels. No graph or reference path may synthesize one from the
+  other or read a single camera rotation as both.
+- The boundary also owns ordered waypoint/segment identity and exact adjacency,
+  duration, spatial-mode, timing-profile, flight-profile, schema-version, and
+  engine-version validation before it writes any accepted source input. This
+  leaves a clean future migration target: decode both canonical
+  `bodyRotation`/`gimbalRotation` fields into v2, or reject legacy content that
+  cannot represent the distinction.
+- Discontinuity diagnostics are intentionally placed after successful adapter
+  publication. They report finite per-join C0 position/rotation gaps, position
+  velocity/acceleration jumps, and authored body/gimbal angular-rate jumps as
+  immutable warning data. Diagnostic thresholds cannot change the compiled
+  motion transaction.
+- Seven executable reference tests and five schema tests pass. They include 20
+  seeded forward/reverse compilations, distinct source/desired authorship,
+  legacy/missing-channel rejection, adjacency and duration failures, immutable
+  inputs, deterministic snapshots, and diagnostic non-interference. This is
+  offline architecture evidence only; generated Blueprint bodies remain the
+  next checkpoint.

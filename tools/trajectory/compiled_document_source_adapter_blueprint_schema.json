@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 2,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Lossless normalized compiled-document boundary that preserves distinct body and gimbal authorship before the accepted source sampler.",
+  "architecture": {
+    "boundary": "Parallel typed v2 arrays are the normalized trajectory-document ABI until dedicated v2 Blueprint structs exist.",
+    "legacyMismatch": "ST_EDD_Waypoint v1 exposes only CameraTransform. DraftDocumentV1, CameraTransform rotation, and every single-rotation fallback are forbidden inputs.",
+    "authorship": "Waypoint body and gimbal quaternion arrays are independently required, independently validated, independently copied, and may differ at every key.",
+    "migration": "A future canonical decoder or typed v2 document struct must populate both channels from bodyRotation and gimbalRotation. Legacy v1 documents require an explicit migration decision and cannot compile through this boundary.",
+    "diagnostics": "Discontinuity diagnostics run after successful source publication, own separate immutable outputs, and never mutate or veto the accepted motion transaction."
+  },
+  "limits": {
+    "minimumWaypoints": 2,
+    "maximumWaypoints": 512,
+    "maximumSegments": 511,
+    "documentSchemaVersion": 2,
+    "trajectoryEngineVersion": 1,
+    "defaultFixedStepSeconds": 0.016666666666666666,
+    "defaultPositionVelocityJumpThreshold": 1.0,
+    "defaultPositionAccelerationJumpThreshold": 1.0,
+    "defaultAuthoredAngularRateJumpThreshold": 1.0
+  },
+  "existingOutputs": [
+    "PositionRouteInputWaypointPositionsV1",
+    "PositionRouteInputDurationsV1",
+    "PositionRouteInputSpatialCurveTypesV1",
+    "PositionRouteInputTimeProfilesV1",
+    "FlightProfileInputDefaultIdV1",
+    "FlightProfileInputSegmentOverrideIdsV1",
+    "AirframeSourceInputBodyWaypointQuatsV1",
+    "AirframeSourceInputGimbalWaypointQuatsV1",
+    "AirframeSourceInputFixedStepSecondsV1"
+  ],
+  "variables": [
+    { "name": "AirframeDocumentInputSchemaVersionV2", "type": "Integer", "container": "None", "role": "input", "default": 2 },
+    { "name": "AirframeDocumentInputTrajectoryEngineVersionV2", "type": "Integer", "container": "None", "role": "input", "default": 1 },
+    { "name": "AirframeDocumentInputDurationSecondsV2", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeDocumentInputDefaultFlightProfileV2", "type": "String", "container": "None", "role": "input", "default": "cinematic_drone" },
+    { "name": "AirframeDocumentInputFixedStepSecondsV2", "type": "Float", "container": "None", "role": "input", "default": 0.016666666666666666 },
+    { "name": "AirframeDocumentInputWaypointIdsV2", "type": "Integer", "container": "Array", "role": "input" },
+    { "name": "AirframeDocumentInputWaypointPositionsV2", "type": "Vector", "container": "Array", "role": "input" },
+    { "name": "AirframeDocumentInputWaypointBodyQuatsV2", "type": "Quat", "container": "Array", "role": "input" },
+    { "name": "AirframeDocumentInputWaypointGimbalQuatsV2", "type": "Quat", "container": "Array", "role": "input" },
+    { "name": "AirframeDocumentInputSegmentIdsV2", "type": "Integer", "container": "Array", "role": "input" },
+    { "name": "AirframeDocumentInputSegmentFromWaypointIdsV2", "type": "Integer", "container": "Array", "role": "input" },
+    { "name": "AirframeDocumentInputSegmentToWaypointIdsV2", "type": "Integer", "container": "Array", "role": "input" },
+    { "name": "AirframeDocumentInputSegmentDurationsV2", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframeDocumentInputSegmentSpatialCurveTypesV2", "type": "String", "container": "Array", "role": "input" },
+    { "name": "AirframeDocumentInputSegmentTimeProfilesV2", "type": "String", "container": "Array", "role": "input" },
+    { "name": "AirframeDocumentInputSegmentFlightProfileOverridesV2", "type": "String", "container": "Array", "role": "input" },
+
+    { "name": "AirframeDocumentAdapterStageValidV2", "type": "Boolean", "container": "None", "role": "scratch", "default": false },
+    { "name": "AirframeDocumentAdapterCompileValidV2", "type": "Boolean", "container": "None", "role": "result", "default": false },
+    { "name": "AirframeDocumentAdapterFailureCodeV2", "type": "String", "container": "None", "role": "result", "default": "" },
+
+    { "name": "AirframeDocumentDiagnosticPositionVelocityThresholdV2", "type": "Float", "container": "None", "role": "diagnosticInput", "default": 1.0 },
+    { "name": "AirframeDocumentDiagnosticPositionAccelerationThresholdV2", "type": "Float", "container": "None", "role": "diagnosticInput", "default": 1.0 },
+    { "name": "AirframeDocumentDiagnosticAuthoredAngularRateThresholdV2", "type": "Float", "container": "None", "role": "diagnosticInput", "default": 1.0 },
+    { "name": "AirframeDocumentDiagnosticWaypointIdsV2", "type": "Integer", "container": "Array", "role": "diagnosticResult" },
+    { "name": "AirframeDocumentDiagnosticPositionVelocityJumpsV2", "type": "Float", "container": "Array", "role": "diagnosticResult" },
+    { "name": "AirframeDocumentDiagnosticPositionAccelerationJumpsV2", "type": "Float", "container": "Array", "role": "diagnosticResult" },
+    { "name": "AirframeDocumentDiagnosticBodyAngularRateJumpsV2", "type": "Float", "container": "Array", "role": "diagnosticResult" },
+    { "name": "AirframeDocumentDiagnosticGimbalAngularRateJumpsV2", "type": "Float", "container": "Array", "role": "diagnosticResult" },
+    { "name": "AirframeDocumentDiagnosticDiscontinuousFlagsV2", "type": "Boolean", "container": "Array", "role": "diagnosticResult" },
+    { "name": "AirframeDocumentDiagnosticCountV2", "type": "Integer", "container": "None", "role": "diagnosticResult", "default": 0 },
+    { "name": "AirframeDocumentDiagnosticsValidV2", "type": "Boolean", "container": "None", "role": "diagnosticResult", "default": false }
+  ],
+  "functions": [
+    { "name": "ResetAirframeDocumentSourceAdapterV2", "stage": 0, "uses": ["ResetAirframeSourceSamplingV1"] },
+    { "name": "ValidateAirframeDocumentSourceAdapterV2", "stage": 1 },
+    { "name": "CommitAirframeDocumentSourceAdapterV2", "stage": 2, "uses": ["CompileAirframeSourceSamplingV1"] },
+    { "name": "BuildAirframeDocumentDiscontinuityDiagnosticsV2", "stage": 3 },
+    { "name": "CompileAirframeDocumentSourceAdapterV2", "stage": 4, "uses": ["ResetAirframeDocumentSourceAdapterV2", "ValidateAirframeDocumentSourceAdapterV2", "CommitAirframeDocumentSourceAdapterV2", "BuildAirframeDocumentDiscontinuityDiagnosticsV2"] }
+  ],
+  "contracts": {
+    "shape": "Waypoint ID, position, body quaternion, and gimbal quaternion arrays share one 2..512 count. Every seven-channel segment array shares waypoint count minus one.",
+    "adjacency": "Waypoint and segment IDs are positive and unique; each ordered segment from/to pair exactly matches adjacent waypoint IDs.",
+    "duration": "Every segment duration is finite and positive, and their exact sum equals the positive finite compiled-document duration.",
+    "copy": "Only CommitAirframeDocumentSourceAdapterV2 copies all nine accepted source/compiler inputs. Body and gimbal setters have different source getters and no CameraTransform dependency.",
+    "atomicity": "Reset invalidates adapter, source, desired, prebake, and diagnostics first. Adapter validity publishes only after source, desired, and prebake validity are true.",
+    "diagnostics": "Diagnostics require a valid adapter, emit one ordered immutable row per internal waypoint, publish validity last, and cannot modify adapter/source/desired/prebake state.",
+    "orchestration": "The top-level function calls reset, validate, commit, then diagnostics in that exact order with no alternate path."
+  }
+}

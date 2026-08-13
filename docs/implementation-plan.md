@@ -395,6 +395,21 @@ This section is the authoritative handoff. Detailed evidence remains in
   runtime acceptance matrix. Upstream
   document-to-source sampling, lens/focus/effects, debug dogfood, polished UI,
   cook, Workshop, and whole-mod completion remain unclaimed.
+- The velocity, acceleration, and jerk graph bodies are also frozen offline.
+  One parameterized generator emits three deliberately identical 104-node full
+  / 103-node paste graphs, changing only the function and source/target array
+  contracts. Each clears its own candidate, honors prior stage validity, uses
+  an exact two-sample secant or one bounded local-quadratic loop, evaluates
+  schedule times as `min(index * step, total)`, rejects non-finite results, and
+  can only turn stage validity false.
+- An exported-graph interpreter compares every stage against the independent
+  derivative oracle over 83 directed/seeded schedules in both graph forms,
+  including nonuniform terminal intervals. It also proves repeat-invocation
+  independence, false-stage guarded clearing, and overflow rejection before a
+  complete candidate can be formed. Deterministic regeneration and the full
+  scaffold own all six artifacts. Next are absolute-time velocity sampling,
+  the desired-pose solve loop, commit/orchestration, and eventual live
+  acceptance; no live claim is made for these derivative graphs yet.
 
 ### Position-route absolute-time evaluator checkpoint
 

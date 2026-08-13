@@ -148,6 +148,14 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeDesiredStreamValidationContracts.py',
     'tools\blueprint\snippets\validate-airframe-desired-stream-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-airframe-desired-stream-inputs-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframeDesiredDerivativeGraph.py',
+    'tools\blueprint\Test-AirframeDesiredDerivativeContracts.py',
+    'tools\blueprint\snippets\build-airframe-desired-velocity-samples-v1.eddgraph',
+    'tools\blueprint\snippets\build-airframe-desired-velocity-samples-v1-paste.eddgraph',
+    'tools\blueprint\snippets\build-airframe-desired-acceleration-samples-v1.eddgraph',
+    'tools\blueprint\snippets\build-airframe-desired-acceleration-samples-v1-paste.eddgraph',
+    'tools\blueprint\snippets\build-airframe-desired-jerk-samples-v1.eddgraph',
+    'tools\blueprint\snippets\build-airframe-desired-jerk-samples-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframePrebakeResetGraph.py',
     'tools\blueprint\Test-AirframePrebakeResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1.eddgraph',
@@ -1018,6 +1026,33 @@ foreach ($graphCase in @(@($desiredValidation, $false), @($desiredValidationPast
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredStreamValidationContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Airframe desired-stream validation contracts failed with exit code $LASTEXITCODE." }
+}
+foreach ($derivativeStage in @('velocity', 'acceleration', 'jerk')) {
+    $derivativeSlug = "build-airframe-desired-$derivativeStage-samples-v1"
+    $derivativeGraph = Join-Path $airframeDesiredRoot "$derivativeSlug.eddgraph"
+    $derivativePaste = Join-Path $airframeDesiredRoot "$derivativeSlug-paste.eddgraph"
+    $derivativeRepeat = Join-Path $airframeDesiredRoot "$derivativeSlug-repeat.eddgraph"
+    $derivativeRepeatPaste = Join-Path $airframeDesiredRoot "$derivativeSlug-repeat-paste.eddgraph"
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredDerivativeGraph.py') `
+        --project-root $ProjectRoot --stage $derivativeStage --output $derivativeGraph --paste-output $derivativePaste
+    if ($LASTEXITCODE -ne 0) { throw "Airframe desired $derivativeStage generation failed with exit code $LASTEXITCODE." }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredDerivativeGraph.py') `
+        --project-root $ProjectRoot --stage $derivativeStage --output $derivativeRepeat --paste-output $derivativeRepeatPaste
+    if ($LASTEXITCODE -ne 0) { throw "Repeated airframe desired $derivativeStage generation failed with exit code $LASTEXITCODE." }
+    foreach ($comparison in @(
+        @($derivativeGraph, $derivativeRepeat, (Join-Path $ProjectRoot "tools\blueprint\snippets\$derivativeSlug.eddgraph")),
+        @($derivativePaste, $derivativeRepeatPaste, (Join-Path $ProjectRoot "tools\blueprint\snippets\$derivativeSlug-paste.eddgraph"))
+    )) {
+        $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+        if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired $derivativeStage generation is not byte-identical." }
+    }
+    foreach ($graphCase in @(@($derivativeGraph, $false), @($derivativePaste, $true))) {
+        & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+        $arguments = @('--project-root', $ProjectRoot, '--stage', $derivativeStage, '--graph', $graphCase[0])
+        if ($graphCase[1]) { $arguments += '--paste' }
+        & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredDerivativeContracts.py') @arguments
+        if ($LASTEXITCODE -ne 0) { throw "Airframe desired $derivativeStage contracts failed with exit code $LASTEXITCODE." }
+    }
 }
 $airframePrebakeNonce = [guid]::NewGuid().ToString('N')
 $airframePrebakeRoot = Join-Path $scratchRoot "edd-airframe-prebake-$airframePrebakeNonce"

@@ -4815,3 +4815,29 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   offline boundary. Live install/compile/save/cold/runtime evidence waits until
   the remaining kinematic, look-ahead, solve, commit, and orchestration graphs
   form one testable transaction.
+
+### Desired-stream derivative graphs frozen offline (2026-08-13)
+
+- `Build-AirframeDesiredDerivativeGraph.py` emits velocity, acceleration, and
+  jerk from one shared graph source, preventing three copies of the local-
+  quadratic rule from drifting. Each full graph is 104 nodes/406 pins; each
+  paste body is 103/405. Only function identity and source/target candidate
+  arrays vary between stages.
+- The two-sample branch computes one exact secant and appends it twice. The
+  larger branch uses one bounded `ForLoopWithBreak`, selects forward/centered/
+  backward stencils by index, reconstructs all four relevant times with
+  `min(index * fixedStep, total)`, evaluates the three analytic Lagrange
+  derivative weights, and publishes one vector only after all components pass
+  explicit finite-double bounds. Overflow turns stage validity false and breaks
+  before a complete candidate can exist.
+- `Test-AirframeDesiredDerivativeContracts.py` executes the exported links and
+  compares them with `differentiate_sampled_vectors`. Each of the three stages
+  and both export forms passes 83 directed/seeded valid schedules, including a
+  partial terminal interval, plus repeat-state poisoning, a false-stage guarded
+  clear with an unreadable source, and overflow rejection. Its pure-node cache
+  is invalidated on every state mutation and loop index, keeping the exhaustive
+  proof fast without changing semantics.
+- Repeated generation is byte-identical to all six checked-in artifacts, syntax
+  and exact read/write/link contracts pass, and the complete scaffold owns the
+  suite. These are offline graph contracts only; they have not yet been pasted,
+  compiled, saved, cold-loaded, or executed by Enhanced.

@@ -304,6 +304,16 @@ only after exact five-array cardinality preflight. `CompileCameraScalarTrackV1`
 is the policy-free 5 full / 4 paste reset→validate→build→commit coordinator.
 Both are deterministic and scaffold-owned. Next: absolute-time evaluation.
 
+The absolute-time evaluator is now frozen as three ownership-safe helpers plus
+one top-level query function. A result-only reset clears stale samples; a
+selected-segment helper composes the already accepted time-profile and quintic
+math; and one publication helper exclusively owns reciprocal-focus derivative
+conversion, output bounds, and validity-last publication. This explicit split
+avoids competing Blueprint execution merges while keeping all interpolation
+paths history-free. The scalar reference and amended nine-stage schema pass.
+Next: generate and interpret the result-reset graph, then publication, segment,
+and top-level evaluation in that order before opening the editor.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

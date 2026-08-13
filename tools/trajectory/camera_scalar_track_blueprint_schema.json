@@ -58,7 +58,10 @@
     { "name": "BuildCameraScalarTrackCandidatesV1", "stage": 2 },
     { "name": "CommitCameraScalarTrackV1", "stage": 3 },
     { "name": "CompileCameraScalarTrackV1", "stage": 4, "uses": ["ResetCameraScalarTrackCompileV1", "ValidateCameraScalarTrackInputsV1", "BuildCameraScalarTrackCandidatesV1", "CommitCameraScalarTrackV1"] },
-    { "name": "EvaluateCameraScalarTrackV1", "stage": 5 }
+    { "name": "ResetCameraScalarTrackResultV1", "stage": 5 },
+    { "name": "PublishCameraScalarTrackSampleV1", "stage": 6 },
+    { "name": "EvaluateCameraScalarTrackSegmentV1", "stage": 7, "uses": ["EvaluateTimeProfileV1", "EvaluateQuinticScalarV1", "PublishCameraScalarTrackSampleV1"] },
+    { "name": "EvaluateCameraScalarTrackV1", "stage": 8, "uses": ["ResetCameraScalarTrackResultV1", "EvaluateCameraScalarTrackSegmentV1", "PublishCameraScalarTrackSampleV1"] }
   ],
   "contracts": {
     "shape": "Times, values, arrive tangents, and leave tangents share one 1..512 key count. Interpolation modes contain key count minus one entries.",
@@ -66,7 +69,7 @@
     "domain": "linear accepts finite values; reciprocal requires every physical value to be strictly positive before inverse conversion.",
     "tangents": "Tangents are finite interpolation-domain units per second. Unused first-arrive/last-leave tangents and non-Hermite segment tangents must be zero instead of silently hiding authored data.",
     "atomicity": "Compile reset invalidates and clears candidates/results first. Candidate storage is published only after complete validation and conversion.",
-    "evaluation": "Every query clears result validity first, clamps finite absolute time to the compiled duration, publishes value/velocity/acceleration plus segment coordinates, and publishes validity last.",
+    "evaluation": "Every query calls the dedicated result reset, clamps finite absolute time to the compiled duration, selects one segment, and delegates interpolation. The segment helper composes the accepted time-profile/quintic primitives; the publication helper alone converts reciprocal derivatives, applies bounds, and publishes validity last.",
     "reuse": "Channel owners may copy a successful compiled snapshot; they must not alias the generic candidate arrays or compile the channel on every playback frame."
   }
 }

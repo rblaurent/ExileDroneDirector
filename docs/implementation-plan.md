@@ -712,6 +712,12 @@ This section is the authoritative handoff. Detailed evidence remains in
 - `CompileCameraScalarTrackV1` is a policy-free 5 full / 4 paste coordinator:
   reset, validate, build private candidates, commit. It owns no state, branch,
   loop, reroute, or alternate execution path.
+- Evaluation is decomposed into three ownership-safe helpers before graph
+  generation: a result-only reset, a selected-segment evaluator that composes
+  the already accepted time-profile and quintic primitives, and one publication
+  helper that exclusively owns reciprocal derivative conversion, output bounds,
+  and validity-last publication. This prevents five interpolation branches from
+  competing for one exec merge and keeps optical/bounds policy in one place.
 
 ### Position-route absolute-time evaluator checkpoint
 

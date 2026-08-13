@@ -40,15 +40,24 @@ class CameraScalarTrackBlueprintSchemaContracts(unittest.TestCase):
 
     def test_functions_and_orchestration_are_exact(self):
         functions = SCHEMA["functions"]
-        self.assertEqual([item["stage"] for item in functions], list(range(6)))
+        self.assertEqual([item["stage"] for item in functions], list(range(9)))
         self.assertEqual([item["name"] for item in functions], [
             "ResetCameraScalarTrackCompileV1", "ValidateCameraScalarTrackInputsV1",
             "BuildCameraScalarTrackCandidatesV1", "CommitCameraScalarTrackV1",
-            "CompileCameraScalarTrackV1", "EvaluateCameraScalarTrackV1",
+            "CompileCameraScalarTrackV1", "ResetCameraScalarTrackResultV1",
+            "PublishCameraScalarTrackSampleV1", "EvaluateCameraScalarTrackSegmentV1",
+            "EvaluateCameraScalarTrackV1",
         ])
         self.assertEqual(functions[4]["uses"], [
             "ResetCameraScalarTrackCompileV1", "ValidateCameraScalarTrackInputsV1",
             "BuildCameraScalarTrackCandidatesV1", "CommitCameraScalarTrackV1",
+        ])
+        self.assertEqual(functions[7]["uses"], [
+            "EvaluateTimeProfileV1", "EvaluateQuinticScalarV1", "PublishCameraScalarTrackSampleV1",
+        ])
+        self.assertEqual(functions[8]["uses"], [
+            "ResetCameraScalarTrackResultV1", "EvaluateCameraScalarTrackSegmentV1",
+            "PublishCameraScalarTrackSampleV1",
         ])
 
     def test_optical_domain_and_bounds_are_explicit(self):

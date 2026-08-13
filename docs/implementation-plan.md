@@ -319,6 +319,15 @@ This section is the authoritative handoff. Detailed evidence remains in
   for 30 seeded streams; five invalid input families and a failed recompile
   after prior success all clear publication. Absolute-time evaluation is next;
   no live prebake claim is made yet.
+- `EvaluateCompiledAirframePrebakeV1` is frozen offline as deterministic
+  155/154-node full/paste graphs. It independently validates compiled shape,
+  schedule, every quaternion/rate sample, and seed diagnostics before exposing
+  a pose. Absolute elapsed time selects a fixed-step segment, uses the real
+  terminal-partial duration, and independently slerps body and gimbal. Both
+  forms match 406 oracle evaluations in arbitrary invocation order and reject
+  19 corrupt states with fully reset output. The seven-stage offline prebake
+  graph family is now complete; live compile/save/cold-load and runtime proof
+  are the next checkpoint, not a claim that the whole mod is complete.
 
 ### Position-route absolute-time evaluator checkpoint
 

@@ -4690,3 +4690,30 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   commit compose without stale publication leakage. Regeneration is byte exact
   and the full repository gate owns this test. Absolute-time evaluation is next;
   no live prebake, UI, cook, Workshop, or whole-mod readiness claim is made.
+
+### Fixed-step airframe/gimbal absolute-time evaluator frozen offline (2026-08-13)
+
+- `EvaluateCompiledAirframePrebakeV1` generates as exact 155/154-node full/paste
+  graphs. Every invocation first resets segment, alpha, both quaternions,
+  completion, and validity. Compiled arrays, schedule, compile validity, and
+  elapsed input are read-only.
+- Its fail-closed preflight independently checks compile validity, finite elapsed,
+  six equal `2..65536` channel lengths, finite bounded step/total, and the exact
+  fixed schedule. Four complete scans validate every body/gimbal quaternion as
+  finite unit data and every measured rate as finite `0..720+1e-7`; seed rates
+  must be exactly zero and seed limited-flags exactly false.
+- Accepted evaluation is purely absolute-time. Negative time clamps to sample
+  zero; completion publishes the last sample with segment `count-2` and alpha
+  one. Active playback floors `clamped/step`, derives the real partial-terminal
+  duration when needed, and independently slerps adjacent body and gimbal
+  samples. Result validity is the final write on both success branches.
+- Executable interpreters for both graph forms match 406 independent oracle
+  evaluations across 20 compiled tracks, fixed-step boundaries, the instant
+  before completion, terminal/overshoot values, random scrubs, and reverse-order
+  replay from poisoned prior results. Nineteen corrupt states cover invalid
+  publication, elapsed, shape, quaternion, rate, seed diagnostics, schedule,
+  and bounds; every one returns the complete reset result.
+- The complete seven-stage prebake family is now frozen offline and owned by the
+  full regression gate. Live Blueprint creation, compile/save, fresh cold load,
+  runtime acceptance, UI, cook, Workshop, and whole-mod completion are not yet
+  claimed.

@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-13 after commit `7a97958`
+Last updated: 2026-08-13 after implementation commit `0e31940`
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -22,7 +22,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Last implementation head: `7a97958e66b7814f0c34f227411a69018fe82cb1`;
+- Last implementation head: `0e3194098514f95a81bdd4979265337b05c8e014`;
   current HEAD should be the later documentation-only handoff commit and must
   equal `origin/main`
 - Expected worktree: clean
@@ -59,9 +59,10 @@ The trajectory backend is live-accepted through scalar/vector/quaternion and
 adaptive-arc primitives, position/orientation compilation and absolute-time
 evaluation, combined cinematic pose, five flight profiles and C2 smoothing,
 stateless airframe/gimbal solving, angular-rate-limited fixed-step prebake, and
-complete desired-airframe stream composition.
+complete desired-airframe stream composition. The source-sampling bridge that
+feeds that accepted desired stream is also live-accepted end to end.
 
-The last live-accepted trajectory commit is `8d8b603`:
+The prior desired-stream live acceptance is `8d8b603`:
 
 - nine desired-stream graphs contain 30, 218, 104, 104, 104, 94, 84, 37, and
   8 nodes
@@ -76,14 +77,14 @@ The last live-accepted trajectory commit is `8d8b603`:
 
 Do not weaken or replace those helpers. Compose them.
 
-## Current source-sampling bridge state
+## Accepted source-sampling bridge state
 
-The missing seam is compiled-document/source sampling into the accepted desired
-stream. It must sample position, distinct authored body orientation, distinct
-authored gimbal orientation, and all ten smoothed flight-profile values on one
-exact absolute-time schedule.
+Implementation commit `0e31940` live-accepts compiled-source sampling into the
+accepted desired stream. It samples position, distinct authored body
+orientation, distinct authored gimbal orientation, and all ten smoothed
+flight-profile values on one exact absolute-time schedule.
 
-Seven clean checkpoints are pushed after `8d8b603`:
+Seven offline checkpoints were pushed after `8d8b603` before live acceptance:
 
 ### `2aa201f` — reference and schema
 
@@ -178,35 +179,35 @@ The schema freezes 22 variables and seven functions:
 - owns no state, branch, loop, reroute, alternate path, or external link
 - complete scaffold passed in 91.1 seconds
 
-These seven checkpoints are offline-proven only. None of the new bridge graphs
-has been installed, compiled, saved, cold-loaded, or executed by Enhanced.
+### `0e31940` — live Enhanced acceptance
+
+- `Configure-AirframeSourceSamplingAssembly.py` idempotently owns all 22 typed
+  variables and seven functions on Client Director.
+- The installed full graphs contain 34, 43, 44, 130, 80, 84, and 7 nodes in
+  reset-to-orchestration order. Every exact contract passed before compile and
+  again on the checked-in postcompile exports.
+- Two warm CDO runs and one independent fresh NullRHI run each pass 10 forward
+  and 10 reverse compilations, exact and partial schedules, all five profiles,
+  six invalid families, two direct boundary cases, poisoned state, immutable
+  inputs, and exact restoration of the complete 325-property schema union.
+- Distinct authored body and gimbal rotations remain distinct in source
+  candidates and accepted desired outputs. No single-rotation alias was added.
+- Guarded shutdown reached `LogExit: Exiting.`. Closed-editor preview reported
+  16 unchanged packages and exactly Client Director changed; sync copied one.
+- Live and mirrored Client Director SHA-256 is
+  `EA2576672F41F56474DB3BE9CA529264273CF94F0DABFC5CB7671CFAE596DF35`.
+- A fresh cold commandlet loaded all nine core assets, compiled all six
+  Blueprints, emitted `EDD_COLD_LOAD|RESULT|PASS`, and exited with zero errors.
+- The complete scaffold with mirrored MVP assets passes in 96.3 seconds and now
+  owns all seven live exports, the configurator, and the runtime harness.
 
 ## Next ordered implementation
 
-The complete seven-function offline set is green. Proceed with live acceptance
-below in exactly one Enhanced editor process.
-
-## Live acceptance after the offline set
-
-Once all seven bridge graphs are offline green:
-
-1. create idempotent `Configure-AirframeSourceSamplingAssembly.py` modeled on
-   `Configure-AirframeDesiredStreamAssembly.py`
-2. add all 22 variables and seven functions
-3. paste exact generated bodies through established automation
-4. export and run contracts before compile
-5. compile/save with an explicit save marker
-6. export again and rerun contracts postcompile
-7. run a CDO runtime harness against the independent oracle, warm twice and in
-   an independent fresh NullRHI process
-8. cover exact/partial schedules, all profiles, distinct body/gimbal, invalid
-   authorship, component/evaluator/physical/downstream failure, poisoned repeat,
-   immutability, and full union-state restoration
-9. guarded shutdown; require `LogExit: Exiting.`
-10. FromDevKit preview; expect only Client Director changed and review it
-11. sync that package, prove live/mirror SHA-256 equality
-12. fresh cold core-asset load and complete scaffold
-13. commit and push the live-accepted bridge
+Design and freeze the compiled-document-to-source adapter that feeds the now
+accepted source-sampling boundary while preserving separate body and gimbal
+authorship. Begin offline with reference/schema contracts and deterministic
+generators/interpreters before any new live editor work. Discontinuity
+diagnostics follow that explicit adapter boundary.
 
 ## Critical design mismatch
 
@@ -214,8 +215,8 @@ The Python document model has distinct `body_rotation` and `gimbal_rotation`,
 but the current Blueprint v1 document/waypoint bridge exposes one
 `CameraTransform` rotation. Do not alias that rotation into both source arrays.
 Resolve the document adapter explicitly after the sampling bridge is accepted.
-This does not block current graphs because their schema already owns separate
-body and gimbal quaternion inputs.
+This does not invalidate the accepted source-sampling graphs because their
+schema already owns separate body and gimbal quaternion inputs.
 
 ## Hazards already paid for
 
@@ -264,8 +265,8 @@ git rev-parse origin/main
 
 ## Confidence statement
 
-Confidence is high in every checkpoint explicitly accepted above and in the
-seven new offline bridge checkpoints. Confidence is not claimed for live bridge
-integration, document adaptation for
-distinct body/gimbal authorship, lens/focus/effects, events, keyboard dogfood,
-UI, cooking, Workshop, or whole-mod completion.
+Confidence is high in every checkpoint explicitly accepted above, including the
+complete live source-sampling bridge. Confidence is not claimed for the explicit
+document adapter that must preserve distinct body/gimbal authorship,
+discontinuity diagnostics, lens/focus/effects, events, keyboard dogfood, UI,
+cooking, Workshop, G-Portal, deployment, or whole-mod completion.

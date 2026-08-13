@@ -204,10 +204,10 @@ The schema freezes 22 variables and seven functions:
 ## Next ordered implementation
 
 The normalized compiled-document-to-source boundary is now frozen and its
-reset, structural validator, and atomic accepted-source commit are complete
-offline. Continue the remaining two graphs in order: post-boundary
-discontinuity diagnostics, then the policy-free top-level orchestrator. Do not
-open the editor until all five graphs and the complete offline suite are green.
+reset, structural validator, atomic accepted-source commit, and post-boundary
+discontinuity diagnostics are complete offline. Continue the one remaining
+policy-free top-level orchestrator. Do not open the editor until all five
+graphs and the complete offline suite are green.
 
 ### Document-adapter offline state
 
@@ -218,8 +218,9 @@ open the editor until all five graphs and the complete offline suite are green.
   separate required quaternion channels.
 - `112ae23` adds deterministic reset full/paste graphs. The subsequently
   tightened ownership contract adds one adapter-owned exact-duration
-  accumulator, so reset is now 20 full / 19 paste nodes and clears it without
-  touching any normalized authored input.
+  accumulator plus four diagnostic-local scratch values, so reset is now 24
+  full / 23 paste nodes and clears them without touching any normalized
+  authored input.
 - The current validation checkpoint adds a deterministic 114 full / 113 paste
   graph. It fail-closes schema/engine versions, all eleven array shapes, the
   2..512 waypoint bound, fixed-step and document-duration domains, positive
@@ -232,8 +233,17 @@ open the editor until all five graphs and the complete offline suite are green.
   accepted source compiler once, and publishes adapter validity last only when
   source, desired, and prebake validity all hold. Forty seeded distinct-track
   handoffs plus stage/source/desired/prebake failure cases pass in both forms.
+- The current diagnostic checkpoint adds a deterministic 149 full / 148 paste
+  graph. It emits six aligned arrays for internal waypoint IDs, accepted
+  position velocity/acceleration jumps, separately authored body/gimbal
+  angular-rate jumps, and threshold flags. Four guarded quaternion-log calls
+  read three body keys and three gimbal keys independently; failures only
+  invalidate diagnostic-local state. Sixty seeded compiled documents match the
+  independent reference in both forms, including mixed spatial curves and
+  loose/tight warning thresholds. No authoritative motion state is writable.
 - Full repository scaffold, including byte-for-byte repeat generation and
-  graph parsing for reset, validation, and commit, passes in 106.5 seconds.
+  graph parsing for reset, validation, commit, and diagnostics, passes in
+  107.5 seconds.
 - No editor process was opened for these offline checkpoints.
 
 ## Critical design mismatch

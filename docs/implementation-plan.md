@@ -639,7 +639,8 @@ This section is the authoritative handoff. Detailed evidence remains in
   desired outputs, reject v1/missing orientation fallbacks, cover shape/ID/
   adjacency/duration/profile failures, prove value snapshots and diagnostic
   independence, and execute 20 seeded cases in both orders. Five schema tests
-  freeze 31 variables (including one adapter-owned exact-duration accumulator),
+  freeze 35 variables (including one adapter-owned exact-duration accumulator
+  and four diagnostic-local scratch values),
   five ordered functions, nine exact downstream mappings,
   separate diagnostic ownership, and the explicit legacy mismatch. This is an
   offline reference/schema checkpoint. Deterministic reset, validation, and
@@ -647,6 +648,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   validation proves normalized structure and exact duration, and commit maps
   the nine accepted inputs before publishing adapter validity only after the
   accepted source, desired, and prebake stages all succeed.
+- The post-boundary diagnostic graph is intentionally non-authoritative. It
+  clears and owns six aligned outputs, reports the accepted position C1/C2
+  join pressure plus separately authored body/gimbal angular-rate pressure,
+  counts threshold warnings, and publishes diagnostic validity last. Its four
+  orientation-delta calls use separate body/gimbal triplets and may only
+  invalidate diagnostic-local state; no accepted adapter, source, desired,
+  prebake, or position publication is writable from this graph.
 
 ### Position-route absolute-time evaluator checkpoint
 

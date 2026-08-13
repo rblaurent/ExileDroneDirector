@@ -160,6 +160,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeDocumentAdapterCommitContracts.py',
     'tools\blueprint\snippets\commit-airframe-document-source-adapter-v2.eddgraph',
     'tools\blueprint\snippets\commit-airframe-document-source-adapter-v2-paste.eddgraph',
+    'tools\blueprint\Build-AirframeDocumentDiagnosticsGraph.py',
+    'tools\blueprint\Test-AirframeDocumentDiagnosticsContracts.py',
+    'tools\blueprint\snippets\build-airframe-document-discontinuity-diagnostics-v2.eddgraph',
+    'tools\blueprint\snippets\build-airframe-document-discontinuity-diagnostics-v2-paste.eddgraph',
     'tools\blueprint\Build-AirframeSourceSamplingResetGraph.py',
     'tools\blueprint\Test-AirframeSourceSamplingResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-source-sampling-v1.eddgraph',
@@ -1082,7 +1086,8 @@ New-Item -ItemType Directory -Path $documentAdapterRoot -Force | Out-Null
 $documentAdapterStages = @(
     @('reset-airframe-document-source-adapter-v2', 'Build-AirframeDocumentAdapterResetGraph.py', 'Test-AirframeDocumentAdapterResetContracts.py'),
     @('validate-airframe-document-source-adapter-v2', 'Build-AirframeDocumentAdapterValidationGraph.py', 'Test-AirframeDocumentAdapterValidationContracts.py'),
-    @('commit-airframe-document-source-adapter-v2', 'Build-AirframeDocumentAdapterCommitGraph.py', 'Test-AirframeDocumentAdapterCommitContracts.py')
+    @('commit-airframe-document-source-adapter-v2', 'Build-AirframeDocumentAdapterCommitGraph.py', 'Test-AirframeDocumentAdapterCommitContracts.py'),
+    @('build-airframe-document-discontinuity-diagnostics-v2', 'Build-AirframeDocumentDiagnosticsGraph.py', 'Test-AirframeDocumentDiagnosticsContracts.py')
 )
 foreach ($stage in $documentAdapterStages) {
     $generated = Join-Path $documentAdapterRoot "$($stage[0]).eddgraph"

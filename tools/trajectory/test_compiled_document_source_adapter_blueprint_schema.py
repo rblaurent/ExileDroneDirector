@@ -72,7 +72,14 @@ class CompiledDocumentSourceAdapterBlueprintSchemaContracts(unittest.TestCase):
     def test_diagnostics_are_separate_non_authoritative_state(self):
         variables = SCHEMA["variables"]
         diagnostic = [item for item in variables if item["role"].startswith("diagnostic")]
-        self.assertEqual(len(diagnostic), 11)
+        self.assertEqual(len(diagnostic), 15)
+        scratch = {item["name"] for item in diagnostic if item["role"] == "diagnosticScratch"}
+        self.assertEqual(scratch, {
+            "AirframeDocumentDiagnosticStageValidV2",
+            "AirframeDocumentDiagnosticScratchBodyLeftRateV2",
+            "AirframeDocumentDiagnosticScratchGimbalLeftRateV2",
+            "AirframeDocumentDiagnosticScratchBodyAngularRateJumpV2",
+        })
         self.assertIn("never mutate", SCHEMA["architecture"]["diagnostics"])
         self.assertIn("cannot modify adapter/source/desired/prebake", SCHEMA["contracts"]["diagnostics"])
 

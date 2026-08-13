@@ -565,6 +565,19 @@ This section is the authoritative handoff. Detailed evidence remains in
   `998DD7A521A4BF7BBD6E9D293F2445CA486333A4BBFDEA7C8429271B3DCC9ACE` /
   `1EB325465046C1BC793DB349BD5DD00A0862B4F6651D663D71ABD5D2CEF53EC3`.
   This remains offline only. Next is the thirteen-array desired-stream commit.
+- `CommitAirframeSourceSamplesToDesiredV1` is now frozen offline as deterministic
+  84/83-node full/paste graphs. It invalidates source validity first, proves all
+  thirteen source arrays share one exact 2..65,536 cardinality equal to the
+  published expected count, and only then copies the complete arrays plus total
+  and step into the accepted desired-stream inputs. Source validity publishes
+  last only after both desired-stream and prebake validity are true.
+- Its exported-link interpreter passes 44 oracle-valid desired compilations,
+  including a partial terminal schedule, sixteen preflight failures that retain
+  every downstream input by exact object identity, and independent desired and
+  prebake rejection. Full/paste SHA-256 is
+  `FF7F571D23DD3E7B25B05E5EBC323B6D0C9FE1300402D021BEE6596A3DB3ED39` /
+  `A776FEA5D338EC80AFD49C9C030B1677C14289FC3C130593F1ED440AFA265EA3`.
+  This remains offline only. Next is the policy-free seven-call orchestrator.
 
 ### Position-route absolute-time evaluator checkpoint
 

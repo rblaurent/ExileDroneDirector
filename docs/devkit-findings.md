@@ -5029,3 +5029,16 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `998DD7A521A4BF7BBD6E9D293F2445CA486333A4BBFDEA7C8429271B3DCC9ACE` /
   `1EB325465046C1BC793DB349BD5DD00A0862B4F6651D663D71ABD5D2CEF53EC3`.
   No live Enhanced claim exists yet.
+- `CommitAirframeSourceSamplesToDesiredV1` freezes the sole source publication
+  boundary as deterministic 84/83-node full/paste graphs. It invalidates only
+  source validity before preflight, checks exact cardinality across all thirteen
+  candidates against both 2..65,536 and the staged expected count, then performs
+  fifteen ordered desired-input writes and calls the accepted desired compiler.
+  Source validity publishes last only after desired and prebake validity agree.
+- Exported-link execution passes 44 oracle-valid transactions, one partial
+  terminal schedule, sixteen direct preflight failures with exact downstream
+  object-identity preservation, and separate desired/prebake failures. Full and
+  paste SHA-256 is
+  `FF7F571D23DD3E7B25B05E5EBC323B6D0C9FE1300402D021BEE6596A3DB3ED39` /
+  `A776FEA5D338EC80AFD49C9C030B1677C14289FC3C130593F1ED440AFA265EA3`.
+  No live Enhanced claim exists yet.

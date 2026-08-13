@@ -78,18 +78,26 @@ This section is the authoritative handoff. Detailed evidence remains in
 - Eight executable oracle tests pass distinct bounded presets, input
   independence, deterministic 511-segment compilation, shuffled direct lookup,
   invalid shapes/identifiers/types/indices, every corrupt parameter channel,
-  and 200 seeded mixed tracks. Five Blueprint-schema tests freeze 34 explicit
-  variables, seven ordered function boundaries, exact candidate/result channel
-  separation, atomic publication, and fail-closed lookup.
+  and 200 seeded mixed tracks. Five Blueprint-schema tests freeze 53 explicit
+  variables, seven ordered function boundaries, isolated resolver scratch,
+  exact candidate/result channel separation, atomic publication, and fail-closed
+  lookup.
 - Deterministic Blueprint reset and authored-input validation graphs are now
   generated and contract-accepted offline. Reset clears all 22 candidate/result
   arrays and 14 public validity/result scalars in one 59-node ordered chain.
   Validation uses 37 nodes to enforce segment count 1..511, exact override
   cardinality, one of five exact defaults, and empty-or-known identity for every
   override while keeping stage validity sticky-false after any rejection.
+- Preset resolution and candidate construction are now frozen as deterministic
+  graphs. The 84-node resolver clears its isolated 12-field result, follows one
+  ordered exact-ID branch, writes all ten canonical parameters, and publishes
+  resolver validity last. The 58-node candidate builder clears all candidate
+  arrays, stages inherited/default IDs explicitly, calls the resolver per
+  segment, rejects sticky-false on any failure, and appends the ID plus all ten
+  channels in one ordered chain.
 - Next is deterministic Blueprint graph generation and exact source/paste
-  contracts for preset resolution, candidate build, commit, compile, and
-  evaluation, followed by live compile/save and warm/fresh runtime evidence.
+  contracts for commit, compile, and evaluation, followed by live compile/save
+  and warm/fresh runtime evidence.
   This offline checkpoint is not live feature acceptance.
 
 ### Position-route absolute-time evaluator checkpoint

@@ -132,6 +132,14 @@ $requiredFiles = @(
     'tools\blueprint\Test-FlightProfileValidationContracts.py',
     'tools\blueprint\snippets\validate-flight-profile-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-flight-profile-inputs-v1-paste.eddgraph',
+    'tools\blueprint\Build-FlightProfileResolverGraph.py',
+    'tools\blueprint\Test-FlightProfileResolverContracts.py',
+    'tools\blueprint\snippets\resolve-flight-profile-preset-v1.eddgraph',
+    'tools\blueprint\snippets\resolve-flight-profile-preset-v1-paste.eddgraph',
+    'tools\blueprint\Build-FlightProfileCandidatesGraph.py',
+    'tools\blueprint\Test-FlightProfileCandidatesContracts.py',
+    'tools\blueprint\snippets\build-flight-profile-candidates-v1.eddgraph',
+    'tools\blueprint\snippets\build-flight-profile-candidates-v1-paste.eddgraph',
     'tools\unreal\Configure-CinematicPoseAssembly.py',
     'tools\unreal\Validate-CinematicPoseRuntime.py',
     'tools\blueprint\Build-CinematicPoseResetGraph.py',
@@ -947,9 +955,19 @@ $flightProfileValidation = Join-Path $flightProfileRoot 'validate-flight-profile
 $flightProfileValidationPaste = Join-Path $flightProfileRoot 'validate-flight-profile-inputs-v1-paste.eddgraph'
 $flightProfileValidationRepeat = Join-Path $flightProfileRoot 'validate-flight-profile-inputs-v1-repeat.eddgraph'
 $flightProfileValidationRepeatPaste = Join-Path $flightProfileRoot 'validate-flight-profile-inputs-v1-repeat-paste.eddgraph'
+$flightProfileResolver = Join-Path $flightProfileRoot 'resolve-flight-profile-preset-v1.eddgraph'
+$flightProfileResolverPaste = Join-Path $flightProfileRoot 'resolve-flight-profile-preset-v1-paste.eddgraph'
+$flightProfileResolverRepeat = Join-Path $flightProfileRoot 'resolve-flight-profile-preset-v1-repeat.eddgraph'
+$flightProfileResolverRepeatPaste = Join-Path $flightProfileRoot 'resolve-flight-profile-preset-v1-repeat-paste.eddgraph'
+$flightProfileCandidates = Join-Path $flightProfileRoot 'build-flight-profile-candidates-v1.eddgraph'
+$flightProfileCandidatesPaste = Join-Path $flightProfileRoot 'build-flight-profile-candidates-v1-paste.eddgraph'
+$flightProfileCandidatesRepeat = Join-Path $flightProfileRoot 'build-flight-profile-candidates-v1-repeat.eddgraph'
+$flightProfileCandidatesRepeatPaste = Join-Path $flightProfileRoot 'build-flight-profile-candidates-v1-repeat-paste.eddgraph'
 foreach ($spec in @(
     @('Build-FlightProfileResetGraph.py', $flightProfileReset, $flightProfileResetPaste, $flightProfileResetRepeat, $flightProfileResetRepeatPaste),
-    @('Build-FlightProfileValidationGraph.py', $flightProfileValidation, $flightProfileValidationPaste, $flightProfileValidationRepeat, $flightProfileValidationRepeatPaste)
+    @('Build-FlightProfileValidationGraph.py', $flightProfileValidation, $flightProfileValidationPaste, $flightProfileValidationRepeat, $flightProfileValidationRepeatPaste),
+    @('Build-FlightProfileResolverGraph.py', $flightProfileResolver, $flightProfileResolverPaste, $flightProfileResolverRepeat, $flightProfileResolverRepeatPaste),
+    @('Build-FlightProfileCandidatesGraph.py', $flightProfileCandidates, $flightProfileCandidatesPaste, $flightProfileCandidatesRepeat, $flightProfileCandidatesRepeatPaste)
 )) {
     & python (Join-Path $ProjectRoot "tools\blueprint\$($spec[0])") `
         --project-root $ProjectRoot --output $spec[1] --paste-output $spec[2]
@@ -962,7 +980,11 @@ foreach ($pair in @(
     @($flightProfileReset, $flightProfileResetRepeat),
     @($flightProfileResetPaste, $flightProfileResetRepeatPaste),
     @($flightProfileValidation, $flightProfileValidationRepeat),
-    @($flightProfileValidationPaste, $flightProfileValidationRepeatPaste)
+    @($flightProfileValidationPaste, $flightProfileValidationRepeatPaste),
+    @($flightProfileResolver, $flightProfileResolverRepeat),
+    @($flightProfileResolverPaste, $flightProfileResolverRepeatPaste),
+    @($flightProfileCandidates, $flightProfileCandidatesRepeat),
+    @($flightProfileCandidatesPaste, $flightProfileCandidatesRepeatPaste)
 )) {
     if ((Get-FileHash -Algorithm SHA256 $pair[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $pair[1]).Hash) {
         throw "Flight-profile graph generation is not deterministic: $($pair[0])"
@@ -970,7 +992,9 @@ foreach ($pair in @(
 }
 foreach ($family in @(
     @('Reset', 'Test-FlightProfileResetContracts.py', $flightProfileReset, $flightProfileResetPaste, 'reset-flight-profile-state-v1'),
-    @('Validation', 'Test-FlightProfileValidationContracts.py', $flightProfileValidation, $flightProfileValidationPaste, 'validate-flight-profile-inputs-v1')
+    @('Validation', 'Test-FlightProfileValidationContracts.py', $flightProfileValidation, $flightProfileValidationPaste, 'validate-flight-profile-inputs-v1'),
+    @('Resolver', 'Test-FlightProfileResolverContracts.py', $flightProfileResolver, $flightProfileResolverPaste, 'resolve-flight-profile-preset-v1'),
+    @('Candidates', 'Test-FlightProfileCandidatesContracts.py', $flightProfileCandidates, $flightProfileCandidatesPaste, 'build-flight-profile-candidates-v1')
 )) {
     foreach ($spec in @(
         @($family[2], $false),

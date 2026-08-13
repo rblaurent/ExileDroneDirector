@@ -4023,8 +4023,9 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   deterministic ceiling compilation, shuffled history-independent lookup, 200
   seeded mixed publications, invalid identifier/shape/type/index families, and
   corruption of cardinality, identity, every non-finite parameter, and every
-  finite-but-noncanonical parameter. Five schema tests freeze 34 explicit
-  Blueprint fields, ten one-to-one candidate/compiled/result parameter channels,
+  finite-but-noncanonical parameter. Five schema tests initially froze the
+  document/candidate/compiled/evaluation seam, ten one-to-one
+  candidate/compiled/result parameter channels,
   seven ordered functions, and atomic fail-closed contracts. The full repository
   scaffold remains green after registration.
 - A generated-name abstraction was rejected during review before Unreal work:
@@ -4033,6 +4034,13 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   channel explicitly. Next is generated graph bodies plus exact contracts, then
   live compile/save and executable warm/fresh proof; no live flight-profile claim
   is made by this checkpoint.
+
+- Pre-resolver review caught that the named `ResolveFlightProfilePresetV1`
+  boundary had no explicit call scratch. The schema now enumerates one resolver
+  input plus 12 resettable resolver results (ID, ten parameters, validity), for
+  53 total variables. This keeps resolver output disjoint from candidate,
+  compiled, and evaluation publications and makes the function executable in
+  isolation. The omission was corrected before any live asset mutation.
 
 ### Flight-profile reset and validation graphs frozen (2026-08-13)
 
@@ -4056,3 +4064,28 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   Repeated generation is byte-identical and the full scaffold passes. These are
   generated offline bodies only; they are not yet live, compiled, or runtime
   accepted. Next is canonical preset resolution and candidate construction.
+
+### Flight-profile resolver and candidate construction frozen (2026-08-13)
+
+- `ResolveFlightProfilePresetV1` uses an isolated one-string input and 12-field
+  result seam. Its 84/83-node full/paste graphs reset ID, ten parameters, and
+  validity first; compare the input against all five IDs in canonical order;
+  write the complete matching preset; and publish validity last. The final
+  unknown-ID `else` is deliberately unconnected, retaining the reset invalid
+  result. Source/paste SHA-256 is
+  `2F9F2D867C6B236AC400BFF5C4CA1EDDD411DE5BE7669D12E376E8C3C1248C20` /
+  `7C574DF2B1D79FFD4A730C62860DA0D73185A2311DA4C6E22F18869272F38D97`.
+- `BuildFlightProfileCandidatesV1` uses 58/57 nodes. It clears all 11 candidate
+  arrays, checks sticky stage validity, loops the authored override array, stages
+  either the document default or nonempty override into the resolver input,
+  invokes the isolated resolver, writes stage validity false on resolver failure,
+  and otherwise appends the resolved ID plus every numeric parameter in one
+  ordered chain. Source/paste SHA-256 is
+  `CC41DC566F37D1CB193F8706C545C8C7F41241F9D7D599049424B41BE7550C27` /
+  `A8AB86DECAB913E6511C46DD9F8AE819ABB9792F14ABED20EBC62ADC582B61A6`.
+- Exact contracts prove reset-before-branch behavior, canonical literal order,
+  complete preset setter chains, unknown-ID fail-closed behavior, explicit
+  inheritance staging, self-context helper invocation, resolver validity guard,
+  sticky rejection, and one-to-one source for every candidate append. Repeated
+  generation is byte-identical and the full scaffold remains green. These bodies
+  are not live yet; next is atomic candidate commit and orchestration/evaluation.

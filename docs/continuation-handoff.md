@@ -204,11 +204,10 @@ The schema freezes 22 variables and seven functions:
 ## Next ordered implementation
 
 The normalized compiled-document-to-source boundary is now frozen and its
-reset plus structural validator are complete offline. Continue the remaining
-three graphs in order: atomic commit into the accepted source sampler,
-post-boundary discontinuity diagnostics, then the policy-free top-level
-orchestrator. Do not open the editor until all five graphs and the complete
-offline suite are green.
+reset, structural validator, and atomic accepted-source commit are complete
+offline. Continue the remaining two graphs in order: post-boundary
+discontinuity diagnostics, then the policy-free top-level orchestrator. Do not
+open the editor until all five graphs and the complete offline suite are green.
 
 ### Document-adapter offline state
 
@@ -227,8 +226,14 @@ offline suite are green.
   unique IDs, ordered segment adjacency, finite positive segment durations,
   and exact accumulated duration. Its interpreter passes 80 seeded valid
   documents and 16 injected failure classes in both forms.
+- The current commit checkpoint adds a deterministic 30 full / 29 paste graph.
+  It copies exactly nine accepted inputs only after adapter validation, uses
+  different getters for body and gimbal quaternions, invokes the already
+  accepted source compiler once, and publishes adapter validity last only when
+  source, desired, and prebake validity all hold. Forty seeded distinct-track
+  handoffs plus stage/source/desired/prebake failure cases pass in both forms.
 - Full repository scaffold, including byte-for-byte repeat generation and
-  graph parsing for reset and validation, passes in 105.6 seconds.
+  graph parsing for reset, validation, and commit, passes in 106.5 seconds.
 - No editor process was opened for these offline checkpoints.
 
 ## Critical design mismatch

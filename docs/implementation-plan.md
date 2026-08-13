@@ -642,7 +642,11 @@ This section is the authoritative handoff. Detailed evidence remains in
   freeze 31 variables (including one adapter-owned exact-duration accumulator),
   five ordered functions, nine exact downstream mappings,
   separate diagnostic ownership, and the explicit legacy mismatch. This is an
-  offline reference/schema checkpoint; deterministic graph bodies follow.
+  offline reference/schema checkpoint. Deterministic reset, validation, and
+  commit bodies now follow it: reset owns all adapter/downstream invalidation,
+  validation proves normalized structure and exact duration, and commit maps
+  the nine accepted inputs before publishing adapter validity only after the
+  accepted source, desired, and prebake stages all succeed.
 
 ### Position-route absolute-time evaluator checkpoint
 

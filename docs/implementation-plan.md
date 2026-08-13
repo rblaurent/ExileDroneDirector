@@ -218,6 +218,12 @@ This section is the authoritative handoff. Detailed evidence remains in
   covered by byte-reproducibility plus reciprocal-link contracts. Validation
   is the next graph; joint live installation still waits for the complete
   three-function set.
+- `ValidateAirframeGimbalInputsV1` is now frozen offline as a deterministic
+  165/164-node graph. It independently proves all vector components,
+  quaternion finiteness plus the exact `1 +/- 1e-6` magnitude window, and all
+  ten profile domains using non-foldable finite bounds. Stage validity is
+  reset first and accepted once; all inputs remain read-only and no public
+  result is touched. Desired-pose solve is the next graph.
 
 ### Position-route absolute-time evaluator checkpoint
 

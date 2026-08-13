@@ -136,6 +136,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeGimbalResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-gimbal-v1.eddgraph',
     'tools\blueprint\snippets\reset-airframe-gimbal-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframeGimbalValidationGraph.py',
+    'tools\blueprint\Test-AirframeGimbalValidationContracts.py',
+    'tools\blueprint\snippets\validate-airframe-gimbal-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-airframe-gimbal-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-SmoothedFlightProfileResetGraph.py',
     'tools\blueprint\Test-SmoothedFlightProfileResetContracts.py',
     'tools\blueprint\snippets\reset-smoothed-flight-profile-v1.eddgraph',
@@ -915,6 +919,30 @@ foreach ($graphCase in @(@($airframeGimbalReset, $false), @($airframeGimbalReset
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeGimbalResetContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Airframe/gimbal reset contracts failed with exit code $LASTEXITCODE." }
+}
+$airframeGimbalValidation = Join-Path $airframeGimbalRoot 'validate-airframe-gimbal-inputs-v1.eddgraph'
+$airframeGimbalValidationPaste = Join-Path $airframeGimbalRoot 'validate-airframe-gimbal-inputs-v1-paste.eddgraph'
+$airframeGimbalValidationRepeat = Join-Path $airframeGimbalRoot 'validate-airframe-gimbal-inputs-v1-repeat.eddgraph'
+$airframeGimbalValidationRepeatPaste = Join-Path $airframeGimbalRoot 'validate-airframe-gimbal-inputs-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeGimbalValidationGraph.py') `
+    --project-root $ProjectRoot --output $airframeGimbalValidation --paste-output $airframeGimbalValidationPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe/gimbal validation graph generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeGimbalValidationGraph.py') `
+    --project-root $ProjectRoot --output $airframeGimbalValidationRepeat --paste-output $airframeGimbalValidationRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe/gimbal validation generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($airframeGimbalValidation, $airframeGimbalValidationRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-airframe-gimbal-inputs-v1.eddgraph')),
+    @($airframeGimbalValidationPaste, $airframeGimbalValidationRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-airframe-gimbal-inputs-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe/gimbal validation generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($airframeGimbalValidation, $false), @($airframeGimbalValidationPaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeGimbalValidationContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe/gimbal validation contracts failed with exit code $LASTEXITCODE." }
 }
 
 $cinematicPoseNonce = [guid]::NewGuid().ToString('N')

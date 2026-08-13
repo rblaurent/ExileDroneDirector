@@ -4436,3 +4436,26 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - This reset remains offline until validation and solve are frozen and the
   three functions can be installed and executed together. No live
   airframe/gimbal, UI, cook, or Workshop claim is made.
+
+### Airframe/gimbal input validation graph frozen (2026-08-13)
+
+- `ValidateAirframeGimbalInputsV1` is a deterministic 165/164-node full/paste
+  graph. It resets stage validity false, independently validates four
+  three-component vectors, two quaternions, and all ten profile channels, then
+  writes stage validity true only through one final acceptance branch.
+- Each vector component and profile scalar uses explicit representable-double
+  lower/upper bounds, avoiding the bytecode-foldable `x - x == 0` predicate.
+  Each quaternion must pass native finiteness and an explicit magnitude window
+  of `0.999999..1.000001`. Every profile channel has the same inclusive or
+  strict bounds as the accepted canonical-profile and smoothing boundaries.
+- Exact contracts prove one read-only getter per input, all twelve vector
+  component finite guards, both quaternion finite/norm guards, all thirty
+  profile finite/domain guards, 69 BooleanAND nodes (22 finite pairs plus the
+  47-link aggregate), reset-before-branch, acceptance-only publication, no
+  result publication, no external links, and no reroute knots. Repeated
+  generation is byte-identical; full/paste SHA-256 is
+  `BCFDB2694FD8381B1A508206C6456A5B77260E7B9C874178350B12E9BE364EED` /
+  `C8316BEEC27C943A7E56A32E5ACDC5246CA96AC465DCDDA927BF320C16A4A091`.
+- Reset and validation remain offline until desired-pose solve is frozen and
+  all three functions can be installed/tested together. No live
+  airframe/gimbal, UI, cook, or Workshop claim is made.

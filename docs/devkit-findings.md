@@ -4233,3 +4233,21 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `PublishSmoothedFlightProfileV1`, and `EvaluateSmoothedFlightProfileV1`
   generated graphs, exact contracts, live compile/save, and warm/fresh runtime
   proof. No airframe/gimbal, UI, cook, or Workshop claim is made here.
+
+### Smoothed flight-profile reset graph frozen (2026-08-13)
+
+- `ResetSmoothedFlightProfileV1` is now a deterministic 39/38-node full/paste
+  graph. It preserves the segment-index and local-alpha inputs while clearing
+  stage validity, current and neighbor IDs, all twenty current/neighbor numeric
+  scratch values, neighbor weight, both public IDs, all eleven numeric public
+  values, and public validity in one exact ordered execution chain.
+- Exact contracts require every setter/default, forbid array operations and
+  input mutation, require the native-entry seam only in the full form, reject
+  reroute knots and external links, and prove the entire reciprocal execution
+  chain. Full/paste SHA-256 is
+  `AF9612612D66022B027E013CE9FC35B2D76E0DED4A24B85CA241F42A0219564C` /
+  `EA9A0BBA4C8190C82ED27B9369437D14A5619903D98B1D4EA8CB24B5C8A86043`.
+- Repeated generation is byte-identical and the complete repository scaffold
+  passes. This graph remains offline until the full four-function consumer set
+  is frozen and installed together. Next is current/neighbor sample staging;
+  no live reset, airframe/gimbal, UI, cook, or Workshop claim is made.

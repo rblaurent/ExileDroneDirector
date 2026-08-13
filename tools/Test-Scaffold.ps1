@@ -128,6 +128,10 @@ $requiredFiles = @(
     'tools\trajectory\test_smoothed_flight_profile_reference.py',
     'tools\trajectory\smoothed_flight_profile_blueprint_schema.json',
     'tools\trajectory\test_smoothed_flight_profile_blueprint_schema.py',
+    'tools\blueprint\Build-SmoothedFlightProfileResetGraph.py',
+    'tools\blueprint\Test-SmoothedFlightProfileResetContracts.py',
+    'tools\blueprint\snippets\reset-smoothed-flight-profile-v1.eddgraph',
+    'tools\blueprint\snippets\reset-smoothed-flight-profile-v1-paste.eddgraph',
     'tools\blueprint\Build-FlightProfileResetGraph.py',
     'tools\blueprint\Test-FlightProfileResetContracts.py',
     'tools\blueprint\snippets\reset-flight-profile-state-v1.eddgraph',
@@ -1083,6 +1087,45 @@ foreach ($family in @(
         if ($LASTEXITCODE -ne 0) {
             throw "Flight-profile $($family[0]) contracts failed with exit code ${LASTEXITCODE}: $($spec[0])"
         }
+    }
+}
+
+$smoothedProfileNonce = [guid]::NewGuid().ToString('N')
+$smoothedProfileRoot = Join-Path $scratchRoot "edd-smoothed-flight-profile-$smoothedProfileNonce"
+$smoothedProfileReset = Join-Path $smoothedProfileRoot 'reset-smoothed-flight-profile-v1.eddgraph'
+$smoothedProfileResetPaste = Join-Path $smoothedProfileRoot 'reset-smoothed-flight-profile-v1-paste.eddgraph'
+$smoothedProfileResetRepeat = Join-Path $smoothedProfileRoot 'reset-smoothed-flight-profile-v1-repeat.eddgraph'
+$smoothedProfileResetRepeatPaste = Join-Path $smoothedProfileRoot 'reset-smoothed-flight-profile-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-SmoothedFlightProfileResetGraph.py') `
+    --project-root $ProjectRoot --output $smoothedProfileReset --paste-output $smoothedProfileResetPaste
+if ($LASTEXITCODE -ne 0) { throw "Smoothed flight-profile reset generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-SmoothedFlightProfileResetGraph.py') `
+    --project-root $ProjectRoot --output $smoothedProfileResetRepeat --paste-output $smoothedProfileResetRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated smoothed flight-profile reset generation failed with exit code $LASTEXITCODE." }
+foreach ($pair in @(
+    @($smoothedProfileReset, $smoothedProfileResetRepeat),
+    @($smoothedProfileResetPaste, $smoothedProfileResetRepeatPaste)
+)) {
+    if ((Get-FileHash -Algorithm SHA256 $pair[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $pair[1]).Hash) {
+        throw "Smoothed flight-profile reset generation is not deterministic: $($pair[0])"
+    }
+}
+foreach ($spec in @(
+    @($smoothedProfileReset, $false),
+    @($smoothedProfileResetPaste, $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-smoothed-flight-profile-v1.eddgraph'), $false),
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-smoothed-flight-profile-v1-paste.eddgraph'), $true)
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $spec[0]
+    $arguments = @(
+        (Join-Path $ProjectRoot 'tools\blueprint\Test-SmoothedFlightProfileResetContracts.py'),
+        '--project-root', $ProjectRoot,
+        '--graph', $spec[0]
+    )
+    if ($spec[1]) { $arguments += '--paste' }
+    & python @arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Smoothed flight-profile reset contracts failed with exit code ${LASTEXITCODE}: $($spec[0])"
     }
 }
 

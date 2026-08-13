@@ -174,6 +174,45 @@ This section is the authoritative handoff. Detailed evidence remains in
   followed by lens/focus/effects and shortcut/debug dogfooding. No polished UI,
   cook, Workshop publication, or whole-mod completion is claimed.
 
+### Airframe/gimbal desired-pose contract checkpoint
+
+- The first airframe/gimbal slice is frozen and executable as a stateless
+  reference contract plus an exact Blueprint assembly schema. It consumes
+  current and look-ahead velocity, acceleration, jerk, authored body and gimbal
+  quaternions, and all ten accepted smoothed profile channels. It does not yet
+  claim a live Blueprint implementation.
+- Local X is forward, local Y is right, and local Z is up. Look-ahead velocity
+  selects the predictive path direction, then current velocity, then authored
+  forward as deterministic fallbacks. World-up constructs the frame except at
+  vertical tangents, where projected authored up supplies the stable roll
+  reference.
+- Curvature banking uses signed lateral acceleration, gravity, profile gain,
+  and the profile bank clamp. `PathFollowWeight` shortest-arc blends authored
+  body orientation with the banked path frame. Camera uptilt is a body-local
+  negative-Y rotation; `HorizonStabilizationWeight` continuously blends that
+  body lock toward the authored world-gimbal orientation.
+- Acceleration, jerk, and finite-turn-radius gates reject unsafe samples before
+  publication. Straight or stationary motion uses the explicit finite
+  `TurnRadiusCm == 0` sentinel; all other published diagnostics are finite and
+  finite turns are positive. Invalid vectors, quaternions, profiles, booleans
+  masquerading as numbers, and overflow-capable diagnostics fail closed.
+- Eleven reference tests cover exact blend endpoints, distinct preset
+  behavior, signed/clamped bank, positive uptilt, predictive/fallback geometry,
+  stationary/vertical/straight motion, exact physical-limit boundaries,
+  invalid and overflow families, quaternion sign equivalence, and 1,000 seeded
+  order-independent samples. Five schema tests freeze 25 explicit variables,
+  three ordered function boundaries, one-to-one consumption of all profile
+  channels, reset defaults, history independence, physical gates, and
+  validity-last atomic publication. Both suites are part of the complete
+  scaffold.
+- Next is deterministic graph generation and exact contracts for reset,
+  validation, and desired-pose solve, followed by joint live installation,
+  compile/save, cold load, and warm/fresh executable oracle proof. The later
+  fixed-step compiler owns max-angular-rate limiting and prebaked continuity;
+  this primitive deliberately remains history-free. No lens/focus/effects,
+  shortcut dogfood, polished UI, cook, Workshop, or whole-mod completion is
+  claimed.
+
 ### Position-route absolute-time evaluator checkpoint
 
 - `EvaluateCompiledPositionRouteV1` is compiled, saved, and warm-runtime

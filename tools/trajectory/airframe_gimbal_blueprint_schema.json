@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Stateless desired airframe/gimbal pose from absolute-time trajectory derivatives and the accepted smoothed flight profile.",
+  "limits": {
+    "finiteScalarBound": 1.7976931348623157e+308,
+    "gravityCmPerSecondSquared": 980.665,
+    "quaternionUnitTolerance": 0.000001,
+    "vectorEpsilon": 0.000000001
+  },
+  "variables": [
+    { "name": "AirframeGimbalInputCurrentVelocityV1", "type": "Vector", "container": "None", "role": "input", "default": [0.0, 0.0, 0.0] },
+    { "name": "AirframeGimbalInputLookAheadVelocityV1", "type": "Vector", "container": "None", "role": "input", "default": [0.0, 0.0, 0.0] },
+    { "name": "AirframeGimbalInputAccelerationV1", "type": "Vector", "container": "None", "role": "input", "default": [0.0, 0.0, 0.0] },
+    { "name": "AirframeGimbalInputJerkV1", "type": "Vector", "container": "None", "role": "input", "default": [0.0, 0.0, 0.0] },
+    { "name": "AirframeGimbalInputAuthoredBodyQuatV1", "type": "Quat", "container": "None", "role": "input", "default": [0.0, 0.0, 0.0, 1.0] },
+    { "name": "AirframeGimbalInputAuthoredGimbalQuatV1", "type": "Quat", "container": "None", "role": "input", "default": [0.0, 0.0, 0.0, 1.0] },
+    { "name": "AirframeGimbalInputPathFollowWeightV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeGimbalInputHorizonStabilizationWeightV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeGimbalInputLookAheadSecondsV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeGimbalInputBankGainV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeGimbalInputMaxBankDegreesV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeGimbalInputCameraUptiltDegreesV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeGimbalInputMaxAngularRateDegreesPerSecondV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeGimbalInputMaxAccelerationCmPerSecondSquaredV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeGimbalInputMaxJerkCmPerSecondCubedV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeGimbalInputMinimumTurnRadiusCmV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeGimbalStageValidV1", "type": "Boolean", "container": "None", "role": "candidate", "default": false },
+    { "name": "AirframeGimbalResultBodyQuatV1", "type": "Quat", "container": "None", "role": "result", "default": [0.0, 0.0, 0.0, 1.0] },
+    { "name": "AirframeGimbalResultGimbalQuatV1", "type": "Quat", "container": "None", "role": "result", "default": [0.0, 0.0, 0.0, 1.0] },
+    { "name": "AirframeGimbalResultPathQuatV1", "type": "Quat", "container": "None", "role": "result", "default": [0.0, 0.0, 0.0, 1.0] },
+    { "name": "AirframeGimbalResultSpeedCmPerSecondV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "AirframeGimbalResultLateralAccelerationCmPerSecondSquaredV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "AirframeGimbalResultTurnRadiusCmV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "AirframeGimbalResultBankDegreesV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "AirframeGimbalResultValidV1", "type": "Boolean", "container": "None", "role": "result", "default": false }
+  ],
+  "functions": [
+    { "name": "ResetAirframeGimbalV1", "stage": 0 },
+    { "name": "ValidateAirframeGimbalInputsV1", "stage": 1 },
+    { "name": "SolveAirframeGimbalV1", "stage": 2, "uses": ["ResetAirframeGimbalV1", "ValidateAirframeGimbalInputsV1"] }
+  ],
+  "contracts": {
+    "sampling": "Current velocity, look-ahead velocity, acceleration, and jerk are derived from the accepted absolute-time route. Look-ahead velocity is sampled at elapsed plus LookAheadSeconds, clamped to the route endpoint.",
+    "desiredPose": "SolveAirframeGimbalV1 is history-free. It produces a desired pose only; fixed-step compilation owns max-angular-rate limiting and prebaked continuity.",
+    "body": "Path orientation uses local X forward and world Z up with a deterministic authored-up fallback for vertical tangents. Curvature bank is signed, gain-scaled, and clamped before shortest-arc blending with authored body orientation by PathFollowWeight.",
+    "gimbal": "Body-locked orientation applies camera uptilt around local negative Y. HorizonStabilizationWeight shortest-arc blends body-lock at zero to authored world gimbal orientation at one.",
+    "physicalGates": "Acceleration magnitude, jerk magnitude, and instantaneous turn radius must satisfy the accepted smoothed profile before any result publication. TurnRadiusCm is zero when motion is stationary or has no finite turn; otherwise it is finite and positive.",
+    "atomicity": "Result validity publishes last after every quaternion and diagnostic scalar is finite, normalized, and safe.",
+    "failure": "Any invalid input or physical-limit failure resets every result to defaults, leaves result validity false, and never mutates an input."
+  }
+}

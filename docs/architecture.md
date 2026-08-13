@@ -827,6 +827,30 @@ look-ahead, horizon stabilization, and weighted blends. Gimbal angular rates and
 acceleration are limited/smoothed. A hybrid stabilization weight continuously
 blends body-locked FPV with stabilized cinematic framing.
 
+### 12.5 Deterministic desired-pose boundary
+
+The first shared airframe/gimbal primitive is a history-free desired-pose
+solver. Its inputs are absolute-time trajectory derivatives (current velocity,
+look-ahead velocity sampled at the profile offset, acceleration, and jerk), two
+normalized authored quaternions, and the accepted smoothed profile. It returns
+normalized body, gimbal, and path quaternions plus finite speed, lateral
+acceleration, turn-radius, and bank diagnostics. A turn-radius result of zero is
+the explicit sentinel for stationary or straight motion; every finite turn is
+positive.
+
+The solver rejects invalid structure, non-finite values, non-unit quaternions,
+profile-domain violations, acceleration/jerk excess, and finite turns tighter
+than the active profile before publishing any result. Result validity is written
+last after the complete record is safe. It never mutates trajectory or profile
+inputs.
+
+This desired-pose boundary intentionally does not consume frame delta and does
+not apply `MaxAngularRateDegreesPerSecond`. The deterministic fixed-step compiler
+above it applies angular-rate limits and prebakes any stateful continuity. This
+separation keeps direct scrubbing history-independent while allowing the same
+instantaneous target to drive Cinematic, Hybrid, Cinewhoop, Freestyle, and
+Long-range compilation.
+
 ## 13. Scalar camera and effect channels
 
 All scalar channels use the common compiled track interface:

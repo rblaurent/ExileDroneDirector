@@ -128,6 +128,10 @@ $requiredFiles = @(
     'tools\trajectory\test_smoothed_flight_profile_reference.py',
     'tools\trajectory\smoothed_flight_profile_blueprint_schema.json',
     'tools\trajectory\test_smoothed_flight_profile_blueprint_schema.py',
+    'tools\trajectory\airframe_gimbal_reference.py',
+    'tools\trajectory\test_airframe_gimbal_reference.py',
+    'tools\trajectory\airframe_gimbal_blueprint_schema.json',
+    'tools\trajectory\test_airframe_gimbal_blueprint_schema.py',
     'tools\blueprint\Build-SmoothedFlightProfileResetGraph.py',
     'tools\blueprint\Test-SmoothedFlightProfileResetContracts.py',
     'tools\blueprint\snippets\reset-smoothed-flight-profile-v1.eddgraph',
@@ -871,6 +875,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_smoothed_flight_profile_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Smoothed flight-profile Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_airframe_gimbal_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Airframe/gimbal desired-pose reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_airframe_gimbal_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Airframe/gimbal Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 
 $cinematicPoseNonce = [guid]::NewGuid().ToString('N')

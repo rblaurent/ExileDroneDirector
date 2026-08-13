@@ -4387,3 +4387,36 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   ordered backend slice consumes them in cinematic/hybrid/FPV airframe and
   gimbal dynamics. Lens/focus/effects, shortcut dogfood, polished UI, cook,
   Workshop, and whole-mod completion remain unclaimed.
+
+### Airframe/gimbal desired-pose contract frozen offline (2026-08-13)
+
+- `airframe_gimbal_reference.py` now freezes the first shared motion primitive:
+  a stateless desired body/gimbal pose from absolute-time velocity,
+  look-ahead velocity, acceleration, jerk, authored body/gimbal quaternions,
+  and the complete accepted smoothed profile. The profile look-ahead offset is
+  consumed by the upstream absolute-time sampler; max angular rate is consumed
+  by the later deterministic fixed-step compiler.
+- The path frame uses local X forward/Y right/Z up, with deterministic current
+  velocity and authored-forward fallbacks. Vertical tangents project authored
+  up to prevent an arbitrary roll choice. Signed lateral acceleration produces
+  gain-scaled, clamped bank; shortest-arc blends implement both path-follow body
+  weight and body-lock-to-authored-world gimbal stabilization. Positive camera
+  uptilt rotates around local negative Y.
+- Acceleration, jerk, and finite-turn-radius gates run before result creation.
+  Straight/stationary motion publishes the finite zero-radius sentinel rather
+  than infinity. Every other diagnostic must remain finite. Boolean numeric
+  impostors, malformed/non-unit quaternions, profile-domain errors, physical
+  excess, and overflow-capable motion reject explicitly.
+- Eleven executable reference tests cover exact endpoints, all three principal
+  flight characters, signed clamp behavior, geometry/fallbacks, vertical and
+  stationary cases, exact limit boundaries, invalid/corrupt input families,
+  quaternion sign invariance, and 1,000 seeded samples evaluated forward and
+  reverse. Five Blueprint-schema tests freeze 25 variables, reset/validate/
+  solve ordering, all ten profile channels, fail-closed defaults, history
+  independence, and validity-last publication. The full scaffold invokes both
+  suites.
+- This is offline contract evidence, not a live Blueprint claim. Next are
+  deterministic reset, validation, and solve graph sources with exact
+  reciprocal-link contracts, then joint install/compile/save, exact post-compile
+  export, cold load, and warm/fresh oracle/failure/restoration execution. UI,
+  cook, Workshop, and whole-mod completion remain unclaimed.

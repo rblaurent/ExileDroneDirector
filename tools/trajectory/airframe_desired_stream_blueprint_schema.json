@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Transactional sampled kinematics, desired airframe/gimbal pose, and accepted fixed-step prebake composition.",
+  "limits": {
+    "minimumFixedStepSeconds": 0.004166666666666667,
+    "maximumFixedStepSeconds": 0.5,
+    "maximumTotalSeconds": 3600.0,
+    "maximumSampleCount": 65536
+  },
+  "profileFields": [
+    "PathFollowWeight",
+    "HorizonStabilizationWeight",
+    "LookAheadSeconds",
+    "BankGain",
+    "MaxBankDegrees",
+    "CameraUptiltDegrees",
+    "MaxAngularRateDegreesPerSecond",
+    "MaxAccelerationCmPerSecondSquared",
+    "MaxJerkCmPerSecondCubed",
+    "MinimumTurnRadiusCm"
+  ],
+  "variables": [
+    { "name": "AirframeDesiredStreamInputPositionsV1", "type": "Vector", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputAuthoredBodyQuatsV1", "type": "Quat", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputAuthoredGimbalQuatsV1", "type": "Quat", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputPathFollowWeightsV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputHorizonStabilizationWeightsV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputLookAheadSecondsV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputBankGainsV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputMaxBankDegreesV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputCameraUptiltDegreesV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputMaxAngularRatesDegreesPerSecondV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputMaxAccelerationsCmPerSecondSquaredV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputMaxJerksCmPerSecondCubedV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputMinimumTurnRadiiCmV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframeDesiredStreamInputTotalSecondsV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframeDesiredStreamInputFixedStepSecondsV1", "type": "Float", "container": "None", "role": "input", "default": 0.016666666666666666 },
+
+    { "name": "AirframeDesiredStreamCandidateVelocitiesV1", "type": "Vector", "container": "Array", "role": "candidate" },
+    { "name": "AirframeDesiredStreamCandidateAccelerationsV1", "type": "Vector", "container": "Array", "role": "candidate" },
+    { "name": "AirframeDesiredStreamCandidateJerksV1", "type": "Vector", "container": "Array", "role": "candidate" },
+    { "name": "AirframeDesiredStreamCandidateLookAheadVelocitiesV1", "type": "Vector", "container": "Array", "role": "candidate" },
+    { "name": "AirframeDesiredStreamCandidateBodyQuatsV1", "type": "Quat", "container": "Array", "role": "candidate" },
+    { "name": "AirframeDesiredStreamCandidateGimbalQuatsV1", "type": "Quat", "container": "Array", "role": "candidate" },
+    { "name": "AirframeDesiredStreamCandidateMaxAngularRatesDegreesPerSecondV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframeDesiredStreamStageIndexV1", "type": "Integer", "container": "None", "role": "candidate", "default": 0 },
+    { "name": "AirframeDesiredStreamStageValidV1", "type": "Boolean", "container": "None", "role": "candidate", "default": false },
+
+    { "name": "AirframeDesiredStreamVelocitySampleInputSecondsV1", "type": "Float", "container": "None", "role": "helperInput", "default": 0.0 },
+    { "name": "AirframeDesiredStreamVelocitySampleResultV1", "type": "Vector", "container": "None", "role": "helperResult", "default": [0.0, 0.0, 0.0] },
+    { "name": "AirframeDesiredStreamVelocitySampleResultValidV1", "type": "Boolean", "container": "None", "role": "helperResult", "default": false },
+    { "name": "AirframeDesiredStreamCompileValidV1", "type": "Boolean", "container": "None", "role": "result", "default": false }
+  ],
+  "functions": [
+    { "name": "ResetAirframeDesiredStreamV1", "stage": 0, "uses": ["ResetAirframePrebakeCandidateV1"] },
+    { "name": "ValidateAirframeDesiredStreamInputsV1", "stage": 1 },
+    { "name": "BuildAirframeDesiredVelocitySamplesV1", "stage": 2 },
+    { "name": "BuildAirframeDesiredAccelerationSamplesV1", "stage": 3 },
+    { "name": "BuildAirframeDesiredJerkSamplesV1", "stage": 4 },
+    { "name": "SampleAirframeDesiredVelocityAtTimeV1", "stage": 5 },
+    { "name": "SolveAirframeDesiredPoseSamplesV1", "stage": 6, "uses": ["SampleAirframeDesiredVelocityAtTimeV1", "SolveAirframeGimbalV1"] },
+    { "name": "CommitAirframeDesiredStreamToPrebakeV1", "stage": 7, "uses": ["CompileAirframePrebakeV1"] },
+    { "name": "CompileAirframeDesiredStreamV1", "stage": 8, "uses": ["ResetAirframeDesiredStreamV1", "ValidateAirframeDesiredStreamInputsV1", "BuildAirframeDesiredVelocitySamplesV1", "BuildAirframeDesiredAccelerationSamplesV1", "BuildAirframeDesiredJerkSamplesV1", "SolveAirframeDesiredPoseSamplesV1", "CommitAirframeDesiredStreamToPrebakeV1"] }
+  ],
+  "contracts": {
+    "sourceBoundary": "Positions, distinct authored body/gimbal quaternions, and all ten accepted profile channels are immutable arrays sampled on the exact fixed-step schedule.",
+    "schedule": "Cardinality equals ceil(total / step) + 1, with zero, integer fixed-step samples, and one exact terminal sample; the established 2..65536 and time/step bounds apply before allocation.",
+    "kinematics": "Two samples share one secant derivative; three or more use the local quadratic Lagrange derivative forward at the first sample, centered in the interior, and backward at the last. The identical operator derives velocity, acceleration, then jerk on the real partial-terminal schedule.",
+    "lookAhead": "Velocity at sample time plus the accepted profile offset is linearly interpolated from the immutable velocity candidate track and clamped to the route endpoints.",
+    "authorship": "Body and gimbal source arrays remain distinct and are never aliased merely because an older cinematic adapter exposes one camera orientation.",
+    "atomicity": "Reset clears desired candidates, downstream prebake inputs, prior compiled motion, and both validity flags. Only the commit stage copies complete desired body/gimbal/rate arrays into prebake inputs, invokes CompileAirframePrebakeV1, and publishes stream validity last after downstream validity is true.",
+    "failure": "Invalid shape, schedule, vector, quaternion, profile, derivative, helper result, physical gate, or downstream prebake compile leaves both stream and prebake compilation invalid with no partial authoritative motion.",
+    "determinism": "Compilation depends only on immutable source samples and absolute schedule values; no game-frame delta or prior invocation state is consumed."
+  }
+}

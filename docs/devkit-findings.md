@@ -4764,3 +4764,25 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Scope remains narrow: this accepts the fixed-step airframe/gimbal backend only.
   Desired-pose stream orchestration, lens/focus/effects, debug shortcut dogfood,
   polished UI, cook, Workshop, and the complete mod remain future work.
+
+### Airframe desired-stream transaction frozen offline (2026-08-13)
+
+- The next boundary is intentionally not a monolithic route/profile/body/gimbal
+  graph. `airframe_desired_stream_reference.py` accepts immutable position,
+  distinct authored body/gimbal quaternion, and complete profile samples on the
+  exact accepted fixed schedule. This avoids silently treating one legacy
+  camera-orientation result as both waypoint fields.
+- A single deterministic local-quadratic derivative operator handles the real
+  partial-terminal schedule. Two samples use their shared secant; larger tracks
+  use forward/interior/backward three-point stencils. Reapplying the operator
+  yields velocity, acceleration, and jerk. Look-ahead velocity is sampled from
+  the completed velocity array by clamped absolute-time linear interpolation.
+- Eight reference tests include two-sample and partial-terminal shots, exact
+  quadratic derivatives, invalid structure/data, solver and physical failures,
+  downstream angular-rate propagation, and 80 seeded forward/reverse cases.
+  Five schema tests freeze 28 variables and nine functions, require reset to
+  invalidate prior prebake state, reserve commit as the only downstream copy,
+  and forbid variable collisions with all four accepted component schemas.
+- `Test-Scaffold.ps1` owns both suites and remains green. No Blueprint body or
+  live runtime claim is made for this new boundary yet; graph implementation
+  begins with reset and validation before any kinematic loop is installed.

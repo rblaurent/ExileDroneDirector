@@ -858,6 +858,26 @@ the finite-turn division receives a selected nonzero denominator even when the
 published straight/stationary radius is the zero sentinel. Quaternion call forms
 remain unsplit at graph boundaries to avoid unstable split-struct serialization.
 
+The upstream desired-stream compiler consumes immutable position, authored body,
+authored gimbal, and smoothed-profile samples on the exact fixed schedule. It
+does not alias body and gimbal authorship: those are distinct waypoint fields
+even though the older cinematic-pose adapter currently exposes one camera
+orientation. Two-position shots use one shared secant velocity and zero higher
+derivatives. Three or more samples apply the same local quadratic Lagrange
+derivative forward at the first sample, centered in the interior, and backward
+at the last; applying that operator successively yields velocity, acceleration,
+and jerk on a schedule whose terminal interval may be shorter than the nominal
+step. Profile look-ahead samples this immutable velocity track by absolute-time
+linear interpolation with endpoint clamping.
+
+This sampled-kinematics boundary is deterministic and deliberately modular. A
+document/route adapter owns producing the immutable source samples; it may not
+write desired or compiled motion incrementally. Only after every desired-pose
+solve succeeds may the complete body/gimbal/rate arrays cross into the accepted
+prebake compiler. Reset invalidates prior prebake publication first, so any
+source, derivative, physical-gate, or downstream failure leaves no older motion
+appearing valid for a newly requested compilation.
+
 ### 12.6 Fixed-step angular-rate prebake
 
 Stateful rotational continuity is compiled, never integrated from game-frame

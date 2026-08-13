@@ -352,6 +352,38 @@ This section is the authoritative handoff. Detailed evidence remains in
   focus, effects, shortcut dogfood, polished UI, cook, Workshop, and whole-mod
   completion remain unclaimed.
 
+### Airframe desired-stream orchestration contract checkpoint
+
+- `airframe_desired_stream_reference.py` freezes the modular transaction above
+  the accepted desired-pose solver and fixed-step prebake. It consumes immutable
+  position, distinct authored body/gimbal quaternion, and ten-channel smoothed
+  profile arrays on the exact fixed schedule. It never aliases body and gimbal
+  authorship to accommodate the older single-orientation cinematic adapter.
+- Kinematics use one explicit rule on the real schedule, including its partial
+  terminal interval: two samples share one secant; three or more use a local
+  quadratic Lagrange derivative forward, centered, or backward by position.
+  The same operator derives velocity, acceleration, then jerk. Look-ahead
+  velocity is absolute-time linear interpolation over the immutable velocity
+  candidates, clamped at both shot endpoints.
+- Every desired sample invokes the accepted stateless solver. Only after every
+  solver and physical gate succeeds are the complete desired body/gimbal/rate
+  arrays passed to the accepted prebake compiler. The planned reset invalidates
+  prior prebake publication first; the stream validity flag publishes last only
+  after downstream compile validity is true.
+- Eight executable reference tests cover two-sample motion, exact quadratic
+  derivatives, partial-terminal timing, look-ahead interpolation and clamping,
+  all source cardinalities, malformed and non-finite data, quaternion/profile/
+  physical rejection, angular-rate propagation, and 80 seeded forward/reverse
+  compilations. Five schema tests freeze 28 Blueprint-safe variables, nine
+  ordered functions, dependency ownership, distinct authorship, collision
+  freedom, and fail-closed atomicity. The complete scaffold passes.
+- This checkpoint is offline contract evidence only. Next are deterministic
+  reset and validation graph sources, followed by the three kinematic stages,
+  look-ahead helper, desired-pose loop, commit/orchestration, and then the full
+  live compile/save/post-compile/cold/runtime acceptance matrix. Upstream
+  document-to-source sampling, lens/focus/effects, debug dogfood, polished UI,
+  cook, Workshop, and whole-mod completion remain unclaimed.
+
 ### Position-route absolute-time evaluator checkpoint
 
 - `EvaluateCompiledPositionRouteV1` is compiled, saved, and warm-runtime

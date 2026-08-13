@@ -136,6 +136,10 @@ $requiredFiles = @(
     'tools\trajectory\test_airframe_gimbal_prebake_reference.py',
     'tools\trajectory\airframe_gimbal_prebake_blueprint_schema.json',
     'tools\trajectory\test_airframe_gimbal_prebake_blueprint_schema.py',
+    'tools\trajectory\airframe_desired_stream_reference.py',
+    'tools\trajectory\test_airframe_desired_stream_reference.py',
+    'tools\trajectory\airframe_desired_stream_blueprint_schema.json',
+    'tools\trajectory\test_airframe_desired_stream_blueprint_schema.py',
     'tools\blueprint\Build-AirframePrebakeResetGraph.py',
     'tools\blueprint\Test-AirframePrebakeResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1.eddgraph',
@@ -947,6 +951,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_airframe_gimbal_prebake_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Airframe/gimbal fixed-step prebake Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_airframe_desired_stream_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Airframe desired-stream reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_airframe_desired_stream_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Airframe desired-stream Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 $airframePrebakeNonce = [guid]::NewGuid().ToString('N')
 $airframePrebakeRoot = Join-Path $scratchRoot "edd-airframe-prebake-$airframePrebakeNonce"

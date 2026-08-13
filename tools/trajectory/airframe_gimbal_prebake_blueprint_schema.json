@@ -65,7 +65,7 @@
     "schedule": "Sample count is ceil(TotalSeconds / FixedStepSeconds) + 1; sample zero is time zero, interior samples are integer fixed steps, and the last sample is exact TotalSeconds.",
     "rateLimit": "Each interval independently limits body and gimbal shortest-arc rotation using min(rate[i-1], rate[i]) and its real interval duration.",
     "shotBoundary": "The first desired body and gimbal samples seed the shot exactly; cuts begin a new compilation and intentionally reset continuity.",
-    "sign": "Quaternion representatives are canonicalized deterministically, including exact 180-degree ties, then kept sign-continuous.",
+    "sign": "Authored quaternion targets are canonicalized deterministically, including exact 180-degree ties; each limited result preserves the authoritative previous compiled sample's hemisphere.",
     "helper": "ApplyAirframeAngularRateLimitV1 resets its four result fields before every call, consumes only explicit scratch inputs, and publishes result validity last.",
     "atomicity": "Only CommitCompiledAirframePrebakeV1 may replace compiled arrays and scalars; compile validity is published last.",
     "failure": "Any failure clears all compiled and evaluation results and leaves both validity flags false.",

@@ -255,7 +255,7 @@ This section is the authoritative handoff. Detailed evidence remains in
   measured angular rates, and rate-limited diagnostics. Only the commit stage
   may replace compiled state, and validity publishes last. Absolute-time
   evaluation uses immutable adjacent samples and never game-frame delta.
-- Eighteen reference tests cover integral and terminal-partial schedules,
+- Nineteen reference tests cover integral and terminal-partial schedules,
   invalid scalars/cardinalities/quaternions/rates, exact and exceeded limits,
   independent body/gimbal behavior, stricter endpoint limits, antipodal and
   180-degree ties, convergence, distinct rate character, 100 seeded streams,
@@ -281,15 +281,27 @@ This section is the authoritative handoff. Detailed evidence remains in
   validation only owns stage validity and never touches compiled/evaluation
   publication. Sample construction is next; no live prebake claim is made.
 - `ApplyAirframeAngularRateLimitV1` is frozen offline as deterministic
-  133/132-node full/paste graphs. It validates four explicit scratch inputs,
-  canonicalizes quaternion signs including exact half-turn ties, aligns the
-  desired sample to the previous sample, applies shortest-arc slerp against a
+  109/108-node full/paste graphs. It validates four explicit scratch inputs,
+  preserves the authoritative previous sample's hemisphere, canonicalizes the
+  authored desired sign including exact half-turn ties, applies shortest-arc slerp against a
   real interval budget, and resets four outputs before publishing validity
   last. Both graph forms execute against the independent reference contract for
   205 valid cases, reject 20 poisoned invalid cases without leaking stale
-  results, preserve every input, and produce byte-identical antipodal half-turn
+  results, preserve every input, and produce byte-identical desired-antipode half-turn
   results. `BuildAirframePrebakeSamplesV1` is next; no live prebake claim is
   made yet.
+- `BuildAirframePrebakeSamplesV1` is frozen offline as deterministic 81/80-node
+  full/paste graphs. It clears all six candidate channels, requires accepted
+  upstream validation, canonicalizes and seeds body/gimbal sample zero exactly,
+  then processes indices `1..N-1` with a bounded breakable loop. Every interval
+  uses its real duration, including the partial terminal interval, and the
+  stricter adjacent rate. Body and gimbal invoke the atomic limiter
+  independently and publish lockstep quaternion/rate/limited channels; helper
+  failure clears stage validity and breaks immediately. Both forms match the
+  independent compiler for 103 valid streams, including long random schedules,
+  and prove antipodal-stream byte equivalence, a false-stage no-op, input
+  immutability, and injected seed/loop helper failures. Atomic commit is next;
+  no live prebake claim is made yet.
 
 ### Position-route absolute-time evaluator checkpoint
 

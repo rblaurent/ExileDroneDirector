@@ -151,6 +151,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeAngularRateLimitContracts.py',
     'tools\blueprint\snippets\apply-airframe-angular-rate-limit-v1.eddgraph',
     'tools\blueprint\snippets\apply-airframe-angular-rate-limit-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframePrebakeSamplesGraph.py',
+    'tools\blueprint\Test-AirframePrebakeSamplesContracts.py',
+    'tools\blueprint\snippets\build-airframe-prebake-samples-v1.eddgraph',
+    'tools\blueprint\snippets\build-airframe-prebake-samples-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeGimbalResetGraph.py',
     'tools\blueprint\Test-AirframeGimbalResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-gimbal-v1.eddgraph',
@@ -1024,6 +1028,30 @@ foreach ($graphCase in @(@($airframeRateLimit, $false), @($airframeRateLimitPast
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeAngularRateLimitContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Airframe angular-rate helper contracts failed with exit code $LASTEXITCODE." }
+}
+$airframePrebakeSamples = Join-Path $airframePrebakeRoot 'build-airframe-prebake-samples-v1.eddgraph'
+$airframePrebakeSamplesPaste = Join-Path $airframePrebakeRoot 'build-airframe-prebake-samples-v1-paste.eddgraph'
+$airframePrebakeSamplesRepeat = Join-Path $airframePrebakeRoot 'build-airframe-prebake-samples-v1-repeat.eddgraph'
+$airframePrebakeSamplesRepeatPaste = Join-Path $airframePrebakeRoot 'build-airframe-prebake-samples-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframePrebakeSamplesGraph.py') `
+    --project-root $ProjectRoot --output $airframePrebakeSamples --paste-output $airframePrebakeSamplesPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe prebake sample-builder generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframePrebakeSamplesGraph.py') `
+    --project-root $ProjectRoot --output $airframePrebakeSamplesRepeat --paste-output $airframePrebakeSamplesRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe prebake sample-builder generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($airframePrebakeSamples, $airframePrebakeSamplesRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\build-airframe-prebake-samples-v1.eddgraph')),
+    @($airframePrebakeSamplesPaste, $airframePrebakeSamplesRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\build-airframe-prebake-samples-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe prebake sample-builder generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($airframePrebakeSamples, $false), @($airframePrebakeSamplesPaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframePrebakeSamplesContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe prebake sample-builder contracts failed with exit code $LASTEXITCODE." }
 }
 
 $airframeGimbalNonce = [guid]::NewGuid().ToString('N')

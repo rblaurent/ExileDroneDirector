@@ -4554,7 +4554,7 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   commit, orchestration, and absolute-time evaluation. The evaluator
   rejects malformed compiled cardinality, schedule, quaternion, boolean, or
   measured-rate state before returning a pose.
-- Eighteen oracle tests and six schema tests pass, including 100 seeded streams
+- Nineteen oracle tests and six schema tests pass, including 100 seeded streams
   in forward/reverse invocation order, terminal partial intervals, exact rate
   boundaries, changing endpoint limits, antipodal and half-turn input,
   independent body/gimbal clamping, corrupt publications, and arbitrary scrub
@@ -4604,12 +4604,13 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   false, false. Previous and desired quaternions must be finite with magnitude
   in the inclusive `1 +/- 1e-6` window; delta must be finite in `(0, 0.5]`; max
   rate must be finite in `(0, 720]`. Rejection terminates after reset.
-- Accepted inputs are normalized and canonicalized by scalar-first then vector
-  lexicographic sign, the desired representative is aligned to the previous
+- Accepted inputs preserve the authoritative previous sample's normalized
+  hemisphere. Authored desired input is canonicalized by scalar-first then vector
+  lexicographic sign and aligned to the previous
   representative, and one native `Quat_AngularDistance` plus one `Quat_Slerp`
   applies `clamp(delta * maxRate / angle, 0, 1)`. Selected nonzero denominators
   make pure-node evaluation safe even if an invalid call is inspected.
-- The deterministic graph has 133 full nodes and 132 paste nodes. An executable
+- The deterministic graph has 109 full nodes and 108 paste nodes. An executable
   graph interpreter proves both forms against the independent Python oracle for
   five directed and 200 seeded valid cases, 20 poisoned invalid cases, input
   immutability, exact-boundary limited flags, and three byte-identical
@@ -4619,3 +4620,34 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - This remains an offline primitive. The next ordered slice is
   `BuildAirframePrebakeSamplesV1`; there is still no live prebake, UI, cook,
   Workshop, or whole-mod readiness claim.
+
+### Fixed-step airframe/gimbal sample builder frozen offline (2026-08-13)
+
+- `BuildAirframePrebakeSamplesV1` clears its six private candidate arrays and
+  stage index before inspecting upstream validation. A false stage exits with
+  empty candidates. Sample zero is deliberately handled before the loop:
+  identity plus a `0.5 * 720 = 360` degree budget canonicalizes any authored
+  unit quaternion without limiting it, so the first desired body/gimbal pose is
+  seeded exactly and deterministically.
+- One `ForLoopWithBreak` starts at index one. The prior candidate sample is
+  always available, avoiding speculative `array[-1]` reads. Interior intervals
+  use fixed step; the terminal interval uses
+  `total - (index - 1) * step`. The rate passed to each body and gimbal helper
+  call is `min(rate[index-1], rate[index])`.
+- Each successful helper invocation appends quaternion, analytic angular rate,
+  and limited flag in a single execution chain. Any helper rejection marks the
+  stage invalid and breaks. Partial candidates are never authoritative and the
+  later commit boundary must reject them whenever stage validity is false.
+- Deterministic full/paste graphs contain 81/80 nodes. Their executable graph
+  interpreters match the independent full-stream compiler for three directed
+  and 100 seeded schedules, including long and partial-terminal schedules;
+  also proven are whole-stream antipodal byte equivalence, input immutability,
+  false-stage empty output, and injected seed/loop helper failures. Repeated
+  generation, reciprocal links, exact counts, and the full repository scaffold
+  enforce the checkpoint.
+- The composition tests exposed and corrected a prior-isolated-contract flaw:
+  the limiter now preserves the authoritative previous compiled hemisphere and
+  canonicalizes only authored targets. This maintains serialized continuity
+  across repeated calls while retaining deterministic desired `q`/`-q`
+  equivalence. Atomic commit is next; no live prebake, UI, cook, Workshop, or
+  whole-mod readiness claim is made.

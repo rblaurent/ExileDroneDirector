@@ -86,7 +86,7 @@ def _canonical_sign(value: Quaternion) -> Quaternion:
     return _negate(normalized) if first < 0.0 else normalized
 
 
-def _strict_unit(value: Quaternion, label: str) -> Quaternion:
+def _strict_unit(value: Quaternion, label: str, canonical=True) -> Quaternion:
     if len(value) != 4:
         raise AirframeGimbalPrebakeError(f"{label} must have four components")
     if any(isinstance(component, bool) for component in value):
@@ -97,7 +97,8 @@ def _strict_unit(value: Quaternion, label: str) -> Quaternion:
     magnitude = sqrt(sum(component * component for component in components))
     if abs(magnitude - 1.0) > UNIT_TOLERANCE:
         raise AirframeGimbalPrebakeError(f"{label} must be normalized")
-    return _canonical_sign(components)  # type: ignore[arg-type]
+    normalized = normalize(components)  # type: ignore[arg-type]
+    return _canonical_sign(normalized) if canonical else normalized
 
 
 def fixed_sample_times(total_seconds: float, fixed_step_seconds: float) -> tuple[float, ...]:
@@ -141,11 +142,13 @@ def _limit_one(
     allowed = maximum_rate * delta_seconds
     limited = angle > allowed
     alpha = allowed / angle if limited and angle > EPSILON else 1.0
-    result = _canonical_sign(slerp(previous, target, alpha))
-    # Keep the serialized sequence sign-continuous after global canonicalization.
+    result = normalize(slerp(previous, target, alpha))
+    # Preserve the authoritative prior sample's serialized hemisphere.
     if _dot(previous, result) < 0.0:
         result = _negate(result)
-    applied_rate = _angle_degrees(previous, result) / delta_seconds
+    # Publish the analytic rate. Re-measuring a near-identity quaternion with
+    # acos is numerically unstable and can report a tiny false overshoot.
+    applied_rate = maximum_rate if limited else angle / delta_seconds
     return result, applied_rate, limited
 
 
@@ -157,7 +160,7 @@ def apply_airframe_angular_rate_limit(
 ) -> AirframeAngularRateLimitResult:
     """Validate and apply the exact atomic contract used by the Blueprint helper."""
 
-    prior = _strict_unit(previous, "previous quaternion")
+    prior = _strict_unit(previous, "previous quaternion", canonical=False)
     target = _strict_unit(desired, "desired quaternion")
     delta = _number(delta_seconds, "delta seconds")
     maximum_rate = _number(maximum_rate_degrees_per_second, "maximum angular rate")
@@ -258,9 +261,9 @@ def _track_valid(track: CompiledAirframeGimbalMotion) -> bool:
             delta = times[index] - times[index - 1]
             actual_body_rate = _angle_degrees(track.body_rotations[index - 1], track.body_rotations[index]) / delta
             actual_gimbal_rate = _angle_degrees(track.gimbal_rotations[index - 1], track.gimbal_rotations[index]) / delta
-            if abs(actual_body_rate - track.body_angular_rates_degrees_per_second[index]) > 1.0e-7:
+            if abs(actual_body_rate - track.body_angular_rates_degrees_per_second[index]) > 1.0e-5:
                 return False
-            if abs(actual_gimbal_rate - track.gimbal_angular_rates_degrees_per_second[index]) > 1.0e-7:
+            if abs(actual_gimbal_rate - track.gimbal_angular_rates_degrees_per_second[index]) > 1.0e-5:
                 return False
     except (AirframeGimbalPrebakeError, TypeError, ValueError):
         return False

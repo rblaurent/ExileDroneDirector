@@ -112,6 +112,16 @@ def main():
             bp.connect(selected[component], "ReturnValue", setter, component)
         return setter, scratch
 
+    def preserve_normalized(normalized, normalized_pin, scratch_name, x, y):
+        broken = compiler.call("qbreak", x, y)
+        bp.connect(normalized, normalized_pin, broken, "InQuat")
+        scratch = compiler.qget(scratch_name, x + 256, y)
+        setter = compiler.call("qsetcomponents", x + 512, y)
+        bp.connect(scratch, scratch_name, setter, "Q")
+        for component in ("X", "Y", "Z", "W"):
+            bp.connect(broken, component, setter, component)
+        return setter, scratch
+
     reset_quat = compiler.qset("AirframePrebakeScratchResultQuatV1", 256, 4000, "0, 0, 0, 1")
     reset_rate = builder.set("AirframePrebakeScratchResultAngularRateDegreesPerSecondV1", "real", 512, 4000, "0.0")
     reset_limited = builder.set("AirframePrebakeScratchResultRateLimitedV1", "bool", 768, 4000, "false")
@@ -140,7 +150,9 @@ def main():
     desired_normal = compiler.call("qnormalize", 3072, 640)
     bp.connect(previous, "AirframePrebakeScratchPreviousQuatV1", previous_normal, "Q")
     bp.connect(desired, "AirframePrebakeScratchDesiredQuatV1", desired_normal, "Q")
-    previous_set, canonical_previous = canonicalize(previous_normal, "ReturnValue", "AirframePrebakeScratchCanonicalPreviousQuatV1", 3328, 0, "previous")
+    previous_set, canonical_previous = preserve_normalized(
+        previous_normal, "ReturnValue", "AirframePrebakeScratchCanonicalPreviousQuatV1", 3328, 0
+    )
     desired_set, canonical_desired = canonicalize(desired_normal, "ReturnValue", "AirframePrebakeScratchCanonicalDesiredQuatV1", 3328, 960, "desired")
     bp.connect(branch, "then", previous_set, "execute")
     bp.connect(previous_set, "then", desired_set, "execute")

@@ -105,13 +105,18 @@ class AirframeGimbalPrebakeContracts(unittest.TestCase):
                 with self.assertRaises(AirframeGimbalPrebakeError):
                     apply_airframe_angular_rate_limit(previous, desired, delta, rate)
 
-    def test_atomic_rate_limit_antipodes_and_half_turn_ties_are_byte_identical(self):
+    def test_atomic_rate_limit_target_antipodes_and_half_turn_ties_are_byte_identical(self):
         for axis in ((1, 0, 0), (0, 1, 0), (0, 0, 1)):
             target = axis_angle(axis, 180.0)
             inverse = tuple(-value for value in target)
             left = apply_airframe_angular_rate_limit(IDENTITY, target, 0.25, 90.0)
-            right = apply_airframe_angular_rate_limit(tuple(-v for v in IDENTITY), inverse, 0.25, 90.0)
+            right = apply_airframe_angular_rate_limit(IDENTITY, inverse, 0.25, 90.0)
             self.assertEqual(left, right)
+
+    def test_atomic_rate_limit_preserves_authoritative_previous_hemisphere(self):
+        previous = tuple(-value for value in axis_angle((1, 0, 0), 120.0))
+        result = apply_airframe_angular_rate_limit(previous, axis_angle((0, 1, 0), 80.0), 0.1, 30.0)
+        self.assertGreaterEqual(sum(a * b for a, b in zip(previous, result.rotation)), 0.0)
 
     def test_below_limit_tracks_desired_samples_exactly(self):
         bodies = [axis_angle((0, 0, 1), angle) for angle in (0, 10, 20, 30, 40)]

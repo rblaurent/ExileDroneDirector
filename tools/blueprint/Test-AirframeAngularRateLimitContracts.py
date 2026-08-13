@@ -231,14 +231,14 @@ def main():
         "edd_airframe_rate_limit_oracle",
     )
     nodes = contracts.parse_graph(args.graph)
-    contracts.require(len(nodes) == (132 if args.paste else 133), f"helper node count {len(nodes)}")
+    contracts.require(len(nodes) == (108 if args.paste else 109), f"helper node count {len(nodes)}")
     entries = [node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class]
     contracts.require(len(entries) == (0 if args.paste else 1), "function entry count")
 
     text = "\n".join(node.text for node in nodes.values())
     contracts.require("K2Node_Knot" not in text and "SubPins=(" not in text and "ParentPin=" not in text, "unsafe graph form")
     contracts.require("K2Node_MakeStruct" not in text, "unsafe quaternion construction")
-    contracts.require(text.count('MemberName="Quat_SetComponents"') == 3, "three explicit quaternion assembly writes")
+    contracts.require(text.count('MemberName="Quat_SetComponents"') == 3, "three explicit quaternion scratch writes")
     contracts.require(text.count('MemberName="Quat_AngularDistance"') == 1, "one angular-distance measurement")
     contracts.require(text.count('MemberName="Quat_Slerp"') == 1, "one shortest-arc interpolation")
 
@@ -311,12 +311,20 @@ def main():
         left = Interpreter(nodes, poisoned_state(IDENTITY, target, 0.25, 90.0), orientation).run()
         right = Interpreter(
             nodes,
-            poisoned_state(tuple(-value for value in IDENTITY), tuple(-value for value in target), 0.25, 90.0),
+            poisoned_state(IDENTITY, tuple(-value for value in target), 0.25, 90.0),
             orientation,
         ).run()
         contracts.require(left[RESULT_QUAT] == right[RESULT_QUAT], f"{axis} half-turn sign instability")
         contracts.require(left[RESULT_RATE] == right[RESULT_RATE], f"{axis} half-turn rate instability")
         contracts.require(left[RESULT_LIMITED] is right[RESULT_LIMITED], f"{axis} half-turn flag instability")
+
+    previous = tuple(-value for value in axis_angle((1.0, 2.0, 3.0), 120.0))
+    continuity = Interpreter(
+        nodes,
+        poisoned_state(previous, axis_angle((-2.0, 1.0, 3.0), 80.0), 0.1, 30.0),
+        orientation,
+    ).run()
+    contracts.require(sum(a * b for a, b in zip(previous, continuity[RESULT_QUAT])) >= 0.0, "previous hemisphere lost")
 
     invalid_cases = []
     for bad in ((0.0, 0.0, 0.0, 0.0), (0.0, 0.0, 0.0, 1.0000011), (math.nan, 0.0, 0.0, 1.0), (math.inf, 0.0, 0.0, 1.0)):

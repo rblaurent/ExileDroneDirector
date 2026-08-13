@@ -65,6 +65,27 @@ This section is the authoritative handoff. Detailed evidence remains in
   dogfooding. Polished UI, cook, Workshop, and whole-mod completion remain
   explicitly unclaimed.
 
+### Flight-profile contract checkpoint
+
+- The first bounded flight-profile slice is frozen offline. It compiles one
+  document default plus one optional override per segment into immutable profile
+  IDs and ten numeric parameter channels; it does not yet claim airframe/gimbal
+  solving or live Blueprint execution.
+- Exact supported IDs are `cinematic_drone`, `hybrid`, `fpv_cinewhoop`,
+  `fpv_freestyle`, and `fpv_long_range`. An empty override inherits the default;
+  every nonempty override is still validated even if another segment is being
+  evaluated. IDs are canonical, case-sensitive, and trimmed.
+- Eight executable oracle tests pass distinct bounded presets, input
+  independence, deterministic 511-segment compilation, shuffled direct lookup,
+  invalid shapes/identifiers/types/indices, every corrupt parameter channel,
+  and 200 seeded mixed tracks. Five Blueprint-schema tests freeze 34 explicit
+  variables, seven ordered function boundaries, exact candidate/result channel
+  separation, atomic publication, and fail-closed lookup.
+- Next is deterministic Blueprint graph generation and exact source/paste
+  contracts for reset, validation, preset resolution, candidate build, commit,
+  compile, and evaluation, followed by live compile/save and warm/fresh runtime
+  evidence. This offline checkpoint is not live feature acceptance.
+
 ### Position-route absolute-time evaluator checkpoint
 
 - `EvaluateCompiledPositionRouteV1` is compiled, saved, and warm-runtime

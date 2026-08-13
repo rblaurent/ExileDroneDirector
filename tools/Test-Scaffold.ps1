@@ -120,6 +120,10 @@ $requiredFiles = @(
     'tools\trajectory\test_cinematic_pose_reference.py',
     'tools\trajectory\cinematic_pose_blueprint_schema.json',
     'tools\trajectory\test_cinematic_pose_blueprint_schema.py',
+    'tools\trajectory\flight_profile_reference.py',
+    'tools\trajectory\test_flight_profile_reference.py',
+    'tools\trajectory\flight_profile_blueprint_schema.json',
+    'tools\trajectory\test_flight_profile_blueprint_schema.py',
     'tools\unreal\Configure-CinematicPoseAssembly.py',
     'tools\unreal\Validate-CinematicPoseRuntime.py',
     'tools\blueprint\Build-CinematicPoseResetGraph.py',
@@ -777,6 +781,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_cinematic_pose_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Cinematic pose Blueprint composition-schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_flight_profile_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Flight-profile reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_flight_profile_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Flight-profile Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 
 $cinematicPoseNonce = [guid]::NewGuid().ToString('N')

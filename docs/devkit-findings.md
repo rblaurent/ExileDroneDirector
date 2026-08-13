@@ -4001,3 +4001,35 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Next ordered backend work is flight-profile behavior followed by camera lens,
   focus, and effect tracks, then shortcut/debug dogfood. Polished UI, cooking,
   Workshop publication, and whole-mod completion remain explicitly unclaimed.
+
+## Flight-profile compiler and resolver frozen offline (2026-08-13)
+
+- The bounded first flight-profile slice owns deterministic profile identity and
+  parameters only. It intentionally does not derive airframe/gimbal transforms
+  or procedural wind. This prevents those later solvers from branching directly
+  on loosely authored strings or embedding preset constants in multiple graphs.
+- Supported IDs and order are exactly `cinematic_drone`, `hybrid`,
+  `fpv_cinewhoop`, `fpv_freestyle`, and `fpv_long_range`. Each immutable preset
+  defines path-follow and horizon-stabilization weights, look-ahead, bank gain
+  and clamp, camera uptilt, angular-rate/acceleration/jerk limits, and minimum
+  turn radius. All fields have explicit finite domain bounds.
+- Compilation accepts one canonical default and exactly one optional override
+  string per segment. Empty means inherit; nonempty values must be exact,
+  trimmed, and known. Every override is validated, including values outside the
+  segment later selected for evaluation. Segment cardinality is bounded to
+  1..511 and compiled lookup accepts only a bounded integer index with no
+  fallback behavior.
+- Eight oracle tests pass all planned presets, authored-input independence,
+  deterministic ceiling compilation, shuffled history-independent lookup, 200
+  seeded mixed publications, invalid identifier/shape/type/index families, and
+  corruption of cardinality, identity, every non-finite parameter, and every
+  finite-but-noncanonical parameter. Five schema tests freeze 34 explicit
+  Blueprint fields, ten one-to-one candidate/compiled/result parameter channels,
+  seven ordered functions, and atomic fail-closed contracts. The full repository
+  scaffold remains green after registration.
+- A generated-name abstraction was rejected during review before Unreal work:
+  pluralization was ambiguous and the configurator needs an explicit field list.
+  The accepted schema enumerates every concrete Blueprint variable and maps each
+  channel explicitly. Next is generated graph bodies plus exact contracts, then
+  live compile/save and executable warm/fresh proof; no live flight-profile claim
+  is made by this checkpoint.

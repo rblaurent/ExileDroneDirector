@@ -551,6 +551,20 @@ This section is the authoritative handoff. Detailed evidence remains in
   `0B8CF6BC4686090AE24B21ECF9ECDC6D388BA6E306B23ABE82546FA98C489309`;
   the complete scaffold passes. This remains offline only. Next is distinct
   gimbal compilation/sampling over the already published schedule.
+- `BuildAirframeSourceGimbalSamplesV1` is now frozen offline as deterministic
+  80/79-node full/paste graphs. It clears only the gimbal candidate, preserves
+  the completed twelve-channel position/body/profile sample set byte-for-byte,
+  recompiles the shared orientation cache from distinct gimbal authorship, and
+  re-proves exact duration/start/total alignment before sampling the same staged
+  absolute-time schedule. Position and gimbal evaluators must agree on validity,
+  segment, local alpha, and completion before each quaternion append.
+- Its exported-link interpreter passes the same 44 exact, partial-terminal,
+  all-profile, and seeded schedules in both orders, poisoned repeats, protected
+  upstream-state checks, compile/timeline corruption, and injected evaluator
+  disagreement. Full/paste SHA-256 is
+  `998DD7A521A4BF7BBD6E9D293F2445CA486333A4BBFDEA7C8429271B3DCC9ACE` /
+  `1EB325465046C1BC793DB349BD5DD00A0862B4F6651D663D71ABD5D2CEF53EC3`.
+  This remains offline only. Next is the thirteen-array desired-stream commit.
 
 ### Position-route absolute-time evaluator checkpoint
 

@@ -5016,3 +5016,16 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `68634353753F39E26DA6570C3B4D1CB443E8EC1A73130D82077771318BEDB3B3` /
   `0B8CF6BC4686090AE24B21ECF9ECDC6D388BA6E306B23ABE82546FA98C489309`.
   The complete scaffold passes; no live Enhanced acceptance is claimed.
+- `BuildAirframeSourceGimbalSamplesV1` freezes sequential reuse of the shared
+  orientation cache as deterministic 80/79-node full/paste graphs. It owns only
+  the gimbal candidate clear/append, copies distinct gimbal waypoint quaternions
+  plus the common durations into the accepted orientation compiler, validates
+  every compiled duration and start against the position publication, and then
+  reevaluates position and gimbal on the exact staged schedule before appending.
+- The exported-link interpreter executes 44 exact/partial/all-profile/seeded
+  cases forward and reverse, poisoned repeats, complete byte-for-byte protection
+  of the prior twelve candidate arrays, and bounded-prefix compile, timeline,
+  position, orientation, and agreement failures. Full/paste SHA-256 is
+  `998DD7A521A4BF7BBD6E9D293F2445CA486333A4BBFDEA7C8429271B3DCC9ACE` /
+  `1EB325465046C1BC793DB349BD5DD00A0862B4F6651D663D71ABD5D2CEF53EC3`.
+  No live Enhanced claim exists yet.

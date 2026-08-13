@@ -160,6 +160,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeSourcePositionBodyProfileSamplesContracts.py',
     'tools\blueprint\snippets\build-airframe-source-position-body-profile-samples-v1.eddgraph',
     'tools\blueprint\snippets\build-airframe-source-position-body-profile-samples-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframeSourceGimbalSamplesGraph.py',
+    'tools\blueprint\Test-AirframeSourceGimbalSamplesContracts.py',
+    'tools\blueprint\snippets\build-airframe-source-gimbal-samples-v1.eddgraph',
+    'tools\blueprint\snippets\build-airframe-source-gimbal-samples-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeDesiredStreamResetGraph.py',
     'tools\blueprint\Test-AirframeDesiredStreamResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-desired-stream-v1.eddgraph',
@@ -1147,6 +1151,34 @@ if ($LASTEXITCODE -ne 0) { throw "Airframe source body/profile sample full contr
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourcePositionBodyProfileSamplesContracts.py') `
     --project-root $ProjectRoot --graph $sourceBodySamplesPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Airframe source body/profile sample paste contracts failed with exit code $LASTEXITCODE." }
+$sourceGimbalSamples = Join-Path $airframeSourceRoot 'build-airframe-source-gimbal-samples-v1.eddgraph'
+$sourceGimbalSamplesPaste = Join-Path $airframeSourceRoot 'build-airframe-source-gimbal-samples-v1-paste.eddgraph'
+$sourceGimbalSamplesRepeat = Join-Path $airframeSourceRoot 'build-airframe-source-gimbal-samples-v1-repeat.eddgraph'
+$sourceGimbalSamplesRepeatPaste = Join-Path $airframeSourceRoot 'build-airframe-source-gimbal-samples-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourceGimbalSamplesGraph.py') `
+    --project-root $ProjectRoot --output $sourceGimbalSamples --paste-output $sourceGimbalSamplesPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source gimbal sample generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourceGimbalSamplesGraph.py') `
+    --project-root $ProjectRoot --output $sourceGimbalSamplesRepeat --paste-output $sourceGimbalSamplesRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe source gimbal sample generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($sourceGimbalSamples, $sourceGimbalSamplesRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\build-airframe-source-gimbal-samples-v1.eddgraph')),
+    @($sourceGimbalSamplesPaste, $sourceGimbalSamplesRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\build-airframe-source-gimbal-samples-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+        throw "Airframe source gimbal sample generation is not byte deterministic."
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $comparison[0]
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourceGimbalSamplesContracts.py') `
+    --project-root $ProjectRoot --graph $sourceGimbalSamples
+if ($LASTEXITCODE -ne 0) { throw "Airframe source gimbal sample full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourceGimbalSamplesContracts.py') `
+    --project-root $ProjectRoot --graph $sourceGimbalSamplesPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source gimbal sample paste contracts failed with exit code $LASTEXITCODE." }
 $airframeDesiredNonce = [guid]::NewGuid().ToString('N')
 $airframeDesiredRoot = Join-Path $scratchRoot "edd-airframe-desired-$airframeDesiredNonce"
 New-Item -ItemType Directory -Path $airframeDesiredRoot -Force | Out-Null

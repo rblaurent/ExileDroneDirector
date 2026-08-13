@@ -95,9 +95,15 @@ This section is the authoritative handoff. Detailed evidence remains in
   arrays, stages inherited/default IDs explicitly, calls the resolver per
   segment, rejects sticky-false on any failure, and appends the ID plus all ten
   channels in one ordered chain.
+- Atomic commit and compilation orchestration are frozen offline. The 115-node
+  commit invalidates prior publication first, proves all 11 candidate array
+  cardinalities, re-resolves and compares every candidate parameter, publishes
+  all 11 compiled arrays only after the completed sticky-valid scan, and writes
+  compile validity last. The five-node compiler calls reset, validation,
+  candidate construction, and commit in exact order.
 - Next is deterministic Blueprint graph generation and exact source/paste
-  contracts for commit, compile, and evaluation, followed by live compile/save
-  and warm/fresh runtime evidence.
+  contracts for evaluation, followed by live compile/save and warm/fresh runtime
+  evidence.
   This offline checkpoint is not live feature acceptance.
 
 ### Position-route absolute-time evaluator checkpoint

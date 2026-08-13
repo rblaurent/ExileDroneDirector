@@ -4089,3 +4089,27 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   sticky rejection, and one-to-one source for every candidate append. Repeated
   generation is byte-identical and the full scaffold remains green. These bodies
   are not live yet; next is atomic candidate commit and orchestration/evaluation.
+
+### Flight-profile atomic commit and compiler frozen (2026-08-13)
+
+- `CommitCompiledFlightProfilesV1` emits 115/114-node full/paste graphs. It
+  invalidates prior compile publication immediately, proves stage validity,
+  count 1..511, and exact cardinality for the ID plus all ten candidate arrays.
+  It then loops every candidate ID, resolves the canonical preset again, compares
+  the resolved ID and all ten numeric values to indexed candidate data, and
+  writes stage validity sticky-false on any mismatch. Only a completed valid scan
+  replaces all 11 compiled arrays; `FlightProfileCompileValidV1=true` is the last
+  write. Source/paste SHA-256 is
+  `199367ED38F248D8CCC1063A6D91FF36805994F858F3986C5FE66438F2BF8A25` /
+  `C85B3B9E7B64112043C3E03DE7A140FDE10512F96DF3B41EC78D8857D9CE37FE`.
+- `CompileFlightProfilesV1` is the deliberately thin 5/4-node full/paste
+  orchestrator: reset, input validation, candidate construction, atomic commit.
+  Source/paste SHA-256 is
+  `A378CAFA6D37EA2296D412D16995FDFEC99806152C70EBB2D1D789FC0DBD41A5` /
+  `3356002F290CF7F1FCD92129DD89E37B896EDA51C0D07E26975D1409AB1A4982`.
+- Exact contracts require initial invalidation, every cardinality comparison,
+  canonical resolver call and per-parameter equality, both rejection seams,
+  completed-loop stage guard, candidate-to-compiled source mapping, ordered
+  publication, and validity-last. Deterministic regeneration and the full
+  scaffold pass. These bodies remain offline until evaluation is frozen and the
+  seven-function set is installed, compiled, saved, and executed in Unreal.

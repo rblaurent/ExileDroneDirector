@@ -360,6 +360,15 @@ repository suite passes in 105.7 seconds. Next: one-editor configure/paste/
 entry-wire repair/compile/save/runtime/PIE/cold acceptance for the full scalar
 family before channel-owned lens/focus/effect storage.
 
+The one-editor acceptance tooling is prepared and syntax-checked while the
+editor is closed: `Configure-CameraScalarTrackAssembly.py` idempotently owns all
+32 variables and nine functions; `Validate-CameraScalarTrackRuntime.py` covers
+forward/reverse live compilation, every preset/domain, absolute queries,
+failure families, immutable inputs, and restoration; and
+`Validate-CameraScalarTrackPIE.py` checks reciprocal-focus output on the real
+player-owned Client Director and tears PIE down. Next: run that package in one
+editor and freeze exact postcompile exports.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

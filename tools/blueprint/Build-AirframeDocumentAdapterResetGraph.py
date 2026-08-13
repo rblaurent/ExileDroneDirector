@@ -11,7 +11,7 @@ ARRAYS=(
  ("AirframeDocumentDiagnosticGimbalAngularRateJumpsV2","real"),
  ("AirframeDocumentDiagnosticDiscontinuousFlagsV2","bool"),
 )
-SCALARS=(("AirframeDocumentAdapterStageValidV2","bool","false"),("AirframeDocumentAdapterCompileValidV2","bool","false"),("AirframeDocumentAdapterFailureCodeV2","string","") ,("AirframeDocumentDiagnosticCountV2","int","0"),("AirframeDocumentDiagnosticsValidV2","bool","false"))
+SCALARS=(("AirframeDocumentAdapterStageValidV2","bool","false"),("AirframeDocumentAdapterDurationAccumulatorV2","real","0.0"),("AirframeDocumentAdapterCompileValidV2","bool","false"),("AirframeDocumentAdapterFailureCodeV2","string","") ,("AirframeDocumentDiagnosticCountV2","int","0"),("AirframeDocumentDiagnosticsValidV2","bool","false"))
 def load(root):
  p=root/"tools/blueprint/Build-OrientationTrackResetGraph.py";s=importlib.util.spec_from_file_location("edd_document_adapter_reset_base",p);m=importlib.util.module_from_spec(s);sys.modules[s.name]=m;s.loader.exec_module(m);return m
 def string_variable(node,old,new):

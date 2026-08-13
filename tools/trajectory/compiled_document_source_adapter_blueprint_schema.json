@@ -50,6 +50,7 @@
     { "name": "AirframeDocumentInputSegmentFlightProfileOverridesV2", "type": "String", "container": "Array", "role": "input" },
 
     { "name": "AirframeDocumentAdapterStageValidV2", "type": "Boolean", "container": "None", "role": "scratch", "default": false },
+    { "name": "AirframeDocumentAdapterDurationAccumulatorV2", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
     { "name": "AirframeDocumentAdapterCompileValidV2", "type": "Boolean", "container": "None", "role": "result", "default": false },
     { "name": "AirframeDocumentAdapterFailureCodeV2", "type": "String", "container": "None", "role": "result", "default": "" },
 

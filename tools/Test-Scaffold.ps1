@@ -152,6 +152,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeDocumentAdapterResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-document-source-adapter-v2.eddgraph',
     'tools\blueprint\snippets\reset-airframe-document-source-adapter-v2-paste.eddgraph',
+    'tools\blueprint\Build-AirframeDocumentAdapterValidationGraph.py',
+    'tools\blueprint\Test-AirframeDocumentAdapterValidationContracts.py',
+    'tools\blueprint\snippets\validate-airframe-document-source-adapter-v2.eddgraph',
+    'tools\blueprint\snippets\validate-airframe-document-source-adapter-v2-paste.eddgraph',
     'tools\blueprint\Build-AirframeSourceSamplingResetGraph.py',
     'tools\blueprint\Test-AirframeSourceSamplingResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-source-sampling-v1.eddgraph',
@@ -1067,6 +1071,43 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_compiled_document_source_adapter_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Compiled-document source-adapter Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+$documentAdapterNonce = [guid]::NewGuid().ToString('N')
+$documentAdapterRoot = Join-Path $scratchRoot "edd-document-adapter-$documentAdapterNonce"
+New-Item -ItemType Directory -Path $documentAdapterRoot -Force | Out-Null
+$documentAdapterStages = @(
+    @('reset-airframe-document-source-adapter-v2', 'Build-AirframeDocumentAdapterResetGraph.py', 'Test-AirframeDocumentAdapterResetContracts.py'),
+    @('validate-airframe-document-source-adapter-v2', 'Build-AirframeDocumentAdapterValidationGraph.py', 'Test-AirframeDocumentAdapterValidationContracts.py')
+)
+foreach ($stage in $documentAdapterStages) {
+    $generated = Join-Path $documentAdapterRoot "$($stage[0]).eddgraph"
+    $generatedPaste = Join-Path $documentAdapterRoot "$($stage[0])-paste.eddgraph"
+    $repeated = Join-Path $documentAdapterRoot "$($stage[0])-repeat.eddgraph"
+    $repeatedPaste = Join-Path $documentAdapterRoot "$($stage[0])-repeat-paste.eddgraph"
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[1])") `
+        --project-root $ProjectRoot --output $generated --paste-output $generatedPaste
+    if ($LASTEXITCODE -ne 0) { throw "Document adapter $($stage[0]) generation failed with exit code $LASTEXITCODE." }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[1])") `
+        --project-root $ProjectRoot --output $repeated --paste-output $repeatedPaste
+    if ($LASTEXITCODE -ne 0) { throw "Repeated document adapter $($stage[0]) generation failed with exit code $LASTEXITCODE." }
+    foreach ($comparison in @(
+        @($generated, $repeated, (Join-Path $ProjectRoot "tools\blueprint\snippets\$($stage[0]).eddgraph")),
+        @($generatedPaste, $repeatedPaste, (Join-Path $ProjectRoot "tools\blueprint\snippets\$($stage[0])-paste.eddgraph"))
+    )) {
+        if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+            (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+            (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+            (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+            throw "Document adapter $($stage[0]) generation is not byte deterministic."
+        }
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $generated
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[2])") `
+        --project-root $ProjectRoot --graph $generated
+    if ($LASTEXITCODE -ne 0) { throw "Document adapter $($stage[0]) full contracts failed with exit code $LASTEXITCODE." }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[2])") `
+        --project-root $ProjectRoot --graph $generatedPaste --paste
+    if ($LASTEXITCODE -ne 0) { throw "Document adapter $($stage[0]) paste contracts failed with exit code $LASTEXITCODE." }
 }
 $airframeSourceNonce = [guid]::NewGuid().ToString('N')
 $airframeSourceRoot = Join-Path $scratchRoot "edd-airframe-source-$airframeSourceNonce"

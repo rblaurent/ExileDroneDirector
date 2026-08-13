@@ -65,6 +65,10 @@ class CompiledDocumentSourceAdapterBlueprintSchemaContracts(unittest.TestCase):
         )
         self.assertEqual(functions[-1]["uses"], [item["name"] for item in functions[:-1]])
 
+    def test_duration_accumulator_is_adapter_owned_scratch(self):
+        variable = next(item for item in SCHEMA["variables"] if item["name"] == "AirframeDocumentAdapterDurationAccumulatorV2")
+        self.assertEqual((variable["type"], variable["container"], variable["role"], variable["default"]), ("Float", "None", "scratch", 0.0))
+
     def test_diagnostics_are_separate_non_authoritative_state(self):
         variables = SCHEMA["variables"]
         diagnostic = [item for item in variables if item["role"].startswith("diagnostic")]

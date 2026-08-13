@@ -639,7 +639,8 @@ This section is the authoritative handoff. Detailed evidence remains in
   desired outputs, reject v1/missing orientation fallbacks, cover shape/ID/
   adjacency/duration/profile failures, prove value snapshots and diagnostic
   independence, and execute 20 seeded cases in both orders. Five schema tests
-  freeze 30 variables, five ordered functions, nine exact downstream mappings,
+  freeze 31 variables (including one adapter-owned exact-duration accumulator),
+  five ordered functions, nine exact downstream mappings,
   separate diagnostic ownership, and the explicit legacy mismatch. This is an
   offline reference/schema checkpoint; deterministic graph bodies follow.
 

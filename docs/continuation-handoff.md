@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-13 after implementation commit `0e31940`
+Last updated: 2026-08-13 at the offline document-adapter validation checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -9,22 +9,22 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 ## Non-negotiable scope
 
-- Continue backend implementation only.
-- Do not start polished UI, cook, Workshop, G-Portal, or deployment work.
+- Continue backend implementation through automated/debug dogfood first, then
+  use the proven dogfood findings to implement the polished UI.
+- Do not start cook, Workshop, G-Portal, deployment, or release work.
 - Prove behavior end to end. Generated graph shape alone is not acceptance.
 - Automate a finicky editor operation before repeating it manually.
 - Commit and push every clean feature checkpoint.
 - Never claim that the whole mod is complete.
-- The next accepted product gate is full keyboard/debug dogfooding after the
-  complete backend, not an early cook.
+- The next accepted product gate is full debug/keyboard dogfooding after the
+  complete backend. Polished UI follows dogfood; cook and release do not.
 
 ## Repository and clean starting state
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Last implementation head: `0e3194098514f95a81bdd4979265337b05c8e014`;
-  current HEAD should be the later documentation-only handoff commit and must
-  equal `origin/main`
+- Current implementation lineage starts from remote-equal `c42e12d`, with the
+  document-adapter checkpoints listed below; HEAD must equal `origin/main`
 - Expected worktree: clean
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -203,11 +203,33 @@ The schema freezes 22 variables and seven functions:
 
 ## Next ordered implementation
 
-Design and freeze the compiled-document-to-source adapter that feeds the now
-accepted source-sampling boundary while preserving separate body and gimbal
-authorship. Begin offline with reference/schema contracts and deterministic
-generators/interpreters before any new live editor work. Discontinuity
-diagnostics follow that explicit adapter boundary.
+The normalized compiled-document-to-source boundary is now frozen and its
+reset plus structural validator are complete offline. Continue the remaining
+three graphs in order: atomic commit into the accepted source sampler,
+post-boundary discontinuity diagnostics, then the policy-free top-level
+orchestrator. Do not open the editor until all five graphs and the complete
+offline suite are green.
+
+### Document-adapter offline state
+
+- `2e0cc75` freezes the independent reference, v2 normalized parallel-array
+  schema, explicit legacy mismatch, and diagnostic contract. Seven reference
+  tests, six schema tests, and 20 seeded forward/reverse cases pass. The v1
+  `CameraTransform` rotation is rejected; body and gimbal authorship remain
+  separate required quaternion channels.
+- `112ae23` adds deterministic reset full/paste graphs. The subsequently
+  tightened ownership contract adds one adapter-owned exact-duration
+  accumulator, so reset is now 20 full / 19 paste nodes and clears it without
+  touching any normalized authored input.
+- The current validation checkpoint adds a deterministic 114 full / 113 paste
+  graph. It fail-closes schema/engine versions, all eleven array shapes, the
+  2..512 waypoint bound, fixed-step and document-duration domains, positive
+  unique IDs, ordered segment adjacency, finite positive segment durations,
+  and exact accumulated duration. Its interpreter passes 80 seeded valid
+  documents and 16 injected failure classes in both forms.
+- Full repository scaffold, including byte-for-byte repeat generation and
+  graph parsing for reset and validation, passes in 105.6 seconds.
+- No editor process was opened for these offline checkpoints.
 
 ## Critical design mismatch
 

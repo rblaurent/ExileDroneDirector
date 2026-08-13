@@ -433,6 +433,14 @@ This section is the authoritative handoff. Detailed evidence remains in
   bounded early exit, and equal candidate-prefix cardinalities; false-stage and
   poisoned repeat cases also pass. Next are commit and top-level orchestration,
   followed by the complete live install/compile/save/cold/runtime matrix.
+- `CommitAirframeDesiredStreamToPrebakeV1` is frozen offline as a 37-node full /
+  36-node paste transaction. It invalidates stream compilation first, verifies
+  complete aligned pose candidates and terminal index, copies body/gimbal/rate
+  arrays plus total/step without aliasing, invokes the accepted prebake compiler,
+  and publishes stream validity only after downstream validity.
+- Both forms prove valid handoff, four preflight failures that leave downstream
+  inputs untouched, injected downstream failure, and invocation independence.
+  Top-level orchestration is the final offline graph before live installation.
 
 ### Position-route absolute-time evaluator checkpoint
 

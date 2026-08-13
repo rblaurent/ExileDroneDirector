@@ -4884,3 +4884,16 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Repeated generation is byte-identical and the complete scaffold owns syntax,
   exact structure, and execution. This remains offline evidence; commit,
   orchestration, and the complete live acceptance matrix are still outstanding.
+
+### Desired-stream prebake handoff frozen offline (2026-08-13)
+
+- `CommitAirframeDesiredStreamToPrebakeV1` is 37 nodes full / 36 paste. It resets
+  desired compile validity first, validates 2..65536 aligned look-ahead/body/
+  gimbal/rate candidates plus the exact terminal stage index, then copies only
+  body, gimbal, rates, total, and step into the accepted prebake input boundary.
+- Candidate arrays remain immutable and downstream array setters copy rather
+  than alias. The accepted `CompileAirframePrebakeV1` call is the sole downstream
+  compiler entry, and desired validity publishes last only on its true result.
+- Exported execution proves valid handoff, four preflight failures with untouched
+  downstream inputs, injected downstream failure, and repeat independence in
+  full and paste forms. This remains offline evidence.

@@ -511,8 +511,17 @@ This section is the authoritative handoff. Detailed evidence remains in
   thirteen-array handoff, reset-first invalidation, and validity-last atomicity.
 - This is an offline reference/schema checkpoint only. No new Blueprint graph,
   Enhanced compile/save, live execution, or whole-mod completion is claimed.
-  Next is exact graph generation and exported-link execution for reset and input
-  validation before any sampling loop is installed.
+  Reset and authored-shape validation are now frozen as exact generated graphs:
+  reset is 34/33 nodes and validation is 43/42 nodes in full/paste form. Reset
+  invalidates the accepted desired/prebake transaction before clearing exactly
+  thirteen candidate arrays and six scalars; its interpreter executes poisoned
+  state and proves all authored inputs retain identity. Validation executes 103
+  valid and 15 invalid cases through exported pin links, enforcing 2..512
+  waypoint shape, all seven array cardinalities, and finite fixed-step bounds.
+  The scalar fixed-step pin is explicitly contracted after an early generator
+  probe caught a template-derived array container. Both generators are
+  byte-deterministic. These remain offline graph claims; the next stage compiles
+  position/profile component publications before any sampling loop is installed.
 
 ### Position-route absolute-time evaluator checkpoint
 

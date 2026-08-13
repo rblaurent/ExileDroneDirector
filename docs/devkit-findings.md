@@ -4980,3 +4980,14 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - This checkpoint is offline only. Graph generation, exported-link execution,
   live Enhanced compile/save, fresh runtime, cold load, mirror sync, and the full
   regression remain required before the bridge is accepted.
+- The first two bridge graphs are now frozen offline. Reset contains 34/33
+  full/paste nodes and calls `ResetAirframeDesiredStreamV1` first, then clears
+  thirteen source candidates and six scratch/result scalars. Validation contains
+  43/42 nodes and checks all seven authored array cardinalities plus the exact
+  fixed-step domain. Exported-link interpreters pass poisoned reset state and
+  103 valid / 15 invalid validation fixtures in both forms.
+- A pre-contract generation exposed a useful template hazard: the initial
+  fixed-step variable getter inherited `ContainerType=Array` from the generic
+  getter form. The generator now retargets that pin explicitly and the contract
+  requires `ContainerType=None`, preventing a syntactically valid but unpasteable
+  scalar getter from reaching the DevKit.

@@ -144,6 +144,14 @@ $requiredFiles = @(
     'tools\trajectory\test_airframe_source_sampling_reference.py',
     'tools\trajectory\airframe_source_sampling_blueprint_schema.json',
     'tools\trajectory\test_airframe_source_sampling_blueprint_schema.py',
+    'tools\blueprint\Build-AirframeSourceSamplingResetGraph.py',
+    'tools\blueprint\Test-AirframeSourceSamplingResetContracts.py',
+    'tools\blueprint\snippets\reset-airframe-source-sampling-v1.eddgraph',
+    'tools\blueprint\snippets\reset-airframe-source-sampling-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframeSourceSamplingValidationGraph.py',
+    'tools\blueprint\Test-AirframeSourceSamplingValidationContracts.py',
+    'tools\blueprint\snippets\validate-airframe-source-sampling-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-airframe-source-sampling-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeDesiredStreamResetGraph.py',
     'tools\blueprint\Test-AirframeDesiredStreamResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-desired-stream-v1.eddgraph',
@@ -1015,6 +1023,66 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Airframe source-sampling Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
+$airframeSourceNonce = [guid]::NewGuid().ToString('N')
+$airframeSourceRoot = Join-Path $scratchRoot "edd-airframe-source-$airframeSourceNonce"
+New-Item -ItemType Directory -Path $airframeSourceRoot -Force | Out-Null
+$sourceReset = Join-Path $airframeSourceRoot 'reset-airframe-source-sampling-v1.eddgraph'
+$sourceResetPaste = Join-Path $airframeSourceRoot 'reset-airframe-source-sampling-v1-paste.eddgraph'
+$sourceResetRepeat = Join-Path $airframeSourceRoot 'reset-airframe-source-sampling-v1-repeat.eddgraph'
+$sourceResetRepeatPaste = Join-Path $airframeSourceRoot 'reset-airframe-source-sampling-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourceSamplingResetGraph.py') `
+    --project-root $ProjectRoot --output $sourceReset --paste-output $sourceResetPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source reset generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourceSamplingResetGraph.py') `
+    --project-root $ProjectRoot --output $sourceResetRepeat --paste-output $sourceResetRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe source reset generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($sourceReset, $sourceResetRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-airframe-source-sampling-v1.eddgraph')),
+    @($sourceResetPaste, $sourceResetRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-airframe-source-sampling-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+        throw "Airframe source reset generation is not byte deterministic."
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $comparison[0]
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourceSamplingResetContracts.py') `
+    --project-root $ProjectRoot --graph $sourceReset
+if ($LASTEXITCODE -ne 0) { throw "Airframe source reset full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourceSamplingResetContracts.py') `
+    --project-root $ProjectRoot --graph $sourceResetPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source reset paste contracts failed with exit code $LASTEXITCODE." }
+
+$sourceValidation = Join-Path $airframeSourceRoot 'validate-airframe-source-sampling-inputs-v1.eddgraph'
+$sourceValidationPaste = Join-Path $airframeSourceRoot 'validate-airframe-source-sampling-inputs-v1-paste.eddgraph'
+$sourceValidationRepeat = Join-Path $airframeSourceRoot 'validate-airframe-source-sampling-inputs-v1-repeat.eddgraph'
+$sourceValidationRepeatPaste = Join-Path $airframeSourceRoot 'validate-airframe-source-sampling-inputs-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourceSamplingValidationGraph.py') `
+    --project-root $ProjectRoot --output $sourceValidation --paste-output $sourceValidationPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source validation generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourceSamplingValidationGraph.py') `
+    --project-root $ProjectRoot --output $sourceValidationRepeat --paste-output $sourceValidationRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe source validation generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($sourceValidation, $sourceValidationRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-airframe-source-sampling-inputs-v1.eddgraph')),
+    @($sourceValidationPaste, $sourceValidationRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-airframe-source-sampling-inputs-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+        throw "Airframe source validation generation is not byte deterministic."
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $comparison[0]
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourceSamplingValidationContracts.py') `
+    --project-root $ProjectRoot --graph $sourceValidation
+if ($LASTEXITCODE -ne 0) { throw "Airframe source validation full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourceSamplingValidationContracts.py') `
+    --project-root $ProjectRoot --graph $sourceValidationPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source validation paste contracts failed with exit code $LASTEXITCODE." }
 $airframeDesiredNonce = [guid]::NewGuid().ToString('N')
 $airframeDesiredRoot = Join-Path $scratchRoot "edd-airframe-desired-$airframeDesiredNonce"
 New-Item -ItemType Directory -Path $airframeDesiredRoot -Force | Out-Null

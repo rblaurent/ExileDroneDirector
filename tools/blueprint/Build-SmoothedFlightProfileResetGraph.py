@@ -75,7 +75,7 @@ def main():
         # Paste normalization centers the complete selection under the cursor.
         # Keep the execution root at that geometric center on a clear lane so
         # the native function entry never lands inside the long setter chain.
-        x, y = ((7952, -384) if index == 0 else (256 + index * 416, 0))
+        x, y = ((7952, -192) if index == 0 else (256 + index * 416, 0))
         setter = bp.Node.clone(
             f"set_{index}", form, f"K2Node_VariableSet_{index}", x, y,
         )

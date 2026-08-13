@@ -136,8 +136,8 @@ This section is the authoritative handoff. Detailed evidence remains in
   quintic coefficient sets, complete eleven-field samples, validity-last stage
   acceptance, no array mutation, and no public-result mutation. Repeated
   generation is byte-identical; full/paste SHA-256 is
-  `2250BF1B075154F2A59E499DE19E8798E09637B1BCE8F42B56B74CE22C58F813` /
-  `C8E6B8DFECD1E0F3F71B82926E08218F36011A1537B376808AEBB86BF8329AC8`.
+  `B0989CD57AAC6DAB9FB45D7EF54A76172F38B4261A76F02CF4787B5DA3B74624` /
+  `5B30D9A6ADA18FC8E8ABEDC695801DA703A7FB5FB1FDFBBFA9E3E31C07A76397`.
 - Atomic publication is also frozen offline at 196/195 nodes. It invalidates
   public validity first; requires valid staging and a finite weight in 0..0.5;
   independently re-resolves and exactly verifies both eleven-field staged
@@ -147,10 +147,10 @@ This section is the authoritative handoff. Detailed evidence remains in
   last. It owns no array operation and never mutates stage state.
 - Repeated publication generation is byte-identical and full/paste exact
   contracts pass with SHA-256
-  `AB238C4E30CD1F121CD6F2A57E760D4ABE31A0E1565EBBBB4EA7BA37B291F611` /
-  `6ADE147210B3A99E0F6375326AD88F126802E48B684E13F50191BBD78610D8D1`.
+  `7497EE0C5402D3BB7A0E68CAC8630E1B00F330FE53DFF070F970034F2F3E61CB` /
+  `79BFB979B0DBA6866C4A335AA9B4E6FD8F820A61B280AA1F5D5E36818E0C2CD6`.
   Reset, staging, and publication deliberately place their first executable
-  node at the pasted selection's geometric center on a clear vertical lane.
+  node near the pasted selection's geometric center on a clear vertical lane.
   Unreal recenters a pasted selection under the cursor regardless of viewport
   panning; this layout invariant makes the native-entry seam deterministic
   without moving the native entry or relying on fragile zoom/drag gestures.

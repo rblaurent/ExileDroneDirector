@@ -718,6 +718,10 @@ This section is the authoritative handoff. Detailed evidence remains in
   helper that exclusively owns reciprocal derivative conversion, output bounds,
   and validity-last publication. This prevents five interpolation branches from
   competing for one exec merge and keeps optical/bounds policy in one place.
+- Reciprocal focus validation rejects positive values below
+  `5.562684646268003e-309`; their inverse cannot fit in a finite Blueprint
+  double. This fails malformed optical data at compile time instead of allowing
+  an infinite candidate to poison later evaluation.
 
 ### Position-route absolute-time evaluator checkpoint
 

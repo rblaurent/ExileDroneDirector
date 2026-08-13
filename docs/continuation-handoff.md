@@ -321,6 +321,14 @@ compile result/failure code, and query time. Both graph forms pass exact
 ownership/execution interpreters, and the complete scaffold passes in 103.2
 seconds. Next: the single optical/bounds publication helper.
 
+The reciprocal compiler guard is hardened before publication: physical values
+below `5.562684646268003e-309` now fail validation because their inverse cannot
+fit in a finite double. The Python compiler independently enforces the same
+boundary and checks its converted result. Validation remains 138 full / 137
+paste nodes and now passes 80 valid tracks plus nine failure classes in both
+forms. The complete scaffold passes in 103.3 seconds. No normal focus, linear
+channel, interpolation, or authored-bound behavior changed.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

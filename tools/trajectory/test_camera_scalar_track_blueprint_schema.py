@@ -67,6 +67,7 @@ class CameraScalarTrackBlueprintSchemaContracts(unittest.TestCase):
         self.assertIn("no per-frame recompilation", architecture["ownership"])
         contracts = SCHEMA["contracts"]
         self.assertIn("strictly positive", contracts["domain"])
+        self.assertIn("finite-representable", contracts["domain"])
         self.assertIn("silently hiding", contracts["tangents"])
 
 

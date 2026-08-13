@@ -13,7 +13,7 @@ def main():
  for name in ARRAYS:c.require(name in text,f"required authored array {name}")
  for mode in ("hold","linear","smooth","cinematic","hermite"):c.require(f'DefaultValue="{mode}"' in text,f"mode {mode}")
  for required in ("Max_IntInt","Greater_DoubleDouble","GreaterEqual_DoubleDouble","LessEqual_DoubleDouble","EqualEqual_StrStr","BooleanOR","BooleanAND"):c.require(f'MemberName="{required}"' in text,f"operator {required}")
- c.require("CameraScalarTrackCandidate" not in text and "CameraScalarTrackCompileValidV1" not in text,"validation cannot publish candidates")
+ c.require('DefaultValue="5.562684646268003e-309"' in text,"reciprocal conversion must stay finite");c.require("CameraScalarTrackCandidate" not in text and "CameraScalarTrackCompileValidV1" not in text,"validation cannot publish candidates")
 
  ref=load(x.project_root/"tools/trajectory/camera_scalar_track_reference.py","edd_camera_scalar_validation_reference");valid=[]
  for seed in range(80):
@@ -24,10 +24,10 @@ def main():
   keys=tuple(ref.CameraScalarKey(times[i],values[i],modes[i] if i<count-1 else "cinematic",arrive[i],leave[i]) for i in range(count));valid.append((keys,duration,domain))
  for keys,duration,domain in valid:ref.compile_camera_scalar_track(keys,duration,domain=domain,minimum=1.0,maximum=1000.0)
  base=(ref.CameraScalarKey(0.0,10.0,"linear"),ref.CameraScalarKey(1.0,20.0))
- invalid=((),(replace(base[0],time_seconds=1.0),base[1]),(base[0],replace(base[1],time_seconds=0.0)),(replace(base[0],value=float("nan")),base[1]),(replace(base[0],interpolation_out="bad"),base[1]),(replace(base[0],leave_tangent=2.0),base[1]),(replace(base[0],arrive_tangent=2.0),base[1]),(base[0],replace(base[1],leave_tangent=2.0)))
+ invalid=((),(replace(base[0],time_seconds=1.0),base[1]),(base[0],replace(base[1],time_seconds=0.0)),(replace(base[0],value=float("nan")),base[1]),(replace(base[0],interpolation_out="bad"),base[1]),(replace(base[0],leave_tangent=2.0),base[1]),(replace(base[0],arrive_tangent=2.0),base[1]),(base[0],replace(base[1],leave_tangent=2.0)),(replace(base[0],value=1e-320),base[1]))
  failures=0
  for keys in invalid:
-  try:ref.compile_camera_scalar_track(keys,1.0)
+  try:ref.compile_camera_scalar_track(keys,1.0,domain="reciprocal" if keys and keys[0].value==1e-320 else "linear")
   except ref.CameraScalarTrackError:failures+=1
  c.require(failures==len(invalid),"invalid validation classes");print(f"Camera scalar-track validation contracts passed ({'paste' if x.paste else 'full'}): 80 valid and {failures} failure classes")
 if __name__=="__main__":main()

@@ -10,12 +10,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import isfinite
+from sys import float_info
 from typing import Iterable
 
 
 MAX_KEYS = 512
 MODES = ("hold", "linear", "smooth", "cinematic", "hermite")
 DOMAINS = ("linear", "reciprocal")
+MIN_RECIPROCAL_PHYSICAL_VALUE = 1.0 / float_info.max
 
 
 class CameraScalarTrackError(ValueError):
@@ -72,9 +74,12 @@ def _number(value: object, name: str) -> float:
 def _to_domain(value: float, domain: str) -> float:
     if domain == "linear":
         return value
-    if value <= 0.0:
-        raise CameraScalarTrackError("reciprocal-domain values must be positive")
-    return 1.0 / value
+    if value < MIN_RECIPROCAL_PHYSICAL_VALUE:
+        raise CameraScalarTrackError("reciprocal-domain values must have a finite representable inverse")
+    result = 1.0 / value
+    if not isfinite(result):
+        raise CameraScalarTrackError("reciprocal-domain conversion must remain finite")
+    return result
 
 
 def compile_camera_scalar_track(

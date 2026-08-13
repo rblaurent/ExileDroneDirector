@@ -66,7 +66,7 @@
   "contracts": {
     "shape": "Times, values, arrive tangents, and leave tangents share one 1..512 key count. Interpolation modes contain key count minus one entries.",
     "time": "Times are finite, start at exactly zero, increase strictly, and end at exactly the non-negative duration; multi-key tracks require positive duration.",
-    "domain": "linear accepts finite values; reciprocal requires every physical value to be strictly positive before inverse conversion.",
+    "domain": "linear accepts finite values; reciprocal requires every physical value to be at least 5.562684646268003e-309 so inverse conversion is strictly positive and finite-representable.",
     "tangents": "Tangents are finite interpolation-domain units per second. Unused first-arrive/last-leave tangents and non-Hermite segment tangents must be zero instead of silently hiding authored data.",
     "atomicity": "Compile reset invalidates and clears candidates/results first. Candidate storage is published only after complete validation and conversion.",
     "evaluation": "Every query calls the dedicated result reset, clamps finite absolute time to the compiled duration, selects one segment, and delegates interpolation. The segment helper composes the accepted time-profile/quintic primitives; the publication helper alone converts reciprocal derivatives, applies bounds, and publishes validity last.",

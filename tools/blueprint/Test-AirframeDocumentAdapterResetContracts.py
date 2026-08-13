@@ -11,6 +11,8 @@ def member(n):
 def main():
  a=argparse.ArgumentParser();a.add_argument("--project-root",type=Path,required=True);a.add_argument("--graph",type=Path,required=True);a.add_argument("--paste",action="store_true");x=a.parse_args();c=load(x.project_root/"tools/blueprint/Test-WaypointCaptureContracts.py");nodes=c.parse_graph(x.graph);c.require(len(nodes)==(23 if x.paste else 24),f"node count {len(nodes)}")
  calls=[n for n in nodes.values() if member(n)=="ResetAirframeSourceSamplingV1"];c.require(len(calls)==1,"one downstream reset")
+ entries=[n for n in nodes.values() if "K2Node_FunctionEntry" in n.node_class];c.require(len(entries)==(0 if x.paste else 1),"entry count")
+ c.require(not calls[0].pins["execute"].links,"paste execution root") if x.paste else c.require_link(entries[0],"then",calls[0],"execute","native entry to downstream reset")
  clears=[n for n in nodes.values() if member(n)=="Array_Clear"];c.require(len(clears)==6,"six diagnostic clears")
  getters=[n for n in nodes.values() if "K2Node_VariableGet" in n.node_class];c.require({member(n) for n in getters}==set(ARRAYS),"diagnostic clear ownership")
  setters=[n for n in nodes.values() if "K2Node_VariableSet" in n.node_class];c.require({member(n) for n in setters}==set(SCALARS),"scalar reset ownership")

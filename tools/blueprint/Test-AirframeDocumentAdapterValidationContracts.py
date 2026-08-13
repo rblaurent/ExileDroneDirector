@@ -86,6 +86,14 @@ def main():
     nodes = contracts.parse_graph(args.graph)
     text = args.graph.read_text(encoding="utf-8")
     contracts.require(len(nodes) == (113 if args.paste else 114), f"node count {len(nodes)}")
+    entries = [node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class]
+    contracts.require(len(entries) == (0 if args.paste else 1), "entry count")
+    root = nodes["K2Node_VariableSet_0"]
+    contracts.require(member(root) == "AirframeDocumentAdapterStageValidV2", "validation execution root")
+    if args.paste:
+        contracts.require(not root.pins["execute"].links, "paste execution root")
+    else:
+        contracts.require_link(entries[0], "then", root, "execute", "native entry to validation root")
     contracts.require("CameraTransform" not in text and "DraftDocumentV1" not in text, "legacy document path forbidden")
     for name in (*WAYPOINTS, *SEGMENTS):
         contracts.require(f'AirframeDocumentInput{name}V2' in text, f"normalized channel {name}")

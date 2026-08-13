@@ -125,6 +125,14 @@ def main():
     nodes = contracts.parse_graph(args.graph)
     text = args.graph.read_text(encoding="utf-8")
     contracts.require(len(nodes) == (148 if args.paste else 149), f"node count {len(nodes)}")
+    entries = [node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class]
+    contracts.require(len(entries) == (0 if args.paste else 1), "entry count")
+    root = nodes["K2Node_CallArrayFunction_0"]
+    contracts.require(member(root) == "Array_Clear", "diagnostic execution root")
+    if args.paste:
+        contracts.require(not root.pins["execute"].links, "paste execution root")
+    else:
+        contracts.require_link(entries[0], "then", root, "execute", "native entry to diagnostic root")
     contracts.require("CameraTransform" not in text and "DraftDocumentV1" not in text, "legacy authorship forbidden")
     contracts.require(text.count('MemberName="Array_Clear"') == 6, "six owned output clears")
     contracts.require(text.count('MemberName="Array_Add"') == 6, "six aligned output appends")

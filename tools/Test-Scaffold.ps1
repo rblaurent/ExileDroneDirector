@@ -152,22 +152,30 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeDocumentAdapterResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-document-source-adapter-v2.eddgraph',
     'tools\blueprint\snippets\reset-airframe-document-source-adapter-v2-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-airframe-document-source-adapter-v2.eddgraph',
     'tools\blueprint\Build-AirframeDocumentAdapterValidationGraph.py',
     'tools\blueprint\Test-AirframeDocumentAdapterValidationContracts.py',
     'tools\blueprint\snippets\validate-airframe-document-source-adapter-v2.eddgraph',
     'tools\blueprint\snippets\validate-airframe-document-source-adapter-v2-paste.eddgraph',
+    'tools\blueprint\live-snippets\validate-airframe-document-source-adapter-v2.eddgraph',
     'tools\blueprint\Build-AirframeDocumentAdapterCommitGraph.py',
     'tools\blueprint\Test-AirframeDocumentAdapterCommitContracts.py',
     'tools\blueprint\snippets\commit-airframe-document-source-adapter-v2.eddgraph',
     'tools\blueprint\snippets\commit-airframe-document-source-adapter-v2-paste.eddgraph',
+    'tools\blueprint\live-snippets\commit-airframe-document-source-adapter-v2.eddgraph',
     'tools\blueprint\Build-AirframeDocumentDiagnosticsGraph.py',
     'tools\blueprint\Test-AirframeDocumentDiagnosticsContracts.py',
     'tools\blueprint\snippets\build-airframe-document-discontinuity-diagnostics-v2.eddgraph',
     'tools\blueprint\snippets\build-airframe-document-discontinuity-diagnostics-v2-paste.eddgraph',
+    'tools\blueprint\live-snippets\build-airframe-document-discontinuity-diagnostics-v2.eddgraph',
     'tools\blueprint\Build-AirframeDocumentAdapterCompileGraph.py',
     'tools\blueprint\Test-AirframeDocumentAdapterCompileContracts.py',
     'tools\blueprint\snippets\compile-airframe-document-source-adapter-v2.eddgraph',
     'tools\blueprint\snippets\compile-airframe-document-source-adapter-v2-paste.eddgraph',
+    'tools\blueprint\live-snippets\compile-airframe-document-source-adapter-v2.eddgraph',
+    'tools\unreal\Configure-AirframeDocumentAdapterAssembly.py',
+    'tools\unreal\Validate-AirframeDocumentAdapterRuntime.py',
+    'tools\unreal\Validate-AirframeDocumentAdapterPIE.py',
     'tools\blueprint\Build-AirframeSourceSamplingResetGraph.py',
     'tools\blueprint\Test-AirframeSourceSamplingResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-source-sampling-v1.eddgraph',
@@ -1123,6 +1131,11 @@ foreach ($stage in $documentAdapterStages) {
     & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[2])") `
         --project-root $ProjectRoot --graph $generatedPaste --paste
     if ($LASTEXITCODE -ne 0) { throw "Document adapter $($stage[0]) paste contracts failed with exit code $LASTEXITCODE." }
+    $live = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($stage[0]).eddgraph"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $live
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[2])") `
+        --project-root $ProjectRoot --graph $live
+    if ($LASTEXITCODE -ne 0) { throw "Live document adapter $($stage[0]) contracts failed with exit code $LASTEXITCODE." }
 }
 $airframeSourceNonce = [guid]::NewGuid().ToString('N')
 $airframeSourceRoot = Join-Path $scratchRoot "edd-airframe-source-$airframeSourceNonce"

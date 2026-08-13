@@ -659,6 +659,15 @@ This section is the authoritative handoff. Detailed evidence remains in
   coordinator. It calls reset, structural validation, atomic source commit,
   then diagnostics in that exact order. It owns no variables, branches, loops,
   alternate path, or implicit legacy conversion.
+- Live acceptance is complete on `BPC_EDD_ClientDirector`. The saved graphs
+  contain 24, 114, 30, 149, and 5 nodes. Two warm runtime matrices each pass
+  10 forward and 10 reverse valid documents, six invalid families, three
+  diagnostic policies, a direct boundary case, immutable inputs, restoration,
+  and distinct body/gimbal values. A fresh-process PIE run passes on the real
+  player-owned component with diagnostic waypoint ID `107`, restores defaults,
+  and exits PIE normally. The saved asset cold-loads and the complete scaffold
+  passes with all five live exports under contract. Live/mirror SHA-256 is
+  `6D6F964EFDA4D63BD7FE09F13077926AB2859A1F9B787D08CA8DC5DD08836A98`.
 
 ### Position-route absolute-time evaluator checkpoint
 
@@ -1642,16 +1651,16 @@ before any polished editor UI or cook is attempted:
    published source, preserves exact source ID/revision attribution, commits
    through the accepted A/B writer, survives a fresh SaveGame process, and
    rejects private/missing/corrupt/stale requests without publication.
-9. **Current:** complete the remaining trajectory backend adapters and diagnostics.
+9. **Complete:** remaining trajectory backend adapters and diagnostics.
    Linear and cinematic
    position curves, monotonic timing profiles, smooth quaternion rotation,
    canonical flight profiles, smoothed profile sampling, desired airframe/gimbal
    solving, angular-rate limiting, fixed-step prebake, and the complete
-   source-sampling bridge are accepted. The ordered remaining seam is an
-   explicit compiled-document adapter that preserves distinct authored body and
-   gimbal tracks; the older single-camera-rotation waypoint bridge must not be
-   aliased into both. Discontinuity diagnostics follow that adapter boundary.
-10. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
+   source-sampling bridge, lossless compiled-document adapter, and downstream
+   discontinuity diagnostics are accepted. The older single-camera-rotation
+   waypoint bridge remains explicitly rejected and is not aliased into both
+   orientation tracks.
+10. **Current:** implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
    event tracks with bounded target adapters and authorization.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,

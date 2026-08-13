@@ -5111,3 +5111,38 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   inputs, deterministic snapshots, and diagnostic non-interference. This is
   offline architecture evidence only; generated Blueprint bodies remain the
   next checkpoint.
+
+### Compiled-document adapter live acceptance (2026-08-14)
+
+- The five deterministic graphs are installed and saved on the Client Director:
+  reset 24 nodes, validation 114, atomic source commit 30, post-boundary
+  diagnostics 149, and orchestration 5. Exact postcompile exports are checked
+  in under `tools/blueprint/live-snippets` and owned by the complete scaffold.
+- Initial live execution found that the validation and diagnostic native entry
+  nodes were not connected to their generated roots even though their bodies
+  existed. Strengthened full and paste contracts now require every native-entry
+  seam for reset, validation, commit, and diagnostics. The repaired saved
+  exports pass those contracts; this is why runtime acceptance remains required
+  in addition to node/body inspection.
+- `Validate-AirframeDocumentAdapterRuntime.py` passed twice in the warm editor.
+  Each run covers 10 forward and 10 reverse accepted documents, six invalid
+  document families, three diagnostic policies, one direct boundary case,
+  poisoned-state cleanup, immutable inputs, full schema-union restoration, and
+  exact distinct body/gimbal authorship through source, desired, and prebake.
+- `Validate-AirframeDocumentAdapterPIE.py` starts `/Game/Dev/AlmostEmpty`, drives
+  the real player-controller-owned Client Director, and tears PIE down. A fresh
+  process emitted `DISTINCT_AUTHORSHIP|PASS`, diagnostic waypoint IDs `[107]`,
+  `GAME_WORLD_RESULT|PASS`, `DEFAULTS_RESTORED|True`, and
+  `AUTOMATIC_RESULT|PASS`. The exhaustive mutation matrix remains in the warm
+  harness because retaining Python-owned UObject values across destroyed PIE
+  worlds can crash Enhanced's Python plugin; one clean PIE world is stable.
+- Guarded shutdown reached `LogExit: Exiting.`. Closed-editor sync reported 16
+  unchanged packages and exactly Client Director changed, then copied that one
+  reviewed asset. Live and mirrored SHA-256 are both
+  `6D6F964EFDA4D63BD7FE09F13077926AB2859A1F9B787D08CA8DC5DD08836A98`.
+  A fresh cold commandlet passed with zero errors, and the complete scaffold
+  including all five live graph contracts passed in 103.3 seconds.
+- The current v1 `CameraTransform` rotation remains explicitly unsupported as a
+  source for both orientation tracks. This checkpoint accepts the lossless v2
+  boundary and diagnostics, not a lossy legacy migration. The next backend seam
+  is lens/focus/effects and the documented camera modes, followed by events.

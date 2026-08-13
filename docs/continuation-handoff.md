@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-13 at the offline document-adapter validation checkpoint
+Last updated: 2026-08-14 at the live document-adapter acceptance checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,8 +23,8 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current implementation lineage starts from remote-equal `c42e12d`, with the
-  document-adapter checkpoints listed below; HEAD must equal `origin/main`
+- Current implementation lineage starts from remote-equal `f0f4b1b`, with the
+  live document-adapter checkpoint described below; HEAD must equal `origin/main`
 - Expected worktree: clean
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -201,15 +201,14 @@ The schema freezes 22 variables and seven functions:
 - The complete scaffold with mirrored MVP assets passes in 96.3 seconds and now
   owns all seven live exports, the configurator, and the runtime harness.
 
-## Next ordered implementation
+## Live compiled-document adapter state
 
-The normalized compiled-document-to-source boundary is now frozen and all five
-offline graphs are complete: reset, structural validator, atomic accepted-source
-commit, post-boundary discontinuity diagnostics, and the policy-free top-level
-orchestrator. The next gate is the documented one-editor live installation and
-acceptance sequence; do not claim live acceptance from offline graph shape.
+The normalized compiled-document-to-source boundary and downstream diagnostics
+are live-accepted. The five saved graphs are reset 24 nodes, validation 114,
+atomic source commit 30, diagnostics 149, and orchestration 5. Their exact
+postcompile exports are scaffold-owned.
 
-### Document-adapter offline state
+### Document-adapter evidence
 
 - `2e0cc75` freezes the independent reference, v2 normalized parallel-array
   schema, explicit legacy mismatch, and diagnostic contract. Seven reference
@@ -246,18 +245,41 @@ acceptance sequence; do not claim live acceptance from offline graph shape.
   no policy or state. Focused contracts prove the complete call chain executes
   even when an earlier stage fails, leaving fail-closed state to the owning
   stage rather than inventing an alternate orchestration path.
-- Full repository scaffold, including byte-for-byte repeat generation and
-  graph parsing for all five adapter graphs, passes in 104.5 seconds.
-- No editor process was opened for these offline checkpoints.
+- The initial warm run caught two real missing native-entry wires in validation
+  and diagnostics. Those saved graphs were repaired, and contracts now require
+  the native entry seam for every non-orchestrator graph so the defect cannot
+  regress behind a structurally complete body.
+- Two repaired warm runs each pass 10 forward plus 10 reverse valid documents,
+  six invalid families, three diagnostic policies, one direct boundary case,
+  immutable inputs, complete union restoration, and separate body/gimbal values.
+- A fresh editor's real PIE world passed on the player-owned Client Director:
+  distinct authorship, diagnostic waypoint ID 107, end-to-end valid publication,
+  input immutability, restored defaults, and clean PIE teardown.
+- Guarded shutdown reached `LogExit: Exiting.`. Sync copied only Client Director;
+  live and mirror SHA-256 are
+  `6D6F964EFDA4D63BD7FE09F13077926AB2859A1F9B787D08CA8DC5DD08836A98`.
+- Fresh cold load passes with zero errors. The complete scaffold passes in
+  103.3 seconds and validates generated full/paste forms plus all five saved
+  live exports.
+
+## Next ordered implementation
+
+Proceed with ordered task 10: lens, focus, and effect tracks first, then the
+Directed / Free Look / Carrier Freecam backend modes, then event tracks with
+bounded target adapters and authorization. Start each seam offline with an
+explicit reference/schema and deterministic graph generators/interpreters,
+then use one-editor compile/save/runtime/PIE/cold acceptance. After the complete
+backend, expose temporary debug controls and logs, run the attended dogfood,
+and only then implement the polished UI.
 
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,
 but the current Blueprint v1 document/waypoint bridge exposes one
 `CameraTransform` rotation. Do not alias that rotation into both source arrays.
-Resolve the document adapter explicitly after the sampling bridge is accepted.
-This does not invalidate the accepted source-sampling graphs because their
-schema already owns separate body and gimbal quaternion inputs.
+The accepted adapter resolves this by requiring separate v2 quaternion channels
+and rejecting the lossy legacy source. A future migration may decode distinct
+canonical fields, but must never manufacture both from `CameraTransform`.
 
 ## Hazards already paid for
 
@@ -284,9 +306,9 @@ schema already owns separate body and gimbal quaternion inputs.
 ## Standard commands
 
 ```powershell
-# Focused reference/schema
-python tools\trajectory\test_airframe_source_sampling_reference.py
-python tools\trajectory\test_airframe_source_sampling_blueprint_schema.py
+# Focused document-adapter reference/schema
+python tools\trajectory\test_compiled_document_source_adapter_reference.py
+python tools\trajectory\test_compiled_document_source_adapter_blueprint_schema.py
 
 # Complete repository proof
 .\tools\Test-Scaffold.ps1 -RequireMvpAssets
@@ -307,7 +329,7 @@ git rev-parse origin/main
 ## Confidence statement
 
 Confidence is high in every checkpoint explicitly accepted above, including the
-complete live source-sampling bridge. Confidence is not claimed for the explicit
-document adapter that must preserve distinct body/gimbal authorship,
-discontinuity diagnostics, lens/focus/effects, events, keyboard dogfood, UI,
-cooking, Workshop, G-Portal, deployment, or whole-mod completion.
+complete live source-sampling bridge and lossless compiled-document adapter with
+post-boundary discontinuity diagnostics. Confidence is not claimed for
+lens/focus/effects, camera modes, events, keyboard dogfood, UI, cooking,
+Workshop, G-Portal, deployment, or whole-mod completion.

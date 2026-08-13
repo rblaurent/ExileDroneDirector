@@ -293,6 +293,12 @@ declared ranges, linear/reciprocal domains, all five modes, and explicit tangent
 ownership. Its interpreter passes 80 seeded valid tracks and eight failure
 classes in both forms. The next graph is candidate conversion/publication.
 
+`BuildCameraScalarTrackCandidatesV1` is now 20 full / 19 paste nodes. It copies
+the four validated structural arrays, converts values once into linear or
+reciprocal optical space, remains private, and cannot publish compile/evaluation
+validity. Forty seeded tracks pass in both domains and graph forms; invalid-stage
+execution is a no-op. Next: atomic commit, then absolute-time evaluation.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

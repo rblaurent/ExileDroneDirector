@@ -699,6 +699,12 @@ This section is the authoritative handoff. Detailed evidence remains in
   range policy, zero unused endpoint tangents, and zero tangents on every
   non-Hermite segment. Exported-link contracts execute 80 seeded accepted
   tracks and eight poisoned failure classes in both forms.
+- `BuildCameraScalarTrackCandidatesV1` is deterministic at 20 full / 19 paste
+  nodes. It is a validation-gated private stage: four already-validated arrays
+  copy by value, key values append through exactly one linear/reciprocal branch,
+  and reciprocal focus is converted once to inverse-centimetre space. It cannot
+  publish compile/evaluation validity. Forty seeded tracks execute in both
+  domains and both graph forms; a false validation stage is an exact no-op.
 
 ### Position-route absolute-time evaluator checkpoint
 

@@ -81,10 +81,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   and 200 seeded mixed tracks. Five Blueprint-schema tests freeze 34 explicit
   variables, seven ordered function boundaries, exact candidate/result channel
   separation, atomic publication, and fail-closed lookup.
+- Deterministic Blueprint reset and authored-input validation graphs are now
+  generated and contract-accepted offline. Reset clears all 22 candidate/result
+  arrays and 14 public validity/result scalars in one 59-node ordered chain.
+  Validation uses 37 nodes to enforce segment count 1..511, exact override
+  cardinality, one of five exact defaults, and empty-or-known identity for every
+  override while keeping stage validity sticky-false after any rejection.
 - Next is deterministic Blueprint graph generation and exact source/paste
-  contracts for reset, validation, preset resolution, candidate build, commit,
-  compile, and evaluation, followed by live compile/save and warm/fresh runtime
-  evidence. This offline checkpoint is not live feature acceptance.
+  contracts for preset resolution, candidate build, commit, compile, and
+  evaluation, followed by live compile/save and warm/fresh runtime evidence.
+  This offline checkpoint is not live feature acceptance.
 
 ### Position-route absolute-time evaluator checkpoint
 

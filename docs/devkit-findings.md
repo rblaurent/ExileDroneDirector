@@ -4033,3 +4033,26 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   channel explicitly. Next is generated graph bodies plus exact contracts, then
   live compile/save and executable warm/fresh proof; no live flight-profile claim
   is made by this checkpoint.
+
+### Flight-profile reset and validation graphs frozen (2026-08-13)
+
+- `ResetFlightProfileStateV1` deterministically emits 59/58-node full/paste
+  graphs. Its one ordered execution chain clears the 11 candidate arrays and 11
+  compiled arrays, then resets stage/compile validity, the public profile ID,
+  ten public numeric results, and result validity. Authored inputs and the query
+  segment index are deliberately preserved. Source/paste SHA-256 is
+  `8C2F80567039EDE4B3E6964E45D00A2B04F369E36E1823C6157FE64A2ED59C5E` /
+  `831512E3BF08C9D218A7E0427BC103D52F866E79ACBDA1EF006D591815BD3C32`.
+- `ValidateFlightProfileInputsV1` deterministically emits 37/36-node full/paste
+  graphs. It resets stage validity false, proves explicit count 1..511 and exact
+  override-array cardinality, accepts only one of the five canonical defaults,
+  tentatively publishes stage validity true, then loops through every override
+  and writes it sticky-false for anything other than empty or a canonical ID.
+  Source/paste SHA-256 is
+  `2C41C3276965ECEA939BF0DC0B4A2CDDA6BA9533971B6CA13B98042B1ED3DA4B` /
+  `2F0794A646B94B25F6409F42C6DF56B4AB2023C4E7827D9FB78C7B27E2D089B5`.
+- Exact contracts require every array clear, scalar default, reciprocal execution
+  link, integer bound, identity literal, array source, and sticky validity write.
+  Repeated generation is byte-identical and the full scaffold passes. These are
+  generated offline bodies only; they are not yet live, compiled, or runtime
+  accepted. Next is canonical preset resolution and candidate construction.

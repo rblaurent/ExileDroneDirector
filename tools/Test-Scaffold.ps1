@@ -124,6 +124,14 @@ $requiredFiles = @(
     'tools\trajectory\test_flight_profile_reference.py',
     'tools\trajectory\flight_profile_blueprint_schema.json',
     'tools\trajectory\test_flight_profile_blueprint_schema.py',
+    'tools\blueprint\Build-FlightProfileResetGraph.py',
+    'tools\blueprint\Test-FlightProfileResetContracts.py',
+    'tools\blueprint\snippets\reset-flight-profile-state-v1.eddgraph',
+    'tools\blueprint\snippets\reset-flight-profile-state-v1-paste.eddgraph',
+    'tools\blueprint\Build-FlightProfileValidationGraph.py',
+    'tools\blueprint\Test-FlightProfileValidationContracts.py',
+    'tools\blueprint\snippets\validate-flight-profile-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-flight-profile-inputs-v1-paste.eddgraph',
     'tools\unreal\Configure-CinematicPoseAssembly.py',
     'tools\unreal\Validate-CinematicPoseRuntime.py',
     'tools\blueprint\Build-CinematicPoseResetGraph.py',
@@ -925,6 +933,61 @@ foreach ($family in @(
         & python @arguments
         if ($LASTEXITCODE -ne 0) {
             throw "Cinematic pose $($family[0]) contracts failed with exit code ${LASTEXITCODE}: $($spec[0])"
+        }
+    }
+}
+
+$flightProfileNonce = [guid]::NewGuid().ToString('N')
+$flightProfileRoot = Join-Path $scratchRoot "edd-flight-profile-$flightProfileNonce"
+$flightProfileReset = Join-Path $flightProfileRoot 'reset-flight-profile-state-v1.eddgraph'
+$flightProfileResetPaste = Join-Path $flightProfileRoot 'reset-flight-profile-state-v1-paste.eddgraph'
+$flightProfileResetRepeat = Join-Path $flightProfileRoot 'reset-flight-profile-state-v1-repeat.eddgraph'
+$flightProfileResetRepeatPaste = Join-Path $flightProfileRoot 'reset-flight-profile-state-v1-repeat-paste.eddgraph'
+$flightProfileValidation = Join-Path $flightProfileRoot 'validate-flight-profile-inputs-v1.eddgraph'
+$flightProfileValidationPaste = Join-Path $flightProfileRoot 'validate-flight-profile-inputs-v1-paste.eddgraph'
+$flightProfileValidationRepeat = Join-Path $flightProfileRoot 'validate-flight-profile-inputs-v1-repeat.eddgraph'
+$flightProfileValidationRepeatPaste = Join-Path $flightProfileRoot 'validate-flight-profile-inputs-v1-repeat-paste.eddgraph'
+foreach ($spec in @(
+    @('Build-FlightProfileResetGraph.py', $flightProfileReset, $flightProfileResetPaste, $flightProfileResetRepeat, $flightProfileResetRepeatPaste),
+    @('Build-FlightProfileValidationGraph.py', $flightProfileValidation, $flightProfileValidationPaste, $flightProfileValidationRepeat, $flightProfileValidationRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($spec[0])") `
+        --project-root $ProjectRoot --output $spec[1] --paste-output $spec[2]
+    if ($LASTEXITCODE -ne 0) { throw "Flight-profile graph generation failed: $($spec[0])" }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($spec[0])") `
+        --project-root $ProjectRoot --output $spec[3] --paste-output $spec[4]
+    if ($LASTEXITCODE -ne 0) { throw "Repeated flight-profile graph generation failed: $($spec[0])" }
+}
+foreach ($pair in @(
+    @($flightProfileReset, $flightProfileResetRepeat),
+    @($flightProfileResetPaste, $flightProfileResetRepeatPaste),
+    @($flightProfileValidation, $flightProfileValidationRepeat),
+    @($flightProfileValidationPaste, $flightProfileValidationRepeatPaste)
+)) {
+    if ((Get-FileHash -Algorithm SHA256 $pair[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $pair[1]).Hash) {
+        throw "Flight-profile graph generation is not deterministic: $($pair[0])"
+    }
+}
+foreach ($family in @(
+    @('Reset', 'Test-FlightProfileResetContracts.py', $flightProfileReset, $flightProfileResetPaste, 'reset-flight-profile-state-v1'),
+    @('Validation', 'Test-FlightProfileValidationContracts.py', $flightProfileValidation, $flightProfileValidationPaste, 'validate-flight-profile-inputs-v1')
+)) {
+    foreach ($spec in @(
+        @($family[2], $false),
+        @($family[3], $true),
+        @((Join-Path $ProjectRoot "tools\blueprint\snippets\$($family[4]).eddgraph"), $false),
+        @((Join-Path $ProjectRoot "tools\blueprint\snippets\$($family[4])-paste.eddgraph"), $true)
+    )) {
+        & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $spec[0]
+        $arguments = @(
+            (Join-Path $ProjectRoot "tools\blueprint\$($family[1])"),
+            '--project-root', $ProjectRoot,
+            '--graph', $spec[0]
+        )
+        if ($spec[1]) { $arguments += '--paste' }
+        & python @arguments
+        if ($LASTEXITCODE -ne 0) {
+            throw "Flight-profile $($family[0]) contracts failed with exit code ${LASTEXITCODE}: $($spec[0])"
         }
     }
 }

@@ -279,17 +279,18 @@ This section is the authoritative handoff. Detailed evidence remains in
   finite/unit quaternion streams, and every finite `0 < rate <= 720` sample.
   Its graph interpreter passes 103 valid and 28 invalid cases for both forms;
   validation only owns stage validity and never touches compiled/evaluation
-  publication. Sample construction is next; no live prebake claim is made.
-- `ApplyAirframeAngularRateLimitV1` is frozen offline as deterministic
-  109/108-node full/paste graphs. It validates four explicit scratch inputs,
+  publication. It is now live as part of the accepted seven-function family.
+- `ApplyAirframeAngularRateLimitV1` is frozen as deterministic
+  110/109-node full/paste graphs. It validates four explicit scratch inputs,
   preserves the authoritative previous sample's hemisphere, canonicalizes the
   authored desired sign including exact half-turn ties, applies shortest-arc slerp against a
   real interval budget, and resets four outputs before publishing validity
   last. Both graph forms execute against the independent reference contract for
   205 valid cases, reject 20 poisoned invalid cases without leaking stale
   results, preserve every input, and produce byte-identical desired-antipode half-turn
-  results. `BuildAirframePrebakeSamplesV1` is next; no live prebake claim is
-  made yet.
+  results. The reported limited flag uses a measured Unreal numerical floor of
+  `0.05` degrees while interpolation and published rate remain physically
+  clamped to the authored interval budget.
 - `BuildAirframePrebakeSamplesV1` is frozen offline as deterministic 81/80-node
   full/paste graphs. It clears all six candidate channels, requires accepted
   upstream validation, canonicalizes and seeds body/gimbal sample zero exactly,
@@ -300,8 +301,8 @@ This section is the authoritative handoff. Detailed evidence remains in
   failure clears stage validity and breaks immediately. Both forms match the
   independent compiler for 103 valid streams, including long random schedules,
   and prove antipodal-stream byte equivalence, a false-stage no-op, input
-  immutability, and injected seed/loop helper failures. Atomic commit is next;
-  no live prebake claim is made yet.
+  immutability, and injected seed/loop helper failures. The graph is now live
+  as part of the accepted seven-function family.
 - `CommitCompiledAirframePrebakeV1` is frozen offline as deterministic
   59/58-node full/paste graphs. It first clears all six prior compiled channels,
   zeros the compiled schedule, and invalidates publication. It then independently
@@ -311,14 +312,14 @@ This section is the authoritative handoff. Detailed evidence remains in
   is the final write. Executable graph contracts prove exact non-aliasing copies,
   candidate immutability, mismatched channels, both count limits, terminal-index
   rejection, poisoned prior publication cleanup, and invocation independence.
-  Compile orchestration is next; no live prebake claim is made yet.
+  It is now live as part of the accepted seven-function family.
 - `CompileAirframePrebakeV1` is frozen offline as deterministic 5/4-node
   full/paste orchestration. Its only execution path is reset, validation,
   sample construction, then atomic commit. The composition harness executes
   those actual generated component graphs and matches the independent compiler
   for 30 seeded streams; five invalid input families and a failed recompile
-  after prior success all clear publication. Absolute-time evaluation is next;
-  no live prebake claim is made yet.
+  after prior success all clear publication. It is now live as part of the
+  accepted seven-function family.
 - `EvaluateCompiledAirframePrebakeV1` is frozen offline as deterministic
   155/154-node full/paste graphs. It independently validates compiled shape,
   schedule, every quaternion/rate sample, and seed diagnostics before exposing
@@ -326,8 +327,30 @@ This section is the authoritative handoff. Detailed evidence remains in
   terminal-partial duration, and independently slerps body and gimbal. Both
   forms match 406 oracle evaluations in arbitrary invocation order and reject
   19 corrupt states with fully reset output. The seven-stage offline prebake
-  graph family is now complete; live compile/save/cold-load and runtime proof
-  are the next checkpoint, not a claim that the whole mod is complete.
+  graph family is now complete.
+- All seven functions are now installed together in Client Director, compiled,
+  saved, re-exported, mirrored, cold-loaded, and accepted in a separate fresh
+  NullRHI process. Exact post-compile counts are 36 reset, 73 validation, 110
+  limiter, 81 sample build, 59 commit, 5 orchestration, and 155 evaluator
+  nodes. Their complete post-compile contract suite passes.
+- Warm and fresh CDO execution each pass 27 forward compilations, 27
+  reverse-order compilations, 16 absolute-time evaluations, two invalid
+  compile families, two corrupt compiled-state families, and exact restoration
+  of all 40 touched properties. Maximum reconstructed rates differ from the
+  independent oracle by `4.739966801992068e-05` degrees/second for body and
+  `0.00014897799050572758` for gimbal, inside the measured stored-float
+  acceptance boundary of `0.0003`.
+- The accepted live and Git-mirror Client Director packages are byte-identical:
+  11,859,172 bytes, SHA-256
+  `094FEC44B8603074F409EB924E300C325C815085C224FA0FE954AFEB1D61DDC5`.
+  Cold load finds all nine core assets and compiles all six Blueprints with
+  zero errors; the complete scaffold passes.
+- The next ordered backend slice is desired-pose stream orchestration: evaluate
+  the already accepted position/profile pipeline on the fixed schedule, invoke
+  the accepted stateless airframe/gimbal solve for each sample, and feed those
+  desired tracks into this accepted prebake compiler transactionally. Lens,
+  focus, effects, shortcut dogfood, polished UI, cook, Workshop, and whole-mod
+  completion remain unclaimed.
 
 ### Position-route absolute-time evaluator checkpoint
 
@@ -2101,8 +2124,11 @@ and repeatable isolated PIE runner are complete. The immediate sequence is:
    immutable publication, bounded public discovery, immutable published fetch,
    and private deep clone with immutable source attribution are accepted with
    typed conflicts/limits/failures and fresh SaveGame recovery evidence.
-5. Complete cinematic position/timing/rotation, flight profiles, lens/focus/
-   effect tracks, free-look carrier modes, and event execution.
+5. **In progress:** position/timing compilation and evaluation, profile
+   evaluation, stateless desired airframe/gimbal pose, and fixed-step
+   angular-rate prebake are accepted independently. Next compose the desired
+   pose stream transactionally on the fixed schedule; then complete
+   lens/focus/effect tracks, free-look carrier modes, and event execution.
 6. Give every operation a shortcut/debug route and run the complete automated
    and attended backend dogfood matrix.
 7. Only then build the polished UI against those stable contracts.

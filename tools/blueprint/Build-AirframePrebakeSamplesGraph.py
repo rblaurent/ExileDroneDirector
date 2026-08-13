@@ -198,8 +198,11 @@ def main():
     total = get("AirframePrebakeInputTotalSecondsV1", "real", 0, 1520)
     step = get("AirframePrebakeInputFixedStepSecondsV1", "real", 0, 1680)
     # The first element is safe because validation has already proven count >= 2.
-    body_zero = item(bodies, "AirframePrebakeInputDesiredBodyQuatsV1", "quat", stage_index_reset, "AirframePrebakeStageIndexV1", 2304, 400, "body_zero")
-    gimbal_zero = item(gimbals, "AirframePrebakeInputDesiredGimbalQuatsV1", "quat", stage_index_reset, "AirframePrebakeStageIndexV1", 2304, 640, "gimbal_zero")
+    # Variable-set value pins are inputs. Use the native Output_Get pin for
+    # both seed indices; linking the named value pin here produces a symmetric
+    # clipboard record that nevertheless fails K2 compilation as input->input.
+    body_zero = item(bodies, "AirframePrebakeInputDesiredBodyQuatsV1", "quat", stage_index_reset, "Output_Get", 2304, 400, "body_zero")
+    gimbal_zero = item(gimbals, "AirframePrebakeInputDesiredGimbalQuatsV1", "quat", stage_index_reset, "Output_Get", 2304, 640, "gimbal_zero")
     count = array_node("array_length", "body_count", "quat", 2304, 1120, bodies, "AirframePrebakeInputDesiredBodyQuatsV1")
     last = math("Subtract_IntInt", "int", count, "ReturnValue", 2560, 1120, default_b="1")
 

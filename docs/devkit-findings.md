@@ -4610,7 +4610,7 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   representative, and one native `Quat_AngularDistance` plus one `Quat_Slerp`
   applies `clamp(delta * maxRate / angle, 0, 1)`. Selected nonzero denominators
   make pure-node evaluation safe even if an invalid call is inspected.
-- The deterministic graph has 109 full nodes and 108 paste nodes. An executable
+- The deterministic graph has 110 full nodes and 109 paste nodes. An executable
   graph interpreter proves both forms against the independent Python oracle for
   five directed and 200 seeded valid cases, 20 poisoned invalid cases, input
   immutability, exact-boundary limited flags, and three byte-identical
@@ -4717,3 +4717,50 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   full regression gate. Live Blueprint creation, compile/save, fresh cold load,
   runtime acceptance, UI, cook, Workshop, and whole-mod completion are not yet
   claimed.
+
+### Fixed-step airframe/gimbal prebake accepted live (2026-08-13)
+
+- All seven generated bodies are installed in
+  `BPC_EDD_ClientDirector`, connected to their native function entries, compiled,
+  saved, and re-exported. Exact post-compile graph sizes are 36 reset, 73
+  validation, 110 angular-rate limiter, 81 sample builder, 59 atomic commit, 5
+  compile orchestration, and 155 evaluator nodes. The seven live exports pass
+  their complete executable contracts, including 205 limiter cases, 103 stream
+  cases, ten commit rejection families, 30 composed compile streams, 406
+  arbitrary-order evaluations, and 19 corrupt compiled states.
+- Live evidence exposed two defects that graph shape alone could not prove. Two
+  sample-builder array reads were linked to the input array pin instead of the
+  indexed output, and Unreal's native quaternion angular-distance calculation
+  reports small positive error at exact boundaries. The links were repaired and
+  contracted globally. The limited diagnostic now uses a `0.05` degree numerical
+  floor measured against 500,000 arbitrary quaternion pairs; physical motion is
+  still strict because slerp alpha and published angular rate each use their own
+  native `FClamp` against the exact authored budget.
+- Enhanced silently discarded an attempted `Min_DoubleDouble` node during paste
+  while retaining the rest of the graph. Exact node-identity comparison caught
+  the missing node before compile. The supported second `FClamp` form replaced
+  it, and contracts now require exactly both clamp nodes. Never infer paste
+  success from selection size or surrounding links.
+- Warm and independent fresh NullRHI execution each pass 27 forward compile
+  cases, the same 27 cases in reverse order, 16 absolute-time evaluations, two
+  invalid recompiles, two corrupt-publication evaluations, and restoration of
+  all 40 touched CDO properties. Measured float-storage reconstruction error is
+  `4.739966801992068e-05` degrees/second for body and
+  `0.00014897799050572758` for gimbal; the independent oracle's stored-float
+  boundary is therefore `0.0003`, not a graph-derived guess.
+- Guarded editor shutdown completed without a new crash report. The authoritative
+  live package and Git mirror are both 11,859,172 bytes with SHA-256
+  `094FEC44B8603074F409EB924E300C325C815085C224FA0FE954AFEB1D61DDC5`.
+  A fresh cold process loads all nine core assets and compiles all six Blueprints
+  with zero errors. A second fresh process repeats the complete runtime matrix,
+  reports `COMPLETE|PASS` and `STATE_RESTORED|True`, and exits cleanly. The full
+  scaffold also passes after regenerating stale deterministic snippet artifacts.
+- Compilation still emits Enhanced's recurring nonfatal quaternion `ImportText`
+  diagnostic for the textual scratch default `0, 0, 0, 1`. Save succeeds, cold
+  compile reports zero errors, and both fresh and warm runtime resets prove the
+  actual identity value. This is documented noise, not evidence of a failed
+  package; changing the serialized form without an accepted native round trip
+  would be riskier than retaining the proven value.
+- Scope remains narrow: this accepts the fixed-step airframe/gimbal backend only.
+  Desired-pose stream orchestration, lens/focus/effects, debug shortcut dogfood,
+  polished UI, cook, Workshop, and the complete mod remain future work.

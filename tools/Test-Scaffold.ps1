@@ -187,6 +187,7 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\solve-airframe-gimbal-v1.eddgraph',
     'tools\unreal\Configure-AirframeGimbalAssembly.py',
     'tools\unreal\Validate-AirframeGimbalRuntime.py',
+    'tools\unreal\Validate-AirframePrebakeRuntime.py',
     'tools\blueprint\Build-SmoothedFlightProfileResetGraph.py',
     'tools\blueprint\Test-SmoothedFlightProfileResetContracts.py',
     'tools\blueprint\snippets\reset-smoothed-flight-profile-v1.eddgraph',

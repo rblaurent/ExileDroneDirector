@@ -90,6 +90,8 @@ class Interpreter:
         if source is not None:
             return self.output(*source)
         text = default(node, pin_name)
+        if text == "" and 'PinType.PinCategory="real"' in node.pins[pin_name].body:
+            return 0.0
         if text == "true":
             return True
         if text == "false":
@@ -225,7 +227,12 @@ def main():
     contracts.require(len(valid_sets) == 2, "validity reset and publication")
     reset_valid = next(node for node in valid_sets if default(node, COMPILE_VALID) == "false")
     publish_valid = next(node for node in valid_sets if default(node, COMPILE_VALID) == "true")
-    publish_total = next(node for node in nodes.values() if "K2Node_VariableSet" in node.node_class and variable(node) == COMPILED_TOTAL and default(node, COMPILED_TOTAL) != "0.0")
+    publish_total = next(
+        node for node in nodes.values()
+        if "K2Node_VariableSet" in node.node_class
+        and variable(node) == COMPILED_TOTAL
+        and bool(node.pins[COMPILED_TOTAL].links)
+    )
     contracts.require(contracts.linked(publish_total, "then", publish_valid, "execute"), "compile-validity must be final publication write")
     contracts.require(any(contracts.linked(reset_valid, "then", node, "execute") for node in branches), "guard only after invalidation")
     contracts.require(not any("AirframePrebakeResult" in variable(node) for node in nodes.values() if "K2Node_Variable" in node.node_class), "commit must not touch evaluation state")

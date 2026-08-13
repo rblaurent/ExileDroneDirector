@@ -359,6 +359,23 @@ drag between freshly measured pin positions. Re-export before compile and again
 after compile/save; both exact contracts must pass, and only the post-compile
 export may be promoted to `live-snippets`.
 
+Enhanced may silently omit an unsupported node class from an otherwise
+successful multi-node paste. The fixed-step angular-rate limiter demonstrated
+this with `Min_DoubleDouble`: every surrounding node appeared, but the minimum
+node itself did not. Before wiring the native entry, compare the complete live
+node identities and exact count with the deterministic paste artifact; after
+wiring, require the full exact contract again. If one node is absent, replace
+the unsupported form in the generator with a harvested native form instead of
+manually recreating it in the live graph.
+
+Dense entryless bodies should be prepared near their native entry
+deterministically rather than navigated into place by repeated zoom/pan guesses.
+`Prepare-BlueprintPasteNearEntry.py` translates the complete paste artifact by
+explicit graph-space offsets while preserving every relative coordinate and
+link. The airframe limiter's accepted placement used offsets `-1312,-432`;
+screen coordinates were then used only for the final pin drag, and the exported
+reciprocal entry link—not the drag itself—proved success.
+
 The Enhanced mod root may contain DevKit-managed `Content`, `Shared`, and
 `KitContent` directories beside authored `Local`. Repository synchronization is
 deliberately allowlisted to `Local/**/*.{uasset,umap,ubulk,uexp}` and root

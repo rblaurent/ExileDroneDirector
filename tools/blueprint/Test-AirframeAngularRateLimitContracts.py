@@ -231,7 +231,7 @@ def main():
         "edd_airframe_rate_limit_oracle",
     )
     nodes = contracts.parse_graph(args.graph)
-    contracts.require(len(nodes) == (108 if args.paste else 109), f"helper node count {len(nodes)}")
+    contracts.require(len(nodes) == (109 if args.paste else 110), f"helper node count {len(nodes)}")
     entries = [node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class]
     contracts.require(len(entries) == (0 if args.paste else 1), "function entry count")
 
@@ -241,6 +241,12 @@ def main():
     contracts.require(text.count('MemberName="Quat_SetComponents"') == 3, "three explicit quaternion scratch writes")
     contracts.require(text.count('MemberName="Quat_AngularDistance"') == 1, "one angular-distance measurement")
     contracts.require(text.count('MemberName="Quat_Slerp"') == 1, "one shortest-arc interpolation")
+    contracts.require(text.count('MemberName="FClamp"') == 2, "interpolation and physical rate clamps")
+    tolerance_nodes = [
+        node for node in nodes.values()
+        if member(node) == "Add_DoubleDouble" and default(node, "B") == "0.05"
+    ]
+    contracts.require(len(tolerance_nodes) == 1, "one diagnostic boundary tolerance")
 
     input_names = (PREVIOUS, DESIRED, DELTA, MAXIMUM)
     for name in input_names:

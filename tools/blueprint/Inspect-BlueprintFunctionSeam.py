@@ -39,7 +39,7 @@ def main():
     parser.add_argument("--project-root", type=Path, required=True)
     parser.add_argument("--graph", type=Path, required=True)
     parser.add_argument("--function", required=True)
-    parser.add_argument("--root-marker", required=True)
+    parser.add_argument("--root-marker", default="")
     args = parser.parse_args()
 
     contracts = load_contracts(args.project_root)

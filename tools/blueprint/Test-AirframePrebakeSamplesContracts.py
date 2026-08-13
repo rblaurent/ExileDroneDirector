@@ -100,6 +100,15 @@ class Interpreter:
         if source is not None:
             return self.output(*source)
         text = default(node, pin_name)
+        # Enhanced omits an authored numeric zero when it serializes a live
+        # default-valued pin. The absence is the native zero default, not an
+        # empty string runtime value. Keep source and post-paste execution
+        # proofs semantically equivalent while still requiring the pin to be
+        # unlinked through source() above.
+        if text == "" and 'PinType.PinCategory="real"' in node.pins[pin_name].body:
+            return 0.0
+        if text == "" and 'PinType.PinCategory="bool"' in node.pins[pin_name].body:
+            return False
         if text == "true":
             return True
         if text == "false":
@@ -258,6 +267,28 @@ def main():
     contracts.require(len(entries) == (0 if args.paste else 1), "function entry count")
     text = "\n".join(node.text for node in nodes.values())
     contracts.require("K2Node_Knot" not in text and "SubPins=(" not in text and "ParentPin=" not in text, "unsafe graph form")
+    pin_index = {}
+    for node in nodes.values():
+        for pin in node.pins.values():
+            pin_id = re.search(r"PinId=([0-9A-F]{32})", pin.body)
+            contracts.require(pin_id is not None, f"pin identity missing: {node.name}.{pin.name}")
+            pin_index[(node.name, pin_id.group(1))] = (node, pin)
+    for node in nodes.values():
+        for pin in node.pins.values():
+            source_is_output = 'Direction="EGPD_Output"' in pin.body
+            for link in pin.links:
+                contracts.require(link in pin_index, f"unresolved link: {node.name}.{pin.name} -> {link}")
+                target_node, target_pin = pin_index[link]
+                target_is_output = 'Direction="EGPD_Output"' in target_pin.body
+                contracts.require(
+                    source_is_output != target_is_output,
+                    f"same-direction link: {node.name}.{pin.name} -> {target_node.name}.{target_pin.name}",
+                )
+                source_id = re.search(r"PinId=([0-9A-F]{32})", pin.body).group(1)
+                contracts.require(
+                    (node.name, source_id) in target_pin.links,
+                    f"non-reciprocal link: {node.name}.{pin.name} -> {target_node.name}.{target_pin.name}",
+                )
     contracts.require(text.count('MemberName="ApplyAirframeAngularRateLimitV1"') == 4, "four atomic helper calls")
     loops = [node for node in nodes.values() if "ForLoopWithBreak" in node.text]
     contracts.require(len(loops) == 1 and default(loops[0], "FirstIndex") == "1", "bounded loop starts at sample one")

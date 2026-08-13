@@ -4957,3 +4957,26 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   Blueprints, and emitted `EDD_COLD_LOAD|RESULT|PASS` with zero errors. The full
   scaffold with mirrored MVP assets passes. No UI, cook, Workshop, or complete-
   mod claim is made by this checkpoint.
+
+### Source-sampling bridge offline contract (2026-08-13)
+
+- The accepted trajectory pieces previously stopped at sampled desired-stream
+  inputs. The new `airframe_source_sampling_reference.py` closes that design gap
+  without adding a second interpolation implementation: it evaluates the
+  accepted position route, two independent accepted orientation tracks, and the
+  accepted smoothed profile evaluator on one exact fixed schedule, then invokes
+  the already accepted desired-stream compiler.
+- Body and gimbal waypoint quaternions are separate required source arrays. The
+  Blueprint plan reuses the single orientation compiler sequentially: compile
+  and fully sample body first, then compile and fully sample gimbal while the
+  completed body candidates remain immutable. The existing cinematic-pose
+  adapter's one rotation is explicitly not a valid substitute for both tracks.
+- Reference execution passes exact/partial schedules, all five profiles,
+  timeline disagreement, invalid scalar families, expected physical rejection,
+  immutable source state, and 40 deterministic seeded cases in both orders. The
+  schema freezes 22 collision-free variables and seven functions, including
+  reset-first downstream invalidation and a sole thirteen-array commit into
+  `CompileAirframeDesiredStreamV1`.
+- This checkpoint is offline only. Graph generation, exported-link execution,
+  live Enhanced compile/save, fresh runtime, cold load, mirror sync, and the full
+  regression remain required before the bridge is accepted.

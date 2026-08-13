@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Transactional absolute-time sampling of distinct body and gimbal authorship into the accepted desired-airframe compiler.",
+  "limits": {
+    "minimumWaypoints": 2,
+    "maximumWaypoints": 512,
+    "minimumFixedStepSeconds": 0.004166666666666667,
+    "maximumFixedStepSeconds": 0.5,
+    "maximumTotalSeconds": 3600.0,
+    "maximumSampleCount": 65536
+  },
+  "existingInputs": [
+    "PositionRouteInputWaypointPositionsV1",
+    "PositionRouteInputDurationsV1",
+    "PositionRouteInputSpatialCurveTypesV1",
+    "PositionRouteInputTimeProfilesV1",
+    "PositionRouteInputArcToleranceV1",
+    "PositionRouteInputMaxArcDepthV1",
+    "PositionRouteInputMaxArcOperationsV1",
+    "FlightProfileInputDefaultIdV1",
+    "FlightProfileInputSegmentOverrideIdsV1"
+  ],
+  "profileFields": [
+    "PathFollowWeight",
+    "HorizonStabilizationWeight",
+    "LookAheadSeconds",
+    "BankGain",
+    "MaxBankDegrees",
+    "CameraUptiltDegrees",
+    "MaxAngularRateDegreesPerSecond",
+    "MaxAccelerationCmPerSecondSquared",
+    "MaxJerkCmPerSecondCubed",
+    "MinimumTurnRadiusCm"
+  ],
+  "variables": [
+    { "name": "AirframeSourceInputBodyWaypointQuatsV1", "type": "Quat", "container": "Array", "role": "input" },
+    { "name": "AirframeSourceInputGimbalWaypointQuatsV1", "type": "Quat", "container": "Array", "role": "input" },
+    { "name": "AirframeSourceInputFixedStepSecondsV1", "type": "Float", "container": "None", "role": "input", "default": 0.016666666666666666 },
+
+    { "name": "AirframeSourceCandidatePositionsV1", "type": "Vector", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidateBodyQuatsV1", "type": "Quat", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidateGimbalQuatsV1", "type": "Quat", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidatePathFollowWeightsV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidateHorizonStabilizationWeightsV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidateLookAheadSecondsV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidateBankGainsV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidateMaxBankDegreesV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidateCameraUptiltDegreesV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidateMaxAngularRatesDegreesPerSecondV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidateMaxAccelerationsCmPerSecondSquaredV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidateMaxJerksCmPerSecondCubedV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframeSourceCandidateMinimumTurnRadiiCmV1", "type": "Float", "container": "Array", "role": "candidate" },
+
+    { "name": "AirframeSourceExpectedSampleCountV1", "type": "Integer", "container": "None", "role": "scratch", "default": 0 },
+    { "name": "AirframeSourceSampleIndexV1", "type": "Integer", "container": "None", "role": "scratch", "default": 0 },
+    { "name": "AirframeSourceSampleElapsedSecondsV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "AirframeSourceTotalSecondsV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "AirframeSourceStageValidV1", "type": "Boolean", "container": "None", "role": "scratch", "default": false },
+    { "name": "AirframeSourceCompileValidV1", "type": "Boolean", "container": "None", "role": "result", "default": false }
+  ],
+  "functions": [
+    { "name": "ResetAirframeSourceSamplingV1", "stage": 0, "uses": ["ResetAirframeDesiredStreamV1"] },
+    { "name": "ValidateAirframeSourceSamplingInputsV1", "stage": 1 },
+    { "name": "CompileAirframeSourcePositionProfilesV1", "stage": 2, "uses": ["CompilePositionRouteV1", "CompileFlightProfilesV1"] },
+    { "name": "BuildAirframeSourcePositionBodyProfileSamplesV1", "stage": 3, "uses": ["CompileOrientationTrackV1", "EvaluateCompiledPositionRouteV1", "EvaluateCompiledOrientationTrackV1", "EvaluateSmoothedFlightProfileV1"] },
+    { "name": "BuildAirframeSourceGimbalSamplesV1", "stage": 4, "uses": ["CompileOrientationTrackV1", "EvaluateCompiledOrientationTrackV1"] },
+    { "name": "CommitAirframeSourceSamplesToDesiredV1", "stage": 5, "uses": ["CompileAirframeDesiredStreamV1"] },
+    { "name": "CompileAirframeSourceSamplingV1", "stage": 6, "uses": ["ResetAirframeSourceSamplingV1", "ValidateAirframeSourceSamplingInputsV1", "CompileAirframeSourcePositionProfilesV1", "BuildAirframeSourcePositionBodyProfileSamplesV1", "BuildAirframeSourceGimbalSamplesV1", "CommitAirframeSourceSamplesToDesiredV1"] }
+  ],
+  "contracts": {
+    "authorship": "Body and gimbal waypoint quaternion arrays are distinct required inputs. Neither may be synthesized from the camera transform or aliased to the other.",
+    "timeline": "Position, body, and gimbal compilations must have exact segment counts, segment starts, durations, total seconds, segment indices, local alphas, completion flags, and exact terminal schedule agreement.",
+    "schedule": "Sampling uses zero, integer fixed-step values, and one exact terminal value with ceil(total / step) + 1 samples inside 2..65536 before any loop.",
+    "sequentialOrientationCache": "The shared orientation compiler is first loaded with body authorship and fully sampled, then loaded with gimbal authorship and fully sampled; candidate body samples remain immutable while the cache is reused.",
+    "profiles": "Every position/body sample evaluates the accepted smoothed profile at the agreed position segment and local alpha and appends all ten bounded channels atomically.",
+    "atomicity": "Reset invalidates the source result and accepted desired/prebake result first. Only CommitAirframeSourceSamplesToDesiredV1 copies thirteen complete source arrays plus total and step into the desired-stream inputs, invokes its compiler, and publishes source validity last.",
+    "failure": "Any malformed input, component compile failure, evaluator disagreement, incomplete candidate, profile failure, physical gate, or desired/prebake failure leaves source, desired, and prebake validity false with no partial authoritative motion.",
+    "determinism": "Compilation and sampling consume immutable authored inputs and absolute schedule values only; no game-frame delta, prior invocation, or UI state participates."
+  }
+}

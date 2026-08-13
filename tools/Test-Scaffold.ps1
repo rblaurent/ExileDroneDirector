@@ -140,6 +140,10 @@ $requiredFiles = @(
     'tools\trajectory\test_airframe_desired_stream_reference.py',
     'tools\trajectory\airframe_desired_stream_blueprint_schema.json',
     'tools\trajectory\test_airframe_desired_stream_blueprint_schema.py',
+    'tools\trajectory\airframe_source_sampling_reference.py',
+    'tools\trajectory\test_airframe_source_sampling_reference.py',
+    'tools\trajectory\airframe_source_sampling_blueprint_schema.json',
+    'tools\trajectory\test_airframe_source_sampling_blueprint_schema.py',
     'tools\blueprint\Build-AirframeDesiredStreamResetGraph.py',
     'tools\blueprint\Test-AirframeDesiredStreamResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-desired-stream-v1.eddgraph',
@@ -1002,6 +1006,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_airframe_desired_stream_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Airframe desired-stream Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_airframe_source_sampling_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Airframe source-sampling reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_airframe_source_sampling_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Airframe source-sampling Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 $airframeDesiredNonce = [guid]::NewGuid().ToString('N')
 $airframeDesiredRoot = Join-Path $scratchRoot "edd-airframe-desired-$airframeDesiredNonce"

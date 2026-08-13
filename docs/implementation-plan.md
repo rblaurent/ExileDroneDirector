@@ -488,6 +488,32 @@ This section is the authoritative handoff. Detailed evidence remains in
   document sampling, lens/focus/effects, debug dogfood, polished UI, cook,
   Workshop, and whole-mod completion remain unclaimed.
 
+### Airframe source-sampling bridge frozen offline (2026-08-13)
+
+- `airframe_source_sampling_reference.py` freezes the missing absolute-time
+  bridge from accepted compiled sources into the accepted desired-stream
+  transaction. Position, authored body orientation, authored gimbal orientation,
+  and smoothed profiles are evaluated on one fixed schedule; body and gimbal
+  authorship are deliberately separate and cannot be substituted by the older
+  single-camera-orientation adapter.
+- Timeline validation requires exact segment counts, starts, durations, totals,
+  segment indices, local alphas, and completion agreement. Every successful
+  sample supplies all ten bounded profile channels, then the independent desired
+  compiler owns kinematics, physical gates, angular limiting, and prebake
+  publication. Nothing is returned before that complete downstream transaction
+  succeeds.
+- Six executable reference tests cover exact and partial-terminal schedules,
+  distinct body/gimbal output, all five canonical profiles, timeline/profile
+  divergence, malformed steps, downstream physical rejection, source
+  immutability, and 40 seeded forward/reverse cases. Five schema tests freeze 22
+  unique variables, seven ordered functions, reuse of the accepted component
+  compilers/evaluators, sequential reuse of the one orientation cache, complete
+  thirteen-array handoff, reset-first invalidation, and validity-last atomicity.
+- This is an offline reference/schema checkpoint only. No new Blueprint graph,
+  Enhanced compile/save, live execution, or whole-mod completion is claimed.
+  Next is exact graph generation and exported-link execution for reset and input
+  validation before any sampling loop is installed.
+
 ### Position-route absolute-time evaluator checkpoint
 
 - `EvaluateCompiledPositionRouteV1` is compiled, saved, and warm-runtime
@@ -1465,12 +1491,19 @@ before any polished editor UI or cook is attempted:
    validation, and every path is read-only. Exact compiled-graph, live runtime,
    fresh SaveGame restart, stale-payload reset, cleanup, and cold-load evidence
    pass.
-8. **Current:** add private cloning with immutable source attribution. Extend
-   corruption recovery, limits, migration hooks, and typed failures across the
-   final sharing boundary.
-9. Implement the complete trajectory compiler: linear and cinematic curves,
-   monotonic timing/speed profiles, smooth quaternion rotation, flight profiles,
-   deterministic sampling, and discontinuity diagnostics.
+8. **Complete:** private cloning with immutable source attribution. The clone is
+   a deep private draft owned only by the requester, never aliases its immutable
+   published source, preserves exact source ID/revision attribution, commits
+   through the accepted A/B writer, survives a fresh SaveGame process, and
+   rejects private/missing/corrupt/stale requests without publication.
+9. **Current:** complete the trajectory backend bridge. Linear and cinematic
+   position curves, monotonic timing profiles, smooth quaternion rotation,
+   canonical flight profiles, smoothed profile sampling, desired airframe/gimbal
+   solving, angular-rate limiting, and fixed-step prebake are accepted. The
+   ordered remaining seam samples distinct authored body and gimbal tracks plus
+   position/profile sources on one exact absolute-time schedule and commits them
+   through the accepted desired-stream compiler. Discontinuity diagnostics and
+   document adapters follow that accepted source-sampling boundary.
 10. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
    event tracks with bounded target adapters and authorization.
 11. Expose every backend operation through temporary shortcuts, compact debug

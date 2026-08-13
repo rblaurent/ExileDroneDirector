@@ -858,6 +858,33 @@ the finite-turn division receives a selected nonzero denominator even when the
 published straight/stationary radius is the zero sentinel. Quaternion call forms
 remain unsplit at graph boundaries to avoid unstable split-struct serialization.
 
+### 12.6 Fixed-step angular-rate prebake
+
+Stateful rotational continuity is compiled, never integrated from game-frame
+delta during playback. The compiler samples the desired-pose boundary at time
+zero, integer fixed steps, and one exact terminal sample. The terminal interval
+may therefore be shorter than the configured step without stretching the shot.
+The schedule contains exactly `ceil(total / step) + 1` samples and is bounded
+before any candidate arrays are built.
+
+Body and gimbal are limited independently. For interval `i`, both use the real
+interval duration and the stricter of the profile's angular-rate limits at its
+two endpoints. Each desired quaternion follows the shortest arc from the prior
+compiled result. Quaternion signs are canonicalized, including an explicit
+tie-break for exact half turns, then kept sign-continuous so `q` and `-q`
+authorship compile identically.
+
+The first desired body and gimbal samples seed a shot exactly. This is the
+intentional continuity reset for a cut; a new shot gets a new compilation.
+Candidate samples and rate/clamp diagnostics publish atomically into immutable
+compiled arrays. Runtime evaluation only slerps adjacent compiled samples by
+absolute elapsed time, so playback and scrubbing are independent of frame rate,
+query order, and prior playback state.
+
+Version 1 limits angular velocity but does not claim an angular-acceleration
+model. Any later angular-acceleration feature must add an explicit profile
+parameter and preserve this fixed-schedule, atomic, absolute-time boundary.
+
 ## 13. Scalar camera and effect channels
 
 All scalar channels use the common compiled track interface:

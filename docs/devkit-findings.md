@@ -4530,3 +4530,33 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   at `3B0E5782D14B6762D8E8212292517215C7126CD743F4DF8186FB8E3CFBDCA04F`,
   and the full repository scaffold passes. No fixed-step angular-rate compiler,
   UI, cook, Workshop, or whole-mod completion is claimed here.
+
+### Fixed-step airframe/gimbal prebake contract frozen offline (2026-08-13)
+
+- `airframe_gimbal_prebake_reference.py` owns the first stateful motion layer
+  above the accepted history-free desired-pose solver. Its deterministic
+  schedule is time zero, integer fixed steps, and one exact terminal sample;
+  sample count is `ceil(total / step) + 1` and is rejected above 65,536 before
+  candidate allocation.
+- The first body/gimbal samples seed a shot exactly. Later samples limit body
+  and gimbal independently over the shortest quaternion arc, using the real
+  interval duration and the stricter angular-rate value at the two interval
+  endpoints. This makes smoothly changing profile limits safe without using
+  game-frame delta. Cuts intentionally begin a new seeded compilation.
+- Quaternion signs are canonicalized before limiting. Exact 180-degree arcs use
+  a scalar-then-vector lexicographic tie-break, after which compiled samples are
+  sign-continuous. Entire `q`/`-q` input streams therefore produce identical
+  serialized results rather than merely equivalent physical rotations.
+- Candidate and compiled payloads each carry body/gimbal quaternions, measured
+  rates, and rate-limited flags. The Blueprint schema reserves 29 explicit
+  variables and six ordered functions for reset, validation, sample build,
+  atomic commit, orchestration, and absolute-time evaluation. The evaluator
+  rejects malformed compiled cardinality, schedule, quaternion, boolean, or
+  measured-rate state before returning a pose.
+- Sixteen oracle tests and six schema tests pass, including 100 seeded streams
+  in forward/reverse invocation order, terminal partial intervals, exact rate
+  boundaries, changing endpoint limits, antipodal and half-turn input,
+  independent body/gimbal clamping, corrupt publications, and arbitrary scrub
+  order. The full scaffold includes these suites. This checkpoint does not yet
+  claim Blueprint graph bodies, live compile/runtime evidence, desired-stream
+  orchestration, angular acceleration, UI, cook, or Workshop readiness.

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Transactional fixed-step angular-rate prebake and absolute-time body/gimbal evaluation.",
+  "limits": {
+    "minimumFixedStepSeconds": 0.004166666666666667,
+    "maximumFixedStepSeconds": 0.5,
+    "maximumTotalSeconds": 3600.0,
+    "maximumSampleCount": 65536,
+    "maximumAngularRateDegreesPerSecond": 720.0,
+    "quaternionUnitTolerance": 0.000001
+  },
+  "variables": [
+    { "name": "AirframePrebakeInputDesiredBodyQuatsV1", "type": "Quat", "container": "Array", "role": "input" },
+    { "name": "AirframePrebakeInputDesiredGimbalQuatsV1", "type": "Quat", "container": "Array", "role": "input" },
+    { "name": "AirframePrebakeInputMaxAngularRatesDegreesPerSecondV1", "type": "Float", "container": "Array", "role": "input" },
+    { "name": "AirframePrebakeInputTotalSecondsV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+    { "name": "AirframePrebakeInputFixedStepSecondsV1", "type": "Float", "container": "None", "role": "input", "default": 0.016666666666666666 },
+    { "name": "AirframePrebakeCandidateBodyQuatsV1", "type": "Quat", "container": "Array", "role": "candidate" },
+    { "name": "AirframePrebakeCandidateGimbalQuatsV1", "type": "Quat", "container": "Array", "role": "candidate" },
+    { "name": "AirframePrebakeCandidateBodyAngularRatesDegreesPerSecondV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframePrebakeCandidateGimbalAngularRatesDegreesPerSecondV1", "type": "Float", "container": "Array", "role": "candidate" },
+    { "name": "AirframePrebakeCandidateBodyRateLimitedV1", "type": "Boolean", "container": "Array", "role": "candidate" },
+    { "name": "AirframePrebakeCandidateGimbalRateLimitedV1", "type": "Boolean", "container": "Array", "role": "candidate" },
+    { "name": "AirframePrebakeStageIndexV1", "type": "Integer", "container": "None", "role": "candidate", "default": 0 },
+    { "name": "AirframePrebakeStageValidV1", "type": "Boolean", "container": "None", "role": "candidate", "default": false },
+    { "name": "AirframePrebakeCompiledBodyQuatsV1", "type": "Quat", "container": "Array", "role": "result" },
+    { "name": "AirframePrebakeCompiledGimbalQuatsV1", "type": "Quat", "container": "Array", "role": "result" },
+    { "name": "AirframePrebakeCompiledBodyAngularRatesDegreesPerSecondV1", "type": "Float", "container": "Array", "role": "result" },
+    { "name": "AirframePrebakeCompiledGimbalAngularRatesDegreesPerSecondV1", "type": "Float", "container": "Array", "role": "result" },
+    { "name": "AirframePrebakeCompiledBodyRateLimitedV1", "type": "Boolean", "container": "Array", "role": "result" },
+    { "name": "AirframePrebakeCompiledGimbalRateLimitedV1", "type": "Boolean", "container": "Array", "role": "result" },
+    { "name": "AirframePrebakeCompiledFixedStepSecondsV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "AirframePrebakeCompiledTotalSecondsV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "AirframePrebakeCompileValidV1", "type": "Boolean", "container": "None", "role": "result", "default": false },
+    { "name": "AirframePrebakeInputElapsedSecondsV1", "type": "Float", "container": "None", "role": "evaluationInput", "default": 0.0 },
+    { "name": "AirframePrebakeResultSegmentIndexV1", "type": "Integer", "container": "None", "role": "evaluationResult", "default": -1 },
+    { "name": "AirframePrebakeResultAlphaV1", "type": "Float", "container": "None", "role": "evaluationResult", "default": 0.0 },
+    { "name": "AirframePrebakeResultBodyQuatV1", "type": "Quat", "container": "None", "role": "evaluationResult", "default": [0.0, 0.0, 0.0, 1.0] },
+    { "name": "AirframePrebakeResultGimbalQuatV1", "type": "Quat", "container": "None", "role": "evaluationResult", "default": [0.0, 0.0, 0.0, 1.0] },
+    { "name": "AirframePrebakeResultCompleteV1", "type": "Boolean", "container": "None", "role": "evaluationResult", "default": false },
+    { "name": "AirframePrebakeResultValidV1", "type": "Boolean", "container": "None", "role": "evaluationResult", "default": false }
+  ],
+  "functions": [
+    { "name": "ResetAirframePrebakeCandidateV1", "stage": 0 },
+    { "name": "ValidateAirframePrebakeInputsV1", "stage": 1 },
+    { "name": "BuildAirframePrebakeSamplesV1", "stage": 2, "uses": ["ApplyAirframeAngularRateLimitV1"] },
+    { "name": "CommitCompiledAirframePrebakeV1", "stage": 3 },
+    { "name": "CompileAirframePrebakeV1", "stage": 4 },
+    { "name": "EvaluateCompiledAirframePrebakeV1", "stage": 5 }
+  ],
+  "contracts": {
+    "schedule": "Sample count is ceil(TotalSeconds / FixedStepSeconds) + 1; sample zero is time zero, interior samples are integer fixed steps, and the last sample is exact TotalSeconds.",
+    "rateLimit": "Each interval independently limits body and gimbal shortest-arc rotation using min(rate[i-1], rate[i]) and its real interval duration.",
+    "shotBoundary": "The first desired body and gimbal samples seed the shot exactly; cuts begin a new compilation and intentionally reset continuity.",
+    "sign": "Quaternion representatives are canonicalized deterministically, including exact 180-degree ties, then kept sign-continuous.",
+    "atomicity": "Only CommitCompiledAirframePrebakeV1 may replace compiled arrays and scalars; compile validity is published last.",
+    "failure": "Any failure clears all compiled and evaluation results and leaves both validity flags false.",
+    "evaluation": "Evaluation depends only on immutable compiled samples and absolute elapsed seconds; it never integrates game-frame delta or prior evaluation state."
+  }
+}

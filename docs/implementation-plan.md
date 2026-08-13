@@ -239,6 +239,33 @@ This section is the authoritative handoff. Detailed evidence remains in
   Its live full export passes the same exact contract and its outputs match the
   independent oracle across the accepted warm-runtime matrix.
 
+### Airframe/gimbal fixed-step prebake contract checkpoint
+
+- `airframe_gimbal_prebake_reference.py` now freezes the stateful layer above
+  the desired-pose solver. It builds time zero, integer fixed-step samples, and
+  one exact terminal sample, with a 65,536-sample ceiling before allocation.
+  The first desired pose seeds each shot exactly; cuts intentionally start a
+  new compilation.
+- Body and gimbal are shortest-arc limited independently. Every interval uses
+  its real duration and `min(rate[i-1], rate[i])`, so a changing smoothed
+  profile cannot violate either endpoint's angular-rate limit. Quaternion
+  representatives are canonicalized with an explicit exact-half-turn tie-break
+  and then kept sign-continuous.
+- Six candidate channels mirror six compiled channels: body/gimbal quaternions,
+  measured angular rates, and rate-limited diagnostics. Only the commit stage
+  may replace compiled state, and validity publishes last. Absolute-time
+  evaluation uses immutable adjacent samples and never game-frame delta.
+- Sixteen reference tests cover integral and terminal-partial schedules,
+  invalid scalars/cardinalities/quaternions/rates, exact and exceeded limits,
+  independent body/gimbal behavior, stricter endpoint limits, antipodal and
+  180-degree ties, convergence, distinct rate character, 100 seeded streams,
+  history-independent scrubbing, and corrupt-publication rejection. Six schema
+  tests freeze 29 Blueprint-safe variables, six stages, dependencies, defaults,
+  schedule, rate, sign, atomicity, failure, and evaluation contracts.
+- This is an offline contract checkpoint. No prebake Blueprint graphs, live
+  compile/runtime proof, desired-pose stream orchestration, UI, cook, Workshop,
+  or whole-mod completion is claimed yet.
+
 ### Position-route absolute-time evaluator checkpoint
 
 - `EvaluateCompiledPositionRouteV1` is compiled, saved, and warm-runtime

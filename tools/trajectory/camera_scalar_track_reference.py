@@ -113,6 +113,8 @@ def compile_camera_scalar_track(
     modes = tuple(key.interpolation_out for key in source[:-1])
     if any(mode not in MODES for mode in modes):
         raise CameraScalarTrackError("unsupported interpolation mode")
+    if arrives[0] != 0.0 or leaves[-1] != 0.0:
+        raise CameraScalarTrackError("unused endpoint tangents must be zero")
     for index, mode in enumerate(modes):
         if mode != "hermite" and (leaves[index] != 0.0 or arrives[index + 1] != 0.0):
             raise CameraScalarTrackError("non-hermite segments cannot hide authored tangents")

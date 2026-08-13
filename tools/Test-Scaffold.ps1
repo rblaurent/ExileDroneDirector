@@ -156,6 +156,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraScalarTrackResetContracts.py',
     'tools\blueprint\snippets\reset-camera-scalar-track-compile-v1.eddgraph',
     'tools\blueprint\snippets\reset-camera-scalar-track-compile-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraScalarTrackValidationGraph.py',
+    'tools\blueprint\Test-CameraScalarTrackValidationContracts.py',
+    'tools\blueprint\snippets\validate-camera-scalar-track-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-camera-scalar-track-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeDocumentAdapterResetGraph.py',
     'tools\blueprint\Test-AirframeDocumentAdapterResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-document-source-adapter-v2.eddgraph',
@@ -1136,6 +1140,31 @@ foreach ($comparison in @(
 if ($LASTEXITCODE -ne 0) { throw "Camera scalar reset full contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraScalarTrackResetContracts.py') --project-root $ProjectRoot --graph $cameraScalarResetPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera scalar reset paste contracts failed with exit code $LASTEXITCODE." }
+$cameraScalarValidation = Join-Path $cameraScalarRoot 'validate-camera-scalar-track-inputs-v1.eddgraph'
+$cameraScalarValidationPaste = Join-Path $cameraScalarRoot 'validate-camera-scalar-track-inputs-v1-paste.eddgraph'
+$cameraScalarValidationRepeat = Join-Path $cameraScalarRoot 'validate-camera-scalar-track-inputs-v1-repeat.eddgraph'
+$cameraScalarValidationRepeatPaste = Join-Path $cameraScalarRoot 'validate-camera-scalar-track-inputs-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraScalarValidation, $cameraScalarValidationPaste), @($cameraScalarValidationRepeat, $cameraScalarValidationRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraScalarTrackValidationGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera scalar validation generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraScalarValidation, $cameraScalarValidationRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-scalar-track-inputs-v1.eddgraph')),
+    @($cameraScalarValidationPaste, $cameraScalarValidationRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-scalar-track-inputs-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+            throw 'Camera scalar validation generation is not byte deterministic.'
+    }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraScalarValidation
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraScalarTrackValidationContracts.py') --project-root $ProjectRoot --graph $cameraScalarValidation
+if ($LASTEXITCODE -ne 0) { throw "Camera scalar validation full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraScalarTrackValidationContracts.py') --project-root $ProjectRoot --graph $cameraScalarValidationPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera scalar validation paste contracts failed with exit code $LASTEXITCODE." }
 $documentAdapterNonce = [guid]::NewGuid().ToString('N')
 $documentAdapterRoot = Join-Path $scratchRoot "edd-document-adapter-$documentAdapterNonce"
 New-Item -ItemType Directory -Path $documentAdapterRoot -Force | Out-Null

@@ -692,6 +692,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   and evaluation result/scratch state, and preserves all authored arrays,
   policies, and query time. Full/paste graph parsing, executable ownership, and
   repeat-generation equality are scaffold-owned.
+- `ValidateCameraScalarTrackInputsV1` is deterministic at 138 full / 137 paste
+  nodes. It fail-closes exact 1..512 array shape, strictly increasing absolute
+  times and exact duration endpoints, finite values/tangents/bounds, supported
+  domains and five interpolation modes, positive reciprocal focus, authored
+  range policy, zero unused endpoint tangents, and zero tangents on every
+  non-Hermite segment. Exported-link contracts execute 80 seeded accepted
+  tracks and eight poisoned failure classes in both forms.
 
 ### Position-route absolute-time evaluator checkpoint
 

@@ -64,7 +64,7 @@
     "shape": "Times, values, arrive tangents, and leave tangents share one 1..512 key count. Interpolation modes contain key count minus one entries.",
     "time": "Times are finite, start at exactly zero, increase strictly, and end at exactly the non-negative duration; multi-key tracks require positive duration.",
     "domain": "linear accepts finite values; reciprocal requires every physical value to be strictly positive before inverse conversion.",
-    "tangents": "Tangents are finite interpolation-domain units per second. Non-Hermite segments reject non-zero outgoing/incoming tangents instead of silently ignoring authored data.",
+    "tangents": "Tangents are finite interpolation-domain units per second. Unused first-arrive/last-leave tangents and non-Hermite segment tangents must be zero instead of silently hiding authored data.",
     "atomicity": "Compile reset invalidates and clears candidates/results first. Candidate storage is published only after complete validation and conversion.",
     "evaluation": "Every query clears result validity first, clamps finite absolute time to the compiled duration, publishes value/velocity/acceleration plus segment coordinates, and publishes validity last.",
     "reuse": "Channel owners may copy a successful compiled snapshot; they must not alias the generic candidate arrays or compile the channel on every playback frame."

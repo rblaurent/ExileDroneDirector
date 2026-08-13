@@ -287,6 +287,12 @@ effect storage and live acceptance.
 invalidates compile/evaluation results and scratch, preserves every authored
 input plus query time, and is byte-deterministic and scaffold-owned.
 
+`ValidateCameraScalarTrackInputsV1` follows at 138 full / 137 paste nodes. It
+enforces exact array shape, ordered absolute time and endpoints, finite values,
+declared ranges, linear/reciprocal domains, all five modes, and explicit tangent
+ownership. Its interpreter passes 80 seeded valid tracks and eight failure
+classes in both forms. The next graph is candidate conversion/publication.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

@@ -92,6 +92,8 @@ class CameraScalarTrackContracts(unittest.TestCase):
             ((valid[0], replace(valid[1], time_seconds=0.0)), 0.0, {}),
             ((replace(valid[0], interpolation_out="bad"), valid[1]), 1.0, {}),
             ((replace(valid[0], leave_tangent=1.0), valid[1]), 1.0, {}),
+            ((replace(valid[0], arrive_tangent=1.0), valid[1]), 1.0, {}),
+            ((valid[0], replace(valid[1], leave_tangent=1.0)), 1.0, {}),
             (valid, 1.0, {"domain": "bad"}),
             ((CameraScalarKey(0.0, 0.0),), 0.0, {"domain": "reciprocal"}),
             (valid, 1.0, {"minimum": 3.0}),

@@ -140,6 +140,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-SmoothedFlightProfilePublishContracts.py',
     'tools\blueprint\snippets\publish-smoothed-flight-profile-v1.eddgraph',
     'tools\blueprint\snippets\publish-smoothed-flight-profile-v1-paste.eddgraph',
+    'tools\blueprint\Build-SmoothedFlightProfileEvaluateGraph.py',
+    'tools\blueprint\Test-SmoothedFlightProfileEvaluateContracts.py',
+    'tools\blueprint\snippets\evaluate-smoothed-flight-profile-v1.eddgraph',
+    'tools\blueprint\snippets\evaluate-smoothed-flight-profile-v1-paste.eddgraph',
     'tools\blueprint\Build-FlightProfileResetGraph.py',
     'tools\blueprint\Test-FlightProfileResetContracts.py',
     'tools\blueprint\snippets\reset-flight-profile-state-v1.eddgraph',
@@ -1208,6 +1212,43 @@ foreach ($spec in @(
     & python @arguments
     if ($LASTEXITCODE -ne 0) {
         throw "Smoothed flight-profile publish contracts failed with exit code ${LASTEXITCODE}: $($spec[0])"
+    }
+}
+
+$smoothedProfileEvaluate = Join-Path $smoothedProfileRoot 'evaluate-smoothed-flight-profile-v1.eddgraph'
+$smoothedProfileEvaluatePaste = Join-Path $smoothedProfileRoot 'evaluate-smoothed-flight-profile-v1-paste.eddgraph'
+$smoothedProfileEvaluateRepeat = Join-Path $smoothedProfileRoot 'evaluate-smoothed-flight-profile-v1-repeat.eddgraph'
+$smoothedProfileEvaluateRepeatPaste = Join-Path $smoothedProfileRoot 'evaluate-smoothed-flight-profile-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-SmoothedFlightProfileEvaluateGraph.py') `
+    --project-root $ProjectRoot --output $smoothedProfileEvaluate --paste-output $smoothedProfileEvaluatePaste
+if ($LASTEXITCODE -ne 0) { throw "Smoothed flight-profile evaluate generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-SmoothedFlightProfileEvaluateGraph.py') `
+    --project-root $ProjectRoot --output $smoothedProfileEvaluateRepeat --paste-output $smoothedProfileEvaluateRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated smoothed flight-profile evaluate generation failed with exit code $LASTEXITCODE." }
+foreach ($pair in @(
+    @($smoothedProfileEvaluate, $smoothedProfileEvaluateRepeat),
+    @($smoothedProfileEvaluatePaste, $smoothedProfileEvaluateRepeatPaste)
+)) {
+    if ((Get-FileHash -Algorithm SHA256 $pair[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $pair[1]).Hash) {
+        throw "Smoothed flight-profile evaluate generation is not deterministic: $($pair[0])"
+    }
+}
+foreach ($spec in @(
+    @($smoothedProfileEvaluate, $false),
+    @($smoothedProfileEvaluatePaste, $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-smoothed-flight-profile-v1.eddgraph'), $false),
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-smoothed-flight-profile-v1-paste.eddgraph'), $true)
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $spec[0]
+    $arguments = @(
+        (Join-Path $ProjectRoot 'tools\blueprint\Test-SmoothedFlightProfileEvaluateContracts.py'),
+        '--project-root', $ProjectRoot,
+        '--graph', $spec[0]
+    )
+    if ($spec[1]) { $arguments += '--paste' }
+    & python @arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Smoothed flight-profile evaluate contracts failed with exit code ${LASTEXITCODE}: $($spec[0])"
     }
 }
 

@@ -4308,3 +4308,23 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   is frozen and the four functions can be installed and tested together. Next
   is `EvaluateSmoothedFlightProfileV1`; no live smoothing, airframe/gimbal, UI,
   cook, or Workshop claim is made.
+
+### Smoothed flight-profile orchestration frozen (2026-08-13)
+
+- `EvaluateSmoothedFlightProfileV1` is a deliberately minimal deterministic
+  4/3-node full/paste graph: `ResetSmoothedFlightProfileV1` executes first,
+  `StageSmoothedFlightProfileSamplesV1` second, and
+  `PublishSmoothedFlightProfileV1` last. Publish always runs, so reset clears
+  stale fields and publication invalidates the public boundary even when stage
+  acceptance remains false.
+- Exact contracts require one self-context call per stage, the reciprocal
+  reset-stage-publish execution chain, no variable access, no reroute knot, no
+  alternate path, and no external link. Repeated generation is byte-identical;
+  full/paste SHA-256 is
+  `D741FC97E2E37D5DC1F44872F5E87F2DB99C3A2980CA8F9D39E2860E61078570` /
+  `675F4780D43DB9C5968F9A57D73D692883B4B3B992A4A682795925C6077993F2`.
+- The complete four-function smoothing graph set is now frozen offline and the
+  complete repository scaffold passes. Next is joint live installation,
+  compile/save, exact post-compile export contracts, cold load, and executable
+  warm/fresh oracle/failure/restoration proof. No live smoothing,
+  airframe/gimbal, UI, cook, or Workshop claim is made yet.

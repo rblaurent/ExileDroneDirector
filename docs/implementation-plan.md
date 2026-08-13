@@ -149,11 +149,15 @@ This section is the authoritative handoff. Detailed evidence remains in
   contracts pass with SHA-256
   `2405AFD7CF5CD10F515C4026E0695915150138D8AF8266266C12F1288878987A` /
   `0DCAEAA9D566B3ACBCB528B5A1C8A7A9FCD80D808920753E5A4DD97B05E7E64B`.
-  Next is reset/stage/publish orchestration, then joint live installation,
-  compile/save, cold load, and executable warm/fresh proof for all four
-  functions. Deterministic cinematic, hybrid, and FPV airframe/gimbal behavior
-  follows. No polished UI, cook, Workshop publication, or whole-mod completion
-  is claimed.
+  The four-node/three-node full/paste orchestrator now freezes the sole public
+  evaluation order as reset, stage, publish; it owns no state or alternate
+  path. Its full/paste SHA-256 is
+  `D741FC97E2E37D5DC1F44872F5E87F2DB99C3A2980CA8F9D39E2860E61078570` /
+  `675F4780D43DB9C5968F9A57D73D692883B4B3B992A4A682795925C6077993F2`.
+  Next is joint live installation, compile/save, cold load, and executable
+  warm/fresh proof for all four functions. Deterministic cinematic, hybrid,
+  and FPV airframe/gimbal behavior follows. No polished UI, cook, Workshop
+  publication, or whole-mod completion is claimed.
 
 ### Position-route absolute-time evaluator checkpoint
 

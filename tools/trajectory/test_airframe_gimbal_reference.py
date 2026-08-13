@@ -104,6 +104,19 @@ class AirframeGimbalContracts(unittest.TestCase):
         forward_z = 2.0 * (x * z - w * y)
         self.assertGreater(forward_z, 0.0)
 
+    def test_unreal_roll_and_vertical_half_turn_conventions_are_frozen(self):
+        banked = self.solve("cinematic_drone")
+        self.assertGreater(banked.body_rotation[0], 0.0)
+        self.assertGreater(banked.body_rotation[1], 0.0)
+
+        vertical = self.solve(
+            current_velocity=(0.0, 0.0, 100.0),
+            look_ahead_velocity=(0.0, 0.0, 100.0),
+            acceleration=(0.0, 0.0, 0.0),
+        )
+        expected = (-math.sqrt(0.5), 0.0, -math.sqrt(0.5), 0.0)
+        self.assertTrue(all(math.isclose(a, b, abs_tol=1.0e-12) for a, b in zip(vertical.path_rotation, expected)))
+
     def test_stationary_vertical_and_straight_paths_publish_finite_diagnostics(self):
         stationary = self.solve(current_velocity=(0.0, 0.0, 0.0), look_ahead_velocity=(0.0, 0.0, 0.0), acceleration=(0.0, 0.0, 0.0))
         vertical = self.solve(current_velocity=(0.0, 0.0, 100.0), look_ahead_velocity=(0.0, 0.0, 100.0), acceleration=(0.0, 0.0, 0.0))

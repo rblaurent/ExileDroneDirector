@@ -4491,3 +4491,42 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   save, survive an independent cold load, and match warm plus fresh executable
   oracle/failure/restoration cases. UI, cook, Workshop, and whole-mod
   completion remain unclaimed.
+
+### Airframe/gimbal desired-pose live semantic acceptance (2026-08-13)
+
+- `ResetAirframeGimbalV1`, `ValidateAirframeGimbalInputsV1`, and
+  `SolveAirframeGimbalV1` are installed together on the live ClientDirector,
+  compile and save successfully, and re-export as exact 10/165/100-node full
+  graphs. Each post-compile export passes its original reciprocal-link and
+  atomic-publication contract; graph shape is not being used as a substitute
+  for runtime evidence.
+- `Validate-AirframeGimbalRuntime.py` transactionally snapshots and restores
+  all 25 touched CDO properties. Warm execution passes 16 directed valid
+  cases, 27 poisoned fail-closed cases, 160 seeded cases in forward and reverse
+  order, exact reset/input-immutability boundaries, physical limits,
+  quaternion sign equivalence, overflow, non-finite input handling, and a
+  final `STATE_RESTORED|True` marker.
+- Two engine-native semantics were learned from the executable comparison and
+  encoded in the independent oracle. Unreal Euler X/roll is left-handed, so
+  its local roll quaternion corresponds to the reference helper's negative X
+  axis. At an exactly vertical path with parallel up hint,
+  `MakeRotFromXZ -> RotatorToQuaternion` chooses a deterministic negative-vector
+  half-turn representative; that sign selects the intended shortest-arc slerp
+  branch even though either sign represents the same terminal rotation.
+- `AirframeGimbalStageValidV1` reports structural input/profile validity.
+  Therefore structurally valid samples that later fail acceleration, jerk,
+  radius, or derived-finiteness gates retain stage validity while every public
+  result is reset and `AirframeGimbalResultValidV1` stays false. Invalid
+  structural inputs clear both stage and result validity.
+- Find Results does not refresh when automation merely replaces its query.
+  `Export-BlueprintFunctions.ps1` now sends Enter explicitly before opening a
+  result, and every export still has an exact expected-node-count gate. This
+  prevents a superficially successful run from silently copying the previously
+  selected function.
+- Guarded shutdown produced no new crash report. A separate NullRHI process
+  loaded all nine core assets and compiled all six Blueprints with zero errors;
+  a second fresh process repeated the complete 16/27/160 runtime matrix and
+  restored state. The live and Git-mirror ClientDirector hashes are identical
+  at `3B0E5782D14B6762D8E8212292517215C7126CD743F4DF8186FB8E3CFBDCA04F`,
+  and the full repository scaffold passes. No fixed-step angular-rate compiler,
+  UI, cook, Workshop, or whole-mod completion is claimed here.

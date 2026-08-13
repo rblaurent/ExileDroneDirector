@@ -39,6 +39,10 @@ foreach ($spec in $FunctionSpec) {
     & $inputHelper -WindowHandle $WindowHandle -ClientX $SearchX -ClientY $SearchY -PostDelayMilliseconds 60
     & $inputHelper -WindowHandle $WindowHandle -Keys '^a' -PostDelayMilliseconds 40
     & $inputHelper -WindowHandle $WindowHandle -Keys $functionName -PostDelayMilliseconds 180
+    # Enhanced does not refresh Find Results merely because the query text
+    # changed. Execute the search explicitly before opening the result; without
+    # this, a valid-looking automation run can silently reopen the prior graph.
+    & $inputHelper -WindowHandle $WindowHandle -Keys '{ENTER}' -PostDelayMilliseconds 550
     & $inputHelper -WindowHandle $WindowHandle -ClientX $ResultX -ClientY $ResultY -ClickCount 2 -PostDelayMilliseconds 280
     & $inputHelper -WindowHandle $WindowHandle -ClientX $CanvasX -ClientY $CanvasY -PostDelayMilliseconds 60
     & $inputHelper -WindowHandle $WindowHandle -Keys '^a' -PostDelayMilliseconds 40

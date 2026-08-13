@@ -128,8 +128,10 @@ def _basis_quaternion(forward: Vector3, authored_up: Vector3) -> Quaternion:
     if _length(right) <= EPSILON:
         projected_up = _subtract(authored_up, _scale(x_axis, _dot(authored_up, x_axis)))
         if _length(projected_up) <= EPSILON:
-            projected_up = (0.0, 1.0, 0.0)
-        z_axis = _unit(projected_up, (0.0, 1.0, 0.0))
+            # Mirrors FRotationMatrix::MakeFromXZ's deterministic degenerate
+            # fallback for a vertical X axis and parallel Z hint.
+            projected_up = (1.0, 0.0, 0.0)
+        z_axis = _unit(projected_up, (1.0, 0.0, 0.0))
         y_axis = _unit(_cross(z_axis, x_axis), (1.0, 0.0, 0.0))
         z_axis = _unit(_cross(x_axis, y_axis), z_axis)
     else:
@@ -157,7 +159,14 @@ def _basis_quaternion(forward: Vector3, authored_up: Vector3) -> Quaternion:
         factor = sqrt(1.0 + m22 - m00 - m11) * 2.0
         quaternion = ((m02 + m20) / factor, (m12 + m21) / factor,
                       0.25 * factor, (m10 - m01) / factor)
-    return normalize(quaternion)
+    result = normalize(quaternion)
+    # Rotator->Quat in Unreal chooses the negative vector representative for
+    # this exact 180-degree MakeFromXZ fallback.  The sign normally describes
+    # the same rotation, but it selects the intended shortest-arc branch when
+    # the authored body is subsequently slerped toward the path frame.
+    if abs(result[3]) <= EPSILON and next((value for value in result[:3] if abs(value) > EPSILON), 0.0) > 0.0:
+        result = tuple(-value for value in result)  # type: ignore[assignment]
+    return result
 
 
 def _validate_profile(profile: AirframeGimbalProfile) -> None:
@@ -248,7 +257,10 @@ def solve_airframe_gimbal(
     signed_right_acceleration = _dot(accel, path_right)
     unclamped_bank = -degrees(atan2(signed_right_acceleration, GRAVITY_CM_PER_SECOND_SQUARED)) * profile.bank_gain
     bank = max(-profile.max_bank_degrees, min(profile.max_bank_degrees, unclamped_bank))
-    banked_path = normalize(multiply(path_rotation, _axis_angle((1.0, 0.0, 0.0), radians(bank))))
+    # Unreal's Euler X component is Roll in its left-handed coordinate system.
+    # Expressing that native MakeFromEuler result with this module's
+    # right-handed axis-angle helper therefore requires the negative X axis.
+    banked_path = normalize(multiply(path_rotation, _axis_angle((-1.0, 0.0, 0.0), radians(bank))))
     body = slerp(authored_body, banked_path, profile.path_follow_weight)
 
     uptilt = _axis_angle((0.0, -1.0, 0.0), radians(profile.camera_uptilt_degrees))

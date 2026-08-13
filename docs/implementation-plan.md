@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.81.0-flight-profile-evaluator`
+Current internal build: `0.82.0-airframe-gimbal-desired-pose`
 
 ## 1. Delivery strategy
 
@@ -176,11 +176,10 @@ This section is the authoritative handoff. Detailed evidence remains in
 
 ### Airframe/gimbal desired-pose contract checkpoint
 
-- The first airframe/gimbal slice is frozen and executable as a stateless
-  reference contract plus an exact Blueprint assembly schema. It consumes
+- The first airframe/gimbal slice is frozen and live as a stateless reference
+  contract plus an exact Blueprint assembly. It consumes
   current and look-ahead velocity, acceleration, jerk, authored body and gimbal
-  quaternions, and all ten accepted smoothed profile channels. It does not yet
-  claim a live Blueprint implementation.
+  quaternions, and all ten accepted smoothed profile channels.
 - Local X is forward, local Y is right, and local Z is up. Look-ahead velocity
   selects the predictive path direction, then current velocity, then authored
   forward as deterministic fallbacks. World-up constructs the frame except at
@@ -196,7 +195,7 @@ This section is the authoritative handoff. Detailed evidence remains in
   `TurnRadiusCm == 0` sentinel; all other published diagnostics are finite and
   finite turns are positive. Invalid vectors, quaternions, profiles, booleans
   masquerading as numbers, and overflow-capable diagnostics fail closed.
-- Eleven reference tests cover exact blend endpoints, distinct preset
+- Twelve reference tests cover exact blend endpoints, distinct preset
   behavior, signed/clamped bank, positive uptilt, predictive/fallback geometry,
   stationary/vertical/straight motion, exact physical-limit boundaries,
   invalid and overflow families, quaternion sign equivalence, and 1,000 seeded
@@ -205,35 +204,40 @@ This section is the authoritative handoff. Detailed evidence remains in
   channels, reset defaults, history independence, physical gates, and
   validity-last atomic publication. Both suites are part of the complete
   scaffold.
-- Reset, validation, and desired-pose solve are now frozen as deterministic
-  generated graph sources with exact reciprocal-link contracts. Next is joint
-  live installation of all three functions, compile/save, exact post-compile
-  export, cold load, and warm/fresh executable oracle proof. The later
+- Reset, validation, and desired-pose solve are now installed together,
+  compiled, saved, and re-exported as exact 10/165/100-node live graphs. The
+  same reciprocal-link contracts pass on generated sources and post-compile
+  exports. A transactional warm runtime harness passes 16 directed valid
+  cases, 27 poisoned fail-closed families, 160 deterministic forward/reverse
+  samples, non-finite/overflow handling, input immutability, and exact state
+  restoration. A guarded shutdown, independent cold compile of all core
+  assets, fresh NullRHI repetition of the complete runtime matrix, and exact
+  live/mirror asset equality all pass. The later
   fixed-step compiler owns max-angular-rate limiting and prebaked continuity;
   this primitive deliberately remains history-free. No lens/focus/effects,
   shortcut dogfood, polished UI, cook, Workshop, or whole-mod completion is
   claimed.
-- `ResetAirframeGimbalV1` is now frozen offline as an exact deterministic
+- `ResetAirframeGimbalV1` is live as an exact deterministic
   10/9-node full/paste graph. It resets only candidate/result state, preserves
   all 16 inputs, uses identity quaternion and zero diagnostic defaults, and is
-  covered by byte-reproducibility plus reciprocal-link contracts. Validation
-  is the next graph; joint live installation still waits for the complete
-  three-function set.
-- `ValidateAirframeGimbalInputsV1` is now frozen offline as a deterministic
+  covered by byte-reproducibility, reciprocal-link contracts, and direct
+  executable reset evidence.
+- `ValidateAirframeGimbalInputsV1` is live as a deterministic
   165/164-node graph. It independently proves all vector components,
   quaternion finiteness plus the exact `1 +/- 1e-6` magnitude window, and all
   ten profile domains using non-foldable finite bounds. Stage validity is
   reset first and accepted once; all inputs remain read-only and no public
-  result is touched.
-- `SolveAirframeGimbalV1` is now frozen offline as a deterministic 100/99-node
+  result is touched. Direct executable validation proves both acceptance and
+  rejection without result mutation.
+- `SolveAirframeGimbalV1` is now live as a deterministic 100/99-node
   full/paste graph. It calls reset then validation, derives predictive path,
   banked body, and independently blended gimbal quaternions, rejects unsafe or
   non-finite physical diagnostics, and publishes all seven values before
   validity. Its no-turn radius division uses a selected denominator of one so
   eager evaluation cannot execute `0 / 0`; its rotator-to-quaternion node is an
   unsplit generated form to avoid the DevKit's fragile split-quaternion shape.
-  This remains source-contract evidence until joint live compile and executable
-  oracle proof.
+  Its live full export passes the same exact contract and its outputs match the
+  independent oracle across the accepted warm-runtime matrix.
 
 ### Position-route absolute-time evaluator checkpoint
 

@@ -58,21 +58,20 @@ Read these in order:
 
 ## Current status
 
-Current internal checkpoint: `0.81.0-flight-profile-evaluator`. Seven live
-Blueprint functions now compile a canonical flight-profile default plus one
-optional per-segment override into immutable IDs and ten bounded numeric
-channels, reject malformed or noncanonical state atomically, and evaluate one
-bounded segment without mutating the compiled publication. Warm and fresh
-NullRHI runs each passed 9 preset-resolution cases, 7 valid compilations,
-14 evaluations, the 511-segment ceiling, 12 invalid compile families,
-24 candidate-corruption families, 24 compiled-corruption families, 5 invalid
-indices, non-finite values that reached Blueprint, and complete state
-restoration. All seven functions compile, save, cold-load, mirror byte-for-byte,
-and pass exact post-compile graph contracts. The complete cinematic pose and
-trajectory regressions remain green. This is a backend parameter-compilation
-checkpoint, not a claim that profile-driven airframe/gimbal motion, the whole
-mod, UI, cooking, or Workshop publication is complete; those remain ordered
-work alongside lens/focus/effect tracks and shortcut-driven dogfood.
+Current internal checkpoint: `0.82.0-airframe-gimbal-desired-pose`. Three live
+Blueprint functions now reset, validate, and solve the history-free desired
+airframe/gimbal pose from accepted trajectory derivatives and all ten smoothed
+flight-profile channels. Exact post-compile exports contain 10, 165, and 100
+nodes and pass the same reciprocal-link contracts as their deterministic source
+graphs. The warm executable harness passes 16 directed valid cases, 27 poisoned
+fail-closed cases, 160 forward/reverse deterministic samples, non-finite and
+overflow behavior, exact input immutability, and transactional restoration.
+The oracle explicitly matches Unreal's native left-handed Euler roll and its
+deterministic vertical `MakeFromXZ` half-turn representative. Guarded shutdown,
+fresh cold compilation of all core assets, an independent NullRHI repetition
+of the full runtime matrix, and byte-identical live/Git-mirror assets all pass.
+This is not a claim that fixed-step angular-rate compilation, the whole mod,
+UI, cooking, or Workshop publication is complete.
 
 The Enhanced UE 5.6.1 mod container and first Unreal asset scaffold now exist.
 The scaffold includes a Funcom ModController, client-only director component,

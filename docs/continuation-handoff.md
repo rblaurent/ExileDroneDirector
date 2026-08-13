@@ -203,11 +203,11 @@ The schema freezes 22 variables and seven functions:
 
 ## Next ordered implementation
 
-The normalized compiled-document-to-source boundary is now frozen and its
-reset, structural validator, atomic accepted-source commit, and post-boundary
-discontinuity diagnostics are complete offline. Continue the one remaining
-policy-free top-level orchestrator. Do not open the editor until all five
-graphs and the complete offline suite are green.
+The normalized compiled-document-to-source boundary is now frozen and all five
+offline graphs are complete: reset, structural validator, atomic accepted-source
+commit, post-boundary discontinuity diagnostics, and the policy-free top-level
+orchestrator. The next gate is the documented one-editor live installation and
+acceptance sequence; do not claim live acceptance from offline graph shape.
 
 ### Document-adapter offline state
 
@@ -241,9 +241,13 @@ graphs and the complete offline suite are green.
   invalidate diagnostic-local state. Sixty seeded compiled documents match the
   independent reference in both forms, including mixed spatial curves and
   loose/tight warning thresholds. No authoritative motion state is writable.
+- The final offline graph is a deterministic 5 full / 4 paste coordinator. It
+  calls reset, validation, commit, and diagnostics in that exact order and owns
+  no policy or state. Focused contracts prove the complete call chain executes
+  even when an earlier stage fails, leaving fail-closed state to the owning
+  stage rather than inventing an alternate orchestration path.
 - Full repository scaffold, including byte-for-byte repeat generation and
-  graph parsing for reset, validation, commit, and diagnostics, passes in
-  107.5 seconds.
+  graph parsing for all five adapter graphs, passes in 104.5 seconds.
 - No editor process was opened for these offline checkpoints.
 
 ## Critical design mismatch

@@ -655,6 +655,10 @@ This section is the authoritative handoff. Detailed evidence remains in
   orientation-delta calls use separate body/gimbal triplets and may only
   invalidate diagnostic-local state; no accepted adapter, source, desired,
   prebake, or position publication is writable from this graph.
+- `CompileAirframeDocumentSourceAdapterV2` is the deliberately tiny policy-free
+  coordinator. It calls reset, structural validation, atomic source commit,
+  then diagnostics in that exact order. It owns no variables, branches, loops,
+  alternate path, or implicit legacy conversion.
 
 ### Position-route absolute-time evaluator checkpoint
 

@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.78.0-position-route-arc-slice`
+Current internal build: `0.79.0-position-route-evaluator`
 
 ## 1. Delivery strategy
 
@@ -27,6 +27,42 @@ output. Subsequent UI work exposes this proven backend without redefining it.
 This section is the authoritative handoff. Detailed evidence remains in
 `devkit-findings.md`; exact clipboard procedure remains in
 `blueprint-workflow.md`.
+
+### Position-route absolute-time evaluator checkpoint
+
+- `EvaluateCompiledPositionRouteV1` is compiled, saved, and warm-runtime
+  accepted as the scrub-safe absolute-time composition boundary. It clears all
+  public and primitive result validity first, validates compiled cardinality,
+  scans every duration with sticky finite-positive validation while selecting
+  the first containing segment, evaluates the timing profile, clamps its
+  normalized distance alpha, stages the accepted arc slice, inverts arc length,
+  and evaluates either exact linear interpolation or the accepted quintic
+  vector primitive.
+- Deterministic full/paste graphs contain 237/236 nodes with SHA-256
+  `9616D10AC7D08CA2FCBE59366F0D9B70ADB705AD0E6605FA470D6F414A2F4607` /
+  `13C72D6817F87C4673741C5ADD2B7DCD5ED45CD2864585A25972018C300EBAB4`.
+  The exact post-compile 237-node export hashes to
+  `766327739AEA1D71617364445C5E828BDE7B2B9A7BB4EB19FD12BA790E080D5F`.
+- Warm compiled execution passes 17 routes and 3,605 evaluations, including
+  shuffled direct scrubs, exact boundaries, all spatial/time-profile modes,
+  and the 512-waypoint ceiling. Seventeen corrupt compiled-state families plus
+  three non-finite elapsed values fail closed without mutating publication;
+  complete state restoration passes. Maximum position error is
+  `4.547473508864641e-13`.
+- Runtime evidence caught and fixed three defects before acceptance: polynomial
+  timing could exceed one by a few ulps near an endpoint; a malformed earlier
+  duration could be skipped by selection; and late failures could leave helper
+  validity true. The graph now clamps normalized distance, validates every
+  duration sticky-false, and clears all three primitive validity flags on every
+  post-selection failure.
+- Fresh NullRHI execution repeats all 3,605 evaluations and rejection/restoration
+  cases; fresh route-compiler and arc-inverter regressions also pass. Cold load
+  loads all nine core assets and compiles all six Blueprints. Guarded shutdown
+  kept crash directories at 25, closed-editor sync copied exactly Client
+  Director, reverse sync found 17/17 unchanged, and live/mirror package SHA-256
+  is `A995511B77A6D6E237561AAAEC03915B6773962E7162B234CA83F5218FB57208`.
+  The complete `-RequireMvpAssets` scaffold passes. No UI, cook, Workshop, or
+  whole-mod completion is claimed.
 
 ### Position-route selected arc-slice checkpoint
 

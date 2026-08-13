@@ -470,7 +470,10 @@ def evaluate_position(compiled: CompiledTrajectory, elapsed_seconds: float) -> P
             break
     segment = compiled.segments[index]
     local = (elapsed - segment.start_seconds) / segment.duration_seconds
-    distance_alpha = evaluate_time_profile(segment.time_profile, local)
+    # Polynomial timing profiles can overshoot one by a few ulps near an
+    # endpoint.  The route boundary publishes a normalized distance alpha, so
+    # clamp before both arc inversion and the externally visible result.
+    distance_alpha = max(0.0, min(1.0, evaluate_time_profile(segment.time_profile, local)))
     u = invert_arc_length(segment, distance_alpha)
     return PositionEvaluation(False, index, local, distance_alpha, u,
                               evaluate_spatial(segment, u), compiled.total_seconds)

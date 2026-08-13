@@ -350,8 +350,14 @@ restoration are green for this slice. The multi-segment position route now
 compiles authored waypoints into atomically published, flattened adaptive arc
 tables. A bounded compiled adapter can select one segment, validate and extract
 its exact contiguous arc slice, and stage the accepted inversion primitive
-without stale-state leakage. Full absolute-time route evaluation, the remaining
-cinematic tracks, and shortcut dogfood are still ordered backend work; this is
+without stale-state leakage. `EvaluateCompiledPositionRouteV1` now composes that
+publication by absolute time: it deterministically selects a segment, evaluates
+the authored timing profile, clamps normalized distance, inverts the selected
+arc table, and evaluates exact linear or cinematic quintic position. Warm and
+fresh execution pass 3,605 evaluations across 17 routes, shuffled direct scrubs,
+the 512-waypoint ceiling, 17 corrupt compiled-state families, three non-finite
+elapsed values, source immutability, and state restoration. The remaining
+cinematic tracks and shortcut dogfood are still ordered backend work; this is
 not a completed mod, UI, cook, or Workshop gate.
 
 ## Repository layout

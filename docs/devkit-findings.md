@@ -3858,3 +3858,57 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Next is full `EvaluateCompiledPositionRouteV1` absolute-time composition.
   This helper acceptance does not claim route evaluation, cinematic shortcuts,
   UI, cook, Workshop, or whole-mod completion.
+
+## Compiled position-route absolute-time evaluation accepted (2026-08-13)
+
+- Internal checkpoint `0.79.0-position-route-evaluator` compiles and saves
+  `EvaluateCompiledPositionRouteV1`. It begins by clearing seven public result
+  fields and all three shared primitive validity flags. It validates publication
+  shape, finite elapsed/total time, and positive total time; scans every segment
+  duration with sticky finite-positive validation while selecting the first
+  containing segment; then evaluates timing, clamps normalized distance to
+  `[0,1]`, stages the accepted flattened arc slice, inverts it to curve `u`, and
+  evaluates exact linear interpolation or the accepted quintic-vector primitive.
+  Completion at/after total time returns the final waypoint directly.
+- Deterministic full/paste graphs contain 237/236 nodes with hashes
+  `9616D10AC7D08CA2FCBE59366F0D9B70ADB705AD0E6605FA470D6F414A2F4607` /
+  `13C72D6817F87C4673741C5ADD2B7DCD5ED45CD2864585A25972018C300EBAB4`.
+  The exact accepted post-compile 237-node export hashes to
+  `766327739AEA1D71617364445C5E828BDE7B2B9A7BB4EB19FD12BA790E080D5F`.
+- Runtime acceptance caught three defects that graph topology alone could not.
+  First, `smoothstep(0.999999999)` produced `1.0000000000000002`, which the
+  strict arc-slice boundary correctly rejected; normalized timing output is now
+  clamped before publication and staging. Second, selection could skip an
+  earlier corrupt zero-duration segment; the single bounded scan now validates
+  every duration sticky-false. Third, a late unknown-curve rejection cleared
+  public results but left the successful timing primitive valid; all seven late
+  failure paths now clear public results plus timing, arc, and vector validity.
+  Exact contracts require both clamps, the sticky scan, and every complete
+  ten-write failure chain.
+- Warm and fresh NullRHI execution independently pass 17 routes, 3,605
+  evaluations, 17 shuffled direct-scrub proofs, all supported timing/spatial
+  modes, exact segment boundaries, and the 512-waypoint ceiling. Seventeen
+  malformed compiled-state families and all three scalar non-finite elapsed
+  values reach Blueprint and fail closed; compiled publication never mutates and
+  every touched CDO property restores. Warm/fresh maximum position error is
+  `4.547473508864641e-13`; fresh maximum distance/u errors are
+  `7.105427357601002e-15` / `1.6266987756807794e-12`.
+- All eight warm upstream/downstream position-route/arc runtime suites passed.
+  Separate fresh route-compiler and arc-inverter processes passed. Guarded
+  shutdown reached `LogExit: Exiting.` with crash directories unchanged at 25.
+  Closed-editor FromDevKit preview found 16 unchanged assets and exactly Client
+  Director changed; forced sync copied one package, reverse preview found all 17
+  unchanged, and live/mirror SHA-256 is
+  `A995511B77A6D6E237561AAAEC03915B6773962E7162B234CA83F5218FB57208`.
+  Fresh cold load loaded nine core assets and compiled all six Blueprints.
+- The exact client-coordinate lesson is now explicit: coordinates measured from
+  `Save-WindowScreenshot.ps1` are already client coordinates for the input
+  helpers; subtracting the title bar misses the pin. When the Find Results panel
+  is collapsed, send `Ctrl+F` before using
+  `Open-BlueprintFunctionViaFindResults.ps1`. These two rules made the native
+  entry seam deterministic instead of a blind-click loop.
+- The full `Test-Scaffold.ps1 -RequireMvpAssets` gate passes with deterministic
+  regeneration, checked source/paste/live evaluator contracts, every schema and
+  repository regression, and the mirrored MVP assets. Clean commit/push is the
+  remaining checkpoint gate. This does not claim remaining cinematic tracks,
+  shortcut dogfood, polished UI, cook, Workshop, or whole-mod completion.

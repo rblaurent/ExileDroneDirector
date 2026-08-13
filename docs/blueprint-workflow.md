@@ -342,6 +342,15 @@ relative MOVE deltas; `Move-SelectedBlueprintNode.ps1` uses it for movement and
 then proves the selected node's exact serialized coordinates. A successful
 input call alone is never evidence that a node moved or that pins connected.
 
+At minimum zoom after `Home`, a native function entry and the first pasted body
+node can occupy the same screen region. Treat that as an export-and-relocate
+problem, not a reason to retry pin drags. Export the graph, clear selection,
+select the native entry through an unobstructed header area, move it with the
+bounded node mover, and require the serialized coordinates to change. Only then
+drag between freshly measured pin positions. Re-export before compile and again
+after compile/save; both exact contracts must pass, and only the post-compile
+export may be promoted to `live-snippets`.
+
 The Enhanced mod root may contain DevKit-managed `Content`, `Shared`, and
 `KitContent` directories beside authored `Local`. Repository synchronization is
 deliberately allowlisted to `Local/**/*.{uasset,umap,ubulk,uexp}` and root

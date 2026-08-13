@@ -58,6 +58,19 @@ Read these in order:
 
 ## Current status
 
+Current internal checkpoint: `0.80.0-cinematic-pose-composition`. The accepted
+position and orientation backends now compose into one atomic cinematic pose:
+both tracks compile from the same duration sequence, publication is rejected if
+their timelines disagree, and absolute-time evaluation publishes a pose only
+when both component evaluators agree. Warm and fresh NullRHI runs each passed
+3,223 evaluations across 13 valid routes (including the 512-waypoint ceiling),
+all compile/commit/evaluation corruption families, non-finite elapsed values,
+state restoration, and deterministic recompilation. The five live Blueprint
+functions compile, save, cold-load, mirror byte-for-byte, and pass exact
+post-compile graph contracts. This is a backend checkpoint, not a whole-mod
+completion claim; flight-profile, lens/focus/effect tracks and shortcut-driven
+dogfood remain before UI, cooking, or Workshop work.
+
 The Enhanced UE 5.6.1 mod container and first Unreal asset scaffold now exist.
 The scaffold includes a Funcom ModController, client-only director component,
 SpectatorPawn-based CineCamera drone, spline path preview, Flypath data structs,

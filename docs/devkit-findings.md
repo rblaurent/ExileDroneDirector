@@ -3936,3 +3936,68 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - This checkpoint is offline contract evidence only. No live Blueprint body,
   compile/save, runtime, package mirror, or new feature-version claim has been
   made yet.
+
+## Atomic cinematic-pose composition accepted live (2026-08-13)
+
+- Internal checkpoint `0.80.0-cinematic-pose-composition` installs, compiles,
+  saves, mirrors, and executes the five ordered Client Director functions:
+  `ResetCinematicPoseStateV1` (12 nodes),
+  `ValidateCinematicPoseInputsV1` (27),
+  `CommitCompiledCinematicPoseV1` (57),
+  `CompileCinematicPoseV1` (6), and
+  `EvaluateCompiledCinematicPoseV1` (65). Exact post-compile exports pass the
+  same reciprocal-link and semantic contracts as their generated source and
+  paste forms; graph-shape confidence alone was not accepted.
+- Deterministic source/paste hashes are, in function order:
+  `2773686FAAC6FA991A518A0508FAD20C07EC17DCC8299C67F788A6651C7B2E2F` /
+  `70B60D09A6EF57AC264241BF9F59DDE0D0EB09481226B01994F390EBF03DE031`,
+  `81901AC7BAC08D4C1C20A5871F5B25ECD88F1B3B386C4AF8FC34D5532299BB63` /
+  `CBCF8842256E1B4E2110A79A7138EB09E192A3E9950FB540F2DD7F343956D470`,
+  `135FFC9EAFEFDED5C58F463D3C11CFBF32C14F54F8AA134214D9F186917E96E0` /
+  `DF7059B38469B16DE87602AA9CECD8A06CC301E0ADE4A88EB44F4D9663E9E8AF`,
+  `924AA7CE3C96FFFEE347A7B78EF040F40B3EB7747AAE1C1A9DAFC462161D75DB` /
+  `4EC021A6998F6DBD124A5E139EA08207FBB72159607DDCFB44465C067D057BF9`,
+  and
+  `BCF7D1FBBD38F3C60BACB042CE805D27A08B43C0DE960E582A71550B7455CC4F` /
+  `1C8995EE54412CF401965EBB12CB4848A271FC5B030D8B6E7BBE2FA0E58F7E59`.
+  Accepted live-export hashes are
+  `547E3BB75E67B651D8C2CD093C891499D08363DA44DBF1D0DE7ACB8D6F9CC6EE`,
+  `8BCF35A47CD7C0FEF25A08F200F3D5225C20B059A4E90703218CF81179B78173`,
+  `414600CE42C9895370FF0FCF3717553CF5E92A31EB5449E587D172CE521EC85B`,
+  `3555903505B7E5D2F3519CFD465114B940576AACBE4F90AE262B71558D620CEA`,
+  and
+  `3C5D045D85745050138AF0DEEC138C360173B120B7526CFE54292079A7A58559`.
+- Warm-editor and separate fresh NullRHI execution each pass 13 valid pose
+  routes, 3,223 absolute-time evaluations, 13 shuffled direct-scrub sequences,
+  exact boundaries, deterministic recompilation, and the 512-waypoint ceiling.
+  Maximum position error is `3.410605131648481e-13`; maximum angular error is
+  `1.032382731180714e-07` degrees. Eight compile-invalid families, seven corrupt
+  commit families, eight corrupt evaluation families, and all three non-finite
+  elapsed values reach Blueprint and fail closed. Authored inputs and component
+  publications remain unchanged, poisoned combined outputs clear, and every
+  touched CDO property restores.
+- All accepted scalar, vector, quaternion, arc, position-route, and orientation
+  runtime suites passed before the repository-wide scaffold gate. A separate
+  fresh cold-load process loaded nine core assets and compiled all six
+  Blueprints with zero errors. Guarded shutdown left no editor or crash reporter
+  process. Closed-editor sync copied exactly Client Director; its live and
+  mirrored package hashes match at
+  `CF2A983EA78EBA040D65C3A2407DDA65CD326FD2C52C64D27B07A50BB33803BC`.
+- The full `Test-Scaffold.ps1 -RequireMvpAssets` gate passes with deterministic
+  regeneration, source/paste/live contracts, runtime harness registration,
+  schema checks, repository regressions, and mirrored MVP assets. A mistyped
+  orientation-runtime filename during one manually assembled runner list was
+  an orchestration typo, not a feature failure; the corrected suite and full
+  scaffold both passed.
+- Dense-graph seam rule: at minimum zoom after `Home`, the native function
+  entry may visually overlap the pasted first node. Do not repeat blind pin
+  drags. Export exact graph coordinates, clear selection, select and move the
+  native entry from an unobstructed header region, prove its serialized new
+  position, then connect the measured pins. Re-export after compile and let the
+  exact contract—not the canvas appearance—decide acceptance. The final commit
+  seam was `(464,639) -> (635,625)` and the evaluator seam was
+  `(500,296) -> (250,454)` in their respective captured client layouts; these
+  coordinates are evidence for those layouts, not universal constants.
+- Next ordered backend work is flight-profile behavior followed by camera lens,
+  focus, and effect tracks, then shortcut/debug dogfood. Polished UI, cooking,
+  Workshop publication, and whole-mod completion remain explicitly unclaimed.

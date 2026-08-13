@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.79.0-position-route-evaluator`
+Current internal build: `0.80.0-cinematic-pose-composition`
 
 ## 1. Delivery strategy
 
@@ -28,29 +28,42 @@ This section is the authoritative handoff. Detailed evidence remains in
 `devkit-findings.md`; exact clipboard procedure remains in
 `blueprint-workflow.md`.
 
-### Cinematic pose composition oracle checkpoint
+### Atomic cinematic-pose composition checkpoint
 
-- The next trajectory boundary is frozen offline as atomic composition rather
-  than new interpolation math. `cinematic_pose_reference.py` compiles the
-  accepted position route and quaternion orientation track from one authored
-  duration array, requires exact segment starts/durations/counts/totals, and
-  publishes an evaluated pose only when both component evaluators agree on
-  segment, local-time alpha, completion, and total duration.
-- Seven executable oracle tests cover deterministic compilation, authored-shape
-  rejection, exact component parity, direct-scrub independence, all three
-  non-finite elapsed values, six cross-track timeline-corruption families, and
-  80 seeded tracks with shuffled absolute-time queries. Five schema tests freeze
-  one sticky candidate-valid bit, disjoint combined result channels, fail-closed
-  defaults, exact five-stage ordering, and the component dependency boundary.
-- `Configure-CinematicPoseAssembly.py` is an idempotent schema/function-seam
-  configurator. It preserves every existing class-default value and initializes
-  only fields created by that invocation, matching the accepted position-route
-  upgrade hygiene.
-- This is an executable design contract only. The five Blueprint bodies have
-  not yet been installed, compiled, saved, round-tripped, or runtime-proven, so
-  no live cinematic-pose capability is claimed. That live implementation is the
-  current ordered slice; flight profiles, lens/focus/effects, shortcuts, UI,
-  cook, and Workshop remain later work.
+- `ResetCinematicPoseV1`, `ValidateCinematicPoseInputsV1`,
+  `CommitCompiledCinematicPoseV1`, `CompileCinematicPoseV1`, and
+  `EvaluateCompiledCinematicPoseV1` are installed, compiled, saved, mirrored,
+  and executable. Composition reuses the accepted position-route and quaternion
+  orientation compilers on one duration array; it does not introduce another
+  interpolation implementation.
+- The five deterministic full/paste graphs contain 12/11, 27/26, 57/56, 6/5,
+  and 65/64 nodes. Exact compiler-reconstructed live exports contain 12, 27,
+  57, 6, and 65 nodes and pass the same reciprocal-link contracts. Combined
+  compile validity publishes last only after exact component counts, starts,
+  durations, and totals agree; combined evaluation validity publishes last only
+  after both absolute-time evaluators agree on segment, local alpha, completion,
+  and total.
+- Warm and fresh NullRHI execution each accept 13 poses and 3,223 oracle
+  evaluations, including the 512-waypoint ceiling, exact boundaries, every
+  supported position curve/time profile, random and shuffled direct scrubs, and
+  deterministic recompilation. Maximum position error is
+  `3.410605131648481e-13`, maximum angular error is
+  `1.032382731180714e-07` radians, and local-alpha error is zero.
+- Eight authored compile failures, seven corrupt commit publications, eight
+  corrupt evaluation publications, and all three non-finite elapsed values
+  reach Blueprint and fail closed. Poisoned combined outputs clear, component
+  publications remain unchanged by commit/evaluation checks, authored inputs do
+  not mutate, and every touched class-default property restores.
+- Every accepted scalar/vector/quaternion, adaptive-arc, position-route, and
+  orientation runtime regression remains green. The full scaffold passes;
+  guarded shutdown produced no crash reporter; a separate cold process loaded
+  nine core assets and compiled all six Blueprints. Closed-editor live/mirror
+  Client Director SHA-256 is
+  `CF2A983EA78EBA040D65C3A2407DDA65CD326FD2C52C64D27B07A50BB33803BC`.
+- Next is the ordered cinematic backend beyond pose composition: flight-profile
+  behavior and camera/lens/focus/effect tracks, followed by shortcut/debug
+  dogfooding. Polished UI, cook, Workshop, and whole-mod completion remain
+  explicitly unclaimed.
 
 ### Position-route absolute-time evaluator checkpoint
 

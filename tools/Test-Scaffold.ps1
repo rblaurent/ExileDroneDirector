@@ -121,6 +121,32 @@ $requiredFiles = @(
     'tools\trajectory\cinematic_pose_blueprint_schema.json',
     'tools\trajectory\test_cinematic_pose_blueprint_schema.py',
     'tools\unreal\Configure-CinematicPoseAssembly.py',
+    'tools\unreal\Validate-CinematicPoseRuntime.py',
+    'tools\blueprint\Build-CinematicPoseResetGraph.py',
+    'tools\blueprint\Test-CinematicPoseResetContracts.py',
+    'tools\blueprint\snippets\reset-cinematic-pose-v1.eddgraph',
+    'tools\blueprint\snippets\reset-cinematic-pose-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-cinematic-pose-v1.eddgraph',
+    'tools\blueprint\Build-CinematicPoseValidationGraph.py',
+    'tools\blueprint\Test-CinematicPoseValidationContracts.py',
+    'tools\blueprint\snippets\validate-cinematic-pose-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-cinematic-pose-inputs-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\validate-cinematic-pose-inputs-v1.eddgraph',
+    'tools\blueprint\Build-CinematicPoseCommitGraph.py',
+    'tools\blueprint\Test-CinematicPoseCommitContracts.py',
+    'tools\blueprint\snippets\commit-compiled-cinematic-pose-v1.eddgraph',
+    'tools\blueprint\snippets\commit-compiled-cinematic-pose-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\commit-compiled-cinematic-pose-v1.eddgraph',
+    'tools\blueprint\Build-CinematicPoseCompileGraph.py',
+    'tools\blueprint\Test-CinematicPoseCompileContracts.py',
+    'tools\blueprint\snippets\compile-cinematic-pose-v1.eddgraph',
+    'tools\blueprint\snippets\compile-cinematic-pose-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\compile-cinematic-pose-v1.eddgraph',
+    'tools\blueprint\Build-CinematicPoseEvaluatorGraph.py',
+    'tools\blueprint\Test-CinematicPoseEvaluatorContracts.py',
+    'tools\blueprint\snippets\evaluate-compiled-cinematic-pose-v1.eddgraph',
+    'tools\blueprint\snippets\evaluate-compiled-cinematic-pose-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\evaluate-compiled-cinematic-pose-v1.eddgraph',
     'tools\unreal\Configure-TrajectoryScalarEvaluators.py',
     'tools\unreal\Compile-And-SaveClientDirector.py',
     'tools\unreal\Open-ClientDirectorEditor.py',
@@ -751,6 +777,144 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_cinematic_pose_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Cinematic pose Blueprint composition-schema contracts failed with exit code $LASTEXITCODE."
+}
+
+$cinematicPoseNonce = [guid]::NewGuid().ToString('N')
+$cinematicPoseRoot = Join-Path $scratchRoot "edd-cinematic-pose-$cinematicPoseNonce"
+$cinematicPoseReset = Join-Path $cinematicPoseRoot 'reset-cinematic-pose-v1.eddgraph'
+$cinematicPoseResetPaste = Join-Path $cinematicPoseRoot 'reset-cinematic-pose-v1-paste.eddgraph'
+$cinematicPoseResetRepeat = Join-Path $cinematicPoseRoot 'reset-cinematic-pose-v1-repeat.eddgraph'
+$cinematicPoseResetRepeatPaste = Join-Path $cinematicPoseRoot 'reset-cinematic-pose-v1-repeat-paste.eddgraph'
+$cinematicPoseValidation = Join-Path $cinematicPoseRoot 'validate-cinematic-pose-inputs-v1.eddgraph'
+$cinematicPoseValidationPaste = Join-Path $cinematicPoseRoot 'validate-cinematic-pose-inputs-v1-paste.eddgraph'
+$cinematicPoseValidationRepeat = Join-Path $cinematicPoseRoot 'validate-cinematic-pose-inputs-v1-repeat.eddgraph'
+$cinematicPoseValidationRepeatPaste = Join-Path $cinematicPoseRoot 'validate-cinematic-pose-inputs-v1-repeat-paste.eddgraph'
+$cinematicPoseCommit = Join-Path $cinematicPoseRoot 'commit-compiled-cinematic-pose-v1.eddgraph'
+$cinematicPoseCommitPaste = Join-Path $cinematicPoseRoot 'commit-compiled-cinematic-pose-v1-paste.eddgraph'
+$cinematicPoseCommitRepeat = Join-Path $cinematicPoseRoot 'commit-compiled-cinematic-pose-v1-repeat.eddgraph'
+$cinematicPoseCommitRepeatPaste = Join-Path $cinematicPoseRoot 'commit-compiled-cinematic-pose-v1-repeat-paste.eddgraph'
+$cinematicPoseCompile = Join-Path $cinematicPoseRoot 'compile-cinematic-pose-v1.eddgraph'
+$cinematicPoseCompilePaste = Join-Path $cinematicPoseRoot 'compile-cinematic-pose-v1-paste.eddgraph'
+$cinematicPoseCompileRepeat = Join-Path $cinematicPoseRoot 'compile-cinematic-pose-v1-repeat.eddgraph'
+$cinematicPoseCompileRepeatPaste = Join-Path $cinematicPoseRoot 'compile-cinematic-pose-v1-repeat-paste.eddgraph'
+$cinematicPoseEvaluator = Join-Path $cinematicPoseRoot 'evaluate-compiled-cinematic-pose-v1.eddgraph'
+$cinematicPoseEvaluatorPaste = Join-Path $cinematicPoseRoot 'evaluate-compiled-cinematic-pose-v1-paste.eddgraph'
+$cinematicPoseEvaluatorRepeat = Join-Path $cinematicPoseRoot 'evaluate-compiled-cinematic-pose-v1-repeat.eddgraph'
+$cinematicPoseEvaluatorRepeatPaste = Join-Path $cinematicPoseRoot 'evaluate-compiled-cinematic-pose-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-CinematicPoseResetGraph.py') `
+    --project-root $ProjectRoot --output $cinematicPoseReset --paste-output $cinematicPoseResetPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Cinematic pose reset graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-CinematicPoseResetGraph.py') `
+    --project-root $ProjectRoot --output $cinematicPoseResetRepeat --paste-output $cinematicPoseResetRepeatPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repeated cinematic pose reset graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-CinematicPoseValidationGraph.py') `
+    --project-root $ProjectRoot --output $cinematicPoseValidation --paste-output $cinematicPoseValidationPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Cinematic pose validation graph generation failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-CinematicPoseValidationGraph.py') `
+    --project-root $ProjectRoot --output $cinematicPoseValidationRepeat --paste-output $cinematicPoseValidationRepeatPaste
+if ($LASTEXITCODE -ne 0) {
+    throw "Repeated cinematic pose validation graph generation failed with exit code $LASTEXITCODE."
+}
+foreach ($spec in @(
+    @('Build-CinematicPoseCommitGraph.py', $cinematicPoseCommit, $cinematicPoseCommitPaste, $cinematicPoseCommitRepeat, $cinematicPoseCommitRepeatPaste),
+    @('Build-CinematicPoseCompileGraph.py', $cinematicPoseCompile, $cinematicPoseCompilePaste, $cinematicPoseCompileRepeat, $cinematicPoseCompileRepeatPaste),
+    @('Build-CinematicPoseEvaluatorGraph.py', $cinematicPoseEvaluator, $cinematicPoseEvaluatorPaste, $cinematicPoseEvaluatorRepeat, $cinematicPoseEvaluatorRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($spec[0])") `
+        --project-root $ProjectRoot --output $spec[1] --paste-output $spec[2]
+    if ($LASTEXITCODE -ne 0) {
+        throw "Cinematic pose graph generation failed with exit code ${LASTEXITCODE}: $($spec[0])"
+    }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($spec[0])") `
+        --project-root $ProjectRoot --output $spec[3] --paste-output $spec[4]
+    if ($LASTEXITCODE -ne 0) {
+        throw "Repeated cinematic pose graph generation failed with exit code ${LASTEXITCODE}: $($spec[0])"
+    }
+}
+foreach ($pair in @(
+    @($cinematicPoseReset, $cinematicPoseResetRepeat),
+    @($cinematicPoseResetPaste, $cinematicPoseResetRepeatPaste),
+    @($cinematicPoseValidation, $cinematicPoseValidationRepeat),
+    @($cinematicPoseValidationPaste, $cinematicPoseValidationRepeatPaste),
+    @($cinematicPoseCommit, $cinematicPoseCommitRepeat),
+    @($cinematicPoseCommitPaste, $cinematicPoseCommitRepeatPaste),
+    @($cinematicPoseCompile, $cinematicPoseCompileRepeat),
+    @($cinematicPoseCompilePaste, $cinematicPoseCompileRepeatPaste),
+    @($cinematicPoseEvaluator, $cinematicPoseEvaluatorRepeat),
+    @($cinematicPoseEvaluatorPaste, $cinematicPoseEvaluatorRepeatPaste)
+)) {
+    if ((Get-FileHash -Algorithm SHA256 $pair[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $pair[1]).Hash) {
+        throw "Cinematic pose reset graph generation is not deterministic: $($pair[0])"
+    }
+}
+foreach ($spec in @(
+    @($cinematicPoseReset, $false),
+    @($cinematicPoseResetPaste, $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-cinematic-pose-v1.eddgraph'), $false),
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-cinematic-pose-v1-paste.eddgraph'), $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\reset-cinematic-pose-v1.eddgraph'), $false)
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $spec[0]
+    $arguments = @(
+        (Join-Path $ProjectRoot 'tools\blueprint\Test-CinematicPoseResetContracts.py'),
+        '--project-root', $ProjectRoot,
+        '--graph', $spec[0]
+    )
+    if ($spec[1]) { $arguments += '--paste' }
+    & python @arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Cinematic pose reset contracts failed with exit code ${LASTEXITCODE}: $($spec[0])"
+    }
+}
+foreach ($spec in @(
+    @($cinematicPoseValidation, $false),
+    @($cinematicPoseValidationPaste, $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-cinematic-pose-inputs-v1.eddgraph'), $false),
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-cinematic-pose-inputs-v1-paste.eddgraph'), $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\validate-cinematic-pose-inputs-v1.eddgraph'), $false)
+)) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $spec[0]
+    $arguments = @(
+        (Join-Path $ProjectRoot 'tools\blueprint\Test-CinematicPoseValidationContracts.py'),
+        '--project-root', $ProjectRoot,
+        '--graph', $spec[0]
+    )
+    if ($spec[1]) { $arguments += '--paste' }
+    & python @arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Cinematic pose validation contracts failed with exit code ${LASTEXITCODE}: $($spec[0])"
+    }
+}
+foreach ($family in @(
+    @('Commit', 'Test-CinematicPoseCommitContracts.py', $cinematicPoseCommit, $cinematicPoseCommitPaste, 'commit-compiled-cinematic-pose-v1'),
+    @('Compile', 'Test-CinematicPoseCompileContracts.py', $cinematicPoseCompile, $cinematicPoseCompilePaste, 'compile-cinematic-pose-v1'),
+    @('Evaluator', 'Test-CinematicPoseEvaluatorContracts.py', $cinematicPoseEvaluator, $cinematicPoseEvaluatorPaste, 'evaluate-compiled-cinematic-pose-v1')
+)) {
+    foreach ($spec in @(
+        @($family[2], $false),
+        @($family[3], $true),
+        @((Join-Path $ProjectRoot "tools\blueprint\snippets\$($family[4]).eddgraph"), $false),
+        @((Join-Path $ProjectRoot "tools\blueprint\snippets\$($family[4])-paste.eddgraph"), $true),
+        @((Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($family[4]).eddgraph"), $false)
+    )) {
+        & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $spec[0]
+        $arguments = @(
+            (Join-Path $ProjectRoot "tools\blueprint\$($family[1])"),
+            '--project-root', $ProjectRoot,
+            '--graph', $spec[0]
+        )
+        if ($spec[1]) { $arguments += '--paste' }
+        & python @arguments
+        if ($LASTEXITCODE -ne 0) {
+            throw "Cinematic pose $($family[0]) contracts failed with exit code ${LASTEXITCODE}: $($spec[0])"
+        }
+    }
 }
 
 $trajectoryScalarNonce = [guid]::NewGuid().ToString('N')

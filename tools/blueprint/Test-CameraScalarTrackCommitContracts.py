@@ -1,0 +1,13 @@
+"""Atomic publication contracts for complete camera scalar candidates."""
+from __future__ import annotations
+import argparse,importlib.util,re,sys
+from pathlib import Path
+ARRAYS=("CameraScalarTrackCandidateKeyTimesV1","CameraScalarTrackCandidateDomainValuesV1","CameraScalarTrackCandidateInterpolationModesV1","CameraScalarTrackCandidateArriveTangentsV1","CameraScalarTrackCandidateLeaveTangentsV1")
+def load(path):s=importlib.util.spec_from_file_location("edd_camera_scalar_commit_graph",path);m=importlib.util.module_from_spec(s);sys.modules[s.name]=m;s.loader.exec_module(m);return m
+def member(node):m=re.search(r'MemberName="([^"]+)"',node.text);return None if m is None else m.group(1)
+def accepted(lengths,stage=True):return bool(stage and 1<=lengths[0]<=512 and lengths[1]==lengths[0] and lengths[2]==lengths[0]-1 and lengths[3]==lengths[0] and lengths[4]==lengths[0])
+def main():
+ a=argparse.ArgumentParser();a.add_argument("--project-root",type=Path,required=True);a.add_argument("--graph",type=Path,required=True);a.add_argument("--paste",action="store_true");x=a.parse_args();c=load(x.project_root/"tools/blueprint/Test-WaypointCaptureContracts.py");nodes=c.parse_graph(x.graph);text=x.graph.read_text(encoding="utf-8");c.require(len(nodes)==(28 if x.paste else 29),f"node count {len(nodes)}");entries=[n for n in nodes.values() if "K2Node_FunctionEntry" in n.node_class];c.require(len(entries)==(0 if x.paste else 1),"entry count");root=nodes["K2Node_VariableSet_0"];c.require(member(root)=="CameraScalarTrackCompileValidV1","commit root");c.require(not root.pins["execute"].links,"paste root") if x.paste else c.require_link(entries[0],"then",root,"execute","entry to invalidation")
+ setters=[member(n) for n in nodes.values() if "K2Node_VariableSet" in n.node_class];c.require(setters.count("CameraScalarTrackCompileValidV1")==2 and setters.count("CameraScalarTrackFailureCodeV1")==1 and len(setters)==3,"exact publication writes");c.require(text.count('MemberName="Array_Length"')==5,"five cardinalities");c.require(text.count("CameraScalarTrackCandidate")==10,"candidate read-only ownership");c.require("CameraScalarTrackInput" not in text and "CameraScalarTrackResult" not in text,"commit boundary isolation")
+ good=(3,3,2,3,3);c.require(accepted(good),"valid commit");failures=((0,0,0,0,0),(513,513,512,513,513),(3,2,2,3,3),(3,3,3,3,3),(3,3,2,2,3),(3,3,2,3,2));c.require(all(not accepted(case) for case in failures) and not accepted(good,False),"preflight failures");print(f"Camera scalar-track commit contracts passed ({'paste' if x.paste else 'full'}): atomic success and {len(failures)+1} failure classes")
+if __name__=="__main__":main()

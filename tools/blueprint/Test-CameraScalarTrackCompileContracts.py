@@ -1,0 +1,10 @@
+"""Policy-free orchestration contracts for camera scalar compilation."""
+from __future__ import annotations
+import argparse,importlib.util,re,sys
+from pathlib import Path
+CALLS=("ResetCameraScalarTrackCompileV1","ValidateCameraScalarTrackInputsV1","BuildCameraScalarTrackCandidatesV1","CommitCameraScalarTrackV1")
+def load(path):s=importlib.util.spec_from_file_location("edd_camera_scalar_compile_graph",path);m=importlib.util.module_from_spec(s);sys.modules[s.name]=m;s.loader.exec_module(m);return m
+def member(node):m=re.search(r'MemberName="([^"]+)"',node.text);return None if m is None else m.group(1)
+def main():
+ a=argparse.ArgumentParser();a.add_argument("--project-root",type=Path,required=True);a.add_argument("--graph",type=Path,required=True);a.add_argument("--paste",action="store_true");x=a.parse_args();c=load(x.project_root/"tools/blueprint/Test-WaypointCaptureContracts.py");nodes=c.parse_graph(x.graph);c.require(len(nodes)==(4 if x.paste else 5),f"node count {len(nodes)}");calls=[next(n for n in nodes.values() if member(n)==name) for name in CALLS];entries=[n for n in nodes.values() if "K2Node_FunctionEntry" in n.node_class];c.require(len(entries)==(0 if x.paste else 1),"entry");c.require_link(entries[0],"then",calls[0],"execute","reset first") if entries else c.require(not calls[0].pins["execute"].links,"paste root");[c.require_link(left,"then",right,"execute","ordered") for left,right in zip(calls,calls[1:])];c.require(not [n for n in nodes.values() if "K2Node_Variable" in n.node_class or "K2Node_IfThenElse" in n.node_class or "K2Node_MacroInstance" in n.node_class],"no policy/state");print(f"Camera scalar-track compile contracts passed ({'paste' if x.paste else 'full'}): exact four-stage order")
+if __name__=="__main__":main()

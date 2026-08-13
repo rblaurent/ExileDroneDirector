@@ -164,6 +164,14 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraScalarTrackCandidatesContracts.py',
     'tools\blueprint\snippets\build-camera-scalar-track-candidates-v1.eddgraph',
     'tools\blueprint\snippets\build-camera-scalar-track-candidates-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraScalarTrackCommitGraph.py',
+    'tools\blueprint\Test-CameraScalarTrackCommitContracts.py',
+    'tools\blueprint\snippets\commit-camera-scalar-track-v1.eddgraph',
+    'tools\blueprint\snippets\commit-camera-scalar-track-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraScalarTrackCompileGraph.py',
+    'tools\blueprint\Test-CameraScalarTrackCompileContracts.py',
+    'tools\blueprint\snippets\compile-camera-scalar-track-v1.eddgraph',
+    'tools\blueprint\snippets\compile-camera-scalar-track-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeDocumentAdapterResetGraph.py',
     'tools\blueprint\Test-AirframeDocumentAdapterResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-document-source-adapter-v2.eddgraph',
@@ -1194,6 +1202,36 @@ foreach ($comparison in @(
 if ($LASTEXITCODE -ne 0) { throw "Camera scalar candidates full contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraScalarTrackCandidatesContracts.py') --project-root $ProjectRoot --graph $cameraScalarCandidatesPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera scalar candidates paste contracts failed with exit code $LASTEXITCODE." }
+$cameraScalarPublicationStages = @(
+    @('commit-camera-scalar-track-v1', 'Build-CameraScalarTrackCommitGraph.py', 'Test-CameraScalarTrackCommitContracts.py'),
+    @('compile-camera-scalar-track-v1', 'Build-CameraScalarTrackCompileGraph.py', 'Test-CameraScalarTrackCompileContracts.py')
+)
+foreach ($stage in $cameraScalarPublicationStages) {
+    $generated = Join-Path $cameraScalarRoot "$($stage[0]).eddgraph"
+    $generatedPaste = Join-Path $cameraScalarRoot "$($stage[0])-paste.eddgraph"
+    $repeated = Join-Path $cameraScalarRoot "$($stage[0])-repeat.eddgraph"
+    $repeatedPaste = Join-Path $cameraScalarRoot "$($stage[0])-repeat-paste.eddgraph"
+    foreach ($pair in @(@($generated, $generatedPaste), @($repeated, $repeatedPaste))) {
+        & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[1])") --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+        if ($LASTEXITCODE -ne 0) { throw "Camera scalar $($stage[0]) generation failed with exit code $LASTEXITCODE." }
+    }
+    foreach ($comparison in @(
+        @($generated, $repeated, (Join-Path $ProjectRoot "tools\blueprint\snippets\$($stage[0]).eddgraph")),
+        @($generatedPaste, $repeatedPaste, (Join-Path $ProjectRoot "tools\blueprint\snippets\$($stage[0])-paste.eddgraph"))
+    )) {
+        if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+            (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+            (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+            (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+                throw "Camera scalar $($stage[0]) generation is not byte deterministic."
+        }
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $generated
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[2])") --project-root $ProjectRoot --graph $generated
+    if ($LASTEXITCODE -ne 0) { throw "Camera scalar $($stage[0]) full contracts failed with exit code $LASTEXITCODE." }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[2])") --project-root $ProjectRoot --graph $generatedPaste --paste
+    if ($LASTEXITCODE -ne 0) { throw "Camera scalar $($stage[0]) paste contracts failed with exit code $LASTEXITCODE." }
+}
 $documentAdapterNonce = [guid]::NewGuid().ToString('N')
 $documentAdapterRoot = Join-Path $scratchRoot "edd-document-adapter-$documentAdapterNonce"
 New-Item -ItemType Directory -Path $documentAdapterRoot -Force | Out-Null

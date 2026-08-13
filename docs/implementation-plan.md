@@ -705,6 +705,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   and reciprocal focus is converted once to inverse-centimetre space. It cannot
   publish compile/evaluation validity. Forty seeded tracks execute in both
   domains and both graph forms; a false validation stage is an exact no-op.
+- `CommitCameraScalarTrackV1` is the atomic visibility boundary at 29 full / 28
+  paste nodes. It invalidates first, requires exact cardinality across all five
+  private arrays and the 1..512 limit, then publishes validity last. Six direct
+  shape failures plus invalid staging remain unpublished.
+- `CompileCameraScalarTrackV1` is a policy-free 5 full / 4 paste coordinator:
+  reset, validate, build private candidates, commit. It owns no state, branch,
+  loop, reroute, or alternate execution path.
 
 ### Position-route absolute-time evaluator checkpoint
 

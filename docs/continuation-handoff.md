@@ -299,6 +299,11 @@ reciprocal optical space, remains private, and cannot publish compile/evaluation
 validity. Forty seeded tracks pass in both domains and graph forms; invalid-stage
 execution is a no-op. Next: atomic commit, then absolute-time evaluation.
 
+`CommitCameraScalarTrackV1` is 29 full / 28 paste nodes and publishes validity
+only after exact five-array cardinality preflight. `CompileCameraScalarTrackV1`
+is the policy-free 5 full / 4 paste reset→validate→build→commit coordinator.
+Both are deterministic and scaffold-owned. Next: absolute-time evaluation.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

@@ -212,6 +212,12 @@ This section is the authoritative handoff. Detailed evidence remains in
   this primitive deliberately remains history-free. No lens/focus/effects,
   shortcut dogfood, polished UI, cook, Workshop, or whole-mod completion is
   claimed.
+- `ResetAirframeGimbalV1` is now frozen offline as an exact deterministic
+  10/9-node full/paste graph. It resets only candidate/result state, preserves
+  all 16 inputs, uses identity quaternion and zero diagnostic defaults, and is
+  covered by byte-reproducibility plus reciprocal-link contracts. Validation
+  is the next graph; joint live installation still waits for the complete
+  three-function set.
 
 ### Position-route absolute-time evaluator checkpoint
 

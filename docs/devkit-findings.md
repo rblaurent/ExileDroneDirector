@@ -4420,3 +4420,19 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   reciprocal-link contracts, then joint install/compile/save, exact post-compile
   export, cold load, and warm/fresh oracle/failure/restoration execution. UI,
   cook, Workshop, and whole-mod completion remain unclaimed.
+
+### Airframe/gimbal result reset graph frozen (2026-08-13)
+
+- `ResetAirframeGimbalV1` is a deterministic 10/9-node full/paste transaction.
+  It clears stage validity, resets body/gimbal/path results to identity
+  quaternions, clears all four finite diagnostics to zero, and writes public
+  result validity false last in one exact execution chain.
+- The reset deliberately owns no input getter or setter. Exact contracts prove
+  every default, reciprocal execution order, the sole native-entry seam in the
+  full form, the exposed first setter in paste form, no external links, and no
+  reroute knots. Repeated generation is byte-identical; full/paste SHA-256 is
+  `3E2EC3EA46C1E20E9EB821EAAB3C79602FFD104192ABB94E6A837B431B12B56B` /
+  `0551C908E4DABADFD44981A94086AD1372BA0AF6E3587B54F9B463544FD90721`.
+- This reset remains offline until validation and solve are frozen and the
+  three functions can be installed and executed together. No live
+  airframe/gimbal, UI, cook, or Workshop claim is made.

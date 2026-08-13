@@ -132,6 +132,10 @@ $requiredFiles = @(
     'tools\trajectory\test_airframe_gimbal_reference.py',
     'tools\trajectory\airframe_gimbal_blueprint_schema.json',
     'tools\trajectory\test_airframe_gimbal_blueprint_schema.py',
+    'tools\blueprint\Build-AirframeGimbalResetGraph.py',
+    'tools\blueprint\Test-AirframeGimbalResetContracts.py',
+    'tools\blueprint\snippets\reset-airframe-gimbal-v1.eddgraph',
+    'tools\blueprint\snippets\reset-airframe-gimbal-v1-paste.eddgraph',
     'tools\blueprint\Build-SmoothedFlightProfileResetGraph.py',
     'tools\blueprint\Test-SmoothedFlightProfileResetContracts.py',
     'tools\blueprint\snippets\reset-smoothed-flight-profile-v1.eddgraph',
@@ -883,6 +887,34 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_airframe_gimbal_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Airframe/gimbal Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+
+$airframeGimbalNonce = [guid]::NewGuid().ToString('N')
+$airframeGimbalRoot = Join-Path $scratchRoot "edd-airframe-gimbal-$airframeGimbalNonce"
+$airframeGimbalReset = Join-Path $airframeGimbalRoot 'reset-airframe-gimbal-v1.eddgraph'
+$airframeGimbalResetPaste = Join-Path $airframeGimbalRoot 'reset-airframe-gimbal-v1-paste.eddgraph'
+$airframeGimbalResetRepeat = Join-Path $airframeGimbalRoot 'reset-airframe-gimbal-v1-repeat.eddgraph'
+$airframeGimbalResetRepeatPaste = Join-Path $airframeGimbalRoot 'reset-airframe-gimbal-v1-repeat-paste.eddgraph'
+New-Item -ItemType Directory -Path $airframeGimbalRoot -Force | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeGimbalResetGraph.py') `
+    --project-root $ProjectRoot --output $airframeGimbalReset --paste-output $airframeGimbalResetPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe/gimbal reset graph generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeGimbalResetGraph.py') `
+    --project-root $ProjectRoot --output $airframeGimbalResetRepeat --paste-output $airframeGimbalResetRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe/gimbal reset generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($airframeGimbalReset, $airframeGimbalResetRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-airframe-gimbal-v1.eddgraph')),
+    @($airframeGimbalResetPaste, $airframeGimbalResetRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-airframe-gimbal-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe/gimbal reset generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($airframeGimbalReset, $false), @($airframeGimbalResetPaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeGimbalResetContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe/gimbal reset contracts failed with exit code $LASTEXITCODE." }
 }
 
 $cinematicPoseNonce = [guid]::NewGuid().ToString('N')

@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-13 after commit `33267f6`
+Last updated: 2026-08-13 after commit `6d0ce52`
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -22,7 +22,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Last implementation head: `33267f6ccce915ccdb574aa58e58d04bdf208fd8`;
+- Last implementation head: `6d0ce5271c956a7c8711ed627ca93bb1530a9ac6`;
   current HEAD should be the later documentation-only handoff commit and must
   equal `origin/main`
 - Expected worktree: clean
@@ -83,7 +83,7 @@ stream. It must sample position, distinct authored body orientation, distinct
 authored gimbal orientation, and all ten smoothed flight-profile values on one
 exact absolute-time schedule.
 
-Three clean checkpoints are pushed after `8d8b603`:
+Four clean checkpoints are pushed after `8d8b603`:
 
 ### `2aa201f` — reference and schema
 
@@ -127,38 +127,31 @@ The schema freezes 22 variables and seven functions:
   both forms
 - complete scaffold passed in 94.4 seconds
 
-These three checkpoints are offline-proven only. None of the new bridge graphs
+### `6d0ce52` — position/body/profile source sampling
+
+- `BuildAirframeSourcePositionBodyProfileSamplesV1`: 130 full / 129 paste nodes
+- clears only its twelve owned candidate arrays before the stage guard
+- loads distinct body authorship plus common durations into the accepted
+  orientation compiler and proves exact duration/start/total alignment
+- samples `min(index * fixedStep, total)` and requires exact position/body
+  segment, local-alpha, completion, and validity agreement
+- evaluates the accepted smoothed profile at that same coordinate and appends
+  position, body, and all ten profile values only after complete helper success
+- executes 44 exact/partial/all-profile/seeded schedules in both orders,
+  poisoned repeats, immutable sources, timeline corruption, and injected
+  compile/evaluator/profile failures in both forms
+- failures retain only a bounded aligned twelve-channel private prefix
+- complete scaffold passed in 93.5 seconds
+
+These four checkpoints are offline-proven only. None of the new bridge graphs
 has been installed, compiled, saved, cold-loaded, or executed by Enhanced.
 
 ## Next ordered implementation
 
-Do not open Unreal yet. Finish the four remaining graph bodies and exported-link
+Do not open Unreal yet. Finish the three remaining graph bodies and exported-link
 interpreters offline first.
 
-### 1. `BuildAirframeSourcePositionBodyProfileSamplesV1`
-
-Create a deterministic generator, full/paste snippets, and contract interpreter:
-
-- clear only position, body quaternion, and the ten profile candidates at entry
-- if source stage is false, stop after the clear
-- copy `AirframeSourceInputBodyWaypointQuatsV1` plus common durations into the
-  accepted orientation inputs
-- call `CompileOrientationTrackV1`; reject false or timeline mismatch
-- loop exactly `0 .. AirframeSourceExpectedSampleCountV1 - 1`
-- compute `elapsed = min(index * fixedStep, total)`
-- evaluate accepted position and orientation helpers at the same elapsed value
-- require valid results and exact segment/local-alpha/completion/total agreement
-- evaluate `EvaluateSmoothedFlightProfileV1` at the agreed segment/local alpha
-- append position, body, and ten profile values only after every helper succeeds
-- failures make stage false and break; all owned arrays retain one aligned prefix
-- tests need real accepted oracles, injected helper failures, exact boundaries,
-  partial schedules, all profiles, poisoned repeats, immutability, and seeded
-  forward/reverse cases
-
-`Build-AirframeDesiredPoseSamplesGraph.py` is the best loop/call/array template,
-but its policy must not be copied blindly.
-
-### 2. `BuildAirframeSourceGimbalSamplesV1`
+### 1. `BuildAirframeSourceGimbalSamplesV1`
 
 - clear only the gimbal candidate
 - preserve completed body/profile candidates byte-for-byte
@@ -171,7 +164,7 @@ but its policy must not be copied blindly.
 Sequential reuse of the one orientation cache is intentional. Body is fully
 sampled before the cache is replaced by gimbal.
 
-### 3. `CommitAirframeSourceSamplesToDesiredV1`
+### 2. `CommitAirframeSourceSamplesToDesiredV1`
 
 - invalidate `AirframeSourceCompileValidV1` first
 - require stage true and exact 2..65,536 cardinality across all thirteen arrays
@@ -182,7 +175,7 @@ sampled before the cache is replaced by gimbal.
 - direct preflight failure must not mutate downstream inputs; top-level reset
   owns complete transaction invalidation
 
-### 4. `CompileAirframeSourceSamplingV1`
+### 3. `CompileAirframeSourceSamplingV1`
 
 Keep orchestration tiny and policy-free. Exact order: reset, validate authored
 shape, compile position/profiles/schedule, sample position/body/profiles, sample
@@ -271,7 +264,7 @@ git rev-parse origin/main
 ## Confidence statement
 
 Confidence is high in every checkpoint explicitly accepted above and in the
-three new offline bridge checkpoints. Confidence is not claimed for the four
+four new offline bridge checkpoints. Confidence is not claimed for the three
 remaining bridge graphs, live bridge integration, document adaptation for
 distinct body/gimbal authorship, lens/focus/effects, events, keyboard dogfood,
 UI, cooking, Workshop, or whole-mod completion.

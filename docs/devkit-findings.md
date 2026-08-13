@@ -4113,3 +4113,26 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   publication, and validity-last. Deterministic regeneration and the full
   scaffold pass. These bodies remain offline until evaluation is frozen and the
   seven-function set is installed, compiled, saved, and executed in Unreal.
+
+### Flight-profile evaluator frozen offline (2026-08-13)
+
+- `EvaluateCompiledFlightProfileV1` emits 142/141-node full/paste graphs. It
+  clears a dedicated evaluation-stage bit, profile ID, all ten numeric outputs,
+  and result validity first. Preconditions require compile validity, 1..511
+  compiled IDs, exact cardinality for all ten parameter arrays, and a bounded
+  integer query index.
+- A complete scan re-resolves every compiled ID and compares all ten indexed
+  compiled parameters with its immutable preset. Any bad ID or hidden corruption
+  writes evaluation-stage validity sticky-false. Only the completed valid scan
+  reads the requested index from all 11 arrays, publishes ID then ten parameters,
+  and writes result validity last. Compiled arrays and compile validity are never
+  mutated by evaluation.
+- Exact contracts prove 13 ordered resets, all bounds/cardinalities, the full
+  resolver integrity scan, both rejection seams, final sticky-stage guard,
+  selected-index reads, one-to-one publication sources, and validity-last.
+  Source/paste SHA-256 is
+  `E026C15A386D0894B40C7E6A2C9E9FA93EE8D5F65B0FC273686ECB00FDBA7A59` /
+  `3463ACA8EEEB314D980C8BB156AC3C3EFAF000AA840824EC7094EA75DC2C55DD`.
+  Repeated generation and the full scaffold pass. The complete seven-function
+  flight-profile graph set is now frozen offline; no live compile/runtime claim
+  is made until the DevKit installation and executable harness pass.

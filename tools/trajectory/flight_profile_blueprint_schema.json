@@ -70,6 +70,7 @@
     { "name": "FlightProfileCompiledMinimumTurnRadiiCmV1", "type": "Float", "container": "Array", "role": "result" },
     { "name": "FlightProfileCompileValidV1", "type": "Boolean", "container": "None", "role": "result", "default": false },
     { "name": "FlightProfileInputSegmentIndexV1", "type": "Integer", "container": "None", "role": "evaluationInput", "default": -1 },
+    { "name": "FlightProfileEvaluationStageValidV1", "type": "Boolean", "container": "None", "role": "evaluationScratch", "default": false },
     { "name": "FlightProfileResultIdV1", "type": "String", "container": "None", "role": "evaluationResult", "default": "" },
     { "name": "FlightProfileResultPathFollowWeightV1", "type": "Float", "container": "None", "role": "evaluationResult", "default": 0.0 },
     { "name": "FlightProfileResultHorizonStabilizationWeightV1", "type": "Float", "container": "None", "role": "evaluationResult", "default": 0.0 },

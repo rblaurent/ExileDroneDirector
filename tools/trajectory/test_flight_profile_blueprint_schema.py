@@ -26,7 +26,7 @@ class FlightProfileBlueprintSchemaContracts(unittest.TestCase):
         self.assertEqual(len(names), len(set(names)))
         self.assertTrue(all(value["type"] in {"String", "Float", "Integer", "Boolean"} for value in variables))
         self.assertTrue(all(value["container"] in {"None", "Array"} for value in variables))
-        self.assertEqual(len(variables), 53)
+        self.assertEqual(len(variables), 54)
 
     def test_parameter_channels_are_exact_disjoint_and_complete(self):
         self.assertEqual(len(SCHEMA["parameterChannels"]), 10)
@@ -47,6 +47,9 @@ class FlightProfileBlueprintSchemaContracts(unittest.TestCase):
         self.assertEqual(len(resolver_result), 12)
         self.assertTrue(resolver_input.isdisjoint(resolver_result | roles["candidate"] | roles["result"]))
         self.assertTrue(resolver_result.isdisjoint(roles["candidate"] | roles["result"] | roles["evaluationResult"]))
+        evaluation_scratch = {value["name"] for value in variables if value["role"] == "evaluationScratch"}
+        self.assertEqual(evaluation_scratch, {"FlightProfileEvaluationStageValidV1"})
+        self.assertTrue(evaluation_scratch.isdisjoint(resolver_result | roles["candidate"] | roles["result"] | roles["evaluationResult"]))
 
     def test_stage_order_and_dependencies_are_exact(self):
         functions = SCHEMA["functions"]

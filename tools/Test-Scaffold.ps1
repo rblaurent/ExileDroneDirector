@@ -148,6 +148,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-FlightProfileCompileContracts.py',
     'tools\blueprint\snippets\compile-flight-profiles-v1.eddgraph',
     'tools\blueprint\snippets\compile-flight-profiles-v1-paste.eddgraph',
+    'tools\blueprint\Build-FlightProfileEvaluatorGraph.py',
+    'tools\blueprint\Test-FlightProfileEvaluatorContracts.py',
+    'tools\blueprint\snippets\evaluate-compiled-flight-profile-v1.eddgraph',
+    'tools\blueprint\snippets\evaluate-compiled-flight-profile-v1-paste.eddgraph',
     'tools\unreal\Configure-CinematicPoseAssembly.py',
     'tools\unreal\Validate-CinematicPoseRuntime.py',
     'tools\blueprint\Build-CinematicPoseResetGraph.py',
@@ -979,13 +983,18 @@ $flightProfileCompile = Join-Path $flightProfileRoot 'compile-flight-profiles-v1
 $flightProfileCompilePaste = Join-Path $flightProfileRoot 'compile-flight-profiles-v1-paste.eddgraph'
 $flightProfileCompileRepeat = Join-Path $flightProfileRoot 'compile-flight-profiles-v1-repeat.eddgraph'
 $flightProfileCompileRepeatPaste = Join-Path $flightProfileRoot 'compile-flight-profiles-v1-repeat-paste.eddgraph'
+$flightProfileEvaluator = Join-Path $flightProfileRoot 'evaluate-compiled-flight-profile-v1.eddgraph'
+$flightProfileEvaluatorPaste = Join-Path $flightProfileRoot 'evaluate-compiled-flight-profile-v1-paste.eddgraph'
+$flightProfileEvaluatorRepeat = Join-Path $flightProfileRoot 'evaluate-compiled-flight-profile-v1-repeat.eddgraph'
+$flightProfileEvaluatorRepeatPaste = Join-Path $flightProfileRoot 'evaluate-compiled-flight-profile-v1-repeat-paste.eddgraph'
 foreach ($spec in @(
     @('Build-FlightProfileResetGraph.py', $flightProfileReset, $flightProfileResetPaste, $flightProfileResetRepeat, $flightProfileResetRepeatPaste),
     @('Build-FlightProfileValidationGraph.py', $flightProfileValidation, $flightProfileValidationPaste, $flightProfileValidationRepeat, $flightProfileValidationRepeatPaste),
     @('Build-FlightProfileResolverGraph.py', $flightProfileResolver, $flightProfileResolverPaste, $flightProfileResolverRepeat, $flightProfileResolverRepeatPaste),
     @('Build-FlightProfileCandidatesGraph.py', $flightProfileCandidates, $flightProfileCandidatesPaste, $flightProfileCandidatesRepeat, $flightProfileCandidatesRepeatPaste),
     @('Build-FlightProfileCommitGraph.py', $flightProfileCommit, $flightProfileCommitPaste, $flightProfileCommitRepeat, $flightProfileCommitRepeatPaste),
-    @('Build-FlightProfileCompileGraph.py', $flightProfileCompile, $flightProfileCompilePaste, $flightProfileCompileRepeat, $flightProfileCompileRepeatPaste)
+    @('Build-FlightProfileCompileGraph.py', $flightProfileCompile, $flightProfileCompilePaste, $flightProfileCompileRepeat, $flightProfileCompileRepeatPaste),
+    @('Build-FlightProfileEvaluatorGraph.py', $flightProfileEvaluator, $flightProfileEvaluatorPaste, $flightProfileEvaluatorRepeat, $flightProfileEvaluatorRepeatPaste)
 )) {
     & python (Join-Path $ProjectRoot "tools\blueprint\$($spec[0])") `
         --project-root $ProjectRoot --output $spec[1] --paste-output $spec[2]
@@ -1006,7 +1015,9 @@ foreach ($pair in @(
     @($flightProfileCommit, $flightProfileCommitRepeat),
     @($flightProfileCommitPaste, $flightProfileCommitRepeatPaste),
     @($flightProfileCompile, $flightProfileCompileRepeat),
-    @($flightProfileCompilePaste, $flightProfileCompileRepeatPaste)
+    @($flightProfileCompilePaste, $flightProfileCompileRepeatPaste),
+    @($flightProfileEvaluator, $flightProfileEvaluatorRepeat),
+    @($flightProfileEvaluatorPaste, $flightProfileEvaluatorRepeatPaste)
 )) {
     if ((Get-FileHash -Algorithm SHA256 $pair[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $pair[1]).Hash) {
         throw "Flight-profile graph generation is not deterministic: $($pair[0])"
@@ -1018,7 +1029,8 @@ foreach ($family in @(
     @('Resolver', 'Test-FlightProfileResolverContracts.py', $flightProfileResolver, $flightProfileResolverPaste, 'resolve-flight-profile-preset-v1'),
     @('Candidates', 'Test-FlightProfileCandidatesContracts.py', $flightProfileCandidates, $flightProfileCandidatesPaste, 'build-flight-profile-candidates-v1'),
     @('Commit', 'Test-FlightProfileCommitContracts.py', $flightProfileCommit, $flightProfileCommitPaste, 'commit-compiled-flight-profiles-v1'),
-    @('Compile', 'Test-FlightProfileCompileContracts.py', $flightProfileCompile, $flightProfileCompilePaste, 'compile-flight-profiles-v1')
+    @('Compile', 'Test-FlightProfileCompileContracts.py', $flightProfileCompile, $flightProfileCompilePaste, 'compile-flight-profiles-v1'),
+    @('Evaluator', 'Test-FlightProfileEvaluatorContracts.py', $flightProfileEvaluator, $flightProfileEvaluatorPaste, 'evaluate-compiled-flight-profile-v1')
 )) {
     foreach ($spec in @(
         @($family[2], $false),

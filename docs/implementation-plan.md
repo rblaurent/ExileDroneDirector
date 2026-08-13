@@ -101,9 +101,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   all 11 compiled arrays only after the completed sticky-valid scan, and writes
   compile validity last. The five-node compiler calls reset, validation,
   candidate construction, and commit in exact order.
+- Indexed evaluation is frozen offline in a 142-node graph. It clears its own
+  scratch and every public result, validates compile state/cardinality/index,
+  scans and re-resolves every compiled segment with sticky evaluation validity,
+  and publishes only the requested ID plus ten parameters with validity last.
 - Next is deterministic Blueprint graph generation and exact source/paste
-  contracts for evaluation, followed by live compile/save and warm/fresh runtime
-  evidence.
+  installation of all seven functions, followed by live compile/save and
+  warm/fresh runtime evidence.
   This offline checkpoint is not live feature acceptance.
 
 ### Position-route absolute-time evaluator checkpoint

@@ -4280,3 +4280,31 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - This graph remains offline with reset until atomic publication and the final
   orchestrator are frozen. Next is `PublishSmoothedFlightProfileV1`; no live
   smoothing, airframe/gimbal, UI, cook, or Workshop claim is made.
+
+### Smoothed flight-profile atomic publication frozen (2026-08-13)
+
+- `PublishSmoothedFlightProfileV1` is now a deterministic 196/195-node
+  full/paste graph. It invalidates public validity first and requires valid
+  staging plus an explicitly finite neighbor weight inside 0..0.5.
+- Current and neighbor IDs are independently passed through the accepted
+  canonical resolver. Resolver validity, exact canonical identity, and all ten
+  exact canonical numeric values must agree for each staged record before any
+  result field can be written. All string equalities use StringLibrary with no
+  hidden stale MathLibrary self pin.
+- Zero weight or identical current/neighbor IDs normalize public metadata to
+  current ID, current ID, exact zero. Otherwise the staged neighbor ID/weight
+  survive. Each numeric result uses `current + weight * (neighbor - current)`;
+  all ten blended values must pass their inclusive or strict canonical domain
+  bounds before one ordered thirteen-field publication chain begins. Public
+  validity is the fourteenth and final write.
+- Exact contracts prove both resolver boundaries, twenty value equalities,
+  normalization BooleanOR and two typed Select nodes, every interpolation edge,
+  every result bound, the atomic publication chain, no stage mutation, and no
+  array operation. Full/paste SHA-256 is
+  `2405AFD7CF5CD10F515C4026E0695915150138D8AF8266266C12F1288878987A` /
+  `0DCAEAA9D566B3ACBCB528B5A1C8A7A9FCD80D808920753E5A4DD97B05E7E64B`.
+  Repeated generation is byte-identical.
+- Reset, staging, and publication remain offline until the orchestration graph
+  is frozen and the four functions can be installed and tested together. Next
+  is `EvaluateSmoothedFlightProfileV1`; no live smoothing, airframe/gimbal, UI,
+  cook, or Workshop claim is made.

@@ -138,11 +138,22 @@ This section is the authoritative handoff. Detailed evidence remains in
   generation is byte-identical; full/paste SHA-256 is
   `EE30B3EF0BCE7014567C0C37972F23C0246F6A3E3E17114EAF786031FE29BA61` /
   `08A67673C84C5ABA26FE118AFDC3D2D92749913F1C317E4311F9AF704A5458CD`.
-- Next is generated atomic publish and reset/stage/publish orchestration, then
-  joint live installation, compile/save, cold load, and executable warm/fresh
-  proof for all four functions. Deterministic cinematic, hybrid, and FPV
-  airframe/gimbal behavior follows. No polished UI, cook, Workshop publication,
-  or whole-mod completion is claimed.
+- Atomic publication is also frozen offline at 196/195 nodes. It invalidates
+  public validity first; requires valid staging and a finite weight in 0..0.5;
+  independently re-resolves and exactly verifies both eleven-field staged
+  canonical records; normalizes zero-weight or identical-profile metadata to
+  current/current/zero; computes ten convex interpolations; validates every
+  blended domain; writes IDs, weight, and all ten values; and publishes validity
+  last. It owns no array operation and never mutates stage state.
+- Repeated publication generation is byte-identical and full/paste exact
+  contracts pass with SHA-256
+  `2405AFD7CF5CD10F515C4026E0695915150138D8AF8266266C12F1288878987A` /
+  `0DCAEAA9D566B3ACBCB528B5A1C8A7A9FCD80D808920753E5A4DD97B05E7E64B`.
+  Next is reset/stage/publish orchestration, then joint live installation,
+  compile/save, cold load, and executable warm/fresh proof for all four
+  functions. Deterministic cinematic, hybrid, and FPV airframe/gimbal behavior
+  follows. No polished UI, cook, Workshop publication, or whole-mod completion
+  is claimed.
 
 ### Position-route absolute-time evaluator checkpoint
 

@@ -4245,8 +4245,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   input mutation, require the native-entry seam only in the full form, reject
   reroute knots and external links, and prove the entire reciprocal execution
   chain. Full/paste SHA-256 is
-  `AF9612612D66022B027E013CE9FC35B2D76E0DED4A24B85CA241F42A0219564C` /
-  `EA9A0BBA4C8190C82ED27B9369437D14A5619903D98B1D4EA8CB24B5C8A86043`.
+  `60DC3A9BB60DD92191B7BFA3BFE3E21CAAA1DC903BC24CFA945015AA2F546B39` /
+  `EB40A44080AFE0EE4E083E53371B3770F0C029EE5B8D378EDCE214B83DE9D845`.
 - Repeated generation is byte-identical and the complete repository scaffold
   passes. This graph remains offline until the full four-function consumer set
   is frozen and installed together. Next is current/neighbor sample staging;
@@ -4274,8 +4274,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   complete eleven-field current and neighbor snapshots, all five Select nodes,
   both quintic coefficient sets, both restoration paths, stage-valid-last, and
   the absence of public publication. Full/paste SHA-256 is
-  `EE30B3EF0BCE7014567C0C37972F23C0246F6A3E3E17114EAF786031FE29BA61` /
-  `08A67673C84C5ABA26FE118AFDC3D2D92749913F1C317E4311F9AF704A5458CD`.
+  `2250BF1B075154F2A59E499DE19E8798E09637B1BCE8F42B56B74CE22C58F813` /
+  `C8E6B8DFECD1E0F3F71B82926E08218F36011A1537B376808AEBB86BF8329AC8`.
   Repeated generation is byte-identical and the complete scaffold passes.
 - This graph remains offline with reset until atomic publication and the final
   orchestrator are frozen. Next is `PublishSmoothedFlightProfileV1`; no live
@@ -4301,9 +4301,18 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   normalization BooleanOR and two typed Select nodes, every interpolation edge,
   every result bound, the atomic publication chain, no stage mutation, and no
   array operation. Full/paste SHA-256 is
-  `2405AFD7CF5CD10F515C4026E0695915150138D8AF8266266C12F1288878987A` /
-  `0DCAEAA9D566B3ACBCB528B5A1C8A7A9FCD80D808920753E5A4DD97B05E7E64B`.
+  `AB238C4E30CD1F121CD6F2A57E760D4ABE31A0E1565EBBBB4EA7BA37B291F611` /
+  `6ADE147210B3A99E0F6375326AD88F126802E48B684E13F50191BBD78610D8D1`.
   Repeated generation is byte-identical.
+
+- Dense graph installation exposed a reusable placement rule. Enhanced 5.6.1
+  always translates a pasted selection so its bounding-box center lands under
+  the cursor; viewport panning does not affect that translation. Therefore the
+  reset, staging, and publication generators place their first executable node
+  at the selection's geometric center on a clear vertical lane. After paste,
+  the native entry and intended seam root are locally reachable without moving
+  the native entry. Full/paste semantic contracts remain unchanged apart from
+  deterministic layout hashes, and byte-identical regeneration was re-proven.
 - Reset, staging, and publication remain offline until the orchestration graph
   is frozen and the four functions can be installed and tested together. Next
   is `EvaluateSmoothedFlightProfileV1`; no live smoothing, airframe/gimbal, UI,

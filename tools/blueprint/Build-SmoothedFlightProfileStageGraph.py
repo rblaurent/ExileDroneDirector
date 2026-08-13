@@ -161,7 +161,10 @@ def main():
     ready, ready_pin = boolean_and(guards, 1024, 320)
 
     # Set the helper index before validation so every exit leaves it at the requested value.
-    set_requested = set_value("FlightProfileInputSegmentIndexV1", "int", 256, 1920)
+    # Root at the selection center on a clear lane: Unreal recenters pasted
+    # selections regardless of viewport panning, so this makes the native-entry
+    # seam deterministic even for a wide generated body.
+    set_requested = set_value("FlightProfileInputSegmentIndexV1", "int", 4800, 2880)
     bp.connect(builder.entry, "then", set_requested, "execute")
     bp.connect(requested, "SmoothedFlightProfileInputSegmentIndexV1", set_requested, "FlightProfileInputSegmentIndexV1")
     guard_branch = builder.add("guard_branch", "branch", 512, 1920)

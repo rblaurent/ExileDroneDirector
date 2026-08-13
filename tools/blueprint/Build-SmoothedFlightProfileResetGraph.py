@@ -72,9 +72,12 @@ def main():
     for index, (name, kind, value) in enumerate(RESETS):
         form = string_form if kind == "string" else scalar_form
         old = "ResultDetailV1" if kind == "string" else "PlaybackActive"
+        # Paste normalization centers the complete selection under the cursor.
+        # Keep the execution root at that geometric center on a clear lane so
+        # the native function entry never lands inside the long setter chain.
+        x, y = ((7952, -384) if index == 0 else (256 + index * 416, 0))
         setter = bp.Node.clone(
-            f"set_{index}", form, f"K2Node_VariableSet_{index}",
-            256 + index * 416, 0,
+            f"set_{index}", form, f"K2Node_VariableSet_{index}", x, y,
         )
         reset_base.variable(setter, old, name, kind)
         reset_base.default(setter, name, value)

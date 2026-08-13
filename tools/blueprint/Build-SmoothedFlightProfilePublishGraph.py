@@ -133,7 +133,9 @@ def main():
         )
         return node
 
-    invalidate = set_value("SmoothedFlightProfileResultValidV1", "bool", 256, 2240, "false")
+    # Root at the selection center on a clear lane so the entry seam remains
+    # reachable after Unreal's unavoidable paste-selection recentering.
+    invalidate = set_value("SmoothedFlightProfileResultValidV1", "bool", 9664, 2880, "false")
     bp.connect(b.entry, "then", invalidate, "execute")
     stage_valid = get("SmoothedFlightProfileStageValidV1", "bool", 0, 1760)
     weight = get("SmoothedFlightProfileNeighborWeightV1", "real", 0, 1920)

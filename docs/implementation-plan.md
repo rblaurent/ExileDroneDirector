@@ -255,12 +255,12 @@ This section is the authoritative handoff. Detailed evidence remains in
   measured angular rates, and rate-limited diagnostics. Only the commit stage
   may replace compiled state, and validity publishes last. Absolute-time
   evaluation uses immutable adjacent samples and never game-frame delta.
-- Sixteen reference tests cover integral and terminal-partial schedules,
+- Eighteen reference tests cover integral and terminal-partial schedules,
   invalid scalars/cardinalities/quaternions/rates, exact and exceeded limits,
   independent body/gimbal behavior, stricter endpoint limits, antipodal and
   180-degree ties, convergence, distinct rate character, 100 seeded streams,
   history-independent scrubbing, and corrupt-publication rejection. Six schema
-  tests freeze 29 Blueprint-safe variables, six stages, dependencies, defaults,
+  tests freeze 40 Blueprint-safe variables, seven stages, dependencies, defaults,
   schedule, rate, sign, atomicity, failure, and evaluation contracts.
 - This is an offline contract checkpoint. No prebake Blueprint graphs, live
   compile/runtime proof, desired-pose stream orchestration, UI, cook, Workshop,
@@ -280,6 +280,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   Its graph interpreter passes 103 valid and 28 invalid cases for both forms;
   validation only owns stage validity and never touches compiled/evaluation
   publication. Sample construction is next; no live prebake claim is made.
+- `ApplyAirframeAngularRateLimitV1` is frozen offline as deterministic
+  133/132-node full/paste graphs. It validates four explicit scratch inputs,
+  canonicalizes quaternion signs including exact half-turn ties, aligns the
+  desired sample to the previous sample, applies shortest-arc slerp against a
+  real interval budget, and resets four outputs before publishing validity
+  last. Both graph forms execute against the independent reference contract for
+  205 valid cases, reject 20 poisoned invalid cases without leaking stale
+  results, preserve every input, and produce byte-identical antipodal half-turn
+  results. `BuildAirframePrebakeSamplesV1` is next; no live prebake claim is
+  made yet.
 
 ### Position-route absolute-time evaluator checkpoint
 

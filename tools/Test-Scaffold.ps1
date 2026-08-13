@@ -144,6 +144,13 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframePrebakeValidationContracts.py',
     'tools\blueprint\snippets\validate-airframe-prebake-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-airframe-prebake-inputs-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframePrebakeNativeNodeForms.py',
+    'tools\blueprint\Test-AirframePrebakeNativeNodeForms.py',
+    'tools\blueprint\templates\airframe-prebake-native-node-forms.eddgraph',
+    'tools\blueprint\Build-AirframeAngularRateLimitGraph.py',
+    'tools\blueprint\Test-AirframeAngularRateLimitContracts.py',
+    'tools\blueprint\snippets\apply-airframe-angular-rate-limit-v1.eddgraph',
+    'tools\blueprint\snippets\apply-airframe-angular-rate-limit-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeGimbalResetGraph.py',
     'tools\blueprint\Test-AirframeGimbalResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-gimbal-v1.eddgraph',
@@ -974,6 +981,49 @@ foreach ($graphCase in @(@($airframePrebakeValidation, $false), @($airframePreba
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframePrebakeValidationContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Airframe prebake validation contracts failed with exit code $LASTEXITCODE." }
+}
+$airframePrebakeNative = Join-Path $airframePrebakeRoot 'airframe-prebake-native-node-forms.eddgraph'
+$airframePrebakeNativeRepeat = Join-Path $airframePrebakeRoot 'airframe-prebake-native-node-forms-repeat.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframePrebakeNativeNodeForms.py') `
+    --project-root $ProjectRoot --output $airframePrebakeNative
+if ($LASTEXITCODE -ne 0) { throw "Airframe prebake native form generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframePrebakeNativeNodeForms.py') `
+    --project-root $ProjectRoot --output $airframePrebakeNativeRepeat
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe prebake native form generation failed with exit code $LASTEXITCODE." }
+$airframePrebakeNativeChecked = Join-Path $ProjectRoot 'tools\blueprint\templates\airframe-prebake-native-node-forms.eddgraph'
+$nativeHashes = @($airframePrebakeNative, $airframePrebakeNativeRepeat, $airframePrebakeNativeChecked) |
+    ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+if (@($nativeHashes | Select-Object -Unique).Count -ne 1) {
+    throw "Airframe prebake native form generation is not byte-identical."
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $airframePrebakeNative
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframePrebakeNativeNodeForms.py') `
+    --project-root $ProjectRoot --graph $airframePrebakeNative
+if ($LASTEXITCODE -ne 0) { throw "Airframe prebake native form contracts failed with exit code $LASTEXITCODE." }
+
+$airframeRateLimit = Join-Path $airframePrebakeRoot 'apply-airframe-angular-rate-limit-v1.eddgraph'
+$airframeRateLimitPaste = Join-Path $airframePrebakeRoot 'apply-airframe-angular-rate-limit-v1-paste.eddgraph'
+$airframeRateLimitRepeat = Join-Path $airframePrebakeRoot 'apply-airframe-angular-rate-limit-v1-repeat.eddgraph'
+$airframeRateLimitRepeatPaste = Join-Path $airframePrebakeRoot 'apply-airframe-angular-rate-limit-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeAngularRateLimitGraph.py') `
+    --project-root $ProjectRoot --output $airframeRateLimit --paste-output $airframeRateLimitPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe angular-rate helper generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeAngularRateLimitGraph.py') `
+    --project-root $ProjectRoot --output $airframeRateLimitRepeat --paste-output $airframeRateLimitRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe angular-rate helper generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($airframeRateLimit, $airframeRateLimitRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\apply-airframe-angular-rate-limit-v1.eddgraph')),
+    @($airframeRateLimitPaste, $airframeRateLimitRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\apply-airframe-angular-rate-limit-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe angular-rate helper generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($airframeRateLimit, $false), @($airframeRateLimitPaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeAngularRateLimitContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe angular-rate helper contracts failed with exit code $LASTEXITCODE." }
 }
 
 $airframeGimbalNonce = [guid]::NewGuid().ToString('N')

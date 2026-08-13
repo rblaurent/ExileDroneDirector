@@ -32,10 +32,11 @@ class AirframeGimbalPrebakeBlueprintSchemaContracts(unittest.TestCase):
             "quaternionUnitTolerance": UNIT_TOLERANCE,
         })
         functions = SCHEMA["functions"]
-        self.assertEqual([function["stage"] for function in functions], list(range(6)))
+        self.assertEqual([function["stage"] for function in functions], list(range(7)))
         self.assertEqual([function["name"] for function in functions], [
             "ResetAirframePrebakeCandidateV1",
             "ValidateAirframePrebakeInputsV1",
+            "ApplyAirframeAngularRateLimitV1",
             "BuildAirframePrebakeSamplesV1",
             "CommitCompiledAirframePrebakeV1",
             "CompileAirframePrebakeV1",
@@ -44,14 +45,14 @@ class AirframeGimbalPrebakeBlueprintSchemaContracts(unittest.TestCase):
 
     def test_variables_are_unique_blueprint_safe_and_role_partitioned(self):
         variables = SCHEMA["variables"]
-        self.assertEqual(len(variables), 29)
+        self.assertEqual(len(variables), 40)
         names = [variable["name"] for variable in variables]
         self.assertEqual(len(names), len(set(names)))
         self.assertEqual({variable["type"] for variable in variables}, {"Quat", "Float", "Boolean", "Integer"})
         self.assertEqual({variable["container"] for variable in variables}, {"Array", "None"})
         roles = {role: [variable for variable in variables if variable["role"] == role]
-                 for role in ("input", "candidate", "result", "evaluationInput", "evaluationResult")}
-        self.assertEqual(tuple(len(roles[role]) for role in roles), (5, 8, 9, 1, 6))
+                 for role in ("input", "candidate", "result", "scratch", "evaluationInput", "evaluationResult")}
+        self.assertEqual(tuple(len(roles[role]) for role in roles), (5, 8, 9, 11, 1, 6))
         self.assertEqual(sum(len(values) for values in roles.values()), len(variables))
 
     def test_candidate_and_compiled_payloads_are_one_to_one(self):
@@ -82,10 +83,14 @@ class AirframeGimbalPrebakeBlueprintSchemaContracts(unittest.TestCase):
         by_name = {function["name"]: function for function in SCHEMA["functions"]}
         self.assertEqual(by_name["BuildAirframePrebakeSamplesV1"]["uses"], ["ApplyAirframeAngularRateLimitV1"])
         self.assertNotIn("uses", by_name["EvaluateCompiledAirframePrebakeV1"])
+        scratch = [variable for variable in SCHEMA["variables"] if variable["role"] == "scratch"]
+        self.assertEqual(len(scratch), 11)
+        self.assertEqual(scratch[-4]["name"], "AirframePrebakeScratchResultQuatV1")
+        self.assertEqual(scratch[-1]["name"], "AirframePrebakeScratchResultValidV1")
 
     def test_contracts_freeze_schedule_rate_atomicity_and_absolute_time(self):
         self.assertEqual(set(SCHEMA["contracts"]), {
-            "schedule", "rateLimit", "shotBoundary", "sign", "atomicity", "failure", "evaluation",
+            "schedule", "rateLimit", "shotBoundary", "sign", "helper", "atomicity", "failure", "evaluation",
         })
         contracts = " ".join(SCHEMA["contracts"].values()).lower()
         for required in (
@@ -93,6 +98,7 @@ class AirframeGimbalPrebakeBlueprintSchemaContracts(unittest.TestCase):
             "min(rate[i-1], rate[i])",
             "first desired body and gimbal samples seed the shot exactly",
             "180-degree ties",
+            "resets its four result fields before every call",
             "validity is published last",
             "clears all compiled and evaluation results",
             "absolute elapsed seconds",

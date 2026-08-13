@@ -51,6 +51,13 @@ class AirframeGimbalMotionEvaluation:
     total_seconds: float
 
 
+@dataclass(frozen=True)
+class AirframeAngularRateLimitResult:
+    rotation: Quaternion
+    angular_rate_degrees_per_second: float
+    rate_limited: bool
+
+
 def _number(value: float, label: str) -> float:
     if isinstance(value, bool):
         raise AirframeGimbalPrebakeError(f"{label} cannot be a boolean")
@@ -75,7 +82,7 @@ def _canonical_sign(value: Quaternion) -> Quaternion:
     # Prefer a nonnegative scalar hemisphere.  At w == 0, use vector
     # lexicographic order so q and -q still compile byte-identically.
     ordered = (normalized[3], normalized[0], normalized[1], normalized[2])
-    first = next((component for component in ordered if abs(component) > EPSILON), 0.0)
+    first = next((component for component in ordered if component != 0.0), 0.0)
     return _negate(normalized) if first < 0.0 else normalized
 
 
@@ -124,7 +131,7 @@ def _limit_one(
 ) -> tuple[Quaternion, float, bool]:
     target = _canonical_sign(desired)
     dot = _dot(previous, target)
-    if dot < -EPSILON:
+    if dot < 0.0:
         target = _negate(target)
         dot = -dot
     # Exact 180-degree ties retain target's canonical sign, making q/-q input
@@ -132,7 +139,7 @@ def _limit_one(
     dot = max(0.0, min(1.0, dot))
     angle = degrees(2.0 * acos(dot))
     allowed = maximum_rate * delta_seconds
-    limited = angle > allowed + 1.0e-9
+    limited = angle > allowed
     alpha = allowed / angle if limited and angle > EPSILON else 1.0
     result = _canonical_sign(slerp(previous, target, alpha))
     # Keep the serialized sequence sign-continuous after global canonicalization.
@@ -140,6 +147,26 @@ def _limit_one(
         result = _negate(result)
     applied_rate = _angle_degrees(previous, result) / delta_seconds
     return result, applied_rate, limited
+
+
+def apply_airframe_angular_rate_limit(
+    previous: Quaternion,
+    desired: Quaternion,
+    delta_seconds: float,
+    maximum_rate_degrees_per_second: float,
+) -> AirframeAngularRateLimitResult:
+    """Validate and apply the exact atomic contract used by the Blueprint helper."""
+
+    prior = _strict_unit(previous, "previous quaternion")
+    target = _strict_unit(desired, "desired quaternion")
+    delta = _number(delta_seconds, "delta seconds")
+    maximum_rate = _number(maximum_rate_degrees_per_second, "maximum angular rate")
+    if not 0.0 < delta <= MAXIMUM_FIXED_STEP_SECONDS:
+        raise AirframeGimbalPrebakeError("delta seconds is outside the supported range")
+    if not 0.0 < maximum_rate <= MAXIMUM_ANGULAR_RATE_DEGREES_PER_SECOND:
+        raise AirframeGimbalPrebakeError("maximum angular rate is outside the supported range")
+    rotation, angular_rate, rate_limited = _limit_one(prior, target, delta, maximum_rate)
+    return AirframeAngularRateLimitResult(rotation, angular_rate, rate_limited)
 
 
 def compile_airframe_gimbal_motion(

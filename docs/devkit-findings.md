@@ -4549,11 +4549,12 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   serialized results rather than merely equivalent physical rotations.
 - Candidate and compiled payloads each carry body/gimbal quaternions, measured
   rates, and rate-limited flags. The Blueprint schema reserves 29 explicit
-  variables and six ordered functions for reset, validation, sample build,
-  atomic commit, orchestration, and absolute-time evaluation. The evaluator
+  variables plus eleven isolated limiter scratch fields, and seven ordered
+  functions for reset, validation, the limiter primitive, sample build, atomic
+  commit, orchestration, and absolute-time evaluation. The evaluator
   rejects malformed compiled cardinality, schedule, quaternion, boolean, or
   measured-rate state before returning a pose.
-- Sixteen oracle tests and six schema tests pass, including 100 seeded streams
+- Eighteen oracle tests and six schema tests pass, including 100 seeded streams
   in forward/reverse invocation order, terminal partial intervals, exact rate
   boundaries, changing endpoint limits, antipodal and half-turn input,
   independent body/gimbal clamping, corrupt publications, and arbitrary scrub
@@ -4591,3 +4592,30 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   compiled and evaluation state is never written. Exact links, unsafe forms,
   byte reproducibility, and the complete scaffold also pass. Sample build is
   next; no live prebake, UI, cook, or Workshop claim is made.
+
+### Atomic airframe angular-rate limiter frozen offline (2026-08-13)
+
+- `ApplyAirframeAngularRateLimitV1` uses four explicit input scratch fields and
+  four explicit result fields so the later sample loop has a narrow, observable
+  call boundary despite Enhanced Blueprint automation not providing reliable
+  parameter creation. It never writes authored, candidate, compiled, or
+  evaluation publication state.
+- Each call first resets result quaternion/rate/limited/valid to identity, zero,
+  false, false. Previous and desired quaternions must be finite with magnitude
+  in the inclusive `1 +/- 1e-6` window; delta must be finite in `(0, 0.5]`; max
+  rate must be finite in `(0, 720]`. Rejection terminates after reset.
+- Accepted inputs are normalized and canonicalized by scalar-first then vector
+  lexicographic sign, the desired representative is aligned to the previous
+  representative, and one native `Quat_AngularDistance` plus one `Quat_Slerp`
+  applies `clamp(delta * maxRate / angle, 0, 1)`. Selected nonzero denominators
+  make pure-node evaluation safe even if an invalid call is inspected.
+- The deterministic graph has 133 full nodes and 132 paste nodes. An executable
+  graph interpreter proves both forms against the independent Python oracle for
+  five directed and 200 seeded valid cases, 20 poisoned invalid cases, input
+  immutability, exact-boundary limited flags, and three byte-identical
+  antipodal half-turn pairs. Native node-form shape, reciprocal links, exact
+  node counts, unsafe-form absence, and repeated-generation hashes are also
+  enforced by the full scaffold.
+- This remains an offline primitive. The next ordered slice is
+  `BuildAirframePrebakeSamplesV1`; there is still no live prebake, UI, cook,
+  Workshop, or whole-mod readiness claim.

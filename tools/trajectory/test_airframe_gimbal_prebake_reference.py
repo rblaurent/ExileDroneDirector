@@ -6,6 +6,7 @@ from dataclasses import replace
 from airframe_gimbal_prebake_reference import (
     AirframeGimbalPrebakeError,
     MAXIMUM_SAMPLE_COUNT,
+    apply_airframe_angular_rate_limit,
     compile_airframe_gimbal_motion,
     evaluate_airframe_gimbal_motion,
     fixed_sample_times,
@@ -80,6 +81,37 @@ class AirframeGimbalPrebakeContracts(unittest.TestCase):
             rates[2] = bad
             with self.subTest(bad=bad), self.assertRaises(AirframeGimbalPrebakeError):
                 self.compile(rates=rates)
+
+    def test_atomic_rate_limit_public_contract_validates_and_limits(self):
+        limited = apply_airframe_angular_rate_limit(
+            IDENTITY, axis_angle((0, 0, 1), 90.0), 0.25, 120.0
+        )
+        self.assertTrue(limited.rate_limited)
+        self.assertAlmostEqual(limited.angular_rate_degrees_per_second, 120.0, places=8)
+        exact = apply_airframe_angular_rate_limit(
+            IDENTITY, axis_angle((1, 0, 0), 30.0), 0.25, 120.0
+        )
+        self.assertFalse(exact.rate_limited)
+        self.assertAlmostEqual(exact.angular_rate_degrees_per_second, 120.0, places=8)
+        for previous, desired, delta, rate in (
+            ((0.0, 0.0, 0.0, 0.0), IDENTITY, 0.25, 120.0),
+            (IDENTITY, (math.nan, 0.0, 0.0, 1.0), 0.25, 120.0),
+            (IDENTITY, IDENTITY, 0.0, 120.0),
+            (IDENTITY, IDENTITY, 0.501, 120.0),
+            (IDENTITY, IDENTITY, 0.25, 0.0),
+            (IDENTITY, IDENTITY, 0.25, 720.001),
+        ):
+            with self.subTest(previous=previous, desired=desired, delta=delta, rate=rate):
+                with self.assertRaises(AirframeGimbalPrebakeError):
+                    apply_airframe_angular_rate_limit(previous, desired, delta, rate)
+
+    def test_atomic_rate_limit_antipodes_and_half_turn_ties_are_byte_identical(self):
+        for axis in ((1, 0, 0), (0, 1, 0), (0, 0, 1)):
+            target = axis_angle(axis, 180.0)
+            inverse = tuple(-value for value in target)
+            left = apply_airframe_angular_rate_limit(IDENTITY, target, 0.25, 90.0)
+            right = apply_airframe_angular_rate_limit(tuple(-v for v in IDENTITY), inverse, 0.25, 90.0)
+            self.assertEqual(left, right)
 
     def test_below_limit_tracks_desired_samples_exactly(self):
         bodies = [axis_angle((0, 0, 1), angle) for angle in (0, 10, 20, 30, 40)]

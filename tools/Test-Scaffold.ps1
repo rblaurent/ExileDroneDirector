@@ -180,6 +180,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraScalarTrackPublishContracts.py',
     'tools\blueprint\snippets\publish-camera-scalar-track-sample-v1.eddgraph',
     'tools\blueprint\snippets\publish-camera-scalar-track-sample-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraScalarTrackSegmentGraph.py',
+    'tools\blueprint\Test-CameraScalarTrackSegmentContracts.py',
+    'tools\blueprint\snippets\evaluate-camera-scalar-track-segment-v1.eddgraph',
+    'tools\blueprint\snippets\evaluate-camera-scalar-track-segment-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeDocumentAdapterResetGraph.py',
     'tools\blueprint\Test-AirframeDocumentAdapterResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-document-source-adapter-v2.eddgraph',
@@ -1214,7 +1218,8 @@ $cameraScalarPublicationStages = @(
     @('commit-camera-scalar-track-v1', 'Build-CameraScalarTrackCommitGraph.py', 'Test-CameraScalarTrackCommitContracts.py'),
     @('compile-camera-scalar-track-v1', 'Build-CameraScalarTrackCompileGraph.py', 'Test-CameraScalarTrackCompileContracts.py'),
     @('reset-camera-scalar-track-result-v1', 'Build-CameraScalarTrackResultResetGraph.py', 'Test-CameraScalarTrackResultResetContracts.py'),
-    @('publish-camera-scalar-track-sample-v1', 'Build-CameraScalarTrackPublishGraph.py', 'Test-CameraScalarTrackPublishContracts.py')
+    @('publish-camera-scalar-track-sample-v1', 'Build-CameraScalarTrackPublishGraph.py', 'Test-CameraScalarTrackPublishContracts.py'),
+    @('evaluate-camera-scalar-track-segment-v1', 'Build-CameraScalarTrackSegmentGraph.py', 'Test-CameraScalarTrackSegmentContracts.py')
 )
 foreach ($stage in $cameraScalarPublicationStages) {
     $generated = Join-Path $cameraScalarRoot "$($stage[0]).eddgraph"

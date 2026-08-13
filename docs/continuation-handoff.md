@@ -338,6 +338,17 @@ interpreters match 161 seeded samples and reject eight poisoned cases without
 overwriting stale values. The complete scaffold passes in 103.1 seconds. Next:
 the selected-segment interpolation helper.
 
+`EvaluateCameraScalarTrackSegmentV1` is now deterministic at 124 full / 123
+paste nodes. It validates the staged segment, publishes segment coordinates,
+implements hold explicitly, uses the accepted time-profile helper for preset
+blend values with exact local derivative polynomials, and maps cubic Hermite
+endpoint tangents through the accepted quintic helper. Each of its three paths
+stages one complete domain sample and calls the sole publisher; there is no exec
+merge. Full and paste interpreters match 50 mode/domain samples and five failure
+cases. The complete scaffold passes in 102.6 seconds. Next: top-level absolute-
+time selection, including constant tracks and history-free forward/reverse
+queries.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

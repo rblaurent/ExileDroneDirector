@@ -152,6 +152,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_scalar_track_reference.py',
     'tools\trajectory\camera_scalar_track_blueprint_schema.json',
     'tools\trajectory\test_camera_scalar_track_blueprint_schema.py',
+    'tools\blueprint\Build-CameraScalarTrackResetGraph.py',
+    'tools\blueprint\Test-CameraScalarTrackResetContracts.py',
+    'tools\blueprint\snippets\reset-camera-scalar-track-compile-v1.eddgraph',
+    'tools\blueprint\snippets\reset-camera-scalar-track-compile-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeDocumentAdapterResetGraph.py',
     'tools\blueprint\Test-AirframeDocumentAdapterResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-document-source-adapter-v2.eddgraph',
@@ -1104,6 +1108,34 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Camera scalar-track Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
+$cameraScalarNonce = [guid]::NewGuid().ToString('N')
+$cameraScalarRoot = Join-Path $scratchRoot "edd-camera-scalar-$cameraScalarNonce"
+New-Item -ItemType Directory -Path $cameraScalarRoot -Force | Out-Null
+$cameraScalarReset = Join-Path $cameraScalarRoot 'reset-camera-scalar-track-compile-v1.eddgraph'
+$cameraScalarResetPaste = Join-Path $cameraScalarRoot 'reset-camera-scalar-track-compile-v1-paste.eddgraph'
+$cameraScalarResetRepeat = Join-Path $cameraScalarRoot 'reset-camera-scalar-track-compile-v1-repeat.eddgraph'
+$cameraScalarResetRepeatPaste = Join-Path $cameraScalarRoot 'reset-camera-scalar-track-compile-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraScalarReset, $cameraScalarResetPaste), @($cameraScalarResetRepeat, $cameraScalarResetRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraScalarTrackResetGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera scalar reset generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraScalarReset, $cameraScalarResetRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-scalar-track-compile-v1.eddgraph')),
+    @($cameraScalarResetPaste, $cameraScalarResetRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-scalar-track-compile-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+        throw 'Camera scalar reset generation is not byte deterministic.'
+    }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraScalarReset
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraScalarTrackResetContracts.py') --project-root $ProjectRoot --graph $cameraScalarReset
+if ($LASTEXITCODE -ne 0) { throw "Camera scalar reset full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraScalarTrackResetContracts.py') --project-root $ProjectRoot --graph $cameraScalarResetPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera scalar reset paste contracts failed with exit code $LASTEXITCODE." }
 $documentAdapterNonce = [guid]::NewGuid().ToString('N')
 $documentAdapterRoot = Join-Path $scratchRoot "edd-document-adapter-$documentAdapterNonce"
 New-Item -ItemType Directory -Path $documentAdapterRoot -Force | Out-Null

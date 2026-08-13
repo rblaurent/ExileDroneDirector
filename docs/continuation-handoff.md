@@ -282,6 +282,11 @@ next checkpoint is deterministic reset/validation/candidate/commit/evaluate
 Blueprint graphs for this common engine, followed by channel-owned lens/focus/
 effect storage and live acceptance.
 
+`ResetCameraScalarTrackCompileV1` is the first deterministic graph checkpoint:
+25 full / 24 paste nodes. It clears exactly the five generic candidate arrays,
+invalidates compile/evaluation results and scratch, preserves every authored
+input plus query time, and is byte-deterministic and scaffold-owned.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

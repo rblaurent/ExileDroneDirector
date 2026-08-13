@@ -687,6 +687,11 @@ This section is the authoritative handoff. Detailed evidence remains in
   tests freeze 32 Blueprint-safe variables, six ordered functions, scratch-only
   generic compilation, and the rule that channel owners copy successful
   snapshots instead of recompiling or aliasing generic arrays per frame.
+- `ResetCameraScalarTrackCompileV1` is deterministic at 25 full / 24 paste
+  nodes. It clears only five generic candidate arrays, fail-closes compilation
+  and evaluation result/scratch state, and preserves all authored arrays,
+  policies, and query time. Full/paste graph parsing, executable ownership, and
+  repeat-generation equality are scaffold-owned.
 
 ### Position-route absolute-time evaluator checkpoint
 

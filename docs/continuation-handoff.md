@@ -329,6 +329,15 @@ paste nodes and now passes 80 valid tracks plus nine failure classes in both
 forms. The complete scaffold passes in 103.3 seconds. No normal focus, linear
 channel, interpolation, or authored-bound behavior changed.
 
+`PublishCameraScalarTrackSampleV1` is now deterministic at 78 full / 77 paste
+nodes. It invalidates first, guards compiled and staged state, converts linear
+or reciprocal-domain value/velocity/acceleration with safe denominators,
+applies optional min/max policy without mutating keys, zeroes derivatives only
+when a clamp actually binds, and publishes validity last. Full and paste
+interpreters match 161 seeded samples and reject eight poisoned cases without
+overwriting stale values. The complete scaffold passes in 103.1 seconds. Next:
+the selected-segment interpolation helper.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

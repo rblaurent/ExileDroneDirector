@@ -38,6 +38,8 @@ Read these in order:
    integration paths, local API findings, and rejected Legacy assumptions.
 7. `docs/blueprint-workflow.md` — the validated graph-snippet workflow used to
    batch Blueprint logic without relying on per-node mouse automation.
+8. `docs/continuation-handoff.md` - clean-session resume point, accepted
+   evidence, current graph seam, next ordered work, and known DevKit hazards.
 
 ## Architectural invariants
 

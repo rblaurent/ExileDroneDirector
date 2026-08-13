@@ -851,6 +851,13 @@ separation keeps direct scrubbing history-independent while allowing the same
 instantaneous target to drive Cinematic, Hybrid, Cinewhoop, Freestyle, and
 Long-range compilation.
 
+The Blueprint realization is split into reset, validation, and solve functions.
+Solve always invokes reset and validation before any publication, and commits
+validity last. Pure-node eagerness is treated as part of the execution model:
+the finite-turn division receives a selected nonzero denominator even when the
+published straight/stationary radius is the zero sentinel. Quaternion call forms
+remain unsplit at graph boundaries to avoid unstable split-struct serialization.
+
 ## 13. Scalar camera and effect channels
 
 All scalar channels use the common compiled track interface:

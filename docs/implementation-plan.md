@@ -205,9 +205,10 @@ This section is the authoritative handoff. Detailed evidence remains in
   channels, reset defaults, history independence, physical gates, and
   validity-last atomic publication. Both suites are part of the complete
   scaffold.
-- Next is deterministic graph generation and exact contracts for reset,
-  validation, and desired-pose solve, followed by joint live installation,
-  compile/save, cold load, and warm/fresh executable oracle proof. The later
+- Reset, validation, and desired-pose solve are now frozen as deterministic
+  generated graph sources with exact reciprocal-link contracts. Next is joint
+  live installation of all three functions, compile/save, exact post-compile
+  export, cold load, and warm/fresh executable oracle proof. The later
   fixed-step compiler owns max-angular-rate limiting and prebaked continuity;
   this primitive deliberately remains history-free. No lens/focus/effects,
   shortcut dogfood, polished UI, cook, Workshop, or whole-mod completion is
@@ -223,7 +224,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   quaternion finiteness plus the exact `1 +/- 1e-6` magnitude window, and all
   ten profile domains using non-foldable finite bounds. Stage validity is
   reset first and accepted once; all inputs remain read-only and no public
-  result is touched. Desired-pose solve is the next graph.
+  result is touched.
+- `SolveAirframeGimbalV1` is now frozen offline as a deterministic 100/99-node
+  full/paste graph. It calls reset then validation, derives predictive path,
+  banked body, and independently blended gimbal quaternions, rejects unsafe or
+  non-finite physical diagnostics, and publishes all seven values before
+  validity. Its no-turn radius division uses a selected denominator of one so
+  eager evaluation cannot execute `0 / 0`; its rotator-to-quaternion node is an
+  unsplit generated form to avoid the DevKit's fragile split-quaternion shape.
+  This remains source-contract evidence until joint live compile and executable
+  oracle proof.
 
 ### Position-route absolute-time evaluator checkpoint
 

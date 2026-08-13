@@ -4459,3 +4459,35 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Reset and validation remain offline until desired-pose solve is frozen and
   all three functions can be installed/tested together. No live
   airframe/gimbal, UI, cook, or Workshop claim is made.
+
+### Airframe/gimbal desired-pose solve graph frozen offline (2026-08-13)
+
+- `SolveAirframeGimbalV1` is now deterministic source in 100/99-node
+  full/paste forms. Full/paste SHA-256 is
+  `C91776C45B72934322E9260649395C48A4E8F600F1A067FE70D581DA5BA25D4E` /
+  `6B838FB982A40C32C7866111782F02C0A8E9DB444D2980C0130F9AD8D6063D89`.
+  Repeated generation and checked-in artifacts are byte-identical.
+- Execution is reset -> validate -> validation branch -> physical branch ->
+  seven result setters -> validity true. Exact contracts prove the velocity
+  look-ahead/current/authored fallback chain, stable vertical up reference,
+  acceleration/jerk/radius limits, all diagnostic finite guards, signed bank
+  derivation and clamp, local-X bank composition, local-Y Unreal uptilt
+  composition, body/gimbal slerp endpoints, and valid-last publication.
+- A real pure-node hazard was removed before freezing: Blueprint may evaluate
+  both Select inputs, so radius division no longer consumes raw lateral
+  acceleration in the no-turn case. A first Select supplies `1.0` unless a
+  finite turn exists; a second Select publishes the required `0.0` straight or
+  stationary sentinel. Thus the graph never asks the VM to evaluate `0 / 0`.
+- Headless Enhanced API reflection confirmed native quaternion axis, Euler,
+  vector-dot/normalize, and `Atan2` functions. Their ten reusable call forms,
+  including rotator-to-quaternion conversion, are generated as an 11-node
+  unsplit fixture with SHA-256
+  `AAA9F712186D9AC55E85A2573CB4A881F2194666A25B2A39134339AF47808301`.
+  The unsplit conversion deliberately replaces a harvested template whose
+  quaternion output retained four stale float subpins.
+- This is still offline source and semantic-contract evidence. The accepted
+  reference oracle and schema tests pass, but there is no live airframe/gimbal
+  claim until reset, validation, and solve are installed together, compile and
+  save, survive an independent cold load, and match warm plus fresh executable
+  oracle/failure/restoration cases. UI, cook, Workshop, and whole-mod
+  completion remain unclaimed.

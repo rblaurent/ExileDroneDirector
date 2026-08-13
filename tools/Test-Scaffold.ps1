@@ -944,6 +944,47 @@ foreach ($graphCase in @(@($airframeGimbalValidation, $false), @($airframeGimbal
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeGimbalValidationContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Airframe/gimbal validation contracts failed with exit code $LASTEXITCODE." }
 }
+$airframeGimbalNative = Join-Path $airframeGimbalRoot 'airframe-gimbal-native-node-forms.eddgraph'
+$airframeGimbalNativeRepeat = Join-Path $airframeGimbalRoot 'airframe-gimbal-native-node-forms-repeat.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeGimbalNativeNodeForms.py') `
+    --project-root $ProjectRoot --output $airframeGimbalNative
+if ($LASTEXITCODE -ne 0) { throw "Airframe/gimbal native form generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeGimbalNativeNodeForms.py') `
+    --project-root $ProjectRoot --output $airframeGimbalNativeRepeat
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe/gimbal native form generation failed with exit code $LASTEXITCODE." }
+$airframeGimbalNativeChecked = Join-Path $ProjectRoot 'tools\blueprint\templates\airframe-gimbal-native-node-forms.eddgraph'
+$nativeHashes = @($airframeGimbalNative, $airframeGimbalNativeRepeat, $airframeGimbalNativeChecked) |
+    ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+if (@($nativeHashes | Select-Object -Unique).Count -ne 1) { throw "Airframe/gimbal native form generation is not byte-identical." }
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $airframeGimbalNative
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeGimbalNativeNodeForms.py') `
+    --project-root $ProjectRoot --graph $airframeGimbalNative
+if ($LASTEXITCODE -ne 0) { throw "Airframe/gimbal native form contracts failed with exit code $LASTEXITCODE." }
+
+$airframeGimbalSolve = Join-Path $airframeGimbalRoot 'solve-airframe-gimbal-v1.eddgraph'
+$airframeGimbalSolvePaste = Join-Path $airframeGimbalRoot 'solve-airframe-gimbal-v1-paste.eddgraph'
+$airframeGimbalSolveRepeat = Join-Path $airframeGimbalRoot 'solve-airframe-gimbal-v1-repeat.eddgraph'
+$airframeGimbalSolveRepeatPaste = Join-Path $airframeGimbalRoot 'solve-airframe-gimbal-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeGimbalSolveGraph.py') `
+    --project-root $ProjectRoot --output $airframeGimbalSolve --paste-output $airframeGimbalSolvePaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe/gimbal solve graph generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeGimbalSolveGraph.py') `
+    --project-root $ProjectRoot --output $airframeGimbalSolveRepeat --paste-output $airframeGimbalSolveRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe/gimbal solve generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($airframeGimbalSolve, $airframeGimbalSolveRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\solve-airframe-gimbal-v1.eddgraph')),
+    @($airframeGimbalSolvePaste, $airframeGimbalSolveRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\solve-airframe-gimbal-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe/gimbal solve generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($airframeGimbalSolve, $false), @($airframeGimbalSolvePaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeGimbalSolveContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe/gimbal solve contracts failed with exit code $LASTEXITCODE." }
+}
 
 $cinematicPoseNonce = [guid]::NewGuid().ToString('N')
 $cinematicPoseRoot = Join-Path $scratchRoot "edd-cinematic-pose-$cinematicPoseNonce"

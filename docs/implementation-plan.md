@@ -302,6 +302,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   and prove antipodal-stream byte equivalence, a false-stage no-op, input
   immutability, and injected seed/loop helper failures. Atomic commit is next;
   no live prebake claim is made yet.
+- `CommitCompiledAirframePrebakeV1` is frozen offline as deterministic
+  59/58-node full/paste graphs. It first clears all six prior compiled channels,
+  zeros the compiled schedule, and invalidates publication. It then independently
+  requires an accepted stage, `2..65536` body samples, equal cardinality across
+  all six candidate channels, and `StageIndex == count - 1`. Only the accepted
+  branch copies all six arrays and the exact input step/total; compile validity
+  is the final write. Executable graph contracts prove exact non-aliasing copies,
+  candidate immutability, mismatched channels, both count limits, terminal-index
+  rejection, poisoned prior publication cleanup, and invocation independence.
+  Compile orchestration is next; no live prebake claim is made yet.
 
 ### Position-route absolute-time evaluator checkpoint
 

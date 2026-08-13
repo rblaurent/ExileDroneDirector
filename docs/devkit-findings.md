@@ -4651,3 +4651,25 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   across repeated calls while retaining deterministic desired `q`/`-q`
   equivalence. Atomic commit is next; no live prebake, UI, cook, Workshop, or
   whole-mod readiness claim is made.
+
+### Fixed-step airframe/gimbal atomic commit frozen offline (2026-08-13)
+
+- `CommitCompiledAirframePrebakeV1` is generated as exact 59/58-node full/paste
+  graphs. Its unconditional prefix clears all six compiled arrays, resets the
+  compiled fixed step and total to zero, and clears compile validity before any
+  candidate can be accepted. Rejection therefore cannot expose stale data from
+  a previous successful invocation.
+- The boundary does not trust the sample builder merely because stage validity
+  is true. It independently enforces `2..65536` samples, equal cardinality for
+  body/gimbal quaternion, rate, and limited-flag channels, and an exact terminal
+  stage index of `count - 1`. Candidates and evaluation results remain untouched.
+- The only success branch copies all six candidate arrays, then copies the exact
+  input fixed step and total, and publishes compile validity as its terminal
+  write. The executable interpreter proves value-exact, non-aliasing publication
+  and schedule preservation plus ten fail-closed cases: false stage, small
+  and oversized counts, wrong terminal index, each of five secondary-channel
+  mismatches, and a failed second invocation after a successful first.
+- Both graph forms pass reciprocal-link and unsafe-shape validation, their exact
+  structure and mutation boundaries are contracted, and repeated generation is
+  byte-identical. Compile orchestration is next; no live prebake, UI, cook,
+  Workshop, or whole-mod readiness claim is made.

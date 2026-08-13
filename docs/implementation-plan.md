@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.75.0-position-route-segments`
+Current internal build: `0.76.0-position-route-commit`
 
 ## 1. Delivery strategy
 
@@ -27,6 +27,39 @@ output. Subsequent UI work exposes this proven backend without redefining it.
 This section is the authoritative handoff. Detailed evidence remains in
 `devkit-findings.md`; exact clipboard procedure remains in
 `blueprint-workflow.md`.
+
+### Position-route atomic publication checkpoint
+
+- `CommitCompiledPositionRouteV1` is compiled, saved, mirrored, and accepted.
+  It clears all eleven compiled arrays, both compiled totals, the compile-valid
+  flag, and every position-evaluation result before validating a candidate.
+- Publication is atomic and candidate-only input remains immutable. A candidate
+  is accepted only when waypoint/segment/flat-table cardinalities, cumulative
+  starts, contiguous sample ranges, duration and distance totals, operation
+  bounds, finite values, and exact `(u,distance) = (0,0)..(1,length)` segment
+  endpoints all agree. Any rejection leaves empty invalid compiled state,
+  resets the evaluation result segment to `-1`, and makes stage validity
+  sticky-false.
+- Deterministic full/paste graphs contain 182/181 nodes with SHA-256
+  `FA86FC2A490C4F863BAABD5695885E0019B82327E393BF690DE7D45EFAF6DD1B` /
+  `95B6961CFF70BF6AAA529AD877A7FF817E7F5B2DF81455B143A2B065F66C7FAD`.
+  The exact accepted post-compile 182-node export hashes to
+  `9A06CD6825699A31A9059666B3B25563EAF2ED45D03FD5547009EEBAA3A4004A`.
+- Warm and fresh NullRHI compiled execution each pass 24 valid routes, 658
+  segments, 7,679 flattened arc samples, the 512-waypoint ceiling, and 35
+  corrupt/prior-invalid families. Both runs prove exact publication, candidate
+  immutability, poisoned-state clearing, sticky rejection, evaluation reset,
+  and complete CDO restoration. The upstream reset, validation, velocity, and
+  segment runtime suites also remain green.
+- Guarded editor exit added no crash directory (25 before and after).
+  Closed-editor sync copied only Client Director and reverse preview found all
+  17 managed files unchanged; the mirrored package hashes to
+  `B389EFAB838464EC09FE2DF04204D9B24FCE418D3176A00D1CB13E034EFEE5C9`.
+  Fresh cold load loaded nine core assets and compiled all six Blueprints, and
+  the complete `-RequireMvpAssets` scaffold passed.
+- Next ordered slice is the thin `CompilePositionRouteV1` orchestration
+  boundary. This checkpoint does not claim route evaluation, cinematic
+  dogfood controls, polished UI, cook, Workshop, or a complete mod.
 
 ### Cinematic scalar/vector/quaternion evaluator and control-compiler checkpoint
 

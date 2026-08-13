@@ -404,6 +404,44 @@ Guarded-quit, relaunch without opening the probe, delete immediately through
 `EditorAssetLibrary`, and verify both the API marker and physical package
 absence before closing again.
 
+## Desired-stream generated graph acceptance
+
+Enhanced may silently drop an unsupported Kismet function node while pasting
+every surrounding node. For the desired-stream graphs, the supported double
+minimum is `KismetMathLibrary.FMin`; `Min_DoubleDouble` is not a valid reflected
+identity in this DevKit. Always compare the exact pasted node count and member
+identities before connecting the native entry. Do not repair a missing pure node
+ad hoc in the live graph—fix the generator, regenerate both forms, and rerun the
+exported-link interpreter first.
+
+Native post-compile exports may omit a textual `DefaultValue` when an unlinked
+typed int, real, or bool pin is zero/false. Contract interpreters may infer only
+those language defaults from the serialized pin type. They must not invent
+defaults for vectors, quaternions, strings, names, objects, or connected pins.
+
+For dense entryless paste bodies, generate a translated preparation artifact
+with `Prepare-BlueprintPasteNearEntry.py`, paste it once, measure the exact live
+count, and connect only the short native-entry seam. If the viewport ignores
+ordinary panning, use the raw relative-drag helper; the acceptance signal is
+still the reciprocal link in a fresh export, never the success of the input
+call. Run contracts before compile, compile/save from a sparse graph tab, export
+and contract-test again after compile, and promote only that second export.
+
+Executable orchestration tests must distinguish private scratch from published
+authority. `CompileAirframeDesiredStreamV1` resets downstream publication before
+any work, so a failed top-level call must have false stage/stream/prebake flags
+and empty compiled prebake channels. A late rejection may retain bounded private
+kinematic prefixes. Conversely, direct commit preflight deliberately leaves an
+already accepted downstream snapshot unchanged. Test these two boundaries
+separately rather than imposing a stronger, false cleanup contract.
+
+For the live desired/prebake composition, compare desired vectors and rotations
+to the independent oracle, prove downstream rates finite and within their exact
+per-sample limits, and then replay the accepted prebake Blueprint directly over
+the staged candidates. Require its full downstream snapshot to be bit-exact.
+This isolates integration wiring without masking small-angle quaternion
+quantization behind a broad numeric tolerance.
+
 ## Document-sync runtime gate
 
 Run `tools/unreal/Validate-DocumentSyncPIE.py` once from the editor console, then

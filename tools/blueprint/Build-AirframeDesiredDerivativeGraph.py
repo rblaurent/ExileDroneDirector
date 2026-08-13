@@ -182,7 +182,10 @@ def main():
     def sample_time(index, index_pin, total, step, x, y):
         converted = convert(index, index_pin, x, y)
         product = math("Multiply_DoubleDouble", converted, "ReturnValue", x + 224, y, step, "AirframeDesiredStreamInputFixedStepSecondsV1")
-        return math("Min_DoubleDouble", product, "ReturnValue", x + 448, y, total, "AirframeDesiredStreamInputTotalSecondsV1")
+        # Enhanced 5.6 exposes the double-compatible minimum UFunction as
+        # KismetMathLibrary.FMin. The synthetic promoted name
+        # Min_DoubleDouble is not reflected and is therefore dropped on paste.
+        return math("FMin", product, "ReturnValue", x + 448, y, total, "AirframeDesiredStreamInputTotalSecondsV1")
 
     def uniform_vector(value, value_pin, x, y):
         node = b.add(f"make_vector_{len(b.nodes)}", "make_vector", x, y)

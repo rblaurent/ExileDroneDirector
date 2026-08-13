@@ -120,7 +120,7 @@ def main():
     items = {name: item(sources[name], name, kind, loop, 2304, 1120 + i * 144) for i, (name, kind) in enumerate(source_specs)}
     converted = b.add("converted_index", "convert", 2304, 3360); bp.connect(loop, "Index", converted, "InInt")
     sample_time_raw = math("Multiply_DoubleDouble", converted, "ReturnValue", 2560, 3360, step, "AirframeDesiredStreamInputFixedStepSecondsV1")
-    sample_time = math("Min_DoubleDouble", sample_time_raw, "ReturnValue", 2816, 3360, total, "AirframeDesiredStreamInputTotalSecondsV1")
+    sample_time = math("FMin", sample_time_raw, "ReturnValue", 2816, 3360, total, "AirframeDesiredStreamInputTotalSecondsV1")
     lookahead_item = items[PROFILE_PAIRS[2][0]]
     query_time = math("Add_DoubleDouble", sample_time, "ReturnValue", 3072, 3360, lookahead_item, "Output")
     query_set = set_("AirframeDesiredStreamVelocitySampleInputSecondsV1", "real", 3328, 3520); bp.connect(query_time, "ReturnValue", query_set, "AirframeDesiredStreamVelocitySampleInputSecondsV1"); bp.connect(stage_index, "then", query_set, "execute")

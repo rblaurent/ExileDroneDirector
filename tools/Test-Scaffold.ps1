@@ -172,6 +172,15 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeDesiredStreamCompileContracts.py',
     'tools\blueprint\snippets\compile-airframe-desired-stream-v1.eddgraph',
     'tools\blueprint\snippets\compile-airframe-desired-stream-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-airframe-desired-stream-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-airframe-desired-stream-inputs-v1.eddgraph',
+    'tools\blueprint\live-snippets\build-airframe-desired-velocity-samples-v1.eddgraph',
+    'tools\blueprint\live-snippets\build-airframe-desired-acceleration-samples-v1.eddgraph',
+    'tools\blueprint\live-snippets\build-airframe-desired-jerk-samples-v1.eddgraph',
+    'tools\blueprint\live-snippets\sample-airframe-desired-velocity-at-time-v1.eddgraph',
+    'tools\blueprint\live-snippets\solve-airframe-desired-pose-samples-v1.eddgraph',
+    'tools\blueprint\live-snippets\commit-airframe-desired-stream-to-prebake-v1.eddgraph',
+    'tools\blueprint\live-snippets\compile-airframe-desired-stream-v1.eddgraph',
     'tools\blueprint\Build-AirframePrebakeResetGraph.py',
     'tools\blueprint\Test-AirframePrebakeResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1.eddgraph',
@@ -224,6 +233,8 @@ $requiredFiles = @(
     'tools\unreal\Configure-AirframeGimbalAssembly.py',
     'tools\unreal\Validate-AirframeGimbalRuntime.py',
     'tools\unreal\Validate-AirframePrebakeRuntime.py',
+    'tools\unreal\Configure-AirframeDesiredStreamAssembly.py',
+    'tools\unreal\Validate-AirframeDesiredStreamRuntime.py',
     'tools\blueprint\Build-SmoothedFlightProfileResetGraph.py',
     'tools\blueprint\Test-SmoothedFlightProfileResetContracts.py',
     'tools\blueprint\snippets\reset-smoothed-flight-profile-v1.eddgraph',
@@ -1012,7 +1023,11 @@ foreach ($comparison in @(
     $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
     if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired-stream reset generation is not byte-identical." }
 }
-foreach ($graphCase in @(@($desiredReset, $false), @($desiredResetPaste, $true))) {
+foreach ($graphCase in @(
+    @($desiredReset, $false),
+    @($desiredResetPaste, $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\reset-airframe-desired-stream-v1.eddgraph'), $false)
+)) {
     & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
     $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
     if ($graphCase[1]) { $arguments += '--paste' }
@@ -1036,7 +1051,11 @@ foreach ($comparison in @(
     $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
     if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired-stream validation generation is not byte-identical." }
 }
-foreach ($graphCase in @(@($desiredValidation, $false), @($desiredValidationPaste, $true))) {
+foreach ($graphCase in @(
+    @($desiredValidation, $false),
+    @($desiredValidationPaste, $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\validate-airframe-desired-stream-inputs-v1.eddgraph'), $false)
+)) {
     & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
     $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
     if ($graphCase[1]) { $arguments += '--paste' }
@@ -1062,7 +1081,11 @@ foreach ($derivativeStage in @('velocity', 'acceleration', 'jerk')) {
         $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
         if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired $derivativeStage generation is not byte-identical." }
     }
-    foreach ($graphCase in @(@($derivativeGraph, $false), @($derivativePaste, $true))) {
+    foreach ($graphCase in @(
+        @($derivativeGraph, $false),
+        @($derivativePaste, $true),
+        @((Join-Path $ProjectRoot "tools\blueprint\live-snippets\$derivativeSlug.eddgraph"), $false)
+    )) {
         & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
         $arguments = @('--project-root', $ProjectRoot, '--stage', $derivativeStage, '--graph', $graphCase[0])
         if ($graphCase[1]) { $arguments += '--paste' }
@@ -1087,7 +1110,11 @@ foreach ($comparison in @(
     $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
     if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired velocity sampler generation is not byte-identical." }
 }
-foreach ($graphCase in @(@($velocitySampler, $false), @($velocitySamplerPaste, $true))) {
+foreach ($graphCase in @(
+    @($velocitySampler, $false),
+    @($velocitySamplerPaste, $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\sample-airframe-desired-velocity-at-time-v1.eddgraph'), $false)
+)) {
     & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
     $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
     if ($graphCase[1]) { $arguments += '--paste' }
@@ -1111,7 +1138,11 @@ foreach ($comparison in @(
     $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
     if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired pose-sample generation is not byte-identical." }
 }
-foreach ($graphCase in @(@($poseSamples, $false), @($poseSamplesPaste, $true))) {
+foreach ($graphCase in @(
+    @($poseSamples, $false),
+    @($poseSamplesPaste, $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\solve-airframe-desired-pose-samples-v1.eddgraph'), $false)
+)) {
     & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
     $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
     if ($graphCase[1]) { $arguments += '--paste' }
@@ -1133,7 +1164,11 @@ foreach ($comparison in @(
     $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
     if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired-stream commit generation is not byte-identical." }
 }
-foreach ($graphCase in @(@($desiredCommit, $false), @($desiredCommitPaste, $true))) {
+foreach ($graphCase in @(
+    @($desiredCommit, $false),
+    @($desiredCommitPaste, $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\commit-airframe-desired-stream-to-prebake-v1.eddgraph'), $false)
+)) {
     & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
     $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0]); if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredStreamCommitContracts.py') @arguments
@@ -1154,7 +1189,11 @@ foreach ($comparison in @(
     $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
     if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired-stream orchestration generation is not byte-identical." }
 }
-foreach ($graphCase in @(@($desiredCompile, $false), @($desiredCompilePaste, $true))) {
+foreach ($graphCase in @(
+    @($desiredCompile, $false),
+    @($desiredCompilePaste, $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\compile-airframe-desired-stream-v1.eddgraph'), $false)
+)) {
     & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
     $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0]); if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredStreamCompileContracts.py') @arguments

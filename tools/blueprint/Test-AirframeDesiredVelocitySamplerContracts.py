@@ -64,6 +64,11 @@ class Interpreter:
         if source:
             return self.output(*source)
         text = default(node, pin_name)
+        if text == "":
+            body = node.pins[pin_name].body
+            if 'PinType.PinCategory="int"' in body: return 0
+            if 'PinType.PinCategory="real"' in body: return 0.0
+            if 'PinType.PinCategory="bool"' in body: return False
         if text == "true": return True
         if text == "false": return False
         if text in ("0, 0, 0", "(X=0.000000,Y=0.000000,Z=0.000000)"):

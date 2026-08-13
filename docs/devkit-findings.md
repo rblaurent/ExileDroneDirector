@@ -4908,3 +4908,52 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   repeat independence, no external seams, and deterministic generation. This
   completes the offline graph set only. No Enhanced install, compile, save,
   cold-load, or live runtime claim is made until the next acceptance phase.
+
+### Desired-stream live acceptance (2026-08-13)
+
+- `Configure-AirframeDesiredStreamAssembly.py` idempotently owns all 28 typed
+  variables and nine functions on `BPC_EDD_ClientDirector`. The nine installed
+  full graphs contain 30, 218, 104, 104, 104, 94, 84, 37, and 8 nodes in ordered
+  reset-to-orchestration sequence. Every complete graph export passed its exact
+  executable contract before compile and again after compile/save.
+- Enhanced 5.6 does not reflect the generated `Min_DoubleDouble` identity. It
+  silently omitted that node from paste while retaining surrounding nodes. The
+  accepted native identity is `KismetMathLibrary.FMin`; all derivative and pose
+  generators, artifacts, interpreters, and four/minimum-node count assertions
+  now freeze that identity. Native export also omits explicit text defaults for
+  some zero-valued typed pins, so the contract interpreters derive only empty
+  int/real/bool defaults from the serialized pin type.
+- Exact post-compile exports are checked in under `tools/blueprint/live-snippets`
+  and included in the complete scaffold. This prevents a generated source from
+  passing while an Enhanced paste or compiler normalization silently changes
+  the live function.
+- `Validate-AirframeDesiredStreamRuntime.py` executes the real Client Director
+  CDO, not a graph model. Two warm runs and one independent fresh NullRHI run
+  each pass 15 forward plus 15 reverse compilations, all five flight profiles,
+  exact and partial schedules, two-sample and seeded cases, eight invalid
+  recompile families, direct sampler/commit boundaries, immutable inputs, and
+  complete union-schema state restoration. Maximum kinematic vector error is
+  `1.7763568394002505e-15`.
+- `AirframeDesiredStreamStageIndexV1` is the terminal sample index on success,
+  not a seven-stage orchestration counter. Late physical failure can leave
+  bounded kinematic scratch arrays, but stage/stream/prebake validity remains
+  false and authoritative prebake publication is empty because top-level reset
+  runs first. Direct commit preflight has the narrower frozen contract: desired
+  validity becomes false while a prior accepted downstream snapshot remains
+  byte-for-byte unchanged.
+- Engine quaternion storage makes tiny-angle reconstructed rates substantially
+  more sensitive than pose rotation comparisons. The integration harness does
+  not widen an epsilon to hide that fact: it compares pose candidates to the
+  independent desired oracle, proves published rates finite/nonnegative/within
+  every authored limit, compares oracle flags and schedule, then invokes the
+  independently accepted prebake Blueprint directly over the exact candidates
+  and requires bit-exact replay of all downstream channels.
+- Guarded exit reached `LogExit: Exiting.` with no shutdown assertion. The
+  allowlisted closed-editor FromDevKit preview found 16 unchanged packages and
+  exactly Client Director changed; forced sync copied that one reviewed package.
+  Live/mirror SHA-256 equality is
+  `E36634647AEFE2DD8C206D10EAE1F66154545B2C03539171BF152E79DA8D688F`.
+  A separate cold commandlet loaded all nine core assets, compiled all six
+  Blueprints, and emitted `EDD_COLD_LOAD|RESULT|PASS` with zero errors. The full
+  scaffold with mirrored MVP assets passes. No UI, cook, Workshop, or complete-
+  mod claim is made by this checkpoint.

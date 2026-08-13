@@ -71,6 +71,11 @@ class Interpreter:
         source = self.source(node, pin_name)
         if source: return self.output(*source)
         text = default(node, pin_name)
+        if text == "":
+            body = node.pins[pin_name].body
+            if 'PinType.PinCategory="int"' in body: return 0
+            if 'PinType.PinCategory="real"' in body: return 0.0
+            if 'PinType.PinCategory="bool"' in body: return False
         if text == "true": return True
         if text == "false": return False
         if text in ("0, 0, 0", "(X=0.000000,Y=0.000000,Z=0.000000)"): return (0.0, 0.0, 0.0)
@@ -93,7 +98,7 @@ class Interpreter:
         if name == "Subtract_IntInt": return int(left) - int(right)
         if name == "Multiply_DoubleDouble": return left * right
         if name == "Add_DoubleDouble": return left + right
-        if name == "Min_DoubleDouble": return min(left, right)
+        if name == "FMin": return min(left, right)
         raise RuntimeError(f"unsupported pure {node.name}:{name}")
     def next_target(self, node, pin_name="then"):
         if pin_name not in node.pins: return None

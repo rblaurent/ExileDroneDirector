@@ -520,7 +520,7 @@ Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallF
 End Object
 Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallFunction_26" ExportPath="/Script/BlueprintGraph.K2Node_CallFunction'/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector:BuildAirframeDesiredJerkSamplesV1.K2Node_CallFunction_26'"
    bDefaultsToPureFunc=True
-   FunctionReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.KismetMathLibrary'",MemberName="Min_DoubleDouble")
+   FunctionReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.KismetMathLibrary'",MemberName="FMin")
    NodePosX=3264
    NodePosY=960
    NodeGuid=E0301326F416568BBB1E1312360E1E85
@@ -552,7 +552,7 @@ Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallF
 End Object
 Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallFunction_29" ExportPath="/Script/BlueprintGraph.K2Node_CallFunction'/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector:BuildAirframeDesiredJerkSamplesV1.K2Node_CallFunction_29'"
    bDefaultsToPureFunc=True
-   FunctionReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.KismetMathLibrary'",MemberName="Min_DoubleDouble")
+   FunctionReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.KismetMathLibrary'",MemberName="FMin")
    NodePosX=3264
    NodePosY=1200
    NodeGuid=F4A7B846B4BA5B65AB653BF988A4E97E
@@ -584,7 +584,7 @@ Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallF
 End Object
 Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallFunction_32" ExportPath="/Script/BlueprintGraph.K2Node_CallFunction'/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector:BuildAirframeDesiredJerkSamplesV1.K2Node_CallFunction_32'"
    bDefaultsToPureFunc=True
-   FunctionReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.KismetMathLibrary'",MemberName="Min_DoubleDouble")
+   FunctionReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.KismetMathLibrary'",MemberName="FMin")
    NodePosX=3264
    NodePosY=1440
    NodeGuid=95E3C758597956629D6AE6A480B4BDF5
@@ -616,7 +616,7 @@ Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallF
 End Object
 Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallFunction_35" ExportPath="/Script/BlueprintGraph.K2Node_CallFunction'/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector:BuildAirframeDesiredJerkSamplesV1.K2Node_CallFunction_35'"
    bDefaultsToPureFunc=True
-   FunctionReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.KismetMathLibrary'",MemberName="Min_DoubleDouble")
+   FunctionReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.KismetMathLibrary'",MemberName="FMin")
    NodePosX=3264
    NodePosY=1680
    NodeGuid=DA2F0FA8EBA15089A12F440E45DD504F

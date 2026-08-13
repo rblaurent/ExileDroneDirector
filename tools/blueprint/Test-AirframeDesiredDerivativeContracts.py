@@ -94,6 +94,14 @@ class Interpreter:
         if source:
             return self.output(*source)
         text = default(node, pin_name)
+        if text == "":
+            body = node.pins[pin_name].body
+            if 'PinType.PinCategory="int"' in body:
+                return 0
+            if 'PinType.PinCategory="real"' in body:
+                return 0.0
+            if 'PinType.PinCategory="bool"' in body:
+                return False
         if text == "true":
             return True
         if text == "false":
@@ -154,7 +162,7 @@ class Interpreter:
             return left * right
         if name == "Divide_DoubleDouble":
             return left / right
-        if name == "Min_DoubleDouble":
+        if name == "FMin":
             return min(left, right)
         if name in ("Add_VectorVector", "Subtract_VectorVector", "Multiply_VectorVector", "Divide_VectorVector"):
             operation = {
@@ -263,7 +271,7 @@ def main():
     contracts.require(len(items) == 5 and all(contracts.linked(source_getters[0], source_name, node, "Array") for node in items), "all five samples must read only the stage source")
     contracts.require(len([node for node in nodes.values() if "K2Node_MacroInstance" in node.node_class]) == 1, "one bounded loop")
     contracts.require(len([node for node in nodes.values() if member(node) == "Divide_DoubleDouble"]) == 3, "three Lagrange weights")
-    contracts.require(len([node for node in nodes.values() if member(node) == "Min_DoubleDouble"]) == 4, "four exact schedule samples")
+    contracts.require(len([node for node in nodes.values() if member(node) == "FMin"]) == 4, "four exact schedule samples")
     writes = [member(node) for node in nodes.values() if "K2Node_VariableSet" in node.node_class]
     contracts.require(writes.count(VALID) == 2 and writes.count(INDEX) == 1 and len(writes) == 3, "write boundary changed")
     contracts.require(not any("K2Node_Knot" in node.node_class for node in nodes.values()), "reroute forbidden")

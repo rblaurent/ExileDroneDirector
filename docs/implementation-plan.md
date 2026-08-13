@@ -449,6 +449,45 @@ This section is the authoritative handoff. Detailed evidence remains in
   points. The complete offline transaction now exists; live installation and
   Enhanced compile/save/cold/runtime acceptance are next and remain unclaimed.
 
+### Airframe desired-stream live acceptance checkpoint
+
+- All nine desired-stream functions are installed in the live Enhanced 5.6
+  Client Director and saved: reset (30 nodes), validation (218), velocity /
+  acceleration / jerk (104 each), velocity sampling (94), pose assembly (84),
+  commit (37), and orchestration (8). Exact exported contracts passed before
+  compile and again on fresh post-compile exports; those native exports are now
+  scaffold-owned under `tools/blueprint/live-snippets`.
+- The live round trip exposed two serialization facts now owned by generators
+  and tests: Enhanced reflects the double minimum node as `FMin`, not the
+  synthetic `Min_DoubleDouble`, and native exports omit textual defaults for
+  zero-valued typed pins. Contract interpreters recover those defaults from pin
+  types rather than confusing native normalization with missing data.
+- Warm execution twice and a separate fresh `-ModDevKit -NullRHI` process each
+  pass 15 forward and 15 reverse complete compilations, all five shipped flight
+  profiles, eight invalid recompile families, two direct helper/commit boundary
+  cases, immutable source checks, and restoration of every touched desired,
+  gimbal, and prebake CDO field. Maximum vector error against the independent
+  oracle is `1.7763568394002505e-15`.
+- The runtime boundary separately proves accepted desired rotations, finite and
+  physically bounded downstream rates, exact rate-limit flags and schedule,
+  and bit-exact replay when the accepted prebake compiler is invoked directly
+  over the Blueprint candidates. This avoids disguising small-angle engine
+  quaternion quantization behind a widened oracle tolerance.
+- A failed top-level recompile always begins with reset and exposes neither a
+  valid desired stream nor an authoritative prebake snapshot. Late failure may
+  leave bounded private kinematic scratch prefixes; those arrays are explicitly
+  non-authoritative. A direct commit preflight likewise invalidates only the
+  desired-stream result and leaves an already accepted downstream snapshot
+  byte-for-byte untouched, as frozen by the helper contract.
+- Guarded shutdown reached `LogExit: Exiting.`. Closed-editor sync copied only
+  Client Director, and live/mirror SHA-256 is
+  `E36634647AEFE2DD8C206D10EAE1F66154545B2C03539171BF152E79DA8D688F`.
+  A separate cold process loaded all nine core assets and compiled all six
+  Blueprints with zero errors. The complete scaffold passes with mirrored MVP
+  assets. This accepts only the desired-airframe-to-prebake backend seam; source
+  document sampling, lens/focus/effects, debug dogfood, polished UI, cook,
+  Workshop, and whole-mod completion remain unclaimed.
+
 ### Position-route absolute-time evaluator checkpoint
 
 - `EvaluateCompiledPositionRouteV1` is compiled, saved, and warm-runtime

@@ -4998,3 +4998,21 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   terminal fixed schedule before publishing source total/count/validity. Both
   exported forms pass 105 valid schedules, a false-stage no-op, and eight
   injected or real failure families; generation hashes are byte-identical.
+- `BuildAirframeSourcePositionBodyProfileSamplesV1` now freezes the first source
+  consumer as deterministic 130/129-node full/paste graphs. Entry clears exactly
+  position, body, and ten profile candidates before the stage guard. Success
+  copies distinct body authorship and the common authored durations into the
+  accepted orientation compiler, proves exact compiled duration/start/total
+  agreement against the position route, and then samples the staged absolute
+  schedule with `FMin` terminal clamping.
+- Position and body evaluators must agree exactly on validity, segment, local
+  alpha, and completion before the accepted smoothed-profile evaluator runs.
+  Only its successful result reaches the twelve ordered array appends. The graph
+  interpreter executes 44 exact/partial/all-profile/seeded schedules in both
+  orders, poisoned reinvocation, immutable inputs, four timeline corruptions,
+  compile rejection, and four injected per-sample failure families. Rejections
+  retain only a bounded aligned private prefix and leave source stage validity
+  false. Full/paste SHA-256 is
+  `68634353753F39E26DA6570C3B4D1CB443E8EC1A73130D82077771318BEDB3B3` /
+  `0B8CF6BC4686090AE24B21ECF9ECDC6D388BA6E306B23ABE82546FA98C489309`.
+  The complete scaffold passes; no live Enhanced acceptance is claimed.

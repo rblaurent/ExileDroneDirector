@@ -156,6 +156,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeSourcePositionProfilesContracts.py',
     'tools\blueprint\snippets\compile-airframe-source-position-profiles-v1.eddgraph',
     'tools\blueprint\snippets\compile-airframe-source-position-profiles-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframeSourcePositionBodyProfileSamplesGraph.py',
+    'tools\blueprint\Test-AirframeSourcePositionBodyProfileSamplesContracts.py',
+    'tools\blueprint\snippets\build-airframe-source-position-body-profile-samples-v1.eddgraph',
+    'tools\blueprint\snippets\build-airframe-source-position-body-profile-samples-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeDesiredStreamResetGraph.py',
     'tools\blueprint\Test-AirframeDesiredStreamResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-desired-stream-v1.eddgraph',
@@ -1115,6 +1119,34 @@ if ($LASTEXITCODE -ne 0) { throw "Airframe source component full contracts faile
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourcePositionProfilesContracts.py') `
     --project-root $ProjectRoot --graph $sourceComponentsPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Airframe source component paste contracts failed with exit code $LASTEXITCODE." }
+$sourceBodySamples = Join-Path $airframeSourceRoot 'build-airframe-source-position-body-profile-samples-v1.eddgraph'
+$sourceBodySamplesPaste = Join-Path $airframeSourceRoot 'build-airframe-source-position-body-profile-samples-v1-paste.eddgraph'
+$sourceBodySamplesRepeat = Join-Path $airframeSourceRoot 'build-airframe-source-position-body-profile-samples-v1-repeat.eddgraph'
+$sourceBodySamplesRepeatPaste = Join-Path $airframeSourceRoot 'build-airframe-source-position-body-profile-samples-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourcePositionBodyProfileSamplesGraph.py') `
+    --project-root $ProjectRoot --output $sourceBodySamples --paste-output $sourceBodySamplesPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source body/profile sample generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourcePositionBodyProfileSamplesGraph.py') `
+    --project-root $ProjectRoot --output $sourceBodySamplesRepeat --paste-output $sourceBodySamplesRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe source body/profile sample generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($sourceBodySamples, $sourceBodySamplesRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\build-airframe-source-position-body-profile-samples-v1.eddgraph')),
+    @($sourceBodySamplesPaste, $sourceBodySamplesRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\build-airframe-source-position-body-profile-samples-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+        throw "Airframe source body/profile sample generation is not byte deterministic."
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $comparison[0]
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourcePositionBodyProfileSamplesContracts.py') `
+    --project-root $ProjectRoot --graph $sourceBodySamples
+if ($LASTEXITCODE -ne 0) { throw "Airframe source body/profile sample full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourcePositionBodyProfileSamplesContracts.py') `
+    --project-root $ProjectRoot --graph $sourceBodySamplesPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source body/profile sample paste contracts failed with exit code $LASTEXITCODE." }
 $airframeDesiredNonce = [guid]::NewGuid().ToString('N')
 $airframeDesiredRoot = Join-Path $scratchRoot "edd-airframe-desired-$airframeDesiredNonce"
 New-Item -ItemType Directory -Path $airframeDesiredRoot -Force | Out-Null

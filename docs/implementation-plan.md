@@ -532,6 +532,25 @@ This section is the authoritative handoff. Detailed evidence remains in
   validity. Exported-link execution passes 105 exact/partial/seeded schedules,
   false-stage no-op, and eight component/timeline/limit failure families in both
   forms. Next is body/profile source sampling; no live Enhanced claim exists yet.
+- `BuildAirframeSourcePositionBodyProfileSamplesV1` is now frozen offline as a
+  deterministic 130/129-node full/paste graph. It clears only its twelve owned
+  position/body/profile candidates, compiles the distinct authored body track
+  through the accepted orientation compiler, and walks every compiled duration
+  and segment start before sampling. Its breakable loop uses the exact staged
+  `min(index * fixedStep, total)` schedule, requires position/body evaluator
+  agreement, evaluates the accepted smoothed profile at that same segment-local
+  coordinate, and appends position, body quaternion, and all ten profile values
+  only after every helper succeeds.
+- The exported-link interpreter passes 44 exact, partial-terminal, all-profile,
+  and seeded schedules in forward and reverse order, poisoned repeats, immutable
+  source checks, compile/timeline corruption, injected position/body/profile
+  failures, and evaluator disagreement in both graph forms. Every failure leaves
+  one bounded twelve-channel aligned prefix and sticky-false stage validity.
+  Full/paste SHA-256 is
+  `68634353753F39E26DA6570C3B4D1CB443E8EC1A73130D82077771318BEDB3B3` /
+  `0B8CF6BC4686090AE24B21ECF9ECDC6D388BA6E306B23ABE82546FA98C489309`;
+  the complete scaffold passes. This remains offline only. Next is distinct
+  gimbal compilation/sampling over the already published schedule.
 
 ### Position-route absolute-time evaluator checkpoint
 

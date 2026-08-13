@@ -4786,3 +4786,32 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - `Test-Scaffold.ps1` owns both suites and remains green. No Blueprint body or
   live runtime claim is made for this new boundary yet; graph implementation
   begins with reset and validation before any kinematic loop is installed.
+
+### Desired-stream reset and validation executable offline boundary (2026-08-13)
+
+- `ResetAirframeDesiredStreamV1` now has deterministic full/paste exports of
+  30/29 nodes. Its first executed operation is the accepted downstream prebake
+  reset. The exported exec chain then clears ten candidate/downstream arrays
+  and restores eight scratch/publication scalars without reading or writing any
+  immutable desired-stream source. The test interpreter follows actual pin
+  links over poisoned state, observes the downstream invalidation contract, and
+  verifies immutable inputs by identity; it does not simulate the intended
+  reset independently of the graph.
+- `ValidateAirframeDesiredStreamInputsV1` now has deterministic full/paste
+  exports of 218/217 nodes. It measures all 13 array cardinalities, applies the
+  exact accepted schedule inequalities, and scans every value: finite position
+  components, finite unit body/gimbal quaternions, and all ten profile bounds.
+  Only `AirframeDesiredStreamStageValidV1` is writable and per-loop failures are
+  sticky.
+- The validation test interpreter executes the exported control and data links,
+  including all 13 foreach bodies. Both forms accept 103 directed/seeded valid
+  cases and reject 54 typed invalid families covering cardinality, time/step,
+  schedule, non-finite vectors, quaternion norm/finiteness, and every profile
+  edge. Blueprint type invariants—not impossible Python booleans in typed
+  double/vector arrays—define the executable input domain.
+- Both generators are byte-identical across repeated runs and their checked-in
+  artifacts; syntax, exact structural contracts, executable semantics, Python
+  compilation, and the complete repository scaffold all pass. This is still an
+  offline boundary. Live install/compile/save/cold/runtime evidence waits until
+  the remaining kinematic, look-ahead, solve, commit, and orchestration graphs
+  form one testable transaction.

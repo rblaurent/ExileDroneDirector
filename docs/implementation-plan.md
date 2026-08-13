@@ -377,10 +377,22 @@ This section is the authoritative handoff. Detailed evidence remains in
   compilations. Five schema tests freeze 28 Blueprint-safe variables, nine
   ordered functions, dependency ownership, distinct authorship, collision
   freedom, and fail-closed atomicity. The complete scaffold passes.
-- This checkpoint is offline contract evidence only. Next are deterministic
-  reset and validation graph sources, followed by the three kinematic stages,
-  look-ahead helper, desired-pose loop, commit/orchestration, and then the full
-  live compile/save/post-compile/cold/runtime acceptance matrix. Upstream
+- Deterministic reset and validation Blueprint sources are now frozen offline.
+  Reset is 30 nodes in full form and 29 in paste form; its executable contract
+  traverses the exported links, proves downstream prebake invalidation happens
+  first, clears all ten candidate/publication arrays and eight scratch scalars,
+  and proves all 15 immutable source inputs retain object identity. Validation
+  is 218/217 nodes and executes all 13 typed source scans against 103 valid and
+  54 invalid cases. It enforces exact cardinality/schedule bounds, finite vector
+  components, unit finite quaternions, and every profile-domain boundary while
+  publishing only sticky stage validity.
+- Both graph families regenerate byte-identically in full and paste form, pass
+  syntax and exact-link contracts, and are owned by the complete green
+  scaffold. This remains offline graph evidence: the functions are not yet
+  installed in the live Client Director and no runtime acceptance is claimed.
+  Next are the three kinematic stages, look-ahead helper, desired-pose loop,
+  commit/orchestration, and then the full live compile/save/post-compile/cold/
+  runtime acceptance matrix. Upstream
   document-to-source sampling, lens/focus/effects, debug dogfood, polished UI,
   cook, Workshop, and whole-mod completion remain unclaimed.
 

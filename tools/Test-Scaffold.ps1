@@ -140,6 +140,14 @@ $requiredFiles = @(
     'tools\trajectory\test_airframe_desired_stream_reference.py',
     'tools\trajectory\airframe_desired_stream_blueprint_schema.json',
     'tools\trajectory\test_airframe_desired_stream_blueprint_schema.py',
+    'tools\blueprint\Build-AirframeDesiredStreamResetGraph.py',
+    'tools\blueprint\Test-AirframeDesiredStreamResetContracts.py',
+    'tools\blueprint\snippets\reset-airframe-desired-stream-v1.eddgraph',
+    'tools\blueprint\snippets\reset-airframe-desired-stream-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframeDesiredStreamValidationGraph.py',
+    'tools\blueprint\Test-AirframeDesiredStreamValidationContracts.py',
+    'tools\blueprint\snippets\validate-airframe-desired-stream-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-airframe-desired-stream-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframePrebakeResetGraph.py',
     'tools\blueprint\Test-AirframePrebakeResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1.eddgraph',
@@ -959,6 +967,57 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_airframe_desired_stream_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Airframe desired-stream Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+$airframeDesiredNonce = [guid]::NewGuid().ToString('N')
+$airframeDesiredRoot = Join-Path $scratchRoot "edd-airframe-desired-$airframeDesiredNonce"
+New-Item -ItemType Directory -Path $airframeDesiredRoot -Force | Out-Null
+$desiredReset = Join-Path $airframeDesiredRoot 'reset-airframe-desired-stream-v1.eddgraph'
+$desiredResetPaste = Join-Path $airframeDesiredRoot 'reset-airframe-desired-stream-v1-paste.eddgraph'
+$desiredResetRepeat = Join-Path $airframeDesiredRoot 'reset-airframe-desired-stream-v1-repeat.eddgraph'
+$desiredResetRepeatPaste = Join-Path $airframeDesiredRoot 'reset-airframe-desired-stream-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredStreamResetGraph.py') `
+    --project-root $ProjectRoot --output $desiredReset --paste-output $desiredResetPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe desired-stream reset generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredStreamResetGraph.py') `
+    --project-root $ProjectRoot --output $desiredResetRepeat --paste-output $desiredResetRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe desired-stream reset generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($desiredReset, $desiredResetRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-airframe-desired-stream-v1.eddgraph')),
+    @($desiredResetPaste, $desiredResetRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-airframe-desired-stream-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired-stream reset generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($desiredReset, $false), @($desiredResetPaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredStreamResetContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe desired-stream reset contracts failed with exit code $LASTEXITCODE." }
+}
+$desiredValidation = Join-Path $airframeDesiredRoot 'validate-airframe-desired-stream-inputs-v1.eddgraph'
+$desiredValidationPaste = Join-Path $airframeDesiredRoot 'validate-airframe-desired-stream-inputs-v1-paste.eddgraph'
+$desiredValidationRepeat = Join-Path $airframeDesiredRoot 'validate-airframe-desired-stream-inputs-v1-repeat.eddgraph'
+$desiredValidationRepeatPaste = Join-Path $airframeDesiredRoot 'validate-airframe-desired-stream-inputs-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredStreamValidationGraph.py') `
+    --project-root $ProjectRoot --output $desiredValidation --paste-output $desiredValidationPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe desired-stream validation generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredStreamValidationGraph.py') `
+    --project-root $ProjectRoot --output $desiredValidationRepeat --paste-output $desiredValidationRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe desired-stream validation generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($desiredValidation, $desiredValidationRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-airframe-desired-stream-inputs-v1.eddgraph')),
+    @($desiredValidationPaste, $desiredValidationRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-airframe-desired-stream-inputs-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired-stream validation generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($desiredValidation, $false), @($desiredValidationPaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredStreamValidationContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe desired-stream validation contracts failed with exit code $LASTEXITCODE." }
 }
 $airframePrebakeNonce = [guid]::NewGuid().ToString('N')
 $airframePrebakeRoot = Join-Path $scratchRoot "edd-airframe-prebake-$airframePrebakeNonce"

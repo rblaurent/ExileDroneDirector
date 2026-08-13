@@ -152,6 +152,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeSourceSamplingValidationContracts.py',
     'tools\blueprint\snippets\validate-airframe-source-sampling-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-airframe-source-sampling-inputs-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframeSourcePositionProfilesGraph.py',
+    'tools\blueprint\Test-AirframeSourcePositionProfilesContracts.py',
+    'tools\blueprint\snippets\compile-airframe-source-position-profiles-v1.eddgraph',
+    'tools\blueprint\snippets\compile-airframe-source-position-profiles-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeDesiredStreamResetGraph.py',
     'tools\blueprint\Test-AirframeDesiredStreamResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-desired-stream-v1.eddgraph',
@@ -1083,6 +1087,34 @@ if ($LASTEXITCODE -ne 0) { throw "Airframe source validation full contracts fail
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourceSamplingValidationContracts.py') `
     --project-root $ProjectRoot --graph $sourceValidationPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Airframe source validation paste contracts failed with exit code $LASTEXITCODE." }
+$sourceComponents = Join-Path $airframeSourceRoot 'compile-airframe-source-position-profiles-v1.eddgraph'
+$sourceComponentsPaste = Join-Path $airframeSourceRoot 'compile-airframe-source-position-profiles-v1-paste.eddgraph'
+$sourceComponentsRepeat = Join-Path $airframeSourceRoot 'compile-airframe-source-position-profiles-v1-repeat.eddgraph'
+$sourceComponentsRepeatPaste = Join-Path $airframeSourceRoot 'compile-airframe-source-position-profiles-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourcePositionProfilesGraph.py') `
+    --project-root $ProjectRoot --output $sourceComponents --paste-output $sourceComponentsPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source component generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourcePositionProfilesGraph.py') `
+    --project-root $ProjectRoot --output $sourceComponentsRepeat --paste-output $sourceComponentsRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe source component generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($sourceComponents, $sourceComponentsRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\compile-airframe-source-position-profiles-v1.eddgraph')),
+    @($sourceComponentsPaste, $sourceComponentsRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\compile-airframe-source-position-profiles-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+        throw "Airframe source component generation is not byte deterministic."
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $comparison[0]
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourcePositionProfilesContracts.py') `
+    --project-root $ProjectRoot --graph $sourceComponents
+if ($LASTEXITCODE -ne 0) { throw "Airframe source component full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourcePositionProfilesContracts.py') `
+    --project-root $ProjectRoot --graph $sourceComponentsPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source component paste contracts failed with exit code $LASTEXITCODE." }
 $airframeDesiredNonce = [guid]::NewGuid().ToString('N')
 $airframeDesiredRoot = Join-Path $scratchRoot "edd-airframe-desired-$airframeDesiredNonce"
 New-Item -ItemType Directory -Path $airframeDesiredRoot -Force | Out-Null

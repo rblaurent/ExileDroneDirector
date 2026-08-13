@@ -522,6 +522,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   probe caught a template-derived array container. Both generators are
   byte-deterministic. These remain offline graph claims; the next stage compiles
   position/profile component publications before any sampling loop is installed.
+- `CompileAirframeSourcePositionProfilesV1` is now frozen as a deterministic
+  44/43-node full/paste graph. It is a guarded no-op unless prior authored-shape
+  validation succeeded, invalidates stage state before work, derives and stages
+  the exact profile segment count, invokes position then profile compilation in
+  order, and accepts only aligned compiled segment publications. It derives
+  `ceil(total / step) + 1` with one floor plus an explicit partial-terminal
+  selection and validates 2..65,536 before publishing total, count, then stage
+  validity. Exported-link execution passes 105 exact/partial/seeded schedules,
+  false-stage no-op, and eight component/timeline/limit failure families in both
+  forms. Next is body/profile source sampling; no live Enhanced claim exists yet.
 
 ### Position-route absolute-time evaluator checkpoint
 

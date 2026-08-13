@@ -4991,3 +4991,10 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   getter form. The generator now retargets that pin explicitly and the contract
   requires `ContainerType=None`, preventing a syntactically valid but unpasteable
   scalar getter from reaching the DevKit.
+- `CompileAirframeSourcePositionProfilesV1` adds the accepted component boundary
+  without duplicating either compiler. Its 44/43-node full/paste graphs stage
+  the derived segment count, call position then profile compilation, require
+  aligned compiled publications, and compute the exact integral or partial-
+  terminal fixed schedule before publishing source total/count/validity. Both
+  exported forms pass 105 valid schedules, a false-stage no-op, and eight
+  injected or real failure families; generation hashes are byte-identical.

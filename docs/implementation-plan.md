@@ -577,7 +577,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   prebake rejection. Full/paste SHA-256 is
   `FF7F571D23DD3E7B25B05E5EBC323B6D0C9FE1300402D021BEE6596A3DB3ED39` /
   `A776FEA5D338EC80AFD49C9C030B1677C14289FC3C130593F1ED440AFA265EA3`.
-  This remains offline only. Next is the policy-free seven-call orchestrator.
+  This remains offline only. Next is the policy-free six-call orchestrator.
+- `CompileAirframeSourceSamplingV1` completes the seven-function offline family
+  as a deterministic 7/6-node full/paste graph. It contains only the exact six
+  ordered self-calls: reset, authored validation, position/profile/schedule
+  compilation, position/body/profile sampling, distinct gimbal sampling, and
+  source-to-desired commit. It owns no state, branch, loop, or alternate path.
+  Full/paste SHA-256 is
+  `4C1082DF5048F9A0A87F88941481EB915840BAEE4B927FEEC111360C74E7B68B` /
+  `90D06B44962E4E8F2EA18821738A6E92212323EF5B1EF81AA8E001D473718D85`.
+  The complete offline set is ready for the full scaffold and then live install.
 
 ### Position-route absolute-time evaluator checkpoint
 

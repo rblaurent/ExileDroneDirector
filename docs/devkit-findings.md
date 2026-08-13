@@ -5029,6 +5029,14 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `998DD7A521A4BF7BBD6E9D293F2445CA486333A4BBFDEA7C8429271B3DCC9ACE` /
   `1EB325465046C1BC793DB349BD5DD00A0862B4F6651D663D71ABD5D2CEF53EC3`.
   No live Enhanced claim exists yet.
+- `CompileAirframeSourceSamplingV1` is frozen as a policy-free deterministic
+  7/6-node full/paste graph. Exact execution order is reset, validate authored
+  shape, compile position/profiles/schedule, sample position/body/profiles,
+  sample distinct gimbal, then atomically commit to the desired stream. The
+  contract forbids variables, branches, loops, reroutes, and external links.
+  Full/paste SHA-256 is
+  `4C1082DF5048F9A0A87F88941481EB915840BAEE4B927FEEC111360C74E7B68B` /
+  `90D06B44962E4E8F2EA18821738A6E92212323EF5B1EF81AA8E001D473718D85`.
 - `CommitAirframeSourceSamplesToDesiredV1` freezes the sole source publication
   boundary as deterministic 84/83-node full/paste graphs. It invalidates only
   source validity before preflight, checks exact cardinality across all thirteen

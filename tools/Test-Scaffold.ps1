@@ -168,6 +168,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeSourceCommitContracts.py',
     'tools\blueprint\snippets\commit-airframe-source-samples-to-desired-v1.eddgraph',
     'tools\blueprint\snippets\commit-airframe-source-samples-to-desired-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframeSourceCompileGraph.py',
+    'tools\blueprint\Test-AirframeSourceCompileContracts.py',
+    'tools\blueprint\snippets\compile-airframe-source-sampling-v1.eddgraph',
+    'tools\blueprint\snippets\compile-airframe-source-sampling-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeDesiredStreamResetGraph.py',
     'tools\blueprint\Test-AirframeDesiredStreamResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-desired-stream-v1.eddgraph',
@@ -1211,6 +1215,34 @@ if ($LASTEXITCODE -ne 0) { throw "Airframe source commit full contracts failed w
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourceCommitContracts.py') `
     --project-root $ProjectRoot --graph $sourceCommitPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Airframe source commit paste contracts failed with exit code $LASTEXITCODE." }
+$sourceCompile = Join-Path $airframeSourceRoot 'compile-airframe-source-sampling-v1.eddgraph'
+$sourceCompilePaste = Join-Path $airframeSourceRoot 'compile-airframe-source-sampling-v1-paste.eddgraph'
+$sourceCompileRepeat = Join-Path $airframeSourceRoot 'compile-airframe-source-sampling-v1-repeat.eddgraph'
+$sourceCompileRepeatPaste = Join-Path $airframeSourceRoot 'compile-airframe-source-sampling-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourceCompileGraph.py') `
+    --project-root $ProjectRoot --output $sourceCompile --paste-output $sourceCompilePaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source compile generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeSourceCompileGraph.py') `
+    --project-root $ProjectRoot --output $sourceCompileRepeat --paste-output $sourceCompileRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe source compile generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($sourceCompile, $sourceCompileRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\compile-airframe-source-sampling-v1.eddgraph')),
+    @($sourceCompilePaste, $sourceCompileRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\compile-airframe-source-sampling-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+        throw "Airframe source compile generation is not byte deterministic."
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $comparison[0]
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourceCompileContracts.py') `
+    --project-root $ProjectRoot --graph $sourceCompile
+if ($LASTEXITCODE -ne 0) { throw "Airframe source compile full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourceCompileContracts.py') `
+    --project-root $ProjectRoot --graph $sourceCompilePaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Airframe source compile paste contracts failed with exit code $LASTEXITCODE." }
 $airframeDesiredNonce = [guid]::NewGuid().ToString('N')
 $airframeDesiredRoot = Join-Path $scratchRoot "edd-airframe-desired-$airframeDesiredNonce"
 New-Item -ItemType Directory -Path $airframeDesiredRoot -Force | Out-Null

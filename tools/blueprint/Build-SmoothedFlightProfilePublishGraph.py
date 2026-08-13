@@ -135,8 +135,24 @@ def main():
 
     # Root at the selection center on a clear lane so the entry seam remains
     # reachable after Unreal's unavoidable paste-selection recentering.
-    invalidate = set_value("SmoothedFlightProfileResultValidV1", "bool", 9664, 1440, "false")
+    invalidate = set_value("SmoothedFlightProfileResultValidV1", "bool", 8128, 1280, "false")
     bp.connect(b.entry, "then", invalidate, "execute")
+    # A failed publication must not expose stale data from the last successful
+    # evaluation. Clear the complete public record before inspecting staging;
+    # stage scratch remains immutable so the caller can diagnose a rejection.
+    clear_specs = [
+        ("SmoothedFlightProfileResultCurrentIdV1", "string", ""),
+        ("SmoothedFlightProfileResultNeighborIdV1", "string", ""),
+        ("SmoothedFlightProfileResultNeighborWeightV1", "real", "0.0"),
+        *((f"SmoothedFlightProfileResult{name}V1", "real", "0.0") for name in PARAMETERS),
+    ]
+    clears = [
+        set_value(name, value, 8384 + index * 256, 3040, default)
+        for index, (name, value, default) in enumerate(clear_specs)
+    ]
+    bp.connect(invalidate, "then", clears[0], "execute")
+    for left, right in zip(clears, clears[1:]):
+        bp.connect(left, "then", right, "execute")
     stage_valid = get("SmoothedFlightProfileStageValidV1", "bool", 0, 1760)
     weight = get("SmoothedFlightProfileNeighborWeightV1", "real", 0, 1920)
     weight_finite = b.finite(weight, "SmoothedFlightProfileNeighborWeightV1", 320, 1920)
@@ -144,7 +160,7 @@ def main():
     weight_upper = compare("LessEqual_DoubleDouble", weight, "SmoothedFlightProfileNeighborWeightV1", None, "0.5", "real", 768, 2080)
     pre_valid, pre_pin = combine("BooleanAND", ((stage_valid, "SmoothedFlightProfileStageValidV1"), (weight_finite, "ReturnValue"), (weight_lower, "ReturnValue"), (weight_upper, "ReturnValue")), 1024, 1920)
     pre_branch = b.add("pre_branch", "branch", 1696, 2240)
-    bp.connect(invalidate, "then", pre_branch, "execute")
+    bp.connect(clears[-1], "then", pre_branch, "execute")
     bp.connect(pre_valid, pre_pin, pre_branch, "Condition")
 
     current_id = get("SmoothedFlightProfileCurrentIdV1", "string", 0, 0)
@@ -193,20 +209,23 @@ def main():
     normalize, normalize_pin = combine("BooleanOR", ((zero_weight, "ReturnValue"), (same_id, "ReturnValue")), 9856, 400)
     effective_id = select(normalize, neighbor_id, "SmoothedFlightProfileNeighborIdV1", current_id, "SmoothedFlightProfileCurrentIdV1", "string", 10080, 320)
     effective_weight = select(normalize, weight, "SmoothedFlightProfileNeighborWeightV1", None, "", "real", 10080, 480, true_default="0.0")
+    one_minus_weight = b.math("Subtract_DoubleDouble", 10336, 1900)
+    scalar.set_default(one_minus_weight, "A", "1.0")
+    bp.connect(effective_weight, "ReturnValue", one_minus_weight, "B")
 
     blended = []
     blend_guards = []
     for index, (name, current, neighbor, bounds) in enumerate(zip(PARAMETERS, current_values, neighbor_values, BOUNDS)):
         y = index * 176
-        delta = b.math("Subtract_DoubleDouble", 10336, y)
-        bp.connect(neighbor, f"SmoothedFlightProfileNeighbor{name}V1", delta, "A")
-        bp.connect(current, f"SmoothedFlightProfileCurrent{name}V1", delta, "B")
-        scaled = b.math("Multiply_DoubleDouble", 10560, y)
-        bp.connect(delta, "ReturnValue", scaled, "A")
-        bp.connect(effective_weight, "ReturnValue", scaled, "B")
+        current_scaled = b.math("Multiply_DoubleDouble", 10336, y)
+        bp.connect(current, f"SmoothedFlightProfileCurrent{name}V1", current_scaled, "A")
+        bp.connect(one_minus_weight, "ReturnValue", current_scaled, "B")
+        neighbor_scaled = b.math("Multiply_DoubleDouble", 10560, y)
+        bp.connect(neighbor, f"SmoothedFlightProfileNeighbor{name}V1", neighbor_scaled, "A")
+        bp.connect(effective_weight, "ReturnValue", neighbor_scaled, "B")
         value = b.math("Add_DoubleDouble", 10784, y)
-        bp.connect(current, f"SmoothedFlightProfileCurrent{name}V1", value, "A")
-        bp.connect(scaled, "ReturnValue", value, "B")
+        bp.connect(current_scaled, "ReturnValue", value, "A")
+        bp.connect(neighbor_scaled, "ReturnValue", value, "B")
         blended.append(value)
         lower, upper, inclusive = bounds
         low = compare("GreaterEqual_DoubleDouble" if inclusive else "Greater_DoubleDouble", value, "ReturnValue", None, lower, "real", 11008, y)

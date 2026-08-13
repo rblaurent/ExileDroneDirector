@@ -164,7 +164,7 @@ def main():
     # Root at the selection center on a clear lane: Unreal recenters pasted
     # selections regardless of viewport panning, so this makes the native-entry
     # seam deterministic even for a wide generated body.
-    set_requested = set_value("FlightProfileInputSegmentIndexV1", "int", 4800, 1280)
+    set_requested = set_value("FlightProfileInputSegmentIndexV1", "int", 4000, 1600)
     bp.connect(builder.entry, "then", set_requested, "execute")
     bp.connect(requested, "SmoothedFlightProfileInputSegmentIndexV1", set_requested, "FlightProfileInputSegmentIndexV1")
     guard_branch = builder.add("guard_branch", "branch", 512, 1920)
@@ -204,19 +204,24 @@ def main():
     same_index = compare("EqualEqual_IntInt", requested, "SmoothedFlightProfileInputSegmentIndexV1", neighbor_index, "ReturnValue", "int", 2816, 400)
 
     # Quintic half-curve weight, then force endpoint/self-neighbor weight to exact zero.
-    left_t = scalar.mul_const(builder, alpha, "SmoothedFlightProfileInputLocalTimeAlphaV1", "2.0", 1792, 800)
-    left_s, left_s_pin = scalar.profile_formula(builder, "smootherstep", left_t, 2048, 800)
-    one_minus_left = builder.math("Subtract_DoubleDouble", 3552, 800)
-    scalar.set_default(one_minus_left, "A", "1.0")
-    bp.connect(left_s, left_s_pin, one_minus_left, "B")
-    left_weight = scalar.mul_const(builder, one_minus_left, "ReturnValue", "0.5", 3776, 800)
+    doubled_left_alpha = scalar.mul_const(builder, alpha, "SmoothedFlightProfileInputLocalTimeAlphaV1", "2.0", 1792, 800)
+    left_t = builder.math("Subtract_DoubleDouble", 2048, 800)
+    scalar.set_default(left_t, "A", "1.0")
+    bp.connect(doubled_left_alpha, "ReturnValue", left_t, "B")
+    left_s, left_s_pin = scalar.profile_formula(builder, "smootherstep", left_t, 2272, 800)
+    left_weight = scalar.mul_const(builder, left_s, left_s_pin, "0.5", 3776, 800)
     doubled_alpha = scalar.mul_const(builder, alpha, "SmoothedFlightProfileInputLocalTimeAlphaV1", "2.0", 1792, 1120)
     right_t = builder.math("Subtract_DoubleDouble", 2048, 1120, "1.0")
     bp.connect(doubled_alpha, "ReturnValue", right_t, "A")
     right_s, right_s_pin = scalar.profile_formula(builder, "smootherstep", right_t, 2272, 1120)
     right_weight = scalar.mul_const(builder, right_s, right_s_pin, "0.5", 3776, 1120)
     half_weight = select(right_half, "ReturnValue", left_weight, "ReturnValue", right_weight, "ReturnValue", "real", 4032, 960)
-    neighbor_weight = select(same_index, "ReturnValue", half_weight, "ReturnValue", None, "", "real", 4288, 960, true_default="0.0")
+    # Floating-point evaluation can overshoot the theoretical quintic range by
+    # a few ulps close to the midpoint (for example -4.44e-16 on the left
+    # half). Clamp the derived weight before the strict publication boundary.
+    clamped_weight = builder.clamp(half_weight, "ReturnValue", 4288, 960)
+    scalar.set_default(clamped_weight, "Max", "0.5")
+    neighbor_weight = select(same_index, "ReturnValue", clamped_weight, "ReturnValue", None, "", "real", 4544, 960, true_default="0.0")
 
     set_neighbor_index = set_value("FlightProfileInputSegmentIndexV1", "int", 4608, 1920)
     bp.connect(current_setters[-1], "then", set_neighbor_index, "execute")

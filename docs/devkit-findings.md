@@ -4254,7 +4254,7 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 
 ### Smoothed flight-profile sample staging frozen (2026-08-13)
 
-- `StageSmoothedFlightProfileSamplesV1` is now a deterministic 119/118-node
+- `StageSmoothedFlightProfileSamplesV1` is now a deterministic 120/119-node
   full/paste graph. It reads the actual immutable compiled-ID array length,
   requires valid compiled state, bounds count to 1..511 and requested index to
   the array, and rejects non-finite or out-of-range local alpha before calling
@@ -4262,8 +4262,9 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - A valid current helper result is copied completely into current scratch. A
   pure clamped previous/next/half-selection network chooses at most one
   neighbor without `Max_IntInt` or `Min_IntInt`; a valid neighbor helper result
-  is copied completely into separate neighbor scratch. The two exact quintic
-  smootherstep half-kernels compute a weight in 0..0.5, and a self-neighbor at
+  is copied completely into separate neighbor scratch. The right half uses the
+  direct quintic smootherstep kernel; the left uses the symmetric stable form
+  `0.5*smootherstep(1-2*alpha)` and an explicit 0..0.5 clamp. A self-neighbor at
   either endpoint is forced to exact zero.
 - Four evaluator calls are deliberate: current, neighbor, restored current on
   success, and restored current after neighbor failure. The helper input is set
@@ -4274,8 +4275,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   complete eleven-field current and neighbor snapshots, all five Select nodes,
   both quintic coefficient sets, both restoration paths, stage-valid-last, and
   the absence of public publication. Full/paste SHA-256 is
-  `B0989CD57AAC6DAB9FB45D7EF54A76172F38B4261A76F02CF4787B5DA3B74624` /
-  `5B30D9A6ADA18FC8E8ABEDC695801DA703A7FB5FB1FDFBBFA9E3E31C07A76397`.
+  `8C0F1FC984156091B240CF854870BB930CA63F8A773A837072188F5C23DDE68F` /
+  `F79DD2667557F8BB7EF8C2C506C9A74693BC38F877986A9925CB520CA2ACB69F`.
   Repeated generation is byte-identical and the complete scaffold passes.
 - This graph remains offline with reset until atomic publication and the final
   orchestrator are frozen. Next is `PublishSmoothedFlightProfileV1`; no live
@@ -4283,9 +4284,11 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 
 ### Smoothed flight-profile atomic publication frozen (2026-08-13)
 
-- `PublishSmoothedFlightProfileV1` is now a deterministic 196/195-node
-  full/paste graph. It invalidates public validity first and requires valid
-  staging plus an explicitly finite neighbor weight inside 0..0.5.
+- `PublishSmoothedFlightProfileV1` is now a deterministic 210/209-node
+  full/paste graph. It invalidates public validity first, clears both public
+  IDs and all eleven public numeric values, then requires valid staging plus an
+  explicitly finite neighbor weight inside 0..0.5. This complete clear prevents
+  a rejected stage from exposing stale data from an earlier success.
 - Current and neighbor IDs are independently passed through the accepted
   canonical resolver. Resolver validity, exact canonical identity, and all ten
   exact canonical numeric values must agree for each staged record before any
@@ -4293,16 +4296,16 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   hidden stale MathLibrary self pin.
 - Zero weight or identical current/neighbor IDs normalize public metadata to
   current ID, current ID, exact zero. Otherwise the staged neighbor ID/weight
-  survive. Each numeric result uses `current + weight * (neighbor - current)`;
-  all ten blended values must pass their inclusive or strict canonical domain
-  bounds before one ordered thirteen-field publication chain begins. Public
-  validity is the fourteenth and final write.
+  survive. Each numeric result uses the symmetric convex form
+  `current*(1-weight)+neighbor*weight`; all ten blended values must pass their
+  inclusive or strict canonical domain bounds before one ordered thirteen-field
+  publication chain begins. Public validity is the fourteenth and final write.
 - Exact contracts prove both resolver boundaries, twenty value equalities,
   normalization BooleanOR and two typed Select nodes, every interpolation edge,
   every result bound, the atomic publication chain, no stage mutation, and no
   array operation. Full/paste SHA-256 is
-  `7497EE0C5402D3BB7A0E68CAC8630E1B00F330FE53DFF070F970034F2F3E61CB` /
-  `79BFB979B0DBA6866C4A335AA9B4E6FD8F820A61B280AA1F5D5E36818E0C2CD6`.
+  `2E82A0C1157115188D49B78F2320F3D269C054211ADBC69FA3139DB4D9E1E8C2` /
+  `3639C0DD05EE4C35751593A8FFBC5BA2AE09F270EE577B450D5A56C3BB84CA1A`.
   Repeated generation is byte-identical.
 
 - Dense graph installation exposed a reusable placement rule. Enhanced 5.6.1
@@ -4313,6 +4316,11 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   the native entry and intended seam root are locally reachable without moving
   the native entry. Full/paste semantic contracts remain unchanged apart from
   deterministic layout hashes, and byte-identical regeneration was re-proven.
+- Enhanced 5.6.1 normalizes ignored defaults on linked real-valued Select pins
+  from `0` to `0.0` during paste. Exact contracts must identify an authored
+  zero fallback by both its numeric value and its intentionally unlinked pin;
+  counting the textual default alone falsely conflates linked data inputs with
+  the fail-safe zero branch. The stage contract now enforces that distinction.
 - Reset, staging, and publication remain offline until the orchestration graph
   is frozen and the four functions can be installed and tested together. Next
   is `EvaluateSmoothedFlightProfileV1`; no live smoothing, airframe/gimbal, UI,
@@ -4337,3 +4345,45 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   compile/save, exact post-compile export contracts, cold load, and executable
   warm/fresh oracle/failure/restoration proof. No live smoothing,
   airframe/gimbal, UI, cook, or Workshop claim is made yet.
+
+### Smoothed flight-profile runtime accepted (2026-08-13)
+
+- Reset, stage, publish, and orchestration are installed together in
+  `BPC_EDD_ClientDirector`, compiled, saved, mirrored, cold-loaded, and
+  executable. Exact post-compile exports contain 39, 120, 210, and 4 nodes and
+  hash respectively to
+  `C5EC00928D582D1C25C3AB4B05BBE7D4F3987B359AA2664EBD4A348FAFF744B2`,
+  `8213A3229E0C890B5E01D8B22A941DB7F98C5BB577777EF84E897E563B41C5EF`,
+  `AC69E8B0BDBB9AB4B5CC664B25EA6F9DE35159BD59253F956A0F82394E96EDC4`,
+  and `2C2AA34B47D285B9310AA2A60CCF6CA5ECF5E9A7FB7C09314E57DF632E6D9144`.
+  All four pass the same reciprocal-link contracts as deterministic source.
+- Warm execution and an independent fresh `-ModDevKit -NullRHI` process each
+  pass 75 valid evaluations, four exact shared waypoint boundaries, 160
+  reversed-order direct-scrub checks, five widely separated samples on the
+  511-segment ceiling, 12 invalid inputs, five corrupt compiled publications,
+  seven corrupt staged publications, and exact restoration of every touched
+  CDO property.
+- Executable evidence found three defects that graph shape alone could not.
+  The original left-half subtraction produced `-4.440892098500626e-16` near
+  the midpoint; the symmetric smootherstep form plus a final clamp removes the
+  cancellation. Directional affine interpolation produced a one-ulp mismatch
+  when current/neighbor identities swap across a waypoint; the symmetric convex
+  form publishes identical boundary values. Finally, publication originally
+  cleared only validity, leaving stale public payload after a rejected stage;
+  the accepted graph now clears the complete public record before validation.
+- Exact node counts caught one attempted replacement that retained 110 stale
+  nodes before compile/save. The accepted workflow proves the cleared graph is
+  exactly the immutable native entry, pastes once, re-exports the expected
+  count, connects the one native seam, then re-exports and runs full contracts
+  before compile. Serialized `NodePosX/NodePosY` and clipboard node identity are
+  the authority; viewport appearance is not.
+- Guarded shutdown completed without a crash reporter. A separate cold-load
+  process loaded all nine core assets and compiled all six Blueprints with zero
+  errors. Closed-editor live and mirrored Client Director SHA-256 both equal
+  `349E21CF5EA7309273FCBADA668871B9C5BD2BA1825D53F08229D56D83557CA2`.
+  `Test-Scaffold.ps1 -RequireMvpAssets` passes and now requires plus validates
+  all four live smoothing exports and the executable runtime harness.
+- Accepted scope is smooth, deterministic profile parameters only. The next
+  ordered backend slice consumes them in cinematic/hybrid/FPV airframe and
+  gimbal dynamics. Lens/focus/effects, shortcut dogfood, polished UI, cook,
+  Workshop, and whole-mod completion remain unclaimed.

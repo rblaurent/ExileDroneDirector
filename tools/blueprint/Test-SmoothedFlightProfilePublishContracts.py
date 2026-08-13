@@ -56,7 +56,7 @@ def main():
     args = parser.parse_args()
     c = load(args.project_root)
     nodes = c.parse_graph(args.graph)
-    c.require(len(nodes) == (195 if args.paste else 196), f"publish node count {len(nodes)}")
+    c.require(len(nodes) == (209 if args.paste else 210), f"publish node count {len(nodes)}")
     c.require(not any("K2Node_Knot" in node.node_class for node in nodes.values()), "reroute knots forbidden")
     entries = [node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class]
     c.require(len(entries) == (0 if args.paste else 1), "publish entry count")
@@ -69,6 +69,22 @@ def main():
         c.require(not invalidate.pins["execute"].links, "paste exposes invalidation root")
     else:
         c.require_link(entries[0], "then", invalidate, "execute", "entry invalidates first")
+
+    clear_specs = (
+        ("SmoothedFlightProfileResultCurrentIdV1", ""),
+        ("SmoothedFlightProfileResultNeighborIdV1", ""),
+        ("SmoothedFlightProfileResultNeighborWeightV1", "0.0"),
+        *((f"SmoothedFlightProfileResult{name}V1", "0.0") for name in PARAMETERS),
+    )
+    clears = []
+    for target, expected_default in clear_specs:
+        setters = variables(nodes, target, "K2Node_VariableSet")
+        clear = next((node for node in setters if default(node, target) == expected_default and not node.pins[target].links), None)
+        c.require(clear is not None, f"fail-closed clear setter: {target}")
+        clears.append(clear)
+    c.require_link(invalidate, "then", clears[0], "execute", "invalidation begins complete public clear")
+    for left, right in zip(clears, clears[1:]):
+        c.require_link(left, "then", right, "execute", "complete public clear order")
 
     stage_valid = c.one(nodes, 'MemberName="SmoothedFlightProfileStageValidV1"')
     weight = c.one(nodes, 'MemberName="SmoothedFlightProfileNeighborWeightV1"')
@@ -85,7 +101,7 @@ def main():
     c.require(len(bool_ands) == 45, "finite/pre/two canonical/result guard conjunctions")
     branches = [node for node in nodes.values() if "K2Node_IfThenElse" in node.node_class]
     c.require(len(branches) == 4, "pre/current/neighbor/result branches")
-    pre = next(node for node in branches if c.linked(invalidate, "then", node, "execute"))
+    pre = next(node for node in branches if c.linked(clears[-1], "then", node, "execute"))
     c.require(any(c.linked(node, "ReturnValue", pre, "Condition") for node in bool_ands), "precondition conjunction gates publication")
 
     current_id = c.one(nodes, 'MemberName="SmoothedFlightProfileCurrentIdV1"')
@@ -150,12 +166,15 @@ def main():
     subtracts = calls(nodes, "Subtract_DoubleDouble")
     multiplies = calls(nodes, "Multiply_DoubleDouble")
     adds = calls(nodes, "Add_DoubleDouble")
-    c.require(len(subtracts) == len(multiplies) == len(adds) == 10, "ten exact convex interpolation triplets")
+    c.require(len(subtracts) == 1 and len(multiplies) == 20 and len(adds) == 10, "ten symmetric convex interpolation triplets")
+    one_minus_weight = subtracts[0]
+    c.require(default(one_minus_weight, "A") == "1.0", "one-minus-weight exact unity")
+    c.require_link(weight_select, "ReturnValue", one_minus_weight, "B", "effective weight complements once")
     blended = []
     for index, (name, current, neighbor, bounds) in enumerate(zip(PARAMETERS, current_values, neighbor_values, BOUNDS)):
-        delta = next(node for node in subtracts if c.linked(neighbor, f"SmoothedFlightProfileNeighbor{name}V1", node, "A") and c.linked(current, f"SmoothedFlightProfileCurrent{name}V1", node, "B"))
-        scaled = next(node for node in multiplies if c.linked(delta, "ReturnValue", node, "A") and c.linked(weight_select, "ReturnValue", node, "B"))
-        value = next(node for node in adds if c.linked(current, f"SmoothedFlightProfileCurrent{name}V1", node, "A") and c.linked(scaled, "ReturnValue", node, "B"))
+        current_scaled = next(node for node in multiplies if c.linked(current, f"SmoothedFlightProfileCurrent{name}V1", node, "A") and c.linked(one_minus_weight, "ReturnValue", node, "B"))
+        neighbor_scaled = next(node for node in multiplies if c.linked(neighbor, f"SmoothedFlightProfileNeighbor{name}V1", node, "A") and c.linked(weight_select, "ReturnValue", node, "B"))
+        value = next(node for node in adds if c.linked(current_scaled, "ReturnValue", node, "A") and c.linked(neighbor_scaled, "ReturnValue", node, "B"))
         blended.append(value)
         lower, upper, inclusive = bounds
         lowers = ge if inclusive else gt
@@ -173,9 +192,10 @@ def main():
     publications = []
     for target, source, source_pin in publication_specs:
         setters = variables(nodes, target, "K2Node_VariableSet")
-        c.require(len(setters) == 1, f"one atomic publication setter: {target}")
-        c.require_link(source, source_pin, setters[0], target, f"publication source: {target}")
-        publications.append(setters[0])
+        c.require(len(setters) == 2, f"one clear and one atomic publication setter: {target}")
+        publication = next((node for node in setters if c.linked(source, source_pin, node, target)), None)
+        c.require(publication is not None, f"publication source: {target}")
+        publications.append(publication)
     c.require_link(result_branch, "then", publications[0], "execute", "validated publication begins with current ID")
     for left, right in zip(publications, publications[1:]):
         c.require_link(left, "then", right, "execute", "atomic result publication order")

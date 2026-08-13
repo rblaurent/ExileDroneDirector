@@ -125,7 +125,10 @@ def evaluate_smoothed_flight_profile(
 
     if alpha <= 0.5:
         neighbor_index = max(0, segment_index - 1)
-        neighbor_weight = 0.5 * (1.0 - _smootherstep(alpha * 2.0))
+        # Use the symmetric distance-to-midpoint form instead of
+        # 1 - smootherstep(2a). The latter catastrophically cancels close to
+        # the midpoint and can become a tiny negative value in Blueprint.
+        neighbor_weight = 0.5 * _smootherstep(1.0 - alpha * 2.0)
     else:
         neighbor_index = min(compiled.segment_count - 1, segment_index + 1)
         neighbor_weight = 0.5 * _smootherstep(alpha * 2.0 - 1.0)

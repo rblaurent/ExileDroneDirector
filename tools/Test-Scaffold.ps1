@@ -132,18 +132,23 @@ $requiredFiles = @(
     'tools\blueprint\Test-SmoothedFlightProfileResetContracts.py',
     'tools\blueprint\snippets\reset-smoothed-flight-profile-v1.eddgraph',
     'tools\blueprint\snippets\reset-smoothed-flight-profile-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-smoothed-flight-profile-v1.eddgraph',
     'tools\blueprint\Build-SmoothedFlightProfileStageGraph.py',
     'tools\blueprint\Test-SmoothedFlightProfileStageContracts.py',
     'tools\blueprint\snippets\stage-smoothed-flight-profile-samples-v1.eddgraph',
     'tools\blueprint\snippets\stage-smoothed-flight-profile-samples-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\stage-smoothed-flight-profile-samples-v1.eddgraph',
     'tools\blueprint\Build-SmoothedFlightProfilePublishGraph.py',
     'tools\blueprint\Test-SmoothedFlightProfilePublishContracts.py',
     'tools\blueprint\snippets\publish-smoothed-flight-profile-v1.eddgraph',
     'tools\blueprint\snippets\publish-smoothed-flight-profile-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\publish-smoothed-flight-profile-v1.eddgraph',
     'tools\blueprint\Build-SmoothedFlightProfileEvaluateGraph.py',
     'tools\blueprint\Test-SmoothedFlightProfileEvaluateContracts.py',
     'tools\blueprint\snippets\evaluate-smoothed-flight-profile-v1.eddgraph',
     'tools\blueprint\snippets\evaluate-smoothed-flight-profile-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\evaluate-smoothed-flight-profile-v1.eddgraph',
+    'tools\unreal\Validate-SmoothedFlightProfileRuntime.py',
     'tools\blueprint\Build-FlightProfileResetGraph.py',
     'tools\blueprint\Test-FlightProfileResetContracts.py',
     'tools\blueprint\snippets\reset-flight-profile-state-v1.eddgraph',
@@ -1126,7 +1131,8 @@ foreach ($spec in @(
     @($smoothedProfileReset, $false),
     @($smoothedProfileResetPaste, $true),
     @((Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-smoothed-flight-profile-v1.eddgraph'), $false),
-    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-smoothed-flight-profile-v1-paste.eddgraph'), $true)
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-smoothed-flight-profile-v1-paste.eddgraph'), $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\reset-smoothed-flight-profile-v1.eddgraph'), $false)
 )) {
     & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $spec[0]
     $arguments = @(
@@ -1163,7 +1169,8 @@ foreach ($spec in @(
     @($smoothedProfileStage, $false),
     @($smoothedProfileStagePaste, $true),
     @((Join-Path $ProjectRoot 'tools\blueprint\snippets\stage-smoothed-flight-profile-samples-v1.eddgraph'), $false),
-    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\stage-smoothed-flight-profile-samples-v1-paste.eddgraph'), $true)
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\stage-smoothed-flight-profile-samples-v1-paste.eddgraph'), $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\stage-smoothed-flight-profile-samples-v1.eddgraph'), $false)
 )) {
     & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $spec[0]
     $arguments = @(
@@ -1200,7 +1207,8 @@ foreach ($spec in @(
     @($smoothedProfilePublish, $false),
     @($smoothedProfilePublishPaste, $true),
     @((Join-Path $ProjectRoot 'tools\blueprint\snippets\publish-smoothed-flight-profile-v1.eddgraph'), $false),
-    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\publish-smoothed-flight-profile-v1-paste.eddgraph'), $true)
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\publish-smoothed-flight-profile-v1-paste.eddgraph'), $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\publish-smoothed-flight-profile-v1.eddgraph'), $false)
 )) {
     & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $spec[0]
     $arguments = @(
@@ -1237,7 +1245,8 @@ foreach ($spec in @(
     @($smoothedProfileEvaluate, $false),
     @($smoothedProfileEvaluatePaste, $true),
     @((Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-smoothed-flight-profile-v1.eddgraph'), $false),
-    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-smoothed-flight-profile-v1-paste.eddgraph'), $true)
+    @((Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-smoothed-flight-profile-v1-paste.eddgraph'), $true),
+    @((Join-Path $ProjectRoot 'tools\blueprint\live-snippets\evaluate-smoothed-flight-profile-v1.eddgraph'), $false)
 )) {
     & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $spec[0]
     $arguments = @(

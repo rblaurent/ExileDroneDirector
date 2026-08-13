@@ -53,7 +53,7 @@ def main():
     args = parser.parse_args()
     c = load(args.project_root)
     nodes = c.parse_graph(args.graph)
-    c.require(len(nodes) == (118 if args.paste else 119), f"stage node count {len(nodes)}")
+    c.require(len(nodes) == (119 if args.paste else 120), f"stage node count {len(nodes)}")
     c.require(not any("K2Node_Knot" in node.node_class for node in nodes.values()), "reroute knots forbidden")
     entries = [node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class]
     c.require(len(entries) == (0 if args.paste else 1), "stage entry count")
@@ -166,10 +166,23 @@ def main():
         for value in ("2.0", "10.0", "15.0", "6.0", "0.5")
     }
     c.require(coefficient_counts == {"2.0": 2, "10.0": 2, "15.0": 2, "6.0": 2, "0.5": 2}, f"quintic coefficients changed: {coefficient_counts}")
-    c.require(len([node for node in subtracts if default(node, "A") == "1.0"]) == 1, "left weight is one minus smootherstep")
+    c.require(len([node for node in subtracts if default(node, "A") == "1.0"]) == 1, "left half remaps one minus two-alpha")
     c.require(len([node for node in subtracts if default(node, "B") == "1.0"]) == 1, "right half remaps two-alpha minus one")
-    exact_zero = [node for node in real_selects if default(node, "Option 1") == "0.0"]
+    clamps = calls(nodes, "FClamp")
+    c.require(len(clamps) == 1, "derived neighbor weight clamps exactly once")
+    weight_clamp = clamps[0]
+    c.require(default(weight_clamp, "Min") == "0.0" and default(weight_clamp, "Max") == "0.5", "neighbor-weight clamp bounds")
+    # Unreal normalizes the otherwise-ignored defaults of linked real Select
+    # options to 0.0 during paste. The semantic zero branch is the one whose
+    # authored Option 1 remains deliberately unlinked.
+    exact_zero = [
+        node for node in real_selects
+        if default(node, "Option 1") == "0.0" and not node.pins["Option 1"].links
+    ]
     c.require(len(exact_zero) == 1, "self-neighbor weight forced to exact zero")
+    half_select = next(node for node in real_selects if node is not exact_zero[0])
+    c.require_link(half_select, "ReturnValue", weight_clamp, "Value", "quintic half-weight enters clamp")
+    c.require_link(weight_clamp, "ReturnValue", exact_zero[0], "Option 0", "clamped weight enters self-neighbor select")
     weight_setters = variable_nodes(nodes, "SmoothedFlightProfileNeighborWeightV1", "K2Node_VariableSet")
     c.require(len(weight_setters) == 1, "one neighbor-weight staging write")
     c.require_link(exact_zero[0], "ReturnValue", weight_setters[0], "SmoothedFlightProfileNeighborWeightV1", "clamped C2 weight staged")

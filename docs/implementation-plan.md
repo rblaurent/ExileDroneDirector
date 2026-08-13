@@ -115,15 +115,16 @@ This section is the authoritative handoff. Detailed evidence remains in
   closed. A fresh cold-load compiles all six Blueprints with zero errors; the
   live and mirrored Client Director package SHA-256 is
   `B411E7414A74119D0F094D3CFD87C4C2772BCD17F40AB90DD80D12F20FBD55DB`.
-- The next consumer seam is frozen offline: every segment owns its exact
+- The smooth flight-profile consumer is now installed, compiled, saved,
+  mirrored, cold-loaded, and executable. Every segment owns its exact
   canonical profile at local alpha 0.5, while adjacent presets meet at one exact
   50/50 boundary value. Quintic smootherstep on each half makes all ten numeric
   channels C2 at both midpoint and waypoint boundaries, stays inside the convex
   hull of validated presets, and remains history-free under direct scrubbing.
   Its explicit Blueprint schema separates current/neighbor scratch from atomic
   result publication and restores the indexed helper to the requested segment.
-- The smooth consumer's reset and sample-staging graphs are now frozen offline.
-  Reset is 39/38 nodes; staging is 119/118 nodes. Staging bounds the requested
+- The deterministic full/paste graphs contain 39/38 reset nodes, 120/119 stage
+  nodes, 210/209 publish nodes, and 4/3 orchestration nodes. Staging bounds the requested
   index against the immutable compiled-ID array, rejects non-finite or
   out-of-range local alpha, evaluates and copies complete current/neighbor
   records into disjoint scratch, computes the exact two-half quintic weight,
@@ -132,37 +133,46 @@ This section is the authoritative handoff. Detailed evidence remains in
   writes a public smoothed result.
 - Staging avoids the DevKit-fragile `Max_IntInt`/`Min_IntInt` nodes: three pure
   integer `Select` nodes implement previous, next, and half selection. Exact
-  full/paste contracts prove 119/118 nodes, all guard and helper edges, both
+  full/paste contracts prove all guard and helper edges, both
   quintic coefficient sets, complete eleven-field samples, validity-last stage
   acceptance, no array mutation, and no public-result mutation. Repeated
   generation is byte-identical; full/paste SHA-256 is
-  `B0989CD57AAC6DAB9FB45D7EF54A76172F38B4261A76F02CF4787B5DA3B74624` /
-  `5B30D9A6ADA18FC8E8ABEDC695801DA703A7FB5FB1FDFBBFA9E3E31C07A76397`.
-- Atomic publication is also frozen offline at 196/195 nodes. It invalidates
-  public validity first; requires valid staging and a finite weight in 0..0.5;
+  `8C0F1FC984156091B240CF854870BB930CA63F8A773A837072188F5C23DDE68F` /
+  `F79DD2667557F8BB7EF8C2C506C9A74693BC38F877986A9925CB520CA2ACB69F`.
+  The left half evaluates the numerically stable symmetric form
+  `0.5*smootherstep(1-2*alpha)` and clamps its derived weight to 0..0.5.
+- Atomic publication invalidates validity and clears every public ID/value
+  before validation, so a rejected stage cannot expose stale successful data.
+  It requires valid staging and a finite weight in 0..0.5;
   independently re-resolves and exactly verifies both eleven-field staged
   canonical records; normalizes zero-weight or identical-profile metadata to
-  current/current/zero; computes ten convex interpolations; validates every
-  blended domain; writes IDs, weight, and all ten values; and publishes validity
-  last. It owns no array operation and never mutates stage state.
+  current/current/zero; computes each channel symmetrically as
+  `current*(1-weight)+neighbor*weight`; validates every blended domain; writes
+  IDs, weight, and all ten values; and publishes validity last. It owns no array
+  operation and never mutates stage state.
 - Repeated publication generation is byte-identical and full/paste exact
   contracts pass with SHA-256
-  `7497EE0C5402D3BB7A0E68CAC8630E1B00F330FE53DFF070F970034F2F3E61CB` /
-  `79BFB979B0DBA6866C4A335AA9B4E6FD8F820A61B280AA1F5D5E36818E0C2CD6`.
-  Reset, staging, and publication deliberately place their first executable
-  node near the pasted selection's geometric center on a clear vertical lane.
-  Unreal recenters a pasted selection under the cursor regardless of viewport
-  panning; this layout invariant makes the native-entry seam deterministic
-  without moving the native entry or relying on fragile zoom/drag gestures.
-  The four-node/three-node full/paste orchestrator now freezes the sole public
+  `2E82A0C1157115188D49B78F2320F3D269C054211ADBC69FA3139DB4D9E1E8C2` /
+  `3639C0DD05EE4C35751593A8FFBC5BA2AE09F270EE577B450D5A56C3BB84CA1A`.
+  The four-node/three-node orchestrator freezes the sole public
   evaluation order as reset, stage, publish; it owns no state or alternate
-  path. Its full/paste SHA-256 is
-  `D741FC97E2E37D5DC1F44872F5E87F2DB99C3A2980CA8F9D39E2860E61078570` /
-  `675F4780D43DB9C5968F9A57D73D692883B4B3B992A4A682795925C6077993F2`.
-  Next is joint live installation, compile/save, cold load, and executable
-  warm/fresh proof for all four functions. Deterministic cinematic, hybrid,
-  and FPV airframe/gimbal behavior follows. No polished UI, cook, Workshop
-  publication, or whole-mod completion is claimed.
+  path.
+- Exact post-compile live exports contain 39, 120, 210, and 4 nodes and hash to
+  `C5EC00928D582D1C25C3AB4B05BBE7D4F3987B359AA2664EBD4A348FAFF744B2`,
+  `8213A3229E0C890B5E01D8B22A941DB7F98C5BB577777EF84E897E563B41C5EF`,
+  `AC69E8B0BDBB9AB4B5CC664B25EA6F9DE35159BD59253F956A0F82394E96EDC4`,
+  and `2C2AA34B47D285B9310AA2A60CCF6CA5ECF5E9A7FB7C09314E57DF632E6D9144`.
+  Warm and independent fresh NullRHI runs each pass 75 valid evaluations, four
+  exact adjacent boundaries, 160 reversed history-independence checks, the
+  511-segment ceiling, 12 invalid inputs, five corrupt compiled publications,
+  seven corrupt staged publications, and complete CDO restoration. A separate
+  cold process loaded nine core assets and compiled all six Blueprints with
+  zero errors. Live and mirrored Client Director SHA-256 is
+  `349E21CF5EA7309273FCBADA668871B9C5BD2BA1825D53F08229D56D83557CA2`;
+  the complete scaffold passes.
+- Next is deterministic cinematic/hybrid/FPV airframe and gimbal behavior,
+  followed by lens/focus/effects and shortcut/debug dogfooding. No polished UI,
+  cook, Workshop publication, or whole-mod completion is claimed.
 
 ### Position-route absolute-time evaluator checkpoint
 

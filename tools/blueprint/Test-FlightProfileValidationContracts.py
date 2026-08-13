@@ -22,8 +22,11 @@ def load(root: Path):
 
 
 def default(node, pin):
-    match = re.search(r'(?:^|,)DefaultValue="([^"]*)"', node.pins[pin].body)
-    return None if match is None else match.group(1)
+    body = node.pins[pin].body
+    match = re.search(r'(?:^|,)DefaultValue="([^"]*)"', body)
+    if match is not None:
+        return match.group(1)
+    return "" if 'PinType.PinCategory="string"' in body else None
 
 
 def main():

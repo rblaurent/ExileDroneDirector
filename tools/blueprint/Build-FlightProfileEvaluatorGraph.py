@@ -6,6 +6,7 @@ from pathlib import Path
 FUNCTION="EvaluateCompiledFlightProfileV1"
 TARGET_CLASS='"/Script/Engine.BlueprintGeneratedClass\'/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector_C\'"'
 CHANNELS=(("Ids","string","Id"),("PathFollowWeights","real","PathFollowWeight"),("HorizonStabilizationWeights","real","HorizonStabilizationWeight"),("LookAheadSeconds","real","LookAheadSeconds"),("BankGains","real","BankGain"),("MaxBankDegrees","real","MaxBankDegrees"),("CameraUptiltDegrees","real","CameraUptiltDegrees"),("MaxAngularRatesDegreesPerSecond","real","MaxAngularRateDegreesPerSecond"),("MaxAccelerationsCmPerSecondSquared","real","MaxAccelerationCmPerSecondSquared"),("MaxJerksCmPerSecondCubed","real","MaxJerkCmPerSecondCubed"),("MinimumTurnRadiiCm","real","MinimumTurnRadiusCm"))
+BOUNDS=(("0.0","1.0",True),("0.0","1.0",True),("0.0","5.0",True),("0.0","2.0",True),("0.0","85.0",True),("-45.0","45.0",True),("0.0","720.0",False),("0.0","10000.0",False),("0.0","50000.0",False),("0.0","100000.0",False))
 
 def load(root):
  p=root/"tools/blueprint/Build-TrajectoryScalarEvaluatorGraphs.py";s=importlib.util.spec_from_file_location("edd_flight_profile_evaluator_base",p);m=importlib.util.module_from_spec(s);sys.modules[s.name]=m;s.loader.exec_module(m);return m
@@ -31,6 +32,9 @@ def main():
  def item(src,pin,k,idx,ip,x,y):n=b.add(f"i{len(b.nodes)}","item",x,y);pk(n,"Array",k,True);pk(n,"Output",k);bp.connect(src,pin,n,"Array");bp.connect(idx,ip,n,"Dimension 1");return n
  def cmp(member,l,lp,r,rp,k,x,y):
   n=b.add(f"c{len(b.nodes)}","compare",x,y);s.retarget_function(n,member)
+  # Retarget both the function reference and the hidden self/Target pin. A
+  # partial retarget survives a warm compile but warns during cold rebuild.
+  if member=="EqualEqual_StrStr":n.text=n.text.replace("/Script/Engine.KismetMathLibrary","/Script/Engine.KismetStringLibrary")
   for p0 in ("A","B"):pk(n,p0,k)
   pk(n,"ReturnValue","bool");bp.connect(l,lp,n,"A")
   if r is None:s.set_default(n,"B",rp)
@@ -59,14 +63,15 @@ def main():
  rv=get("FlightProfileResolveResultValidV1","bool",5728,1760);r_id=get("FlightProfileResolveResultIdV1","string",5728,1920);eqid=cmp("EqualEqual_StrStr",r_id,"FlightProfileResolveResultIdV1",loop,"Array Element","string",5984,1920);igs=[(rv,"FlightProfileResolveResultValidV1"),(eqid,"ReturnValue")]
  for j,((suf,k,rs),cg) in enumerate(zip(CHANNELS[1:],compiled[1:])):
   cn=f"FlightProfileCompiled{suf}V1";rn=f"FlightProfileResolveResult{rs}V1";it=item(cg,cn,k,loop,"Array Index",5728,j*144);rg=get(rn,k,5984,j*144);igs.append((cmp("EqualEqual_DoubleDouble",it,"Output",rg,rn,"real",6240,j*144),"ReturnValue"))
- integrity,ip=ands(igs,6496,1760);ib=b.add("integrity","branch",9184,2304);bp.connect(resolver,"then",ib,"execute");bp.connect(integrity,ip,ib,"Condition");fail=setv("FlightProfileEvaluationStageValidV1","bool",9440,2688,"false");bp.connect(pre,"else",fail,"execute");bp.connect(ib,"else",fail,"execute")
- stage=get("FlightProfileEvaluationStageValidV1","bool",9440,1920);final=b.add("final","branch",9696,2304);bp.connect(loop,"Completed",final,"execute");bp.connect(stage,"FlightProfileEvaluationStageValidV1",final,"Condition")
+  lower,upper,inclusive=BOUNDS[j];igs.append((cmp("GreaterEqual_DoubleDouble" if inclusive else "Greater_DoubleDouble",it,"Output",None,lower,"real",6464,j*144),"ReturnValue"));igs.append((cmp("LessEqual_DoubleDouble",it,"Output",None,upper,"real",6688,j*144),"ReturnValue"))
+ integrity,ip=ands(igs,6912,1760);ib=b.add("integrity","branch",14016,2304);bp.connect(resolver,"then",ib,"execute");bp.connect(integrity,ip,ib,"Condition");fail=setv("FlightProfileEvaluationStageValidV1","bool",14272,2688,"false");bp.connect(pre,"else",fail,"execute");bp.connect(ib,"else",fail,"execute")
+ stage=get("FlightProfileEvaluationStageValidV1","bool",14272,1920);final=b.add("final","branch",14528,2304);bp.connect(loop,"Completed",final,"execute");bp.connect(stage,"FlightProfileEvaluationStageValidV1",final,"Condition")
  pubs=[]
  for j,((suf,k,rs),cg) in enumerate(zip(CHANNELS,compiled)):
-  cn=f"FlightProfileCompiled{suf}V1";out=item(cg,cn,k,index,"FlightProfileInputSegmentIndexV1",9952,j*144);rn=f"FlightProfileResult{rs}V1";sv=setv(rn,k,10208+j*288,2304);bp.connect(out,"Output",sv,rn);pubs.append(sv)
+  cn=f"FlightProfileCompiled{suf}V1";out=item(cg,cn,k,index,"FlightProfileInputSegmentIndexV1",14784,j*144);rn=f"FlightProfileResult{rs}V1";sv=setv(rn,k,15040+j*288,2304);bp.connect(out,"Output",sv,rn);pubs.append(sv)
  bp.connect(final,"then",pubs[0],"execute")
  for l,r in zip(pubs,pubs[1:]):bp.connect(l,"then",r,"execute")
- done=setv("FlightProfileResultValidV1","bool",13408,2304,"true");bp.connect(pubs[-1],"then",done,"execute")
+ done=setv("FlightProfileResultValidV1","bool",18240,2304,"true");bp.connect(pubs[-1],"then",done,"execute")
  full="\n".join(n.text for n in b.nodes)+"\n";a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(full,encoding="utf-8")
  if a.paste_output:
   body=[re.sub(r',LinkedTo=\(K2Node_FunctionEntry_0 [0-9A-F]{32},\)',"",n.text) for n in b.nodes[1:]];a.paste_output.parent.mkdir(parents=True,exist_ok=True);a.paste_output.write_text("\n".join(body)+"\n",encoding="utf-8")

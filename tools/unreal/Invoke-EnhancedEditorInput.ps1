@@ -71,6 +71,8 @@ param(
     [Parameter(ParameterSetName = 'Click')]
     [string]$KeysAfterClick = '',
 
+    [switch]$PreserveForeground,
+
     [ValidateRange(0, 5000)]
     [int]$PostDelayMilliseconds = 300
 )
@@ -170,10 +172,12 @@ $handle = [IntPtr]$WindowHandle
 if (-not [EddEnhancedEditorInput]::IsWindow($handle)) {
     throw "Window handle is not valid: $WindowHandle"
 }
-if (-not [EddEnhancedEditorInput]::FocusWindow($handle)) {
-    throw "Could not focus window handle: $WindowHandle"
+if (-not $PreserveForeground) {
+    if (-not [EddEnhancedEditorInput]::FocusWindow($handle)) {
+        throw "Could not focus window handle: $WindowHandle"
+    }
+    Start-Sleep -Milliseconds 150
 }
-Start-Sleep -Milliseconds 150
 
 if ($PSCmdlet.ParameterSetName -eq 'Keys') {
     [System.Windows.Forms.SendKeys]::SendWait($Keys)

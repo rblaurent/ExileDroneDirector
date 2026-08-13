@@ -23,6 +23,7 @@ ARRAYS = (
 )
 SCALARS = (
     ("FlightProfileStageValidV1", "false"),
+    ("FlightProfileEvaluationStageValidV1", "false"),
     ("FlightProfileCompileValidV1", "false"),
     ("FlightProfileResultIdV1", ""),
     ("FlightProfileResultPathFollowWeightV1", "0.0"),
@@ -50,7 +51,9 @@ def load(root: Path):
 
 def explicit_default(body):
     match = re.search(r'(?:^|,)DefaultValue="([^"]*)"', body)
-    return None if match is None else match.group(1)
+    if match is not None:
+        return match.group(1)
+    return "" if 'PinType.PinCategory="string"' in body else None
 
 
 def main():
@@ -61,7 +64,7 @@ def main():
     args = parser.parse_args()
     contracts = load(args.project_root)
     nodes = contracts.parse_graph(args.graph)
-    contracts.require(len(nodes) == (58 if args.paste else 59), f"reset node count {len(nodes)}")
+    contracts.require(len(nodes) == (59 if args.paste else 60), f"reset node count {len(nodes)}")
     entries = [node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class]
     contracts.require(len(entries) == (0 if args.paste else 1), "reset entry count")
     clears = []

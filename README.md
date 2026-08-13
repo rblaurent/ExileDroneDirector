@@ -58,18 +58,21 @@ Read these in order:
 
 ## Current status
 
-Current internal checkpoint: `0.80.0-cinematic-pose-composition`. The accepted
-position and orientation backends now compose into one atomic cinematic pose:
-both tracks compile from the same duration sequence, publication is rejected if
-their timelines disagree, and absolute-time evaluation publishes a pose only
-when both component evaluators agree. Warm and fresh NullRHI runs each passed
-3,223 evaluations across 13 valid routes (including the 512-waypoint ceiling),
-all compile/commit/evaluation corruption families, non-finite elapsed values,
-state restoration, and deterministic recompilation. The five live Blueprint
-functions compile, save, cold-load, mirror byte-for-byte, and pass exact
-post-compile graph contracts. This is a backend checkpoint, not a whole-mod
-completion claim; flight-profile, lens/focus/effect tracks and shortcut-driven
-dogfood remain before UI, cooking, or Workshop work.
+Current internal checkpoint: `0.81.0-flight-profile-evaluator`. Seven live
+Blueprint functions now compile a canonical flight-profile default plus one
+optional per-segment override into immutable IDs and ten bounded numeric
+channels, reject malformed or noncanonical state atomically, and evaluate one
+bounded segment without mutating the compiled publication. Warm and fresh
+NullRHI runs each passed 9 preset-resolution cases, 7 valid compilations,
+14 evaluations, the 511-segment ceiling, 12 invalid compile families,
+24 candidate-corruption families, 24 compiled-corruption families, 5 invalid
+indices, non-finite values that reached Blueprint, and complete state
+restoration. All seven functions compile, save, cold-load, mirror byte-for-byte,
+and pass exact post-compile graph contracts. The complete cinematic pose and
+trajectory regressions remain green. This is a backend parameter-compilation
+checkpoint, not a claim that profile-driven airframe/gimbal motion, the whole
+mod, UI, cooking, or Workshop publication is complete; those remain ordered
+work alongside lens/focus/effect tracks and shortcut-driven dogfood.
 
 The Enhanced UE 5.6.1 mod container and first Unreal asset scaffold now exist.
 The scaffold includes a Funcom ModController, client-only director component,

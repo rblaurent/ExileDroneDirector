@@ -4,7 +4,9 @@ param(
     [long]$WindowHandle,
 
     [Parameter(Mandatory = $true)]
-    [string]$DestinationPath
+    [string]$DestinationPath,
+
+    [switch]$PreserveForeground
 )
 
 Set-StrictMode -Version Latest
@@ -37,10 +39,12 @@ $handle = [IntPtr]$WindowHandle
 if (-not [EddWindowCapture]::IsWindow($handle)) {
     throw "Window handle is not valid: $WindowHandle"
 }
-if (-not [EddWindowCapture]::SetForegroundWindow($handle)) {
-    throw "Could not focus window handle: $WindowHandle"
+if (-not $PreserveForeground) {
+    if (-not [EddWindowCapture]::SetForegroundWindow($handle)) {
+        throw "Could not focus window handle: $WindowHandle"
+    }
+    Start-Sleep -Milliseconds 120
 }
-Start-Sleep -Milliseconds 120
 $rect = New-Object EddWindowCapture+RECT
 if (-not [EddWindowCapture]::GetWindowRect($handle, [ref]$rect)) {
     throw "Could not read window bounds: $WindowHandle"

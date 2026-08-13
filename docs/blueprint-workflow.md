@@ -310,6 +310,10 @@ seam instead of rebuilding inline `user32` calls. It requires the exact editor
 window handle and supports focused SendKeys, client-coordinate clicks, drags,
 and wheel zoom. Visual coordinates remain provisional: after every root-pin
 drag, export the complete graph and require a reciprocal native-entry link.
+For an already-open transient menu, pass `-PreserveForeground` to both that
+input helper and `Save-WindowScreenshot.ps1`; their normal focus step otherwise
+dismisses the popup before the click or capture. Use this only after proving the
+owning editor window is already foreground and the transient menu is visible.
 
 Blueprint Assist may insert `K2Node_Knot` reroutes into a dense graph while it
 is active. Before compiling a newly installed dense function, export it and
@@ -318,6 +322,10 @@ stable function such as `EnterDroneMode`. After compile/save, reopen and export
 the dense function again and repeat both checks. If knots have already been
 injected, replace the whole non-entry body from the deterministic paste artifact
 instead of attempting a fragile manual knot cleanup.
+Do not invoke Blueprint File > Refresh All Nodes on a dense generated function
+while Blueprint Assist is active. A single refresh inserted 84 knots into the
+155-node flight-profile commit graph. Fix stale serialized pins in the generator
+or reset only the exact affected pin, then prove the full post-compile export.
 
 Do not use fixed My Blueprint/search coordinates after the saved Blueprint
 layout changes. On the current Client Director layout, those coordinates can

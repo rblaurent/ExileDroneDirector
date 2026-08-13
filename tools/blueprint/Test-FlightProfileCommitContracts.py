@@ -19,6 +19,7 @@ CHANNELS = (
     ("MaxJerksCmPerSecondCubed", "MaxJerkCmPerSecondCubed"),
     ("MinimumTurnRadiiCm", "MinimumTurnRadiusCm"),
 )
+BOUNDS = (("0.0", "1.0", True), ("0.0", "1.0", True), ("0.0", "5.0", True), ("0.0", "2.0", True), ("0.0", "85.0", True), ("-45.0", "45.0", True), ("0.0", "720.0", False), ("0.0", "10000.0", False), ("0.0", "50000.0", False), ("0.0", "100000.0", False))
 
 
 def load(root: Path):
@@ -35,7 +36,7 @@ def default(node, pin):
 def main():
     parser = argparse.ArgumentParser(); parser.add_argument("--project-root", type=Path, required=True); parser.add_argument("--graph", type=Path, required=True); parser.add_argument("--paste", action="store_true"); args = parser.parse_args()
     c = load(args.project_root); nodes = c.parse_graph(args.graph)
-    c.require(len(nodes) == (114 if args.paste else 115), f"commit node count {len(nodes)}")
+    c.require(len(nodes) == (154 if args.paste else 155), f"commit node count {len(nodes)}")
     entries = [node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class]
     c.require(len(entries) == (0 if args.paste else 1), "entry count")
     compile_sets = [node for node in nodes.values() if 'MemberName="FlightProfileCompileValidV1"' in node.text]
@@ -61,7 +62,7 @@ def main():
         length = next(node for node in lengths if c.linked(candidate, name, node, "TargetArray"))
         c.require(any(c.linked(length, "ReturnValue", equal, "A") and c.linked(count, "FlightProfileInputSegmentCountV1", equal, "B") for equal in integer_equals), f"{name} cardinality")
     boolean_ands = [node for node in nodes.values() if 'MemberName="BooleanAND"' in node.text]
-    c.require(len(boolean_ands) == 24, "pre/item sticky conjunctions")
+    c.require(len(boolean_ands) == 44, "pre/item sticky conjunctions")
     branches = [node for node in nodes.values() if "K2Node_IfThenElse" in node.node_class]
     c.require(len(branches) == 3, "pre/item/final guards")
     pre = next(node for node in branches if c.linked(invalidate, "then", node, "execute"))
@@ -75,15 +76,25 @@ def main():
     resolver_valid = c.one(nodes, 'MemberName="FlightProfileResolveResultValidV1"')
     resolver_id = c.one(nodes, 'MemberName="FlightProfileResolveResultIdV1"')
     id_equal = c.one(nodes, 'MemberName="EqualEqual_StrStr"')
+    c.require('/Script/Engine.KismetStringLibrary' in id_equal.text, "string equality library")
+    c.require('/Script/Engine.KismetMathLibrary' not in id_equal.text, "string equality has no stale MathLibrary self pin")
     c.require_link(resolver_id, "FlightProfileResolveResultIdV1", id_equal, "A", "resolved ID comparison"); c.require_link(loop, "Array Element", id_equal, "B", "candidate ID comparison")
     items = [node for node in nodes.values() if "K2Node_GetArrayItem" in node.node_class]
     real_equals = [node for node in nodes.values() if 'MemberName="EqualEqual_DoubleDouble"' in node.text]
     c.require(len(items) == len(real_equals) == 10, "ten parameter integrity comparisons")
-    for (suffix, result_suffix), candidate in zip(CHANNELS[1:], candidates[1:]):
+    inclusive_lowers = [node for node in nodes.values() if 'MemberName="GreaterEqual_DoubleDouble"' in node.text]
+    strict_lowers = [node for node in nodes.values() if 'MemberName="Greater_DoubleDouble"' in node.text]
+    uppers = [node for node in nodes.values() if 'MemberName="LessEqual_DoubleDouble"' in node.text]
+    c.require(len(inclusive_lowers) == 6 and len(strict_lowers) == 4 and len(uppers) == 10, "finite range guards")
+    for index, ((suffix, result_suffix), candidate) in enumerate(zip(CHANNELS[1:], candidates[1:])):
         candidate_name = f"FlightProfileCandidate{suffix}V1"; resolver_name = f"FlightProfileResolveResult{result_suffix}V1"
         item = next(node for node in items if c.linked(candidate, candidate_name, node, "Array")); c.require_link(loop, "Array Index", item, "Dimension 1", f"{suffix} index")
         result = c.one(nodes, f'MemberName="{resolver_name}"')
         c.require(any(c.linked(item, "Output", equal, "A") and c.linked(result, resolver_name, equal, "B") for equal in real_equals), f"{suffix} canonical integrity")
+        lower, upper, inclusive = BOUNDS[index]
+        lower_nodes = inclusive_lowers if inclusive else strict_lowers
+        c.require(any(c.linked(item, "Output", node, "A") and default(node, "B") == lower for node in lower_nodes), f"{suffix} finite lower bound")
+        c.require(any(c.linked(item, "Output", node, "A") and default(node, "B") == upper for node in uppers), f"{suffix} finite upper bound")
     item_guard = next(node for node in branches if c.linked(resolver, "then", node, "execute")); c.require_link(item_guard, "else", reject, "execute", "item corruption rejects")
     final = next(node for node in branches if c.linked(loop, "Completed", node, "execute") and c.linked(stage, "FlightProfileStageValidV1", node, "Condition"))
     compiled_sets = []

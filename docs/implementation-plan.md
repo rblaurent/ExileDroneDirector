@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.80.0-cinematic-pose-composition`
+Current internal build: `0.81.0-flight-profile-evaluator`
 
 ## 1. Delivery strategy
 
@@ -65,12 +65,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   dogfooding. Polished UI, cook, Workshop, and whole-mod completion remain
   explicitly unclaimed.
 
-### Flight-profile contract checkpoint
+### Flight-profile compile/evaluate checkpoint
 
-- The first bounded flight-profile slice is frozen offline. It compiles one
-  document default plus one optional override per segment into immutable profile
-  IDs and ten numeric parameter channels; it does not yet claim airframe/gimbal
-  solving or live Blueprint execution.
+- The first bounded flight-profile slice is installed, compiled, saved,
+  mirrored, cold-loaded, and executable. It compiles one document default plus
+  one optional override per segment into immutable profile IDs and ten numeric
+  parameter channels. It does not yet claim profile-driven airframe/gimbal
+  solving or procedural wind.
 - Exact supported IDs are `cinematic_drone`, `hybrid`, `fpv_cinewhoop`,
   `fpv_freestyle`, and `fpv_long_range`. An empty override inherits the default;
   every nonempty override is still validated even if another segment is being
@@ -82,33 +83,42 @@ This section is the authoritative handoff. Detailed evidence remains in
   variables, seven ordered function boundaries, isolated resolver scratch,
   exact candidate/result channel separation, atomic publication, and fail-closed
   lookup.
-- Deterministic Blueprint reset and authored-input validation graphs are now
-  generated and contract-accepted offline. Reset clears all 22 candidate/result
-  arrays and 14 public validity/result scalars in one 59-node ordered chain.
+- The seven exact post-compile live graphs contain 60, 37, 84, 58, 155, 5,
+  and 182 nodes for reset, validation, resolver, candidates, commit, compiler,
+  and evaluator respectively, with zero reroute knots. Reset clears all 22
+  candidate/result arrays and 14 public validity/result scalars in one ordered
+  chain.
   Validation uses 37 nodes to enforce segment count 1..511, exact override
   cardinality, one of five exact defaults, and empty-or-known identity for every
   override while keeping stage validity sticky-false after any rejection.
-- Preset resolution and candidate construction are now frozen as deterministic
-  graphs. The 84-node resolver clears its isolated 12-field result, follows one
+- Preset resolution and candidate construction are deterministic live graphs.
+  The 84-node resolver clears its isolated 12-field result, follows one
   ordered exact-ID branch, writes all ten canonical parameters, and publishes
   resolver validity last. The 58-node candidate builder clears all candidate
   arrays, stages inherited/default IDs explicitly, calls the resolver per
   segment, rejects sticky-false on any failure, and appends the ID plus all ten
   channels in one ordered chain.
-- Atomic commit and compilation orchestration are frozen offline. The 115-node
+- Atomic commit and compilation orchestration are live. The 155-node
   commit invalidates prior publication first, proves all 11 candidate array
   cardinalities, re-resolves and compares every candidate parameter, publishes
   all 11 compiled arrays only after the completed sticky-valid scan, and writes
   compile validity last. The five-node compiler calls reset, validation,
   candidate construction, and commit in exact order.
-- Indexed evaluation is frozen offline in a 142-node graph. It clears its own
+- Indexed evaluation is live in a 182-node graph. It clears its own
   scratch and every public result, validates compile state/cardinality/index,
   scans and re-resolves every compiled segment with sticky evaluation validity,
   and publishes only the requested ID plus ten parameters with validity last.
-- Next is deterministic Blueprint graph generation and exact source/paste
-  installation of all seven functions, followed by live compile/save and
-  warm/fresh runtime evidence.
-  This offline checkpoint is not live feature acceptance.
+- Warm and separate fresh NullRHI execution each pass 9 resolver cases, 7 valid
+  compiles, 14 evaluations, the 511-segment ceiling, 12 invalid compile cases,
+  24 candidate-corruption cases, 24 compiled-corruption cases, 5 bad indices,
+  and complete state restoration. Non-finite values reach Blueprint and fail
+  closed. A fresh cold-load compiles all six Blueprints with zero errors; the
+  live and mirrored Client Director package SHA-256 is
+  `B411E7414A74119D0F094D3CFD87C4C2772BCD17F40AB90DD80D12F20FBD55DB`.
+- Next is consuming these immutable parameters in deterministic cinematic,
+  hybrid, and FPV airframe/gimbal behavior. Lens/focus/effect tracks and
+  shortcut/debug dogfood follow. No polished UI, cook, Workshop publication,
+  or whole-mod completion is claimed.
 
 ### Position-route absolute-time evaluator checkpoint
 

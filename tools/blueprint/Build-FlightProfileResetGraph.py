@@ -25,6 +25,7 @@ ARRAYS = (
 )
 SCALARS = (
     ("FlightProfileStageValidV1", "bool", "false"),
+    ("FlightProfileEvaluationStageValidV1", "bool", "false"),
     ("FlightProfileCompileValidV1", "bool", "false"),
     ("FlightProfileResultIdV1", "string", ""),
     ("FlightProfileResultPathFollowWeightV1", "real", "0.0"),

@@ -128,30 +128,40 @@ $requiredFiles = @(
     'tools\blueprint\Test-FlightProfileResetContracts.py',
     'tools\blueprint\snippets\reset-flight-profile-state-v1.eddgraph',
     'tools\blueprint\snippets\reset-flight-profile-state-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-flight-profile-state-v1.eddgraph',
     'tools\blueprint\Build-FlightProfileValidationGraph.py',
     'tools\blueprint\Test-FlightProfileValidationContracts.py',
     'tools\blueprint\snippets\validate-flight-profile-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-flight-profile-inputs-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\validate-flight-profile-inputs-v1.eddgraph',
     'tools\blueprint\Build-FlightProfileResolverGraph.py',
     'tools\blueprint\Test-FlightProfileResolverContracts.py',
     'tools\blueprint\snippets\resolve-flight-profile-preset-v1.eddgraph',
     'tools\blueprint\snippets\resolve-flight-profile-preset-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\resolve-flight-profile-preset-v1.eddgraph',
     'tools\blueprint\Build-FlightProfileCandidatesGraph.py',
     'tools\blueprint\Test-FlightProfileCandidatesContracts.py',
     'tools\blueprint\snippets\build-flight-profile-candidates-v1.eddgraph',
     'tools\blueprint\snippets\build-flight-profile-candidates-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\build-flight-profile-candidates-v1.eddgraph',
     'tools\blueprint\Build-FlightProfileCommitGraph.py',
     'tools\blueprint\Test-FlightProfileCommitContracts.py',
     'tools\blueprint\snippets\commit-compiled-flight-profiles-v1.eddgraph',
     'tools\blueprint\snippets\commit-compiled-flight-profiles-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\commit-compiled-flight-profiles-v1.eddgraph',
     'tools\blueprint\Build-FlightProfileCompileGraph.py',
     'tools\blueprint\Test-FlightProfileCompileContracts.py',
     'tools\blueprint\snippets\compile-flight-profiles-v1.eddgraph',
     'tools\blueprint\snippets\compile-flight-profiles-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\compile-flight-profiles-v1.eddgraph',
     'tools\blueprint\Build-FlightProfileEvaluatorGraph.py',
     'tools\blueprint\Test-FlightProfileEvaluatorContracts.py',
+    'tools\blueprint\Inspect-BlueprintFunctionSeam.py',
     'tools\blueprint\snippets\evaluate-compiled-flight-profile-v1.eddgraph',
     'tools\blueprint\snippets\evaluate-compiled-flight-profile-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\evaluate-compiled-flight-profile-v1.eddgraph',
+    'tools\unreal\Configure-FlightProfileAssembly.py',
+    'tools\unreal\Validate-FlightProfileRuntime.py',
     'tools\unreal\Configure-CinematicPoseAssembly.py',
     'tools\unreal\Validate-CinematicPoseRuntime.py',
     'tools\blueprint\Build-CinematicPoseResetGraph.py',
@@ -665,6 +675,17 @@ if ($editorInputSource -notmatch "ValidateSet\('None', 'Alt', 'Control', 'Shift'
 if ($editorInputSource -notmatch 'keybd_event\(\$modifierKey, 0, 0x0002') {
     throw 'Editor input helper must release held click modifiers in a finally block.'
 }
+if ($editorInputSource -notmatch '\[switch\]\$PreserveForeground' -or
+    $editorInputSource -notmatch 'if \(-not \$PreserveForeground\)') {
+    throw 'Editor input helper must support popup-safe foreground preservation.'
+}
+
+$windowScreenshotPath = Join-Path $ProjectRoot 'tools\unreal\Save-WindowScreenshot.ps1'
+$windowScreenshotSource = [IO.File]::ReadAllText($windowScreenshotPath)
+if ($windowScreenshotSource -notmatch '\[switch\]\$PreserveForeground' -or
+    $windowScreenshotSource -notmatch 'if \(-not \$PreserveForeground\)') {
+    throw 'Window screenshot helper must support popup-safe foreground preservation.'
+}
 
 $movementConfigPath = Join-Path $ProjectRoot 'tools\unreal\Configure-DroneMovement.py'
 $movementConfig = [IO.File]::ReadAllText($movementConfigPath)
@@ -1036,7 +1057,8 @@ foreach ($family in @(
         @($family[2], $false),
         @($family[3], $true),
         @((Join-Path $ProjectRoot "tools\blueprint\snippets\$($family[4]).eddgraph"), $false),
-        @((Join-Path $ProjectRoot "tools\blueprint\snippets\$($family[4])-paste.eddgraph"), $true)
+        @((Join-Path $ProjectRoot "tools\blueprint\snippets\$($family[4])-paste.eddgraph"), $true),
+        @((Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($family[4]).eddgraph"), $false)
     )) {
         & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $spec[0]
         $arguments = @(

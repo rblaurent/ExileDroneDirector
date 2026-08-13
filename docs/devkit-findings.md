@@ -4136,3 +4136,67 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   Repeated generation and the full scaffold pass. The complete seven-function
   flight-profile graph set is now frozen offline; no live compile/runtime claim
   is made until the DevKit installation and executable harness pass.
+
+### Flight-profile compile/evaluate accepted live (2026-08-13)
+
+- `ResetFlightProfileStateV1`, `ValidateFlightProfileInputsV1`,
+  `ResolveFlightProfilePresetV1`, `BuildFlightProfileCandidatesV1`,
+  `CommitCompiledFlightProfilesV1`, `CompileFlightProfilesV1`, and
+  `EvaluateCompiledFlightProfileV1` are installed in
+  `BPC_EDD_ClientDirector`, compiled, saved, mirrored, cold-loaded, and
+  executable. Exact post-compile exports contain 60, 37, 84, 58, 155, 5, and
+  182 nodes respectively, with no `K2Node_Knot` reroutes.
+- Live-export SHA-256 values in that order are
+  `05D8143DF9FFC593D9EAE874E344A36B60B62070A0C02ACDDC12D3F12E2DA4B0`,
+  `60CC4472D563E347FA36A50294B6B60FAACD5A0B5A6F637A4DF141CA05269DAB`,
+  `080C51AC5FF445E836A3716BF2E8E138C47943416860399BDB5279FCD41E9581`,
+  `698C225788644D5AC371E4AB14CB308D289039BDCE35688C48B328CF1B94C543`,
+  `F64E15CFF07D38DA06BF58D73E54C5CC1C104D5E06A47BC909F99FFCBD333DBF`,
+  `97F14D3D2A67DA6B0D7EC1AEF48BFC8443C65F18FAFC81931E2F7AEC5948FAC5`,
+  and
+  `F349DA2AAC42CF84CA3F699B0D7CEB4E143112EC0E0D07337223B3DDBB057F25`.
+  Every focused exact contract passes against the promoted live export, not
+  merely the generated source graph.
+- Warm-editor and separate fresh NullRHI execution each pass 9 resolver cases,
+  7 valid compiles, 14 indexed evaluations, the 511-segment ceiling, 12 invalid
+  compile families, 24 candidate-corruption families, 24 compiled-corruption
+  families, and 5 invalid indices. Actual non-finite floats reach Blueprint and
+  fail closed; no reflection sanitization masked those cases. Authored inputs
+  and accepted compiled publication obey their mutation contracts, poisoned
+  result state clears, and every touched CDO property restores.
+- The complete cinematic-pose suite remains green in the same live editor:
+  13 valid poses, 3,223 evaluations, 13 shuffled direct-scrub cases, the
+  512-waypoint ceiling, 8 compile failures, 7 commit failures, 8 evaluation
+  failures, and 3 non-finite elapsed values. Maximum local-alpha error is zero,
+  maximum position error is `3.410605131648481e-13`, and maximum angular error
+  is `1.032382731180714e-07`. Position-route and orientation-track compiler
+  regressions also pass with full restoration.
+- After guarded editor shutdown, reverse sync copied exactly one asset with no
+  conflicts. Live and mirrored Client Director SHA-256 both equal
+  `B411E7414A74119D0F094D3CFD87C4C2772BCD17F40AB90DD80D12F20FBD55DB`.
+  A fresh cold-load process loaded all nine core assets and compiled all six
+  Blueprints with zero errors. A second fresh executable run repeated the full
+  flight-profile matrix and restoration proof with zero errors. The complete
+  `Test-Scaffold.ps1 -RequireMvpAssets` gate passes.
+- Unreal 5.6 preserved a stale hidden self pin when a generated string-equality
+  call changed from `MathLibrary` to `StringLibrary` but only the first textual
+  class reference was replaced. Generators now replace every occurrence, and
+  equality contracts reject any residual `MathLibrary` reference. This removed
+  the cold-load `Target`-pin warning rather than merely suppressing it.
+- Do not use Blueprint File > Refresh All Nodes on these dense generated graphs
+  while Blueprint Assist is active. One refresh inserted exactly 84 reroute
+  knots into the 155-node commit graph. Exact export caught the 239-node result;
+  the graph was rebuilt from deterministic source, the native entry was moved
+  using serialized coordinates, and its one exec seam was reconnected and
+  re-exported. Compile while a small unrelated function is active so Blueprint
+  Assist cannot rewrite the dense target graph.
+- Transient Unreal menus require foreground preservation. Both
+  `Invoke-EnhancedEditorInput.ps1` and `Save-WindowScreenshot.ps1` now expose
+  `-PreserveForeground`; without it their normal focus step dismisses the popup
+  before the click or capture. Use the switch only after the owning editor
+  window is already foreground and the popup is open.
+- Accepted scope is canonical profile parameter compilation and indexed lookup.
+  Profile-driven airframe/gimbal dynamics, coherent wind/vibration, lens/focus/
+  effects, shortcut dogfood, polished UI, cook, Workshop, and whole-mod
+  completion remain unclaimed. The next ordered slice consumes the immutable
+  profile result in deterministic cinematic, hybrid, and FPV motion behavior.

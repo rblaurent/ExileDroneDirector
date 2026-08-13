@@ -21,6 +21,13 @@ CHANNELS = (
     ("MaxJerksCmPerSecondCubed", "real", "MaxJerkCmPerSecondCubed"),
     ("MinimumTurnRadiiCm", "real", "MinimumTurnRadiusCm"),
 )
+BOUNDS = (
+    ("0.0", "1.0", True), ("0.0", "1.0", True),
+    ("0.0", "5.0", True), ("0.0", "2.0", True),
+    ("0.0", "85.0", True), ("-45.0", "45.0", True),
+    ("0.0", "720.0", False), ("0.0", "10000.0", False),
+    ("0.0", "50000.0", False), ("0.0", "100000.0", False),
+)
 
 
 def load(root: Path):
@@ -86,6 +93,12 @@ def main():
 
     def compare(member, left, left_pin, right, right_pin, kind, x, y):
         node = b.add(f"compare_{len(b.nodes)}", "compare", x, y); scalar.retarget_function(node, member)
+        if member == "EqualEqual_StrStr":
+            # Retarget the function reference and the hidden self/Target pin.
+            # Leaving the latter on KismetMathLibrary compiles in the warm
+            # editor but reconstructs with an obsolete-pin warning on a cold
+            # load.
+            node.text = node.text.replace("/Script/Engine.KismetMathLibrary", "/Script/Engine.KismetStringLibrary")
         for pin in ("A", "B"): pin_kind(node, pin, kind)
         pin_kind(node, "ReturnValue", "bool"); bp.connect(left, left_pin, node, "A")
         if right is None: scalar.set_default(node, "B", right_pin)
@@ -138,22 +151,25 @@ def main():
         candidate_item = item(candidate, candidate_name, kind, loop, "Array Index", 5248, index * 160)
         resolver_value = get(resolver_name, kind, 5504, index * 160)
         equal = compare("EqualEqual_DoubleDouble", candidate_item, "Output", resolver_value, resolver_name, "real", 5760, index * 160)
-        item_guards.append(equal); item_pins.append("ReturnValue")
+        lower, upper, inclusive = BOUNDS[index]
+        lower_guard = compare("GreaterEqual_DoubleDouble" if inclusive else "Greater_DoubleDouble", candidate_item, "Output", None, lower, "real", 6016, index * 160)
+        upper_guard = compare("LessEqual_DoubleDouble", candidate_item, "Output", None, upper, "real", 6240, index * 160)
+        item_guards.extend((equal, lower_guard, upper_guard)); item_pins.extend(("ReturnValue", "ReturnValue", "ReturnValue"))
     item_combined, item_pin = item_guards[0], item_pins[0]
     for index, (guard, guard_pin) in enumerate(zip(item_guards[1:], item_pins[1:])):
-        item_combined = and_(item_combined, item_pin, guard, guard_pin, 6016 + index * 224, 1760); item_pin = "ReturnValue"
-    item_branch = b.add("item_guard", "branch", 8704, 2304)
+        item_combined = and_(item_combined, item_pin, guard, guard_pin, 6720 + index * 224, 1760); item_pin = "ReturnValue"
+    item_branch = b.add("item_guard", "branch", 13824, 2304)
     bp.connect(resolver, "then", item_branch, "execute"); bp.connect(item_combined, item_pin, item_branch, "Condition"); bp.connect(item_branch, "else", reject, "execute")
-    final = b.add("final_guard", "branch", 8960, 2304)
+    final = b.add("final_guard", "branch", 14080, 2304)
     bp.connect(loop, "Completed", final, "execute"); bp.connect(stage, "FlightProfileStageValidV1", final, "Condition")
     compiled_sets = []
     for index, ((suffix, kind, _result), candidate) in enumerate(zip(CHANNELS, candidates)):
         candidate_name = f"FlightProfileCandidate{suffix}V1"; compiled_name = f"FlightProfileCompiled{suffix}V1"
-        setter = set_(compiled_name, kind, 9216 + index * 320, 2304, array=True)
+        setter = set_(compiled_name, kind, 14336 + index * 320, 2304, array=True)
         bp.connect(candidate, candidate_name, setter, compiled_name); compiled_sets.append(setter)
     bp.connect(final, "then", compiled_sets[0], "execute")
     for left, right in zip(compiled_sets, compiled_sets[1:]): bp.connect(left, "then", right, "execute")
-    publish = set_("FlightProfileCompileValidV1", "bool", 12800, 2304, "true"); bp.connect(compiled_sets[-1], "then", publish, "execute")
+    publish = set_("FlightProfileCompileValidV1", "bool", 17920, 2304, "true"); bp.connect(compiled_sets[-1], "then", publish, "execute")
 
     full = "\n".join(node.text for node in b.nodes) + "\n"; args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_text(full, encoding="utf-8")
     if args.paste_output:

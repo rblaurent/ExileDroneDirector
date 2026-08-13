@@ -156,6 +156,10 @@ $requiredFiles = @(
     'tools\blueprint\snippets\build-airframe-desired-acceleration-samples-v1-paste.eddgraph',
     'tools\blueprint\snippets\build-airframe-desired-jerk-samples-v1.eddgraph',
     'tools\blueprint\snippets\build-airframe-desired-jerk-samples-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframeDesiredVelocitySamplerGraph.py',
+    'tools\blueprint\Test-AirframeDesiredVelocitySamplerContracts.py',
+    'tools\blueprint\snippets\sample-airframe-desired-velocity-at-time-v1.eddgraph',
+    'tools\blueprint\snippets\sample-airframe-desired-velocity-at-time-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframePrebakeResetGraph.py',
     'tools\blueprint\Test-AirframePrebakeResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1.eddgraph',
@@ -1053,6 +1057,30 @@ foreach ($derivativeStage in @('velocity', 'acceleration', 'jerk')) {
         & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredDerivativeContracts.py') @arguments
         if ($LASTEXITCODE -ne 0) { throw "Airframe desired $derivativeStage contracts failed with exit code $LASTEXITCODE." }
     }
+}
+$velocitySampler = Join-Path $airframeDesiredRoot 'sample-airframe-desired-velocity-at-time-v1.eddgraph'
+$velocitySamplerPaste = Join-Path $airframeDesiredRoot 'sample-airframe-desired-velocity-at-time-v1-paste.eddgraph'
+$velocitySamplerRepeat = Join-Path $airframeDesiredRoot 'sample-airframe-desired-velocity-at-time-v1-repeat.eddgraph'
+$velocitySamplerRepeatPaste = Join-Path $airframeDesiredRoot 'sample-airframe-desired-velocity-at-time-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredVelocitySamplerGraph.py') `
+    --project-root $ProjectRoot --output $velocitySampler --paste-output $velocitySamplerPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe desired velocity sampler generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredVelocitySamplerGraph.py') `
+    --project-root $ProjectRoot --output $velocitySamplerRepeat --paste-output $velocitySamplerRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe desired velocity sampler generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($velocitySampler, $velocitySamplerRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\sample-airframe-desired-velocity-at-time-v1.eddgraph')),
+    @($velocitySamplerPaste, $velocitySamplerRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\sample-airframe-desired-velocity-at-time-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired velocity sampler generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($velocitySampler, $false), @($velocitySamplerPaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredVelocitySamplerContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe desired velocity sampler contracts failed with exit code $LASTEXITCODE." }
 }
 $airframePrebakeNonce = [guid]::NewGuid().ToString('N')
 $airframePrebakeRoot = Join-Path $scratchRoot "edd-airframe-prebake-$airframePrebakeNonce"

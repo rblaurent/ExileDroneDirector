@@ -410,6 +410,17 @@ This section is the authoritative handoff. Detailed evidence remains in
   scaffold own all six artifacts. Next are absolute-time velocity sampling,
   the desired-pose solve loop, commit/orchestration, and eventual live
   acceptance; no live claim is made for these derivative graphs yet.
+- `SampleAirframeDesiredVelocityAtTimeV1` is now frozen as a 94-node full /
+  93-node paste O(1) helper. It resets outputs first, validates stage/schedule/
+  query shape, clamps absolute time, selects the exact fixed or partial-terminal
+  segment, linearly interpolates velocity, and publishes only a finite result.
+  Endpoint completion separately finite-checks the terminal sample.
+- Both graph forms execute 124 directed/seeded queries exactly against the
+  independent oracle and reject ten invalid/corrupt families with zero/false
+  output. Repeat generation is byte-identical and scaffold-owned. The next
+  ordered slice is the desired-pose sample loop that uses this helper and the
+  accepted stateless airframe/gimbal solver; live acceptance remains deferred
+  until the complete desired-stream transaction exists.
 
 ### Position-route absolute-time evaluator checkpoint
 

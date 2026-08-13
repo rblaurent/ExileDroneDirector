@@ -4841,3 +4841,23 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   and exact read/write/link contracts pass, and the complete scaffold owns the
   suite. These are offline graph contracts only; they have not yet been pasted,
   compiled, saved, cold-loaded, or executed by Enhanced.
+
+### Desired velocity absolute-time sampler frozen offline (2026-08-13)
+
+- `SampleAirframeDesiredVelocityAtTimeV1` is a history-free 94-node full /
+  93-node paste helper with no loop. It resets vector/valid results first,
+  requires an accepted stage and exact schedule shape, rejects non-finite query
+  time, then clamps to the shot endpoints.
+- Active sampling floors `clampedTime / fixedStep`, chooses fixed-step or exact
+  partial-terminal duration, and performs vector linear interpolation. The
+  interpolated vector must pass explicit finite-double component checks before
+  publication. The post-end branch reads and finite-checks the terminal vector
+  independently before publishing it.
+- The exported-link interpreter proves 124 directed/seeded queries in both
+  forms against `sample_vector_track_linear`, including negative time, zero,
+  interior fixed segments, the partial terminal segment, exact completion, and
+  post-end clamp. Ten stage/shape/non-finite/corrupt cases reset to zero/false,
+  and poisoned prior results cannot affect a repeat invocation.
+- Generator reruns are byte-identical to both checked-in artifacts and the
+  complete scaffold owns syntax plus executable contracts. No live Blueprint
+  compile/runtime evidence is claimed yet.

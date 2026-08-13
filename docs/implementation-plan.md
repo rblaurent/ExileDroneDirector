@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.77.0-position-route-compile`
+Current internal build: `0.78.0-position-route-arc-slice`
 
 ## 1. Delivery strategy
 
@@ -27,6 +27,45 @@ output. Subsequent UI work exposes this proven backend without redefining it.
 This section is the authoritative handoff. Detailed evidence remains in
 `devkit-findings.md`; exact clipboard procedure remains in
 `blueprint-workflow.md`.
+
+### Position-route selected arc-slice checkpoint
+
+- `StagePositionRouteArcSliceV1` is compiled, saved, mirrored, and accepted as
+  the bounded adapter between one selected compiled route segment and the
+  existing cumulative arc-table inverter. It clears every primitive input and
+  output first, validates compile state, selected-index/cardinality/slice
+  bounds, finite nonnegative segment length, and finite distance alpha in
+  `[0,1]`, then copies exactly the selected contiguous flat-table slice.
+- Deterministic full/paste graphs contain 68/67 nodes with SHA-256
+  `BB3AB3A286703BE4C59D466432374B6818D81A1B67D7FB9C9302E9950989563F` /
+  `BB163444025E73E5D8852E038699B19B4E5C0CE223B2F0D51B2C211BF6EF656A`.
+  The exact post-compile 68-node export hashes to
+  `8FCC4E4564AA5640C27C74D9777FF2665173F59B11ACB4131A865A02287BA626`.
+- Warm and fresh NullRHI execution each pass 726 valid selections spanning
+  1,976 segments and 25,735 flattened samples, including unequal slice sizes,
+  zero-length segments, out-of-order direct scrubbing, and the 512-waypoint
+  ceiling. Fifteen malformed compile/index/cardinality/bounds/length/alpha
+  families, including a maximum-integer start that would expose wrapped
+  `start + count` arithmetic, all reach Blueprint and fail closed; poisoned
+  destination state is cleared, source publication is unchanged, and every
+  touched CDO property is restored.
+- The complete warm position-route pipeline and downstream arc inverter remain
+  green. Guarded shutdown kept crash directories at 25; closed-editor sync
+  copied exactly Client Director, reverse sync found 17/17 unchanged, and the
+  package hashes to
+  `7906D5220E777F6D5EC6479F82143D0EB960608A3ECAFDB19985205E503BC87D`.
+  Fresh compiler/inverter regressions, cold core-asset compilation, and the
+  complete scaffold pass.
+- The position-route assembly configurator is now safely idempotent: schema
+  upgrades initialize only newly created variables and preserve every existing
+  authored/CDO value. This removes the prior false failure on nonempty restored
+  route inputs.
+- Next ordered slice remains the full absolute-time
+  `EvaluateCompiledPositionRouteV1` composition: segment selection, time-profile
+  evaluation, this accepted slice adapter, arc inversion, linear/quintic
+  spatial evaluation, completion semantics, and atomic public result commit.
+  Cinematic dogfood controls, polished UI, cook, Workshop, and whole-mod
+  completion remain unclaimed.
 
 ### Position-route compiler orchestration checkpoint
 

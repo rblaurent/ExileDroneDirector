@@ -3806,3 +3806,55 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Absolute-time evaluation through `EvaluateCompiledPositionRouteV1` is next.
   Cinematic dogfood shortcuts, polished UI, cook, Workshop, and whole-mod
   completion remain unclaimed.
+
+## Selected position-route arc slice accepted (2026-08-13)
+
+- Internal checkpoint `0.78.0-position-route-arc-slice` adds compiled
+  `StagePositionRouteArcSliceV1` as a deliberately narrow adapter between the
+  flattened compiled route publication and `InvertArcLengthTableV1`. It resets
+  the shared arc primitive, validates compile validity, selected segment,
+  metadata/flat-array cardinalities, bounded slice range, finite nonnegative
+  segment length, and finite `[0,1]` distance alpha, then copies only that
+  segment's contiguous `u` and cumulative-distance samples. Validity is the
+  final write.
+- Deterministic source/paste graphs contain 68/67 nodes and hash to
+  `BB3AB3A286703BE4C59D466432374B6818D81A1B67D7FB9C9302E9950989563F` /
+  `BB163444025E73E5D8852E038699B19B4E5C0CE223B2F0D51B2C211BF6EF656A`.
+  The exact post-compile 68-node export passes the same reciprocal-link
+  contracts and hashes to
+  `8FCC4E4564AA5640C27C74D9777FF2665173F59B11ACB4131A865A02287BA626`.
+- Warm and fresh compiled runtime each pass 726 valid selected slices across
+  1,976 route segments and 25,735 flat samples. Evidence includes unequal
+  per-segment table sizes, zero-length segments, repeated shuffled access, and
+  511 segments from the 512-waypoint route ceiling. Fifteen malformed families
+  cover prior-invalid publication, index bounds, all metadata cardinality
+  mismatches, flat mismatch, count/start/end bounds (including maximum-integer
+  start overflow), negative/non-finite length, and out-of-range/non-finite
+  alpha. All 15 reach Blueprint and clear poisoned primitive state without
+  mutating compiled source data; complete CDO restore passes. The accepted
+  bound uses `count <= flatLength - start` only after proving nonnegative start,
+  avoiding a wrapped `start + count` comparison.
+- The live editor exposed an automation defect before graph installation:
+  `Configure-PositionRouteAssembly.py` rejected legitimate restored nonempty
+  arrays during an idempotent schema upgrade. It now tracks variables created
+  by the current run, initializes only those, and explicitly preserves all
+  existing CDO values. The corrected rerun created/saved the function boundary
+  without erasing the three-waypoint authored route.
+- The exact seam was measured, not assumed: paste-form contract passed first,
+  the native entry moved from `(0,0)` to `(-4144,1648)`, one pin drag created the
+  reciprocal entry-to-first-clear link, and exact contracts passed before and
+  after compile. The first full-scaffold attempt was a harness invocation issue:
+  capturing its combined output promoted normal unittest stderr progress into
+  a PowerShell terminating error. Direct invocation completed successfully; no
+  product or graph test failed.
+- Every warm upstream position-route runtime and the downstream arc inverter
+  remain green. Guarded shutdown exited cleanly with crash directories unchanged
+  at 25. Closed-editor preview found exactly Client Director changed plus 16
+  unchanged files; forced mirror copied that package, reverse preview found all
+  17 unchanged, and live/mirror SHA-256 is
+  `7906D5220E777F6D5EC6479F82143D0EB960608A3ECAFDB19985205E503BC87D`.
+  Fresh helper/compiler/inverter runs, cold compilation of all core assets, and
+  the full scaffold pass.
+- Next is full `EvaluateCompiledPositionRouteV1` absolute-time composition.
+  This helper acceptance does not claim route evaluation, cinematic shortcuts,
+  UI, cook, Workshop, or whole-mod completion.

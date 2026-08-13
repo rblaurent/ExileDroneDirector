@@ -346,9 +346,13 @@ the quaternion control primitives that sign-align endpoints, compute bounded
 time-domain angular tangents, and build segment control quaternions. Exact
 post-compile Blueprint exports, executable serialized-graph oracles, warm
 compiled execution, fresh NullRHI execution, cold asset loading, and state
-restoration are green for this slice. Multi-key/route assembly, arc-length
-integration, the remaining cinematic tracks and shortcut dogfood are still
-ordered backend work; this is not a completed mod, UI, cook, or Workshop gate.
+restoration are green for this slice. The multi-segment position route now
+compiles authored waypoints into atomically published, flattened adaptive arc
+tables. A bounded compiled adapter can select one segment, validate and extract
+its exact contiguous arc slice, and stage the accepted inversion primitive
+without stale-state leakage. Full absolute-time route evaluation, the remaining
+cinematic tracks, and shortcut dogfood are still ordered backend work; this is
+not a completed mod, UI, cook, or Workshop gate.
 
 ## Repository layout
 

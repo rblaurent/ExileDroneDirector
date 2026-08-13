@@ -33,12 +33,14 @@ if blueprint is None:raise RuntimeError(CLIENT)
 vector=unreal.load_object(None,"/Script/CoreUObject.Vector")
 if vector is None:raise RuntimeError("native Vector unavailable")
 types={"Vector":unreal.BlueprintEditorLibrary.get_struct_type(vector),"Float":unreal.BlueprintEditorLibrary.get_basic_type_by_name("real"),"Integer":unreal.BlueprintEditorLibrary.get_basic_type_by_name("int"),"Boolean":unreal.BlueprintEditorLibrary.get_basic_type_by_name("bool"),"String":unreal.BlueprintEditorLibrary.get_basic_type_by_name("string")}
+created_variables=set()
 for spec in SCHEMA["variables"]:
     name=spec["name"]
     if has(name):emit("VARIABLE_ALREADY_PRESENT",name);continue
     pin_type=types[spec["type"]]
     if spec["container"]=="Array":pin_type=unreal.BlueprintEditorLibrary.get_array_type(pin_type)
     if not unreal.BlueprintEditorLibrary.add_member_variable(blueprint,name,pin_type):raise RuntimeError(f"failed to add {name}")
+    created_variables.add(name)
     unreal.BlueprintEditorLibrary.compile_blueprint(blueprint);emit("VARIABLE_CREATED",name)
 for spec in SCHEMA["functions"]:
     name=spec["name"]
@@ -49,6 +51,9 @@ for spec in SCHEMA["functions"]:
 unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
 for spec in SCHEMA["variables"]:
     name=spec["name"]
+    if name not in created_variables:
+        emit("EXISTING_DEFAULT_PRESERVED",f"{name}|{get(name)}")
+        continue
     if spec["container"]=="Array":
         if len(get(name))!=0:raise RuntimeError(f"array default not empty: {name}")
         emit("ARRAY_DEFAULT_VERIFIED",name);continue

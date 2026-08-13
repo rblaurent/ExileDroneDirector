@@ -64,7 +64,8 @@
     { "name": "BuildPositionRouteSegmentsV1", "stage": 3, "uses": ["BuildAdaptiveArcTableV1"] },
     { "name": "CommitCompiledPositionRouteV1", "stage": 4 },
     { "name": "CompilePositionRouteV1", "stage": 5 },
-    { "name": "EvaluateCompiledPositionRouteV1", "stage": 6, "uses": ["EvaluateTimeProfileV1", "InvertArcLengthTableV1", "EvaluateQuinticVectorV1"] }
+    { "name": "StagePositionRouteArcSliceV1", "stage": 6 },
+    { "name": "EvaluateCompiledPositionRouteV1", "stage": 7, "uses": ["EvaluateTimeProfileV1", "StagePositionRouteArcSliceV1", "InvertArcLengthTableV1", "EvaluateQuinticVectorV1"] }
   ],
   "contracts": {
     "inputShape": "durations, spatial curve types, and time profiles each equal waypoint positions minus one.",

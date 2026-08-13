@@ -166,6 +166,7 @@ $requiredFiles = @(
     'tools\unreal\Validate-PositionRouteSegmentsRuntime.py',
     'tools\unreal\Validate-PositionRouteCommitRuntime.py',
     'tools\unreal\Validate-PositionRouteCompileRuntime.py',
+    'tools\unreal\Validate-PositionRouteArcSliceRuntime.py',
     'tools\unreal\Open-BlueprintFunctionViaFindResults.ps1',
     'tools\blueprint\Build-OrientationCompilerNativeNodeForms.py',
     'tools\blueprint\Build-OrientationCompilerGraphs.py',
@@ -212,6 +213,8 @@ $requiredFiles = @(
     'tools\blueprint\Test-PositionRouteCommitContracts.py',
     'tools\blueprint\Build-PositionRouteCompileGraph.py',
     'tools\blueprint\Test-PositionRouteCompileContracts.py',
+    'tools\blueprint\Build-PositionRouteArcSliceGraph.py',
+    'tools\blueprint\Test-PositionRouteArcSliceContracts.py',
     'tools\blueprint\templates\adaptive-arc-forloop-node-form.eddgraph',
     'tools\blueprint\templates\adaptive-arc-for-loop-with-break-node-form.eddgraph',
     'tools\blueprint\templates\adaptive-arc-process-node-forms.eddgraph',
@@ -281,6 +284,9 @@ $requiredFiles = @(
     'tools\blueprint\snippets\compile-position-route-v1.eddgraph',
     'tools\blueprint\snippets\compile-position-route-v1-paste.eddgraph',
     'tools\blueprint\live-snippets\compile-position-route-v1.eddgraph',
+    'tools\blueprint\snippets\stage-position-route-arc-slice-v1.eddgraph',
+    'tools\blueprint\snippets\stage-position-route-arc-slice-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\stage-position-route-arc-slice-v1.eddgraph',
     'tools\blueprint\live-snippets\compile-orientation-track-v1.eddgraph',
     'tools\preview\linear_preview.py',
     'tools\preview\test_linear_preview.py',
@@ -1118,7 +1124,8 @@ foreach ($spec in @(
     @('Build-PositionRouteVelocitiesGraph.py', 'Test-PositionRouteVelocitiesContracts.py', 'compute-position-route-velocities-v1'),
     @('Build-PositionRouteSegmentsGraph.py', 'Test-PositionRouteSegmentsContracts.py', 'build-position-route-segments-v1'),
     @('Build-PositionRouteCommitGraph.py', 'Test-PositionRouteCommitContracts.py', 'commit-compiled-position-route-v1'),
-    @('Build-PositionRouteCompileGraph.py', 'Test-PositionRouteCompileContracts.py', 'compile-position-route-v1')
+    @('Build-PositionRouteCompileGraph.py', 'Test-PositionRouteCompileContracts.py', 'compile-position-route-v1'),
+    @('Build-PositionRouteArcSliceGraph.py', 'Test-PositionRouteArcSliceContracts.py', 'stage-position-route-arc-slice-v1')
 )) {
     $builder = Join-Path $ProjectRoot "tools\blueprint\$($spec[0])"
     $contract = Join-Path $ProjectRoot "tools\blueprint\$($spec[1])"

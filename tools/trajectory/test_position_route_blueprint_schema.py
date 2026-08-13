@@ -27,10 +27,10 @@ class PositionRouteBlueprintSchemaContracts(unittest.TestCase):
         for prefix in ("Candidate","Compiled"):
             for suffix in ("ArcSampleStartsV1","ArcSampleCountsV1","ArcUsV1","ArcDistancesV1"):
                 self.assertIn(f"PositionRoute{prefix}{suffix}",names)
-        functions=S["functions"];self.assertEqual([f["stage"] for f in functions],list(range(7)))
+        functions=S["functions"];self.assertEqual([f["stage"] for f in functions],list(range(8)))
         by_name={f["name"]:f for f in functions}
         self.assertEqual(by_name["BuildPositionRouteSegmentsV1"]["uses"],["BuildAdaptiveArcTableV1"])
-        self.assertEqual(by_name["EvaluateCompiledPositionRouteV1"]["uses"],["EvaluateTimeProfileV1","InvertArcLengthTableV1","EvaluateQuinticVectorV1"])
+        self.assertEqual(by_name["EvaluateCompiledPositionRouteV1"]["uses"],["EvaluateTimeProfileV1","StagePositionRouteArcSliceV1","InvertArcLengthTableV1","EvaluateQuinticVectorV1"])
     def test_contracts_require_atomic_absolute_time_and_flat_slices(self):
         contracts=" ".join(S["contracts"].values()).lower()
         for required in ("only commitcompiledpositionroutev1","contiguous slice","clears every","absolute elapsed","never integrates"):

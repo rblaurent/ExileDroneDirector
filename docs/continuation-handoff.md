@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-13 after commit `6d0ce52`
+Last updated: 2026-08-13 after commit `d63a377`
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -22,7 +22,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Last implementation head: `6d0ce5271c956a7c8711ed627ca93bb1530a9ac6`;
+- Last implementation head: `d63a377d8626c2f0f1463cb9238e5ca2164f37cd`;
   current HEAD should be the later documentation-only handoff commit and must
   equal `origin/main`
 - Expected worktree: clean
@@ -83,7 +83,7 @@ stream. It must sample position, distinct authored body orientation, distinct
 authored gimbal orientation, and all ten smoothed flight-profile values on one
 exact absolute-time schedule.
 
-Four clean checkpoints are pushed after `8d8b603`:
+Five clean checkpoints are pushed after `8d8b603`:
 
 ### `2aa201f` — reference and schema
 
@@ -143,28 +143,29 @@ The schema freezes 22 variables and seven functions:
 - failures retain only a bounded aligned twelve-channel private prefix
 - complete scaffold passed in 93.5 seconds
 
-These four checkpoints are offline-proven only. None of the new bridge graphs
+### `d63a377` — distinct gimbal source sampling
+
+- `BuildAirframeSourceGimbalSamplesV1`: 80 full / 79 paste nodes
+- clears only the gimbal candidate and never references the completed twelve
+  position/body/profile candidates
+- replaces the shared orientation cache from distinct gimbal authorship, then
+  re-proves every compiled duration/start and the exact total
+- samples the published absolute schedule and requires exact position/gimbal
+  validity, segment, local-alpha, and completion agreement before each append
+- executes 44 exact/partial/all-profile/seeded schedules in both orders,
+  poisoned repeats, protected upstream state, timeline corruption, and injected
+  evaluator failures in both forms
+- complete scaffold passed in 91.9 seconds
+
+These five checkpoints are offline-proven only. None of the new bridge graphs
 has been installed, compiled, saved, cold-loaded, or executed by Enhanced.
 
 ## Next ordered implementation
 
-Do not open Unreal yet. Finish the three remaining graph bodies and exported-link
+Do not open Unreal yet. Finish the two remaining graph bodies and exported-link
 interpreters offline first.
 
-### 1. `BuildAirframeSourceGimbalSamplesV1`
-
-- clear only the gimbal candidate
-- preserve completed body/profile candidates byte-for-byte
-- load distinct gimbal quaternions into the shared orientation compiler
-- compile and sample the exact already-published schedule
-- require evaluator agreement with position/body schedule metadata
-- append one gimbal quaternion per successful sample
-- failures set stage false and leave only a bounded private prefix
-
-Sequential reuse of the one orientation cache is intentional. Body is fully
-sampled before the cache is replaced by gimbal.
-
-### 2. `CommitAirframeSourceSamplesToDesiredV1`
+### 1. `CommitAirframeSourceSamplesToDesiredV1`
 
 - invalidate `AirframeSourceCompileValidV1` first
 - require stage true and exact 2..65,536 cardinality across all thirteen arrays
@@ -175,7 +176,7 @@ sampled before the cache is replaced by gimbal.
 - direct preflight failure must not mutate downstream inputs; top-level reset
   owns complete transaction invalidation
 
-### 3. `CompileAirframeSourceSamplingV1`
+### 2. `CompileAirframeSourceSamplingV1`
 
 Keep orchestration tiny and policy-free. Exact order: reset, validate authored
 shape, compile position/profiles/schedule, sample position/body/profiles, sample
@@ -264,7 +265,7 @@ git rev-parse origin/main
 ## Confidence statement
 
 Confidence is high in every checkpoint explicitly accepted above and in the
-four new offline bridge checkpoints. Confidence is not claimed for the three
+five new offline bridge checkpoints. Confidence is not claimed for the two
 remaining bridge graphs, live bridge integration, document adaptation for
 distinct body/gimbal authorship, lens/focus/effects, events, keyboard dogfood,
 UI, cooking, Workshop, or whole-mod completion.

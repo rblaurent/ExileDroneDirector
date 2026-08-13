@@ -421,6 +421,18 @@ This section is the authoritative handoff. Detailed evidence remains in
   ordered slice is the desired-pose sample loop that uses this helper and the
   accepted stateless airframe/gimbal solver; live acceptance remains deferred
   until the complete desired-stream transaction exists.
+- `SolveAirframeDesiredPoseSamplesV1` is now frozen offline as an 84-node full /
+  83-node paste composition loop. It clears all four pose candidates, honors
+  prior stage validity, reads the three kinematic tracks, distinct authored
+  body/gimbal quaternions, and all ten profile tracks at one shared index,
+  samples look-ahead velocity, stages all 16 accepted solver inputs, and appends
+  four aligned outputs only after solver validity.
+- Both exported forms execute 44 directed/seeded schedules against the real
+  sampler and stateless-solver reference implementations. Injected helper and
+  solver failures plus an actual physical-limit failure prove sticky invalidity,
+  bounded early exit, and equal candidate-prefix cardinalities; false-stage and
+  poisoned repeat cases also pass. Next are commit and top-level orchestration,
+  followed by the complete live install/compile/save/cold/runtime matrix.
 
 ### Position-route absolute-time evaluator checkpoint
 

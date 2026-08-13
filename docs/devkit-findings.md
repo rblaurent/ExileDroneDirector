@@ -4861,3 +4861,26 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Generator reruns are byte-identical to both checked-in artifacts and the
   complete scaffold owns syntax plus executable contracts. No live Blueprint
   compile/runtime evidence is claimed yet.
+
+### Desired-pose sample composition frozen offline (2026-08-13)
+
+- `SolveAirframeDesiredPoseSamplesV1` is an 84-node full / 83-node paste graph
+  with one bounded loop. Four output candidates are cleared first. Each index
+  reads current velocity, acceleration, jerk, distinct authored body/gimbal
+  quaternions, and ten independent profile values from the same immutable
+  sample boundary.
+- The graph computes the exact sample time, stages the look-ahead query, and
+  requires the accepted O(1) sampler to succeed. It then writes all 16 scalar/
+  vector/quaternion inputs expected by `SolveAirframeGimbalV1`; this includes
+  look-ahead seconds for validation even though the already sampled vector owns
+  actual look-ahead behavior. Body quaternion, gimbal quaternion, look-ahead
+  velocity, and maximum angular rate append only after solver validity.
+- The interpreter executes the exported graph and supplies both self-calls from
+  the independent accepted Python references. Full and paste forms pass 44
+  directed/seeded schedules, poisoned repeat state, injected sampler failure,
+  injected solver failure, a real acceleration-limit failure, and a false-stage
+  guarded clear. Every failure exits the bounded loop with all four candidate
+  arrays at the same proven prefix length.
+- Repeated generation is byte-identical and the complete scaffold owns syntax,
+  exact structure, and execution. This remains offline evidence; commit,
+  orchestration, and the complete live acceptance matrix are still outstanding.

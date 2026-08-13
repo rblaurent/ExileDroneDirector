@@ -160,6 +160,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeDesiredVelocitySamplerContracts.py',
     'tools\blueprint\snippets\sample-airframe-desired-velocity-at-time-v1.eddgraph',
     'tools\blueprint\snippets\sample-airframe-desired-velocity-at-time-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframeDesiredPoseSamplesGraph.py',
+    'tools\blueprint\Test-AirframeDesiredPoseSamplesContracts.py',
+    'tools\blueprint\snippets\solve-airframe-desired-pose-samples-v1.eddgraph',
+    'tools\blueprint\snippets\solve-airframe-desired-pose-samples-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframePrebakeResetGraph.py',
     'tools\blueprint\Test-AirframePrebakeResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1.eddgraph',
@@ -1081,6 +1085,30 @@ foreach ($graphCase in @(@($velocitySampler, $false), @($velocitySamplerPaste, $
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredVelocitySamplerContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Airframe desired velocity sampler contracts failed with exit code $LASTEXITCODE." }
+}
+$poseSamples = Join-Path $airframeDesiredRoot 'solve-airframe-desired-pose-samples-v1.eddgraph'
+$poseSamplesPaste = Join-Path $airframeDesiredRoot 'solve-airframe-desired-pose-samples-v1-paste.eddgraph'
+$poseSamplesRepeat = Join-Path $airframeDesiredRoot 'solve-airframe-desired-pose-samples-v1-repeat.eddgraph'
+$poseSamplesRepeatPaste = Join-Path $airframeDesiredRoot 'solve-airframe-desired-pose-samples-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredPoseSamplesGraph.py') `
+    --project-root $ProjectRoot --output $poseSamples --paste-output $poseSamplesPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe desired pose-sample generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredPoseSamplesGraph.py') `
+    --project-root $ProjectRoot --output $poseSamplesRepeat --paste-output $poseSamplesRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe desired pose-sample generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($poseSamples, $poseSamplesRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\solve-airframe-desired-pose-samples-v1.eddgraph')),
+    @($poseSamplesPaste, $poseSamplesRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\solve-airframe-desired-pose-samples-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired pose-sample generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($poseSamples, $false), @($poseSamplesPaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredPoseSamplesContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe desired pose-sample contracts failed with exit code $LASTEXITCODE." }
 }
 $airframePrebakeNonce = [guid]::NewGuid().ToString('N')
 $airframePrebakeRoot = Join-Path $scratchRoot "edd-airframe-prebake-$airframePrebakeNonce"

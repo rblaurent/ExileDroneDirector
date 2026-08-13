@@ -9,7 +9,7 @@ that can be evaluated by absolute time at any game frame rate.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import acos, ceil, degrees, isfinite
+from math import acos, ceil, degrees, isfinite, sqrt
 from typing import Sequence
 
 from orientation_reference import Quaternion, normalize, slerp
@@ -87,8 +87,8 @@ def _strict_unit(value: Quaternion, label: str) -> Quaternion:
     components = tuple(float(component) for component in value)
     if not all(isfinite(component) for component in components):
         raise AirframeGimbalPrebakeError(f"{label} must be finite")
-    magnitude_squared = sum(component * component for component in components)
-    if abs(magnitude_squared - 1.0) > UNIT_TOLERANCE:
+    magnitude = sqrt(sum(component * component for component in components))
+    if abs(magnitude - 1.0) > UNIT_TOLERANCE:
         raise AirframeGimbalPrebakeError(f"{label} must be normalized")
     return _canonical_sign(components)  # type: ignore[arg-type]
 

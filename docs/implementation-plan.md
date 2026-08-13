@@ -272,6 +272,14 @@ This section is the authoritative handoff. Detailed evidence remains in
   defaults, reciprocal links, and the absence of external links or reroutes are
   enforced by the full scaffold. Validation is the next graph; no live prebake
   claim is made yet.
+- `ValidateAirframePrebakeInputsV1` is now frozen offline as an exact
+  deterministic 73/72-node full/paste graph. It proves `2..65536` samples,
+  three equal input cardinalities, finite bounded total/step values, the exact
+  `ceil(total / step) + 1` schedule through division-free inequalities, both
+  finite/unit quaternion streams, and every finite `0 < rate <= 720` sample.
+  Its graph interpreter passes 103 valid and 28 invalid cases for both forms;
+  validation only owns stage validity and never touches compiled/evaluation
+  publication. Sample construction is next; no live prebake claim is made.
 
 ### Position-route absolute-time evaluator checkpoint
 

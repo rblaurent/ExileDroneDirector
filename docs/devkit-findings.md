@@ -4573,3 +4573,21 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   execution chain, reciprocal internal links, exact defaults, no reroutes, no
   external graph links, and byte-identical regeneration. This remains offline
   until validation and the remaining prebake stages are frozen together.
+
+### Fixed-step airframe/gimbal validation graph frozen (2026-08-13)
+
+- `ValidateAirframePrebakeInputsV1` generates as exact 73/72-node full/paste
+  graphs. Sample count is bounded to `2..65536`; body, gimbal, and rate arrays
+  must have equal cardinality. Total time and fixed step are finite and bounded.
+- The exact `ceil(total / step) + 1` schedule is checked without division or a
+  missing ceiling node: `(count - 2) * step < total <= (count - 1) * step`.
+  This remains safe under eager pure-node evaluation even for rejected small
+  counts. Both quaternion loops require finite values and magnitude in the
+  inclusive `1 +/- 1e-6` window; each rate is finite and `0 < rate <= 720`.
+- A graph interpreter executes both generated forms across 103 valid schedules
+  and 28 invalid families, including cardinality, schedule edges, scalar
+  non-finites, quaternion zero/nonunit/nonfinite values, and rate bounds. Stage
+  validity is accepted once and can only be rejected by the three loops;
+  compiled and evaluation state is never written. Exact links, unsafe forms,
+  byte reproducibility, and the complete scaffold also pass. Sample build is
+  next; no live prebake, UI, cook, or Workshop claim is made.

@@ -140,6 +140,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframePrebakeResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1.eddgraph',
     'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframePrebakeValidationGraph.py',
+    'tools\blueprint\Test-AirframePrebakeValidationContracts.py',
+    'tools\blueprint\snippets\validate-airframe-prebake-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-airframe-prebake-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeGimbalResetGraph.py',
     'tools\blueprint\Test-AirframeGimbalResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-gimbal-v1.eddgraph',
@@ -946,6 +950,30 @@ foreach ($graphCase in @(@($airframePrebakeReset, $false), @($airframePrebakeRes
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframePrebakeResetContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Airframe prebake reset contracts failed with exit code $LASTEXITCODE." }
+}
+$airframePrebakeValidation = Join-Path $airframePrebakeRoot 'validate-airframe-prebake-inputs-v1.eddgraph'
+$airframePrebakeValidationPaste = Join-Path $airframePrebakeRoot 'validate-airframe-prebake-inputs-v1-paste.eddgraph'
+$airframePrebakeValidationRepeat = Join-Path $airframePrebakeRoot 'validate-airframe-prebake-inputs-v1-repeat.eddgraph'
+$airframePrebakeValidationRepeatPaste = Join-Path $airframePrebakeRoot 'validate-airframe-prebake-inputs-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframePrebakeValidationGraph.py') `
+    --project-root $ProjectRoot --output $airframePrebakeValidation --paste-output $airframePrebakeValidationPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe prebake validation generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframePrebakeValidationGraph.py') `
+    --project-root $ProjectRoot --output $airframePrebakeValidationRepeat --paste-output $airframePrebakeValidationRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe prebake validation generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($airframePrebakeValidation, $airframePrebakeValidationRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-airframe-prebake-inputs-v1.eddgraph')),
+    @($airframePrebakeValidationPaste, $airframePrebakeValidationRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-airframe-prebake-inputs-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe prebake validation generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($airframePrebakeValidation, $false), @($airframePrebakeValidationPaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframePrebakeValidationContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe prebake validation contracts failed with exit code $LASTEXITCODE." }
 }
 
 $airframeGimbalNonce = [guid]::NewGuid().ToString('N')

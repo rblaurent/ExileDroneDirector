@@ -65,6 +65,13 @@ class AirframeGimbalPrebakeContracts(unittest.TestCase):
             bodies[2] = bad
             with self.subTest(bad=bad), self.assertRaises(AirframeGimbalPrebakeError):
                 self.compile(bodies=bodies)
+        accepted = [IDENTITY] * count
+        accepted[2] = (0.0, 0.0, 0.0, 1.000001)
+        self.compile(bodies=accepted)
+        rejected = [IDENTITY] * count
+        rejected[2] = (0.0, 0.0, 0.0, 1.0000011)
+        with self.assertRaises(AirframeGimbalPrebakeError):
+            self.compile(bodies=rejected)
 
     def test_angular_rates_must_be_finite_numeric_and_bounded(self):
         count = len(fixed_sample_times(1.0, 0.25))

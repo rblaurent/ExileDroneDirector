@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-13 after commit `d63a377`
+Last updated: 2026-08-13 after commit `5052ee4`
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -22,7 +22,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Last implementation head: `d63a377d8626c2f0f1463cb9238e5ca2164f37cd`;
+- Last implementation head: `5052ee4c2ec4ff0847314b32f35bd87621bdca5a`;
   current HEAD should be the later documentation-only handoff commit and must
   equal `origin/main`
 - Expected worktree: clean
@@ -83,7 +83,7 @@ stream. It must sample position, distinct authored body orientation, distinct
 authored gimbal orientation, and all ten smoothed flight-profile values on one
 exact absolute-time schedule.
 
-Five clean checkpoints are pushed after `8d8b603`:
+Six clean checkpoints are pushed after `8d8b603`:
 
 ### `2aa201f` — reference and schema
 
@@ -157,26 +157,28 @@ The schema freezes 22 variables and seven functions:
   evaluator failures in both forms
 - complete scaffold passed in 91.9 seconds
 
-These five checkpoints are offline-proven only. None of the new bridge graphs
+### `5052ee4` — atomic source-to-desired commit
+
+- `CommitAirframeSourceSamplesToDesiredV1`: 84 full / 83 paste nodes
+- invalidates only source validity before preflight
+- requires exact 2..65,536 cardinality across all thirteen arrays and equality
+  to the published expected sample count
+- copies all thirteen arrays plus total and step only after complete preflight
+- invokes the accepted desired compiler and publishes source validity last only
+  after both desired and prebake validity are true
+- executes 44 oracle-valid handoffs, sixteen direct preflight failures with
+  downstream object-identity preservation, and desired/prebake failures
+- complete scaffold passed in 90.5 seconds
+
+These six checkpoints are offline-proven only. None of the new bridge graphs
 has been installed, compiled, saved, cold-loaded, or executed by Enhanced.
 
 ## Next ordered implementation
 
-Do not open Unreal yet. Finish the two remaining graph bodies and exported-link
+Do not open Unreal yet. Finish the one remaining graph body and exported-link
 interpreters offline first.
 
-### 1. `CommitAirframeSourceSamplesToDesiredV1`
-
-- invalidate `AirframeSourceCompileValidV1` first
-- require stage true and exact 2..65,536 cardinality across all thirteen arrays
-- require cardinality equals the published expected sample count
-- copy all arrays, total, and step into accepted desired-stream inputs
-- call `CompileAirframeDesiredStreamV1`
-- publish source validity last only if desired and prebake validity are true
-- direct preflight failure must not mutate downstream inputs; top-level reset
-  owns complete transaction invalidation
-
-### 2. `CompileAirframeSourceSamplingV1`
+### 1. `CompileAirframeSourceSamplingV1`
 
 Keep orchestration tiny and policy-free. Exact order: reset, validate authored
 shape, compile position/profiles/schedule, sample position/body/profiles, sample
@@ -265,7 +267,7 @@ git rev-parse origin/main
 ## Confidence statement
 
 Confidence is high in every checkpoint explicitly accepted above and in the
-five new offline bridge checkpoints. Confidence is not claimed for the two
+six new offline bridge checkpoints. Confidence is not claimed for the one
 remaining bridge graphs, live bridge integration, document adaptation for
 distinct body/gimbal authorship, lens/focus/effects, events, keyboard dogfood,
 UI, cooking, Workshop, or whole-mod completion.

@@ -4200,3 +4200,36 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   effects, shortcut dogfood, polished UI, cook, Workshop, and whole-mod
   completion remain unclaimed. The next ordered slice consumes the immutable
   profile result in deterministic cinematic, hybrid, and FPV motion behavior.
+
+### C2 flight-profile transition contract frozen offline (2026-08-13)
+
+- Directly applying one exact preset per segment would create visible parameter
+  jumps at every override boundary. The accepted consumer contract therefore
+  smooths all ten numeric channels before any airframe or gimbal solver sees
+  them. This is required even though indexed canonical lookup itself remains
+  deliberately exact and discrete.
+- Each segment owns its canonical preset at local alpha `0.5`. On the first
+  half, it transitions from the previous/current 50/50 boundary to the current
+  preset; on the second half, it transitions to the current/next 50/50 boundary.
+  A quintic smootherstep makes value, first derivative, and second derivative
+  agree at the midpoint and shared waypoint. Track endpoints and single-profile
+  runs remain exactly canonical.
+- The evaluator returns current ID, at most one neighbor ID, neighbor weight in
+  `[0, 0.5]`, and ten blended parameters. Convex interpolation preserves every
+  validated domain. It rejects invalid indices, booleans masquerading as
+  integers/scalars, non-finite or out-of-range alpha, malformed cardinality,
+  noncanonical or non-finite stored presets, and never mutates the compiled
+  publication.
+- Ten oracle tests pass exact midpoints/endpoints, identical neighbors, exact
+  cross-segment boundary equality, numerical C1/C2 convergence with unequal
+  neighboring durations, convex-domain checks for every field, shuffled
+  history-independent scrubbing, corruption families, and 1,000 seeded queries
+  on the 511-segment ceiling. Six schema tests freeze 40 explicit variables,
+  four ordered functions, complete one-to-one parameter channels, disjoint
+  current/neighbor/result state, helper restoration, reset-first behavior, and
+  validity-last publication.
+- This is an offline contract checkpoint only. Next are deterministic
+  `ResetSmoothedFlightProfileV1`, `StageSmoothedFlightProfileSamplesV1`,
+  `PublishSmoothedFlightProfileV1`, and `EvaluateSmoothedFlightProfileV1`
+  generated graphs, exact contracts, live compile/save, and warm/fresh runtime
+  proof. No airframe/gimbal, UI, cook, or Workshop claim is made here.

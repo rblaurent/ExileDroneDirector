@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "C2 segment-local smoothing of accepted compiled flight-profile parameters before airframe or gimbal evaluation.",
+  "limits": {
+    "minimumSegments": 1,
+    "maximumSegments": 511,
+    "localTimeAlpha": [0.0, 1.0],
+    "maximumNeighborWeight": 0.5
+  },
+  "parameterFields": [
+    "PathFollowWeight",
+    "HorizonStabilizationWeight",
+    "LookAheadSeconds",
+    "BankGain",
+    "MaxBankDegrees",
+    "CameraUptiltDegrees",
+    "MaxAngularRateDegreesPerSecond",
+    "MaxAccelerationCmPerSecondSquared",
+    "MaxJerkCmPerSecondCubed",
+    "MinimumTurnRadiusCm"
+  ],
+  "variables": [
+    { "name": "SmoothedFlightProfileInputSegmentIndexV1", "type": "Integer", "container": "None", "role": "input", "default": -1 },
+    { "name": "SmoothedFlightProfileInputLocalTimeAlphaV1", "type": "Float", "container": "None", "role": "input", "default": 0.0 },
+
+    { "name": "SmoothedFlightProfileStageValidV1", "type": "Boolean", "container": "None", "role": "scratch", "default": false },
+    { "name": "SmoothedFlightProfileCurrentIdV1", "type": "String", "container": "None", "role": "scratch", "default": "" },
+    { "name": "SmoothedFlightProfileCurrentPathFollowWeightV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileCurrentHorizonStabilizationWeightV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileCurrentLookAheadSecondsV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileCurrentBankGainV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileCurrentMaxBankDegreesV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileCurrentCameraUptiltDegreesV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileCurrentMaxAngularRateDegreesPerSecondV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileCurrentMaxAccelerationCmPerSecondSquaredV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileCurrentMaxJerkCmPerSecondCubedV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileCurrentMinimumTurnRadiusCmV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+
+    { "name": "SmoothedFlightProfileNeighborIdV1", "type": "String", "container": "None", "role": "scratch", "default": "" },
+    { "name": "SmoothedFlightProfileNeighborPathFollowWeightV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileNeighborHorizonStabilizationWeightV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileNeighborLookAheadSecondsV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileNeighborBankGainV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileNeighborMaxBankDegreesV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileNeighborCameraUptiltDegreesV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileNeighborMaxAngularRateDegreesPerSecondV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileNeighborMaxAccelerationCmPerSecondSquaredV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileNeighborMaxJerkCmPerSecondCubedV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileNeighborMinimumTurnRadiusCmV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+    { "name": "SmoothedFlightProfileNeighborWeightV1", "type": "Float", "container": "None", "role": "scratch", "default": 0.0 },
+
+    { "name": "SmoothedFlightProfileResultCurrentIdV1", "type": "String", "container": "None", "role": "result", "default": "" },
+    { "name": "SmoothedFlightProfileResultNeighborIdV1", "type": "String", "container": "None", "role": "result", "default": "" },
+    { "name": "SmoothedFlightProfileResultNeighborWeightV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "SmoothedFlightProfileResultPathFollowWeightV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "SmoothedFlightProfileResultHorizonStabilizationWeightV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "SmoothedFlightProfileResultLookAheadSecondsV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "SmoothedFlightProfileResultBankGainV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "SmoothedFlightProfileResultMaxBankDegreesV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "SmoothedFlightProfileResultCameraUptiltDegreesV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "SmoothedFlightProfileResultMaxAngularRateDegreesPerSecondV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "SmoothedFlightProfileResultMaxAccelerationCmPerSecondSquaredV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "SmoothedFlightProfileResultMaxJerkCmPerSecondCubedV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "SmoothedFlightProfileResultMinimumTurnRadiusCmV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "SmoothedFlightProfileResultValidV1", "type": "Boolean", "container": "None", "role": "result", "default": false }
+  ],
+  "functions": [
+    { "name": "ResetSmoothedFlightProfileV1", "stage": 0 },
+    { "name": "StageSmoothedFlightProfileSamplesV1", "stage": 1, "uses": ["EvaluateCompiledFlightProfileV1"] },
+    { "name": "PublishSmoothedFlightProfileV1", "stage": 2 },
+    { "name": "EvaluateSmoothedFlightProfileV1", "stage": 3, "uses": ["ResetSmoothedFlightProfileV1", "StageSmoothedFlightProfileSamplesV1", "PublishSmoothedFlightProfileV1"] }
+  ],
+  "contracts": {
+    "shape": "The compiled profile publication remains immutable and contains exactly 1..511 canonical segment presets before either sample is accepted.",
+    "transition": "Each segment equals its exact canonical preset at local alpha 0.5; adjacent segments share one exact 50/50 boundary value; quintic smootherstep makes first and second derivatives zero at midpoint and boundary.",
+    "sampling": "The current and at most one adjacent canonical profile are copied into disjoint scratch before any blended result is published; the underlying indexed evaluator is restored to the requested current segment.",
+    "bounds": "Neighbor weight remains within 0..0.5 and every numeric result stays inside the convex hull of the two validated canonical presets.",
+    "atomicity": "Reset clears all scratch and result state first; PublishSmoothedFlightProfileV1 writes result validity last and only after complete finite/domain validation.",
+    "failure": "Invalid index, non-finite or out-of-range local alpha, corrupt compiled state, helper failure, or blended-domain failure clears every public result and leaves validity false.",
+    "determinism": "Evaluation depends only on immutable compiled profiles, integer segment index, and segment-local alpha; direct scrubbing is history-independent."
+  }
+}

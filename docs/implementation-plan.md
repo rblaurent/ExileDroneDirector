@@ -115,10 +115,17 @@ This section is the authoritative handoff. Detailed evidence remains in
   closed. A fresh cold-load compiles all six Blueprints with zero errors; the
   live and mirrored Client Director package SHA-256 is
   `B411E7414A74119D0F094D3CFD87C4C2772BCD17F40AB90DD80D12F20FBD55DB`.
-- Next is consuming these immutable parameters in deterministic cinematic,
-  hybrid, and FPV airframe/gimbal behavior. Lens/focus/effect tracks and
-  shortcut/debug dogfood follow. No polished UI, cook, Workshop publication,
-  or whole-mod completion is claimed.
+- The next consumer seam is frozen offline: every segment owns its exact
+  canonical profile at local alpha 0.5, while adjacent presets meet at one exact
+  50/50 boundary value. Quintic smootherstep on each half makes all ten numeric
+  channels C2 at both midpoint and waypoint boundaries, stays inside the convex
+  hull of validated presets, and remains history-free under direct scrubbing.
+  Its explicit Blueprint schema separates current/neighbor scratch from atomic
+  result publication and restores the indexed helper to the requested segment.
+- Next is generated reset/stage/publish/evaluate graphs for that smooth consumer,
+  followed by deterministic cinematic, hybrid, and FPV airframe/gimbal
+  behavior. Lens/focus/effect tracks and shortcut/debug dogfood follow. No
+  polished UI, cook, Workshop publication, or whole-mod completion is claimed.
 
 ### Position-route absolute-time evaluator checkpoint
 

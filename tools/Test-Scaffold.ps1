@@ -124,6 +124,10 @@ $requiredFiles = @(
     'tools\trajectory\test_flight_profile_reference.py',
     'tools\trajectory\flight_profile_blueprint_schema.json',
     'tools\trajectory\test_flight_profile_blueprint_schema.py',
+    'tools\trajectory\smoothed_flight_profile_reference.py',
+    'tools\trajectory\test_smoothed_flight_profile_reference.py',
+    'tools\trajectory\smoothed_flight_profile_blueprint_schema.json',
+    'tools\trajectory\test_smoothed_flight_profile_blueprint_schema.py',
     'tools\blueprint\Build-FlightProfileResetGraph.py',
     'tools\blueprint\Test-FlightProfileResetContracts.py',
     'tools\blueprint\snippets\reset-flight-profile-state-v1.eddgraph',
@@ -838,6 +842,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_flight_profile_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Flight-profile Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_smoothed_flight_profile_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Smoothed flight-profile reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_smoothed_flight_profile_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Smoothed flight-profile Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 
 $cinematicPoseNonce = [guid]::NewGuid().ToString('N')

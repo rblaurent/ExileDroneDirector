@@ -136,6 +136,10 @@ $requiredFiles = @(
     'tools\trajectory\test_airframe_gimbal_prebake_reference.py',
     'tools\trajectory\airframe_gimbal_prebake_blueprint_schema.json',
     'tools\trajectory\test_airframe_gimbal_prebake_blueprint_schema.py',
+    'tools\blueprint\Build-AirframePrebakeResetGraph.py',
+    'tools\blueprint\Test-AirframePrebakeResetContracts.py',
+    'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1.eddgraph',
+    'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeGimbalResetGraph.py',
     'tools\blueprint\Test-AirframeGimbalResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-gimbal-v1.eddgraph',
@@ -915,6 +919,33 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_airframe_gimbal_prebake_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Airframe/gimbal fixed-step prebake Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+$airframePrebakeNonce = [guid]::NewGuid().ToString('N')
+$airframePrebakeRoot = Join-Path $scratchRoot "edd-airframe-prebake-$airframePrebakeNonce"
+$airframePrebakeReset = Join-Path $airframePrebakeRoot 'reset-airframe-prebake-candidate-v1.eddgraph'
+$airframePrebakeResetPaste = Join-Path $airframePrebakeRoot 'reset-airframe-prebake-candidate-v1-paste.eddgraph'
+$airframePrebakeResetRepeat = Join-Path $airframePrebakeRoot 'reset-airframe-prebake-candidate-v1-repeat.eddgraph'
+$airframePrebakeResetRepeatPaste = Join-Path $airframePrebakeRoot 'reset-airframe-prebake-candidate-v1-repeat-paste.eddgraph'
+New-Item -ItemType Directory -Path $airframePrebakeRoot -Force | Out-Null
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframePrebakeResetGraph.py') `
+    --project-root $ProjectRoot --output $airframePrebakeReset --paste-output $airframePrebakeResetPaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe prebake reset generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframePrebakeResetGraph.py') `
+    --project-root $ProjectRoot --output $airframePrebakeResetRepeat --paste-output $airframePrebakeResetRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe prebake reset generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($airframePrebakeReset, $airframePrebakeResetRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1.eddgraph')),
+    @($airframePrebakeResetPaste, $airframePrebakeResetRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe prebake reset generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($airframePrebakeReset, $false), @($airframePrebakeResetPaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframePrebakeResetContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe prebake reset contracts failed with exit code $LASTEXITCODE." }
 }
 
 $airframeGimbalNonce = [guid]::NewGuid().ToString('N')

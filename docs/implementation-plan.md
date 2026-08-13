@@ -265,6 +265,13 @@ This section is the authoritative handoff. Detailed evidence remains in
 - This is an offline contract checkpoint. No prebake Blueprint graphs, live
   compile/runtime proof, desired-pose stream orchestration, UI, cook, Workshop,
   or whole-mod completion is claimed yet.
+- `ResetAirframePrebakeCandidateV1` is now frozen offline as an exact
+  deterministic 36/35-node full/paste graph. It clears all six candidate and
+  six compiled arrays, staging metadata, compile validity, and every evaluation
+  result while preserving all authored inputs. Byte-reproducibility, exact
+  defaults, reciprocal links, and the absence of external links or reroutes are
+  enforced by the full scaffold. Validation is the next graph; no live prebake
+  claim is made yet.
 
 ### Position-route absolute-time evaluator checkpoint
 

@@ -4560,3 +4560,16 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   order. The full scaffold includes these suites. This checkpoint does not yet
   claim Blueprint graph bodies, live compile/runtime evidence, desired-stream
   orchestration, angular acceleration, UI, cook, or Workshop readiness.
+
+### Fixed-step airframe/gimbal reset graph frozen (2026-08-13)
+
+- `ResetAirframePrebakeCandidateV1` is generated as exact 36/35-node full/paste
+  graphs. It clears six candidate arrays and their six compiled mirrors, resets
+  the candidate index/validity, compiled schedule/validity, and all absolute-time
+  evaluation results. Body and gimbal results return to identity, segment index
+  to `-1`, and every validity flag to false.
+- The graph never reads or mutates desired body/gimbal samples, per-sample rate
+  limits, total time, fixed step, or elapsed-time input. Contracts require one
+  execution chain, reciprocal internal links, exact defaults, no reroutes, no
+  external graph links, and byte-identical regeneration. This remains offline
+  until validation and the remaining prebake stages are frozen together.

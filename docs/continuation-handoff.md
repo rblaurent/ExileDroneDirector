@@ -349,6 +349,17 @@ cases. The complete scaffold passes in 102.6 seconds. Next: top-level absolute-
 time selection, including constant tracks and history-free forward/reverse
 queries.
 
+`EvaluateCameraScalarTrackV1` completes the offline scalar engine at 40 full /
+39 paste nodes. It resets first, rejects non-finite queries, handles constant
+tracks, marks completion correctly at zero duration, selects the first matching
+right boundary with one bounded loop, defaults beyond-duration queries to the
+last segment, and delegates interpolation. Both forms pass 288 forward plus
+reverse absolute-time queries and four fail-closed cases. All nine scalar
+graphs are deterministic, interpreter-owned, and scaffold-owned; the complete
+repository suite passes in 105.7 seconds. Next: one-editor configure/paste/
+entry-wire repair/compile/save/runtime/PIE/cold acceptance for the full scalar
+family before channel-owned lens/focus/effect storage.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

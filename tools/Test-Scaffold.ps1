@@ -172,6 +172,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraScalarTrackCompileContracts.py',
     'tools\blueprint\snippets\compile-camera-scalar-track-v1.eddgraph',
     'tools\blueprint\snippets\compile-camera-scalar-track-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraScalarTrackResultResetGraph.py',
+    'tools\blueprint\Test-CameraScalarTrackResultResetContracts.py',
+    'tools\blueprint\snippets\reset-camera-scalar-track-result-v1.eddgraph',
+    'tools\blueprint\snippets\reset-camera-scalar-track-result-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframeDocumentAdapterResetGraph.py',
     'tools\blueprint\Test-AirframeDocumentAdapterResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-document-source-adapter-v2.eddgraph',
@@ -1204,7 +1208,8 @@ if ($LASTEXITCODE -ne 0) { throw "Camera scalar candidates full contracts failed
 if ($LASTEXITCODE -ne 0) { throw "Camera scalar candidates paste contracts failed with exit code $LASTEXITCODE." }
 $cameraScalarPublicationStages = @(
     @('commit-camera-scalar-track-v1', 'Build-CameraScalarTrackCommitGraph.py', 'Test-CameraScalarTrackCommitContracts.py'),
-    @('compile-camera-scalar-track-v1', 'Build-CameraScalarTrackCompileGraph.py', 'Test-CameraScalarTrackCompileContracts.py')
+    @('compile-camera-scalar-track-v1', 'Build-CameraScalarTrackCompileGraph.py', 'Test-CameraScalarTrackCompileContracts.py'),
+    @('reset-camera-scalar-track-result-v1', 'Build-CameraScalarTrackResultResetGraph.py', 'Test-CameraScalarTrackResultResetContracts.py')
 )
 foreach ($stage in $cameraScalarPublicationStages) {
     $generated = Join-Path $cameraScalarRoot "$($stage[0]).eddgraph"

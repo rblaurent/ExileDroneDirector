@@ -314,6 +314,13 @@ paths history-free. The scalar reference and amended nine-stage schema pass.
 Next: generate and interpret the result-reset graph, then publication, segment,
 and top-level evaluation in that order before opening the editor.
 
+`ResetCameraScalarTrackResultV1` is now deterministic at 13 full / 12 paste
+nodes. It clears exactly seven public sample fields and five evaluator-scratch
+fields, while preserving the compiled snapshot, authored inputs and policies,
+compile result/failure code, and query time. Both graph forms pass exact
+ownership/execution interpreters, and the complete scaffold passes in 103.2
+seconds. Next: the single optical/bounds publication helper.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

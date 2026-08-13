@@ -312,6 +312,13 @@ This section is the authoritative handoff. Detailed evidence remains in
   candidate immutability, mismatched channels, both count limits, terminal-index
   rejection, poisoned prior publication cleanup, and invocation independence.
   Compile orchestration is next; no live prebake claim is made yet.
+- `CompileAirframePrebakeV1` is frozen offline as deterministic 5/4-node
+  full/paste orchestration. Its only execution path is reset, validation,
+  sample construction, then atomic commit. The composition harness executes
+  those actual generated component graphs and matches the independent compiler
+  for 30 seeded streams; five invalid input families and a failed recompile
+  after prior success all clear publication. Absolute-time evaluation is next;
+  no live prebake claim is made yet.
 
 ### Position-route absolute-time evaluator checkpoint
 

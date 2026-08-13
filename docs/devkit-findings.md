@@ -4673,3 +4673,20 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   structure and mutation boundaries are contracted, and repeated generation is
   byte-identical. Compile orchestration is next; no live prebake, UI, cook,
   Workshop, or whole-mod readiness claim is made.
+
+### Fixed-step airframe/gimbal compile orchestration frozen offline (2026-08-13)
+
+- `CompileAirframePrebakeV1` is an exact 5/4-node full/paste call chain:
+  reset, validation, sample construction, and atomic commit. It contains no
+  alternate entry or bypass path, and every call is explicitly self-context.
+- The compile contract does not stop at call ordering. Its executable harness
+  runs the selected full or paste form of all four generated component graphs
+  as one transaction. Thirty seeded streams match the independent compiler's
+  six channels and schedule, within the already frozen quaternion/rate numeric
+  tolerances, while authored inputs remain unchanged.
+- Cardinality, quaternion, angular-rate, total-time, and fixed-step failures all
+  finish with empty compiled channels, zero schedule, and false validity. A
+  failed invocation immediately after a successful one proves that reset and
+  commit compose without stale publication leakage. Regeneration is byte exact
+  and the full repository gate owns this test. Absolute-time evaluation is next;
+  no live prebake, UI, cook, Workshop, or whole-mod readiness claim is made.

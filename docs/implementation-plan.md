@@ -488,7 +488,7 @@ This section is the authoritative handoff. Detailed evidence remains in
   document sampling, lens/focus/effects, debug dogfood, polished UI, cook,
   Workshop, and whole-mod completion remain unclaimed.
 
-### Airframe source-sampling bridge frozen offline (2026-08-13)
+### Airframe source-sampling bridge (2026-08-13)
 
 - `airframe_source_sampling_reference.py` freezes the missing absolute-time
   bridge from accepted compiled sources into the accepted desired-stream
@@ -586,7 +586,32 @@ This section is the authoritative handoff. Detailed evidence remains in
   Full/paste SHA-256 is
   `4C1082DF5048F9A0A87F88941481EB915840BAEE4B927FEEC111360C74E7B68B` /
   `90D06B44962E4E8F2EA18821738A6E92212323EF5B1EF81AA8E001D473718D85`.
-  The complete offline set is ready for the full scaffold and then live install.
+  The complete offline set was green before live installation began.
+- The seven-function family is now installed, compiled, saved, runtime-proven,
+  mirrored, cold-loaded, and regression-owned. The live full graphs contain 34,
+  43, 44, 130, 80, 84, and 7 nodes in reset-to-orchestration order. Exact
+  exported-link contracts passed before compile and again on the postcompile
+  exports checked in under `tools/blueprint/live-snippets`.
+- `Configure-AirframeSourceSamplingAssembly.py` idempotently owns the exact 22
+  variables and seven function declarations. `Validate-AirframeSourceSamplingRuntime.py`
+  executes the real Client Director CDO against an independent oracle. Two warm
+  runs and one independent fresh NullRHI run each pass 10 forward and 10 reverse
+  compilations, exact and partial-terminal schedules, all five profiles, six
+  invalid families, two direct boundary cases, and restoration of the complete
+  325-property union state. Distinct body and gimbal authorship remains distinct
+  through source candidates and accepted desired outputs.
+- Guarded shutdown reached `LogExit: Exiting.`. Closed-editor FromDevKit preview
+  reported 16 unchanged packages and exactly Client Director changed; sync
+  copied that single package. Live/mirror SHA-256 equality is
+  `EA2576672F41F56474DB3BE9CA529264273CF94F0DABFC5CB7671CFAE596DF35`.
+  A fresh cold commandlet loaded all nine core assets, compiled all six
+  Blueprints, emitted `EDD_COLD_LOAD|RESULT|PASS`, and exited with zero errors.
+  The complete scaffold with mirrored MVP assets passes in 96.3 seconds.
+- This accepts only the backend source-sampling bridge. The next ordered
+  trajectory work is the explicit compiled-document adapter that preserves
+  separate body and gimbal authorship, followed by discontinuity diagnostics.
+  No UI, keyboard dogfood, cook, Workshop, G-Portal, deployment, or whole-mod
+  claim is made here.
 
 ### Position-route absolute-time evaluator checkpoint
 
@@ -1570,14 +1595,15 @@ before any polished editor UI or cook is attempted:
    published source, preserves exact source ID/revision attribution, commits
    through the accepted A/B writer, survives a fresh SaveGame process, and
    rejects private/missing/corrupt/stale requests without publication.
-9. **Current:** complete the trajectory backend bridge. Linear and cinematic
+9. **Current:** complete the remaining trajectory backend adapters and diagnostics.
+   Linear and cinematic
    position curves, monotonic timing profiles, smooth quaternion rotation,
    canonical flight profiles, smoothed profile sampling, desired airframe/gimbal
-   solving, angular-rate limiting, and fixed-step prebake are accepted. The
-   ordered remaining seam samples distinct authored body and gimbal tracks plus
-   position/profile sources on one exact absolute-time schedule and commits them
-   through the accepted desired-stream compiler. Discontinuity diagnostics and
-   document adapters follow that accepted source-sampling boundary.
+   solving, angular-rate limiting, fixed-step prebake, and the complete
+   source-sampling bridge are accepted. The ordered remaining seam is an
+   explicit compiled-document adapter that preserves distinct authored body and
+   gimbal tracks; the older single-camera-rotation waypoint bridge must not be
+   aliased into both. Discontinuity diagnostics follow that adapter boundary.
 10. Implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
    event tracks with bounded target adapters and authorization.
 11. Expose every backend operation through temporary shortcuts, compact debug

@@ -5050,3 +5050,39 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `FF7F571D23DD3E7B25B05E5EBC323B6D0C9FE1300402D021BEE6596A3DB3ED39` /
   `A776FEA5D338EC80AFD49C9C030B1677C14289FC3C130593F1ED440AFA265EA3`.
   No live Enhanced claim exists yet.
+
+### Source-sampling bridge live acceptance (2026-08-13)
+
+- `Configure-AirframeSourceSamplingAssembly.py` created the exact 22 variables
+  and seven functions on `BPC_EDD_ClientDirector` in one Enhanced 5.6.1 editor.
+  The installed full graphs contain 34, 43, 44, 130, 80, 84, and 7 nodes in
+  reset-to-orchestration order. All seven exact structural and executable
+  contracts passed on precompile exports and again on postcompile exports after
+  the explicit compile/save marker.
+- The postcompile exports are checked in under `tools/blueprint/live-snippets`
+  and owned by the complete scaffold together with the configurator and runtime
+  harness. This freezes the actual saved graph bodies, including compiler
+  normalization, rather than relying only on their deterministic generators.
+- `Validate-AirframeSourceSamplingRuntime.py` executes the real Client Director
+  CDO against an independent source/desired oracle. Each of two warm runs and
+  one independent fresh NullRHI run passed 10 forward plus 10 reverse cases,
+  exact and partial-terminal schedules, all five profile IDs, six invalid
+  families, two direct evaluator/commit boundary cases, poisoned-state cleanup,
+  immutable inputs, and exact restoration of the 325-property union of every
+  trajectory schema. Body and gimbal authorship remained separate in both the
+  source candidates and accepted desired outputs.
+- Guarded shutdown reached `LogExit: Exiting.` with no second interactive
+  editor. Closed-editor FromDevKit preview reported 16 unchanged packages and
+  exactly `BPC_EDD_ClientDirector.uasset` changed; forced sync copied that one
+  reviewed package. Live/mirror SHA-256 equality is
+  `EA2576672F41F56474DB3BE9CA529264273CF94F0DABFC5CB7671CFAE596DF35`.
+- A fresh cold commandlet loaded all nine core assets, compiled all six
+  Blueprints, emitted `EDD_COLD_LOAD|RESULT|PASS`, and exited with zero errors.
+  The complete scaffold with mirrored MVP assets passes in 96.3 seconds,
+  including generated full/paste contracts and every live source-sampling
+  export.
+- This checkpoint accepts the backend source-sampling bridge only. It does not
+  authorize aliasing the existing single waypoint rotation into both body and
+  gimbal inputs; that document adapter remains the next explicit design seam.
+  No UI, keyboard dogfood, cook, Workshop, G-Portal, deployment, or whole-mod
+  completion is claimed.

@@ -148,30 +148,39 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeSourceSamplingResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-source-sampling-v1.eddgraph',
     'tools\blueprint\snippets\reset-airframe-source-sampling-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-airframe-source-sampling-v1.eddgraph',
     'tools\blueprint\Build-AirframeSourceSamplingValidationGraph.py',
     'tools\blueprint\Test-AirframeSourceSamplingValidationContracts.py',
     'tools\blueprint\snippets\validate-airframe-source-sampling-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-airframe-source-sampling-inputs-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\validate-airframe-source-sampling-inputs-v1.eddgraph',
     'tools\blueprint\Build-AirframeSourcePositionProfilesGraph.py',
     'tools\blueprint\Test-AirframeSourcePositionProfilesContracts.py',
     'tools\blueprint\snippets\compile-airframe-source-position-profiles-v1.eddgraph',
     'tools\blueprint\snippets\compile-airframe-source-position-profiles-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\compile-airframe-source-position-profiles-v1.eddgraph',
     'tools\blueprint\Build-AirframeSourcePositionBodyProfileSamplesGraph.py',
     'tools\blueprint\Test-AirframeSourcePositionBodyProfileSamplesContracts.py',
     'tools\blueprint\snippets\build-airframe-source-position-body-profile-samples-v1.eddgraph',
     'tools\blueprint\snippets\build-airframe-source-position-body-profile-samples-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\build-airframe-source-position-body-profile-samples-v1.eddgraph',
     'tools\blueprint\Build-AirframeSourceGimbalSamplesGraph.py',
     'tools\blueprint\Test-AirframeSourceGimbalSamplesContracts.py',
     'tools\blueprint\snippets\build-airframe-source-gimbal-samples-v1.eddgraph',
     'tools\blueprint\snippets\build-airframe-source-gimbal-samples-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\build-airframe-source-gimbal-samples-v1.eddgraph',
     'tools\blueprint\Build-AirframeSourceCommitGraph.py',
     'tools\blueprint\Test-AirframeSourceCommitContracts.py',
     'tools\blueprint\snippets\commit-airframe-source-samples-to-desired-v1.eddgraph',
     'tools\blueprint\snippets\commit-airframe-source-samples-to-desired-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\commit-airframe-source-samples-to-desired-v1.eddgraph',
     'tools\blueprint\Build-AirframeSourceCompileGraph.py',
     'tools\blueprint\Test-AirframeSourceCompileContracts.py',
     'tools\blueprint\snippets\compile-airframe-source-sampling-v1.eddgraph',
     'tools\blueprint\snippets\compile-airframe-source-sampling-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\compile-airframe-source-sampling-v1.eddgraph',
+    'tools\unreal\Configure-AirframeSourceSamplingAssembly.py',
+    'tools\unreal\Validate-AirframeSourceSamplingRuntime.py',
     'tools\blueprint\Build-AirframeDesiredStreamResetGraph.py',
     'tools\blueprint\Test-AirframeDesiredStreamResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-desired-stream-v1.eddgraph',
@@ -1243,6 +1252,24 @@ if ($LASTEXITCODE -ne 0) { throw "Airframe source compile full contracts failed 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeSourceCompileContracts.py') `
     --project-root $ProjectRoot --graph $sourceCompilePaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Airframe source compile paste contracts failed with exit code $LASTEXITCODE." }
+$airframeSourceLiveContracts = @(
+    @('reset-airframe-source-sampling-v1.eddgraph', 'Test-AirframeSourceSamplingResetContracts.py'),
+    @('validate-airframe-source-sampling-inputs-v1.eddgraph', 'Test-AirframeSourceSamplingValidationContracts.py'),
+    @('compile-airframe-source-position-profiles-v1.eddgraph', 'Test-AirframeSourcePositionProfilesContracts.py'),
+    @('build-airframe-source-position-body-profile-samples-v1.eddgraph', 'Test-AirframeSourcePositionBodyProfileSamplesContracts.py'),
+    @('build-airframe-source-gimbal-samples-v1.eddgraph', 'Test-AirframeSourceGimbalSamplesContracts.py'),
+    @('commit-airframe-source-samples-to-desired-v1.eddgraph', 'Test-AirframeSourceCommitContracts.py'),
+    @('compile-airframe-source-sampling-v1.eddgraph', 'Test-AirframeSourceCompileContracts.py')
+)
+foreach ($liveContract in $airframeSourceLiveContracts) {
+    $liveGraph = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($liveContract[0])"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $liveGraph
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($liveContract[1])") `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live airframe source graph contract failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+}
 $airframeDesiredNonce = [guid]::NewGuid().ToString('N')
 $airframeDesiredRoot = Join-Path $scratchRoot "edd-airframe-desired-$airframeDesiredNonce"
 New-Item -ItemType Directory -Path $airframeDesiredRoot -Force | Out-Null

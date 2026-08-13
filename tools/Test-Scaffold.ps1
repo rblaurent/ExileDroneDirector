@@ -116,6 +116,11 @@ $requiredFiles = @(
     'tools\trajectory\test_adaptive_arc_blueprint_schema.py',
     'tools\trajectory\position_route_blueprint_schema.json',
     'tools\trajectory\test_position_route_blueprint_schema.py',
+    'tools\trajectory\cinematic_pose_reference.py',
+    'tools\trajectory\test_cinematic_pose_reference.py',
+    'tools\trajectory\cinematic_pose_blueprint_schema.json',
+    'tools\trajectory\test_cinematic_pose_blueprint_schema.py',
+    'tools\unreal\Configure-CinematicPoseAssembly.py',
     'tools\unreal\Configure-TrajectoryScalarEvaluators.py',
     'tools\unreal\Compile-And-SaveClientDirector.py',
     'tools\unreal\Open-ClientDirectorEditor.py',
@@ -738,6 +743,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_position_route_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Position-route Blueprint assembly-schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_cinematic_pose_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Cinematic pose composition reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_cinematic_pose_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Cinematic pose Blueprint composition-schema contracts failed with exit code $LASTEXITCODE."
 }
 
 $trajectoryScalarNonce = [guid]::NewGuid().ToString('N')

@@ -3909,6 +3909,30 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   entry seam deterministic instead of a blind-click loop.
 - The full `Test-Scaffold.ps1 -RequireMvpAssets` gate passes with deterministic
   regeneration, checked source/paste/live evaluator contracts, every schema and
-  repository regression, and the mirrored MVP assets. Clean commit/push is the
-  remaining checkpoint gate. This does not claim remaining cinematic tracks,
-  shortcut dogfood, polished UI, cook, Workshop, or whole-mod completion.
+  repository regression, and the mirrored MVP assets. A final clean-candidate
+  rerun passed in 50.9 seconds before commit `b79b985` was pushed to `main`.
+  This does not claim remaining cinematic tracks, shortcut dogfood, polished
+  UI, cook, Workshop, or whole-mod completion.
+
+## Atomic cinematic-pose composition frozen offline (2026-08-13)
+
+- Position and orientation are deliberately composed as a narrow transaction,
+  not reimplemented as a third interpolation engine. The frozen oracle compiles
+  both accepted component tracks from one duration sequence and rejects any
+  disagreement in segment cardinality, cumulative starts, durations, or total.
+- Evaluation is absolute-time and fail-closed. A combined pose exists only when
+  both component evaluators agree exactly on segment, local alpha, completion,
+  and total; position keeps its independent distance alpha and arc parameter.
+- Seven oracle tests pass deterministic and malformed authored data, negative,
+  boundary, terminal, non-finite, repeated, and shuffled queries; 80 seeded
+  tracks are compared directly against both accepted component evaluators. Six
+  separately constructed corrupt compiled timelines are rejected before a pose
+  can be returned.
+- The Blueprint schema fixes one sticky stage bit, two compiled-result fields,
+  one evaluation input, eight evaluation outputs, and five ordered functions:
+  reset, authored-input validation, combined commit, ordered compile, and atomic
+  evaluation. Five schema tests pass. The idempotent configurator creates only
+  absent fields/functions and preserves existing defaults.
+- This checkpoint is offline contract evidence only. No live Blueprint body,
+  compile/save, runtime, package mirror, or new feature-version claim has been
+  made yet.

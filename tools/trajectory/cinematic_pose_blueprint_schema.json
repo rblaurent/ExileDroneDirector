@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Atomic Blueprint composition of accepted position and orientation tracks on one absolute timeline.",
+  "limits": {
+    "minimumWaypoints": 2,
+    "maximumWaypoints": 512,
+    "finiteScalarBound": 1.7976931348623157e+308
+  },
+  "variables": [
+    { "name": "CinematicPoseStageValidV1", "type": "Boolean", "container": "None", "role": "candidate", "default": false },
+    { "name": "CinematicPoseCompiledTotalSecondsV1", "type": "Float", "container": "None", "role": "result", "default": 0.0 },
+    { "name": "CinematicPoseCompileValidV1", "type": "Boolean", "container": "None", "role": "result", "default": false },
+    { "name": "CinematicPoseInputElapsedSecondsV1", "type": "Float", "container": "None", "role": "evaluationInput", "default": 0.0 },
+    { "name": "CinematicPoseResultSegmentIndexV1", "type": "Integer", "container": "None", "role": "evaluationResult", "default": -1 },
+    { "name": "CinematicPoseResultLocalTimeAlphaV1", "type": "Float", "container": "None", "role": "evaluationResult", "default": 0.0 },
+    { "name": "CinematicPoseResultDistanceAlphaV1", "type": "Float", "container": "None", "role": "evaluationResult", "default": 0.0 },
+    { "name": "CinematicPoseResultCurveUV1", "type": "Float", "container": "None", "role": "evaluationResult", "default": 0.0 },
+    { "name": "CinematicPoseResultPositionV1", "type": "Vector", "container": "None", "role": "evaluationResult", "default": [0.0, 0.0, 0.0] },
+    { "name": "CinematicPoseResultQuatV1", "type": "Quat", "container": "None", "role": "evaluationResult", "default": [0.0, 0.0, 0.0, 1.0] },
+    { "name": "CinematicPoseResultCompleteV1", "type": "Boolean", "container": "None", "role": "evaluationResult", "default": false },
+    { "name": "CinematicPoseResultValidV1", "type": "Boolean", "container": "None", "role": "evaluationResult", "default": false }
+  ],
+  "functions": [
+    { "name": "ResetCinematicPoseV1", "stage": 0 },
+    { "name": "ValidateCinematicPoseInputsV1", "stage": 1 },
+    { "name": "CommitCompiledCinematicPoseV1", "stage": 2 },
+    { "name": "CompileCinematicPoseV1", "stage": 3, "uses": ["ResetCinematicPoseV1", "ValidateCinematicPoseInputsV1", "CompilePositionRouteV1", "CompileOrientationTrackV1", "CommitCompiledCinematicPoseV1"] },
+    { "name": "EvaluateCompiledCinematicPoseV1", "stage": 4, "uses": ["EvaluateCompiledPositionRouteV1", "EvaluateCompiledOrientationTrackV1"] }
+  ],
+  "contracts": {
+    "authoredShape": "Position and orientation waypoint counts are equal, both use 2..512 keys, and both consume the exact same duration array.",
+    "timeline": "Compiled segment counts, segment starts, durations, and positive finite total seconds must agree exactly across both component tracks.",
+    "atomicity": "Only CommitCompiledCinematicPoseV1 may publish combined compile validity and only EvaluateCompiledCinematicPoseV1 may publish a combined pose.",
+    "failure": "Any composition failure clears every combined result, restores the segment sentinel to -1, makes stage validity sticky-false, and leaves combined validity false.",
+    "evaluation": "Evaluation depends only on compiled component tracks and absolute elapsed seconds; component segment, local-time alpha, completion, and total must agree before publication.",
+    "isolation": "Component compilation channels are internal caches and never constitute a valid combined pose when CinematicPoseCompileValidV1 is false."
+  }
+}

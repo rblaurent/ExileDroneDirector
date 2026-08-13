@@ -28,6 +28,30 @@ This section is the authoritative handoff. Detailed evidence remains in
 `devkit-findings.md`; exact clipboard procedure remains in
 `blueprint-workflow.md`.
 
+### Cinematic pose composition oracle checkpoint
+
+- The next trajectory boundary is frozen offline as atomic composition rather
+  than new interpolation math. `cinematic_pose_reference.py` compiles the
+  accepted position route and quaternion orientation track from one authored
+  duration array, requires exact segment starts/durations/counts/totals, and
+  publishes an evaluated pose only when both component evaluators agree on
+  segment, local-time alpha, completion, and total duration.
+- Seven executable oracle tests cover deterministic compilation, authored-shape
+  rejection, exact component parity, direct-scrub independence, all three
+  non-finite elapsed values, six cross-track timeline-corruption families, and
+  80 seeded tracks with shuffled absolute-time queries. Five schema tests freeze
+  one sticky candidate-valid bit, disjoint combined result channels, fail-closed
+  defaults, exact five-stage ordering, and the component dependency boundary.
+- `Configure-CinematicPoseAssembly.py` is an idempotent schema/function-seam
+  configurator. It preserves every existing class-default value and initializes
+  only fields created by that invocation, matching the accepted position-route
+  upgrade hygiene.
+- This is an executable design contract only. The five Blueprint bodies have
+  not yet been installed, compiled, saved, round-tripped, or runtime-proven, so
+  no live cinematic-pose capability is claimed. That live implementation is the
+  current ordered slice; flight profiles, lens/focus/effects, shortcuts, UI,
+  cook, and Workshop remain later work.
+
 ### Position-route absolute-time evaluator checkpoint
 
 - `EvaluateCompiledPositionRouteV1` is compiled, saved, and warm-runtime

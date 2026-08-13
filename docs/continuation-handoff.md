@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-13 after commit `5052ee4`
+Last updated: 2026-08-13 after commit `7a97958`
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -22,7 +22,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Last implementation head: `5052ee4c2ec4ff0847314b32f35bd87621bdca5a`;
+- Last implementation head: `7a97958e66b7814f0c34f227411a69018fe82cb1`;
   current HEAD should be the later documentation-only handoff commit and must
   equal `origin/main`
 - Expected worktree: clean
@@ -83,7 +83,7 @@ stream. It must sample position, distinct authored body orientation, distinct
 authored gimbal orientation, and all ten smoothed flight-profile values on one
 exact absolute-time schedule.
 
-Six clean checkpoints are pushed after `8d8b603`:
+Seven clean checkpoints are pushed after `8d8b603`:
 
 ### `2aa201f` — reference and schema
 
@@ -170,23 +170,21 @@ The schema freezes 22 variables and seven functions:
   downstream object-identity preservation, and desired/prebake failures
 - complete scaffold passed in 90.5 seconds
 
-These six checkpoints are offline-proven only. None of the new bridge graphs
+### `7a97958` — policy-free top-level orchestration
+
+- `CompileAirframeSourceSamplingV1`: 7 full / 6 paste nodes
+- exact six-call order: reset, validate, compile components/schedule, sample
+  position/body/profiles, sample distinct gimbal, commit desired stream
+- owns no state, branch, loop, reroute, alternate path, or external link
+- complete scaffold passed in 91.1 seconds
+
+These seven checkpoints are offline-proven only. None of the new bridge graphs
 has been installed, compiled, saved, cold-loaded, or executed by Enhanced.
 
 ## Next ordered implementation
 
-Do not open Unreal yet. Finish the one remaining graph body and exported-link
-interpreters offline first.
-
-### 1. `CompileAirframeSourceSamplingV1`
-
-Keep orchestration tiny and policy-free. Exact order: reset, validate authored
-shape, compile position/profiles/schedule, sample position/body/profiles, sample
-gimbal, commit desired stream.
-
-Add generators, snippets, interpreters, deterministic repeat checks, and files
-to `tools/Test-Scaffold.ps1`. Update this handoff and both evidence documents.
-Commit and push every clean slice.
+The complete seven-function offline set is green. Proceed with live acceptance
+below in exactly one Enhanced editor process.
 
 ## Live acceptance after the offline set
 
@@ -267,7 +265,7 @@ git rev-parse origin/main
 ## Confidence statement
 
 Confidence is high in every checkpoint explicitly accepted above and in the
-six new offline bridge checkpoints. Confidence is not claimed for the one
-remaining bridge graphs, live bridge integration, document adaptation for
+seven new offline bridge checkpoints. Confidence is not claimed for live bridge
+integration, document adaptation for
 distinct body/gimbal authorship, lens/focus/effects, events, keyboard dogfood,
 UI, cooking, Workshop, or whole-mod completion.

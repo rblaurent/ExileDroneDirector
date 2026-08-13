@@ -441,6 +441,13 @@ This section is the authoritative handoff. Detailed evidence remains in
 - Both forms prove valid handoff, four preflight failures that leave downstream
   inputs untouched, injected downstream failure, and invocation independence.
   Top-level orchestration is the final offline graph before live installation.
+- `CompileAirframeDesiredStreamV1` is now frozen as the deliberately small
+  eight-node full / seven-node paste orchestration boundary. Its exact order is
+  reset, validate, velocity, acceleration, jerk, desired pose, commit. All
+  stages are invoked so their existing fail-closed guards own cleanup without
+  duplicating branch logic. Both forms prove success and six injected failure
+  points. The complete offline transaction now exists; live installation and
+  Enhanced compile/save/cold/runtime acceptance are next and remain unclaimed.
 
 ### Position-route absolute-time evaluator checkpoint
 

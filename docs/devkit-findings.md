@@ -4897,3 +4897,14 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Exported execution proves valid handoff, four preflight failures with untouched
   downstream inputs, injected downstream failure, and repeat independence in
   full and paste forms. This remains offline evidence.
+
+### Complete desired-stream orchestration frozen offline (2026-08-13)
+
+- `CompileAirframeDesiredStreamV1` is intentionally only eight nodes full /
+  seven paste: seven self-calls in the frozen order reset, validate, velocity,
+  acceleration, jerk, pose solve, commit. It introduces no duplicate state or
+  branch policy; each accepted child owns its fail-closed guard.
+- Exact exported links prove the order, success, six injected failure points,
+  repeat independence, no external seams, and deterministic generation. This
+  completes the offline graph set only. No Enhanced install, compile, save,
+  cold-load, or live runtime claim is made until the next acceptance phase.

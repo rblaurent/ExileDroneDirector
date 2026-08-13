@@ -168,6 +168,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-AirframeDesiredStreamCommitContracts.py',
     'tools\blueprint\snippets\commit-airframe-desired-stream-to-prebake-v1.eddgraph',
     'tools\blueprint\snippets\commit-airframe-desired-stream-to-prebake-v1-paste.eddgraph',
+    'tools\blueprint\Build-AirframeDesiredStreamCompileGraph.py',
+    'tools\blueprint\Test-AirframeDesiredStreamCompileContracts.py',
+    'tools\blueprint\snippets\compile-airframe-desired-stream-v1.eddgraph',
+    'tools\blueprint\snippets\compile-airframe-desired-stream-v1-paste.eddgraph',
     'tools\blueprint\Build-AirframePrebakeResetGraph.py',
     'tools\blueprint\Test-AirframePrebakeResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-prebake-candidate-v1.eddgraph',
@@ -1134,6 +1138,27 @@ foreach ($graphCase in @(@($desiredCommit, $false), @($desiredCommitPaste, $true
     $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0]); if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredStreamCommitContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Airframe desired-stream commit contracts failed with exit code $LASTEXITCODE." }
+}
+$desiredCompile = Join-Path $airframeDesiredRoot 'compile-airframe-desired-stream-v1.eddgraph'
+$desiredCompilePaste = Join-Path $airframeDesiredRoot 'compile-airframe-desired-stream-v1-paste.eddgraph'
+$desiredCompileRepeat = Join-Path $airframeDesiredRoot 'compile-airframe-desired-stream-v1-repeat.eddgraph'
+$desiredCompileRepeatPaste = Join-Path $airframeDesiredRoot 'compile-airframe-desired-stream-v1-repeat-paste.eddgraph'
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredStreamCompileGraph.py') --project-root $ProjectRoot --output $desiredCompile --paste-output $desiredCompilePaste
+if ($LASTEXITCODE -ne 0) { throw "Airframe desired-stream orchestration generation failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Build-AirframeDesiredStreamCompileGraph.py') --project-root $ProjectRoot --output $desiredCompileRepeat --paste-output $desiredCompileRepeatPaste
+if ($LASTEXITCODE -ne 0) { throw "Repeated airframe desired-stream orchestration generation failed with exit code $LASTEXITCODE." }
+foreach ($comparison in @(
+    @($desiredCompile, $desiredCompileRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\compile-airframe-desired-stream-v1.eddgraph')),
+    @($desiredCompilePaste, $desiredCompileRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\compile-airframe-desired-stream-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -Algorithm SHA256 $_).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw "Airframe desired-stream orchestration generation is not byte-identical." }
+}
+foreach ($graphCase in @(@($desiredCompile, $false), @($desiredCompilePaste, $true))) {
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $graphCase[0]
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0]); if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-AirframeDesiredStreamCompileContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Airframe desired-stream orchestration contracts failed with exit code $LASTEXITCODE." }
 }
 $airframePrebakeNonce = [guid]::NewGuid().ToString('N')
 $airframePrebakeRoot = Join-Path $scratchRoot "edd-airframe-prebake-$airframePrebakeNonce"

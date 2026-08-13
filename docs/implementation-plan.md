@@ -5,7 +5,7 @@ Planning rule: every backend phase ends in structural contracts, programmatic
 PIE acceptance, edge-case evidence, and a keyboard/debug dogfood surface.
 Cooking is a later integration gate, not the next implementation milestone.
 Release strategy: complete and prove the backend before investing in polished UI
-Current internal build: `0.76.0-position-route-commit`
+Current internal build: `0.77.0-position-route-compile`
 
 ## 1. Delivery strategy
 
@@ -27,6 +27,31 @@ output. Subsequent UI work exposes this proven backend without redefining it.
 This section is the authoritative handoff. Detailed evidence remains in
 `devkit-findings.md`; exact clipboard procedure remains in
 `blueprint-workflow.md`.
+
+### Position-route compiler orchestration checkpoint
+
+- `CompilePositionRouteV1` is compiled, saved, mirrored, and accepted as the
+  single authored-input-to-compiled-route boundary. Its exact order is reset,
+  validate inputs, compute waypoint velocities, build flattened segment arc
+  tables, then atomically commit.
+- The orchestrator is deliberately thin: six nodes in the full graph and five
+  in paste form. Their SHA-256 hashes are
+  `C30B61819CF6F9A7ACD41592B84F59B86205A6C91C773A7E999AE9EBED1AE5E8` /
+  `2A11766A037E0CF8E4CDAFCCAD02ADDBDB04C5ABEAF6234C38B12D158D6995D4`.
+  The exact post-compile six-node export hashes to
+  `D4960A9F6236E706D4159D5E0422C41163B7DFBEA923C9128DD926AB6923D07A`.
+- Warm and fresh NullRHI execution each stage only seven authored input fields
+  and call the orchestrator once. Both pass 24 valid routes, 614 segments,
+  5,701 arc samples, the 512-waypoint ceiling, 14 malformed-input families,
+  replacement of a prior compiled route, exact candidate and compiled data,
+  authored-input preservation, failure clearing, and full CDO restoration.
+- Guarded shutdown kept crash directories at 25. Closed-editor mirror copied
+  exactly Client Director, reverse sync found 17/17 unchanged, and the package
+  hashes to `0FBE2FE9A52AA9A15681938B7B9FE22F30AF44DAADD4438A315893403AEB4758`.
+  Fresh cold load and the complete scaffold pass.
+- Next ordered slice is absolute-time evaluation through
+  `EvaluateCompiledPositionRouteV1`. Cinematic dogfood controls, polished UI,
+  cook, Workshop, and whole-mod completion remain unclaimed.
 
 ### Position-route atomic publication checkpoint
 

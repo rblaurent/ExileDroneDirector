@@ -3773,3 +3773,36 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - The next ordered slice is the thin `CompilePositionRouteV1` orchestrator.
   Position-route time/distance evaluation, cinematic dogfood shortcuts,
   polished UI, cook, Workshop, and whole-mod completion remain unclaimed.
+
+## Position-route compiler orchestration accepted (2026-08-13)
+
+- Internal checkpoint `0.77.0-position-route-compile` compiles and saves the
+  thin `CompilePositionRouteV1` boundary. Its only execution path calls
+  `ResetPositionRouteCandidateV1`, `ValidatePositionRouteInputsV1`,
+  `ComputePositionRouteVelocitiesV1`, `BuildPositionRouteSegmentsV1`, and
+  `CommitCompiledPositionRouteV1` in that exact order.
+- Deterministic full/paste graphs contain 6/5 nodes and hash to
+  `C30B61819CF6F9A7ACD41592B84F59B86205A6C91C773A7E999AE9EBED1AE5E8` /
+  `2A11766A037E0CF8E4CDAFCCAD02ADDBDB04C5ABEAF6234C38B12D158D6995D4`.
+  The exact accepted post-compile six-node export hashes to
+  `D4960A9F6236E706D4159D5E0422C41163B7DFBEA923C9128DD926AB6923D07A`.
+- Warm and fresh NullRHI executable tests stage only the seven authored input
+  fields and invoke the orchestrator once. Each run accepts 24 seeded routes,
+  614 segments, 5,701 flattened samples, and the 512-waypoint boundary. It
+  proves exact oracle candidate and compiled arrays/totals, authored-input
+  preservation, replacement of a prior valid compilation, 14 malformed-input
+  rejection families with poisoned candidate/compiled/evaluation clearing,
+  and complete CDO restoration.
+- The accepted runtime evidence therefore proves composition, not merely the
+  graph call shape or isolated stages. Fresh log inspection found no runaway
+  or infinite-loop marker. Fresh cold load loaded nine core assets and compiled
+  all six Blueprints; the full scaffold passed with the generator, paste/full
+  contracts, live graph, and runtime harness included.
+- Guarded shutdown kept crash directories unchanged at 25. FromDevKit preview
+  found exactly Client Director changed and 16 files unchanged; forced sync
+  copied one package and reverse preview found all 17 unchanged. Live/mirror
+  package SHA-256 is
+  `0FBE2FE9A52AA9A15681938B7B9FE22F30AF44DAADD4438A315893403AEB4758`.
+- Absolute-time evaluation through `EvaluateCompiledPositionRouteV1` is next.
+  Cinematic dogfood shortcuts, polished UI, cook, Workshop, and whole-mod
+  completion remain unclaimed.

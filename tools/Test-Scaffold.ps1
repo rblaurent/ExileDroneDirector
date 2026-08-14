@@ -475,8 +475,11 @@ $requiredFiles = @(
     'tools\blueprint\snippets\evaluate-camera-scalar-track-v1.eddgraph',
     'tools\blueprint\snippets\evaluate-camera-scalar-track-v1-paste.eddgraph',
     'tools\unreal\Configure-CameraScalarTrackAssembly.py',
+    'tools\unreal\Restore-CameraScalarTrackSchemaDefaults.py',
+    'tools\unreal\Validate-CameraScalarTrackSchemaDefaults.py',
     'tools\unreal\Validate-CameraScalarTrackRuntime.py',
     'tools\unreal\Validate-CameraScalarTrackPIE.py',
+    'tools\unreal\test_camera_scalar_track_validators.py',
     'tools\blueprint\Build-AirframeDocumentAdapterResetGraph.py',
     'tools\blueprint\Test-AirframeDocumentAdapterResetContracts.py',
     'tools\blueprint\snippets\reset-airframe-document-source-adapter-v2.eddgraph',
@@ -2563,13 +2566,26 @@ $cameraScalarLiveStages = @(
 ) + @($cameraScalarPublicationStages | ForEach-Object { , @($_[0], $_[2]) })
 foreach ($stage in $cameraScalarLiveStages) {
     $live = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($stage[0]).eddgraph"
+    $canonical = Join-Path $ProjectRoot "tools\blueprint\snippets\$($stage[0]).eddgraph"
     & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $live
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $live
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera scalar $($stage[0]) link integrity failed with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphTopologyMatch.py') `
+        --project-root $ProjectRoot --expected $canonical --actual $live
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera scalar $($stage[0]) topology failed with exit code $LASTEXITCODE."
+    }
     & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[1])") `
         --project-root $ProjectRoot --graph $live
     if ($LASTEXITCODE -ne 0) {
         throw "Live camera scalar $($stage[0]) contracts failed with exit code $LASTEXITCODE."
     }
 }
+& python (Join-Path $ProjectRoot 'tools\unreal\test_camera_scalar_track_validators.py')
+if ($LASTEXITCODE -ne 0) { throw "Camera scalar-track live-tool contracts failed with exit code $LASTEXITCODE." }
 $cameraChannelNonce = [guid]::NewGuid().ToString('N')
 $cameraChannelRoot = Join-Path $scratchRoot "edd-camera-channel-$cameraChannelNonce"
 New-Item -ItemType Directory -Path $cameraChannelRoot -Force | Out-Null

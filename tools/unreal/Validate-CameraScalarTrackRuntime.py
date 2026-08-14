@@ -16,6 +16,7 @@ CLASS="/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_
 ROOT=Path(__file__).resolve().parents[2]
 SCHEMA=json.loads((ROOT/"tools/trajectory/camera_scalar_track_blueprint_schema.json").read_text(encoding="utf-8"))
 INPUTS=tuple(spec["name"] for spec in SCHEMA["variables"] if spec["role"] in ("input","query"))
+ARRAY_NAMES=frozenset(spec["name"] for spec in SCHEMA["variables"] if spec["container"]=="Array")
 
 
 def emit(label,value):unreal.log(f"{PREFIX}|{label}|{value}")
@@ -33,14 +34,14 @@ def set_(obj,name,value):
         try:obj.set_editor_property(candidate,value);return
         except Exception:pass
     raise RuntimeError("could not set property:"+name)
-def clone(value):return list(value) if isinstance(value,(list,tuple)) else value
+def clone(name,value):return list(value) if name in ARRAY_NAMES else value
 def normalized(value):return tuple(value) if isinstance(value,(list,tuple)) else value
 def close(left,right,tolerance=3.0e-5):return abs(float(left)-float(right))<=tolerance*max(1.0,abs(float(left)),abs(float(right)))
 
 
 sys.path.insert(0,str(ROOT/"tools/trajectory"));import camera_scalar_track_reference as oracle
 oracle=importlib.reload(oracle);cls=unreal.load_class(None,CLASS);require(cls is not None,"class");obj=unreal.get_default_object(cls)
-saved={spec["name"]:clone(get(obj,spec["name"])) for spec in SCHEMA["variables"]}
+saved={spec["name"]:clone(spec["name"],get(obj,spec["name"])) for spec in SCHEMA["variables"]}
 
 
 def stage(track_keys,duration,domain,minimum=None,maximum=None,clamp=False):

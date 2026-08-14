@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at viewer-comfort live-acceptance readiness
+Last updated: 2026-08-15 after integrated scalar-engine re-acceptance
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the viewer-comfort live-acceptance readiness package described below; after
+- Current checkpoint is the integrated scalar-engine re-acceptance package described below; after
   the checkpoint push, HEAD must equal `origin/main` before the next seam starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
@@ -1251,6 +1251,36 @@ failure families, immutable inputs, and restoration; and
 `Validate-CameraScalarTrackPIE.py` checks reciprocal-focus output on the real
 player-owned Client Director and tears PIE down. Next: run that package in one
 editor and freeze exact postcompile exports.
+
+The full scalar family has now been re-accepted on the current integrated
+Client Director after the viewer-comfort checkpoint. All nine saved functions
+match their deterministic generators at 25, 138, 20, 29, 5, 13, 78, 124, and
+40 nodes (472 total) with 639 reciprocal links. Their final postcompile exports
+pass exact topology, link-integrity, and executable-oracle checks and replace
+the older live captures where Unreal regenerated textual pin metadata.
+
+Acceptance found and fixed a tooling defect rather than a graph defect. Unreal
+array properties are live proxy objects; the runtime and PIE validators had
+stored those proxies as their cleanup snapshots, so staged test arrays silently
+rewrote the alleged originals. Both validators now materialize every schema-
+declared array as a plain list and restore all 32 schema fields. A dedicated
+read-only validator proves the exact defaults before and after Blueprint
+regeneration, and the scaffold statically forbids regression to proxy snapshots.
+
+Warm runtime passes 10 forward plus 10 reverse tracks, 121 absolute-time
+queries, and seven invalid families. Real player-owned PIE passes reciprocal
+focus at the exact 160 cm midpoint and restores every schema field; all ten
+array defaults remain empty after both probes. Guarded shutdown closed both
+asset editors and reached `LogExit: Exiting.`. Closed-editor comparison found
+only Client Director changed; reverse sync copied exactly that package, and
+live/mirror SHA-256 is
+`6F2EB7A7812E5974E4E83050B37640AC11916FFF05A31FF461357E28E8CBBB8B`.
+A fresh NullRHI runtime repeats the complete matrix, a separate fresh process
+proves all 32 defaults across cold Blueprint compilation, and a third process
+loads nine core assets and compiles all six Blueprints with zero errors. The
+complete MVP-required scaffold passes in 140.1 seconds. Next: continue the
+remaining backend camera-mode/event-adapter sequence toward debug dogfood; the
+scalar engine is no longer pending.
 
 ## Critical design mismatch
 

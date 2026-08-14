@@ -354,6 +354,17 @@ families without touching candidate or compiled storage. Next: expand sparse
 defaults and compile/copy each canonical channel into the private candidate
 bank through the accepted scalar engine.
 
+`CompileCameraChannelCandidateV1` is deterministic at 186 full / 185 paste
+nodes. For one canonical channel index it selects the fixed physical policy,
+copies an authored disjoint slice or builds the correct one/two-key sparse
+default, invokes the accepted scalar compiler exactly once on one mutually
+exclusive path, and appends the successful compiled snapshot to private flat
+storage. Three path-local copy pipelines avoid unsafe Blueprint exec merges.
+Both forms match 40 complete thirteen-channel oracle banks, including sparse
+defaults and reciprocal focus, while an invalid authored channel preserves the
+prior candidate prefix. Next: atomic whole-bank commit after exact thirteen-
+channel preflight.
+
 ## Next ordered implementation
 
 Generate the nine channel-assembly graphs in frozen stage order, with exact

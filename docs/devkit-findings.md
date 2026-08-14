@@ -5181,3 +5181,43 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - This is backend engine acceptance, not channel integration or dogfood. The
   next seam owns lens/focus/bounded-effect tracks, then camera modes and bounded
   event adapters before temporary debug controls and attended dogfood.
+
+### Camera channel assembly live acceptance (2026-08-14)
+
+- The complete lens/focus/effect frame assembly is installed and saved on
+  Client Director as nine functions with exact node counts 33, 126, 186, 71,
+  11, 15, 119, 25, and 40. Unified precompile and postcompile exports pass the
+  exact structural and executable contracts, and all nine saved captures are
+  owned by the complete scaffold.
+- Live paste exposed a class/library mismatch that offline graph-shape checks
+  alone could not reveal: Enhanced discarded 18 validation string comparisons
+  and two staging comparisons whose function references still named
+  `KismetMathLibrary`. The generators now name `KismetStringLibrary` for
+  `EqualEqual_StrStr` and `NotEqual_StrStr`; contracts require both the exact
+  string-call count and library. The incomplete validation graph was cleared to
+  its native entry and reinstalled before compile/save.
+- Native entry seams are now mandatory in every applicable camera-channel
+  contract. This extends the earlier document-adapter lesson: a saved body with
+  the expected nodes is not executable proof unless the native function entry
+  reaches the generated root.
+- Two warm CDO runs each pass 21 compile cases, 121 frame evaluations, six
+  invalid families, forward/reverse queries, sparse and fully authored banks,
+  reciprocal optical focus, independent bounded effects, failed-recompile
+  snapshot preservation, immutable inputs, and full restoration. In particular,
+  physical focus endpoints 100/400 evaluate to the optical midpoint 160 while
+  bloom remains independently authored at 0.5.
+- PIE on `/Game/Dev/AlmostEmpty` drives the real player-controller-owned Client
+  Director and publishes all thirteen channels plus the discrete filmback
+  snapshot. It reports `GAME_WORLD_RESULT|PASS`, restores defaults, and tears
+  PIE down automatically.
+- Guarded shutdown reached `LogExit: Exiting.`. Closed-editor review and sync
+  changed only `BPC_EDD_ClientDirector.uasset`; reverse preview reports all 17
+  packages unchanged. Live and mirror SHA-256 are both
+  `5A4E8E6E6538DE3526BA72BC68D94DC1FC654C57ED51C0874226C3A5CAE4E655`.
+  A fresh NullRHI process repeats the complete runtime matrix, a fresh cold
+  commandlet loads all nine assets and compiles all six Blueprints with zero
+  errors, and the complete scaffold passes in 119.6 seconds.
+- This checkpoint accepts synchronized camera-frame computation, not application
+  to engine camera/post-process properties. The next seam must discover and
+  freeze actual property availability, apply only supported values, expose
+  unavailable properties explicitly, and restore the prior viewer state.

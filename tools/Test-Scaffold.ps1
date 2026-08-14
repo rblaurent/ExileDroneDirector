@@ -192,6 +192,15 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraChannelEvaluateContracts.py',
     'tools\blueprint\snippets\evaluate-camera-channel-assembly-v1.eddgraph',
     'tools\blueprint\snippets\evaluate-camera-channel-assembly-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-camera-channel-compile-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-camera-channel-inputs-v1.eddgraph',
+    'tools\blueprint\live-snippets\compile-camera-channel-candidate-v1.eddgraph',
+    'tools\blueprint\live-snippets\commit-camera-channel-assembly-v1.eddgraph',
+    'tools\blueprint\live-snippets\compile-camera-channel-assembly-v1.eddgraph',
+    'tools\blueprint\live-snippets\reset-camera-channel-result-v1.eddgraph',
+    'tools\blueprint\live-snippets\stage-compiled-camera-channel-v1.eddgraph',
+    'tools\blueprint\live-snippets\publish-camera-channel-sample-v1.eddgraph',
+    'tools\blueprint\live-snippets\evaluate-camera-channel-assembly-v1.eddgraph',
     'tools\unreal\Configure-CameraChannelAssembly.py',
     'tools\unreal\Validate-CameraChannelRuntime.py',
     'tools\unreal\Validate-CameraChannelPIE.py',
@@ -1566,6 +1575,26 @@ if ($LASTEXITCODE -ne 0) { throw "Camera channel evaluation full contracts faile
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraChannelEvaluateContracts.py') `
     --project-root $ProjectRoot --graph $cameraChannelEvaluatePaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera channel evaluation paste contracts failed with exit code $LASTEXITCODE." }
+$cameraChannelLiveStages = @(
+    @('reset-camera-channel-compile-v1', 'Test-CameraChannelCompileResetContracts.py'),
+    @('validate-camera-channel-inputs-v1', 'Test-CameraChannelValidationContracts.py'),
+    @('compile-camera-channel-candidate-v1', 'Test-CameraChannelCandidateContracts.py'),
+    @('commit-camera-channel-assembly-v1', 'Test-CameraChannelCommitContracts.py'),
+    @('compile-camera-channel-assembly-v1', 'Test-CameraChannelCompileContracts.py'),
+    @('reset-camera-channel-result-v1', 'Test-CameraChannelResultResetContracts.py'),
+    @('stage-compiled-camera-channel-v1', 'Test-CameraChannelStageContracts.py'),
+    @('publish-camera-channel-sample-v1', 'Test-CameraChannelPublishContracts.py'),
+    @('evaluate-camera-channel-assembly-v1', 'Test-CameraChannelEvaluateContracts.py')
+)
+foreach ($stage in $cameraChannelLiveStages) {
+    $live = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($stage[0]).eddgraph"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $live
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[1])") `
+        --project-root $ProjectRoot --graph $live
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera channel $($stage[0]) contracts failed with exit code $LASTEXITCODE."
+    }
+}
 $documentAdapterNonce = [guid]::NewGuid().ToString('N')
 $documentAdapterRoot = Join-Path $scratchRoot "edd-document-adapter-$documentAdapterNonce"
 New-Item -ItemType Directory -Path $documentAdapterRoot -Force | Out-Null

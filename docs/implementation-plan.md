@@ -1714,14 +1714,16 @@ before any polished editor UI or cook is attempted:
    discontinuity diagnostics are accepted. The older single-camera-rotation
    waypoint bridge remains explicitly rejected and is not aliased into both
    orientation tracks.
-10. **Current:** implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
-   event tracks with bounded target adapters and authorization.
-   The camera-channel assembly reference/schema is frozen offline: one discrete
-   filmback snapshot plus thirteen independently owned scalar tracks, atomic
-   candidate-to-compiled publication, reciprocal focus only on the focus-distance
-   channel, bounded effect weights, explicit sparse defaults, and no per-frame
-   recompilation. Seven reference and four schema tests pass; deterministic
-   graph generation/interpreters are the next checkpoint before editor work.
+10. **Current:** complete camera application, Directed / Free Look / Carrier
+   Freecam, and event tracks with bounded target adapters and authorization.
+   The reusable scalar engine and the complete camera-channel assembly are live-
+   accepted: one discrete filmback snapshot plus thirteen independently owned
+   scalar tracks, atomic candidate-to-compiled publication, reciprocal focus
+   only on the focus-distance channel, bounded effect weights, explicit sparse
+   defaults, and no per-frame recompilation. The next seam freezes actual Cine
+   Camera/post-process property availability, transactional frame application,
+   unavailable-property diagnostics, and exact prior-state restoration before
+   adding focus/dolly/comfort helpers and playback modes.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.
@@ -2509,11 +2511,11 @@ and repeatable isolated PIE runner are complete. The immediate sequence is:
    immutable publication, bounded public discovery, immutable published fetch,
    and private deep clone with immutable source attribution are accepted with
    typed conflicts/limits/failures and fresh SaveGame recovery evidence.
-5. **In progress:** position/timing compilation and evaluation, profile
-   evaluation, stateless desired airframe/gimbal pose, and fixed-step
-   angular-rate prebake are accepted independently. Next compose the desired
-   pose stream transactionally on the fixed schedule; then complete
-   lens/focus/effect tracks, free-look carrier modes, and event execution.
+5. **In progress:** the trajectory, distinct body/gimbal source bridge,
+   compiled-document adapter, scalar camera engine, and synchronized thirteen-
+   channel lens/focus/effect assembly are live-accepted. Next apply those frames
+   transactionally through verified engine properties with restoration, then
+   complete camera helpers, free-look carrier modes, and event execution.
 6. Give every operation a shortcut/debug route and run the complete automated
    and attended backend dogfood matrix.
 7. Only then build the polished UI against those stable contracts.

@@ -34,7 +34,9 @@ def packed(rng,ids,duration=4.0):
 def main():
  a=argparse.ArgumentParser();a.add_argument("--project-root",type=Path,required=True);a.add_argument("--graph",type=Path,required=True);a.add_argument("--paste",action="store_true");x=a.parse_args();c=load(x.project_root/"tools/blueprint/Test-WaypointCaptureContracts.py");nodes=c.parse_graph(x.graph);c.require(len(nodes)==(125 if x.paste else 126),f"node count {len(nodes)}")
  entries=[n for n in nodes.values() if "K2Node_FunctionEntry" in n.node_class];c.require(len(entries)==(0 if x.paste else 1),"entry count");loops=[n for n in nodes.values() if "K2Node_MacroInstance" in n.node_class];c.require(len(loops)==1,"one bounded channel loop");finds=[n for n in nodes.values() if member(n)=="Array_Find"];c.require(len(finds)==1,"one uniqueness lookup");setters={member(n) for n in nodes.values() if "K2Node_VariableSet" in n.node_class};c.require(setters=={"CameraChannelScratchValidV1","CameraChannelScratchKeyIndexV1","CameraChannelScratchChannelIndexV1","CameraChannelFailureCodeV1"},"validation setter ownership")
+ root=nodes["K2Node_VariableSet_0"];c.require(not root.pins["execute"].links,"paste execution root") if x.paste else c.require_link(entries[0],"then",root,"execute","native entry to validation root")
  text=x.graph.read_text(encoding="utf-8");c.require(all(name in text for name in ARRAYS),"all packed arrays read");c.require(all(channel_id in text for channel_id in CHANNELS),"canonical channel allowlist");c.require("CameraChannelCompiled" not in text and "CameraChannelCandidate" not in text,"no candidate/compiled mutation");c.require("CameraTransform" not in text,"no legacy camera alias")
+ string_calls=[n for n in nodes.values() if member(n) in {"EqualEqual_StrStr","NotEqual_StrStr"}];c.require(len(string_calls)==18,"exact string comparison count");c.require(all("KismetStringLibrary" in n.text and "KismetMathLibrary" not in n.text for n in string_calls),"reconstructable string comparisons")
  rng=random.Random(0xEDD610);cases=[packed(rng,())]
  for _ in range(80):
   selected=rng.sample(CHANNELS,rng.randint(0,len(CHANNELS)));cases.append(packed(rng,selected,0.0 if not selected and rng.random()<0.5 else 4.0))
@@ -48,4 +50,3 @@ def main():
  c.require(all(not valid(state) for state in broken),"failure families")
  print(f"Camera channel validation contracts passed ({'paste' if x.paste else 'full'}): {len(cases)} valid and {len(broken)} failure cases")
 if __name__=="__main__":main()
-

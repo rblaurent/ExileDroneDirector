@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the live camera scalar-track acceptance checkpoint
+Last updated: 2026-08-14 at the live camera channel-assembly acceptance checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,8 +23,8 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current implementation lineage starts from remote-equal `51cd7fa`, with the
-  live camera scalar-track checkpoint described below; HEAD must equal
+- Current implementation lineage starts from remote-equal `836f6f5`, with the
+  live camera channel-assembly checkpoint described below; HEAD must equal
   `origin/main`
 - Expected worktree: clean
 - Git remote: `origin/main`
@@ -309,7 +309,7 @@ This accepts the reusable backend math and execution engine. It does not yet
 claim channel-owned lens/focus/effect storage, camera modes, event targets,
 debug controls, attended dogfood, or polished UI.
 
-## Offline camera channel-assembly state
+## Live camera channel-assembly state
 
 The lens/focus/effect ownership boundary is now frozen offline in
 `camera_channel_assembly_reference.py` and
@@ -416,29 +416,57 @@ structural/semantic interpreters, and complete scaffold ownership. Next: prepare
 one-editor configuration, live runtime, real-world PIE, save/sync, cold-load,
 and full regression tooling before opening Unreal.
 
-The one-editor acceptance tooling is now prepared while Unreal remains closed.
-`Configure-CameraChannelAssembly.py` idempotently owns the schema variables and
-nine functions; `Validate-CameraChannelRuntime.py` covers sparse and fully
-authored forward/reverse compilation, frame equality, optical focus, independent
-effects, invalid transactions, compiled-bank preservation, input immutability,
-and complete default restoration; `Validate-CameraChannelPIE.py` repeats the
-critical optical/default/effect/filmback frame on the real player-owned Client
-Director and tears PIE down automatically. Next: syntax/scaffold-freeze this
-tooling, then perform the single-editor graph installation and acceptance.
+The complete nine-graph family is now installed, compiled, saved, synchronized,
+and accepted on Client Director. The saved full graphs contain 33, 126, 186,
+71, 11, 15, 119, 25, and 40 nodes in reset-to-evaluation order. Exact native-
+entry and executable contracts pass on every postcompile export, and all nine
+live captures are scaffold-owned.
+
+Live installation found one real importer defect before save: 18 validation
+string comparisons and two staging comparisons were discarded because their
+generated call nodes named `KismetMathLibrary` instead of
+`KismetStringLibrary`. Both generators now emit the correct library, focused
+contracts require the library and exact call counts, and every non-orchestrator
+contract requires its native entry seam. The malformed validation body was
+cleared back to its native entry and reinstalled from the corrected generator;
+no incomplete graph was compiled or saved.
+
+Two warm runtime runs each pass 21 assembly compilations, 121 frame evaluations,
+six invalid families, forward/reverse history-free queries, reciprocal-focus
+midpoint 160 for authored 100/400 distances, independent bloom, immutable
+authored inputs, failed-recompile snapshot preservation, and exact default
+restoration. PIE on `/Game/Dev/AlmostEmpty` passes the same critical optical,
+filmback, thirteen-channel, and independent-effect frame on the real player-
+controller-owned Client Director, then restores defaults and tears down.
+
+Guarded shutdown reached `LogExit: Exiting.`. Closed-editor review found exactly
+Client Director changed; sync copied that one package and reverse preview reports
+17 unchanged packages. Live and mirror SHA-256 are both
+`5A4E8E6E6538DE3526BA72BC68D94DC1FC654C57ED51C0874226C3A5CAE4E655`.
+An independent fresh NullRHI run repeats the 21/121/six-family matrix. A fresh
+cold commandlet loads all nine core assets and compiles all six Blueprints with
+zero errors. The complete scaffold with mirrored MVP assets passes in 119.6
+seconds and owns all nine generated full/paste forms plus all nine saved live
+exports.
+
+This accepts camera-track compilation and synchronized frame evaluation. The
+next backend seam is the engine-application boundary: explicitly discover and
+freeze supported Cine Camera/post-process properties, apply a valid compiled
+frame transactionally, report unavailable properties rather than pretending
+success, and restore the viewer's prior camera state. Then continue with manual
+and target focus helpers, dolly zoom, comfort overrides, Directed / Free Look /
+Carrier Freecam modes, bounded event adapters, debug dogfood, and polished UI.
 
 ## Next ordered implementation
 
-Generate the nine channel-assembly graphs in frozen stage order, with exact
-full/paste snippets, semantic interpreters, and scaffold ownership. Only after
-the entire offline family is green, install and live-accept it in one editor,
-including runtime, real-world PIE, guarded save/sync, cold load, and full
-regression. Then implement
-Directed / Free Look / Carrier Freecam backend modes, followed by event tracks
-with bounded target adapters and authorization. Start each seam offline with an
-explicit reference/schema and deterministic graph generators/interpreters,
-then use one-editor compile/save/runtime/PIE/cold acceptance. After the complete
-backend, expose temporary debug controls and logs, run attended dogfood, and
-only then implement the polished UI.
+Begin the camera engine-application seam offline with an explicit property-
+availability and restoration reference/schema, then deterministic generators,
+interpreters, and scaffold ownership. Only after that family is green, use one
+editor for compile/save/runtime/PIE/cold acceptance. Continue through the
+remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,
+and bounded event adapters with authorization. After the complete backend,
+expose temporary debug controls and logs, run attended dogfood, and only then
+implement the polished UI.
 
 The first task-10 seam is now live-accepted from the frozen contracts in
 `camera_scalar_track_reference.py` and
@@ -592,7 +620,8 @@ git rev-parse origin/main
 ## Confidence statement
 
 Confidence is high in every checkpoint explicitly accepted above, including the
-complete live source-sampling bridge and lossless compiled-document adapter with
-post-boundary discontinuity diagnostics. Confidence is not claimed for
-lens/focus/effects, camera modes, events, keyboard dogfood, UI, cooking,
-Workshop, G-Portal, deployment, or whole-mod completion.
+complete live source-sampling bridge, lossless compiled-document adapter with
+post-boundary discontinuity diagnostics, scalar-track engine, and synchronized
+thirteen-channel lens/focus/effect frame assembly. Confidence is not yet claimed
+for engine property application/restoration, camera modes, events, keyboard
+dogfood, UI, cooking, Workshop, G-Portal, deployment, or whole-mod completion.

@@ -41,6 +41,8 @@ def main():
   n=add_form(f"find_{source_pin}_{len(b.nodes)}","find",px,py);pin_kind(n,"TargetArray","string",True);pin_kind(n,"ItemToFind","string");pin_kind(n,"ReturnValue","int");bp.connect(source,source_pin,n,"TargetArray");bp.connect(value,value_pin,n,"ItemToFind");return n
  def retarget(n,member,kinds):
   scalar.retarget_function(n,member)
+  if member in ("EqualEqual_StrStr","NotEqual_StrStr"):
+   n.text=n.text.replace("KismetMathLibrary","KismetStringLibrary")
   for pin,kind in kinds.items():pin_kind(n,pin,kind)
   return n
  def compare(member,left,left_pin,px,py,right=None,right_pin=None,default_b=None,kind="int"):

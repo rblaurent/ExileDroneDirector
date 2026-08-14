@@ -1782,6 +1782,10 @@ before any polished editor UI or cook is attempted:
    graph adds only the exact reset -> validate -> build -> commit order and no
    state or policy. All five full/paste graph pairs are deterministic and
    scaffold-owned. One-editor runtime/PIE acceptance tooling is next.
+   Live tooling is now prepared offline: an idempotent 15-variable/five-function
+   configurator, six-case forward/reverse oracle runtime probe with explicit
+   body/gimbal immutability, three-session automatic PIE probe, and separate
+   compile-safe default restore. One-editor acceptance is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

@@ -900,6 +900,17 @@ are structurally plus executably owned by the complete scaffold. Next: prepare
 the idempotent one-editor configurator, runtime oracle, automatic PIE probe, and
 separate post-PIE schema restore while Unreal remains closed.
 
+The dolly-zoom live-acceptance package is now prepared while Unreal remains
+closed. The configurator idempotently owns exactly 15 variables and five
+functions. Runtime checks six physical routes in forward and reverse order,
+whole-input immutability, explicit body/gimbal compiled-track immutability, full
+compile rejection, and direct commit rejection. Three automatic PIE sessions
+exercise shrinking, expanding, and fail-closed behavior on the real player-owned
+Client Director and tear down themselves. The separate restore compiles before
+reacquiring the generated class and converges all schema defaults outside the
+Slate callback. Next: one-editor configure/paste/compile/save/runtime/PIE/
+restore/cold acceptance and final live exports.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

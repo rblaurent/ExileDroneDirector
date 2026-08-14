@@ -196,6 +196,11 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraDollyZoomCompileContracts.py',
     'tools\blueprint\snippets\compile-camera-dolly-zoom-v1.eddgraph',
     'tools\blueprint\snippets\compile-camera-dolly-zoom-v1-paste.eddgraph',
+    'tools\unreal\Configure-CameraDollyZoom.py',
+    'tools\unreal\Restore-CameraDollyZoomSchemaDefaults.py',
+    'tools\unreal\Validate-CameraDollyZoomRuntime.py',
+    'tools\unreal\Validate-CameraDollyZoomPIE.py',
+    'tools\unreal\test_camera_dolly_zoom_validators.py',
     'tools\blueprint\Build-CameraDofDiagnosticsResetGraph.py',
     'tools\blueprint\Test-CameraDofDiagnosticsResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dof-diagnostics-v1.eddgraph',
@@ -1489,6 +1494,8 @@ foreach ($comparison in @(
 if ($LASTEXITCODE -ne 0) { throw "Camera dolly compile full contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDollyZoomCompileContracts.py') --project-root $ProjectRoot --graph $cameraDollyCompilePaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera dolly compile paste contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\unreal\test_camera_dolly_zoom_validators.py')
+if ($LASTEXITCODE -ne 0) { throw "Camera dolly zoom live-tool contracts failed with exit code $LASTEXITCODE." }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null
 $cameraDofReset = Join-Path $cameraDofRoot 'reset-camera-dof-diagnostics-v1.eddgraph'

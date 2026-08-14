@@ -42,11 +42,24 @@ class CameraEngineApplicationBlueprintSchemaContracts(unittest.TestCase):
         self.assertEqual(len(names), len(set(names)))
         for layer in ("Input", "Baseline", "Current"):
             self.assertIn(f"CameraApply{layer}TargetValuesV1", names)
-        self.assertIn("CameraApplyBaselineOverrideFlagsV1", names)
-        self.assertIn("CameraApplyCurrentOverrideFlagsV1", names)
+        self.assertNotIn("CameraApplyBaselineOverrideFlagsV1", names)
+        self.assertNotIn("CameraApplyCurrentOverrideFlagsV1", names)
         self.assertIn("CameraApplyCapabilityEngineVersionV1", names)
         self.assertIn("CameraApplyCapabilityManifestIdV1", names)
         self.assertIn("CameraApplyCapabilityAvailableV1", names)
+
+    def test_exact_restoration_uses_three_native_struct_baselines_and_scratch(self):
+        variables = {item["name"]: item for item in self.schema["variables"]}
+        structs = {
+            "FilmbackSettings": "/Script/CinematicCamera.CameraFilmbackSettings",
+            "FocusSettings": "/Script/CinematicCamera.CameraFocusSettings",
+            "PostProcessSettings": "/Script/Engine.PostProcessSettings",
+        }
+        for suffix, identity in structs.items():
+            baseline = variables[f"CameraApplyBaseline{suffix}V1"]
+            scratch = variables[f"CameraApplyScratch{suffix}V1"]
+            self.assertEqual((baseline["type"], baseline["struct"], baseline["role"]), ("Struct", identity, "baseline"))
+            self.assertEqual((scratch["type"], scratch["struct"], scratch["role"]), ("Struct", identity, "scratch"))
 
     def test_live_capability_manifest_is_frozen_to_the_probed_engine(self):
         manifest_contract = self.schema["capabilityManifest"]
@@ -80,7 +93,8 @@ class CameraEngineApplicationBlueprintSchemaContracts(unittest.TestCase):
         self.assertIn("zero camera or post-process writes", contracts["atomicity"])
         self.assertIn("cannot replace the baseline", contracts["capture"])
         self.assertIn("exact baseline restoration", contracts["restore"])
-        self.assertIn("override flags", contracts["overrides"])
+        self.assertIn("No Blueprint Boolean array", contracts["overrides"])
+        self.assertIn("complete captured PostProcessSettings struct", contracts["overrides"])
         self.assertIn("Runtime reflection", contracts["capabilities"])
 
     def test_schema_keeps_authored_and_compiled_camera_banks_read_only(self):

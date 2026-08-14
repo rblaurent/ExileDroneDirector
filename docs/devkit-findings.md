@@ -5320,3 +5320,12 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   mutate only the explicitly supported fields through Set Members. The offline
   reference/schema must freeze that ownership model before production graph
   generation.
+- The revised offline ABI now encodes that decision directly. It removes
+  `CameraApplyBaselineOverrideFlagsV1` and
+  `CameraApplyCurrentOverrideFlagsV1`; adds exact native Filmback,
+  FocusSettings, and PostProcessSettings baseline variables plus same-typed
+  scratch variables; and treats absent logical targets as having no inspectable
+  engine state. Neutral absent requests are no-ops, while non-neutral requests
+  reject before capture/write. Seven reference and seven schema tests preserve
+  unrelated opaque native fields through apply and restore the original three
+  structs exactly.

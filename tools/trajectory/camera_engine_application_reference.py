@@ -7,9 +7,10 @@ capture per playback session, deterministic application, and exact restoration.
 
 The oracle does not pretend that every desired effect maps to an Unreal
 property.  A target is writable only when the frozen capability manifest says
-so.  An unavailable optional target may be skipped only when both the desired
-and current engine states are already neutral and no override is active.
-Otherwise the complete frame is rejected before mutation.
+so.  An unavailable optional target may be skipped only when the desired value
+is neutral; it has no concrete engine field to inspect or mutate.  Hidden
+post-process override state is represented inside an opaque whole-struct
+snapshot, never as a Blueprint-readable Boolean array.
 """
 
 from __future__ import annotations
@@ -65,6 +66,13 @@ NEUTRAL_TARGET_VALUES_V1 = (
 )
 _TARGET_INDEX = {target_id: index for index, target_id in enumerate(TARGET_IDS_V1)}
 _POLICY_BY_ID = {policy.channel_id: policy for policy in CHANNEL_POLICIES_V1}
+_POST_PROCESS_FIELDS_V1 = {
+    "exposure_ev": "AutoExposureBias",
+    "bloom_weight": "BloomIntensity",
+    "vignette_weight": "VignetteIntensity",
+    "motion_blur_weight": "MotionBlurAmount",
+    "chromatic_aberration_weight": "SceneFringeIntensity",
+}
 
 
 @dataclass(frozen=True)
@@ -76,10 +84,19 @@ class CameraEngineCapabilitySnapshotV1:
 
 
 @dataclass(frozen=True)
+class CameraEngineNativeStructSnapshotV1:
+    """Exact native struct payloads, including fields Blueprint cannot split."""
+
+    filmback: tuple[tuple[str, object], ...]
+    focus: tuple[tuple[str, object], ...]
+    post_process: tuple[tuple[str, object], ...]
+
+
+@dataclass(frozen=True)
 class CameraEngineStateSnapshotV1:
     filmback_preset_id: str
     target_values: tuple[float, ...]
-    override_enabled: tuple[bool, ...]
+    native_structs: CameraEngineNativeStructSnapshotV1
 
 
 @dataclass(frozen=True)
@@ -87,7 +104,7 @@ class CameraEngineApplicationPlanV1:
     filmback_preset_id: str
     target_values: tuple[float, ...]
     write_mask: tuple[bool, ...]
-    override_write_mask: tuple[bool, ...]
+    owned_post_process_mask: tuple[bool, ...]
     unavailable_target_ids: tuple[str, ...]
 
 
@@ -143,17 +160,27 @@ def validate_camera_engine_state_v1(
         raise CameraEngineApplicationError("invalid_state_filmback_id")
     if len(state.target_values) != TARGET_COUNT_V1:
         raise CameraEngineApplicationError("invalid_state_value_shape")
-    if len(state.override_enabled) != TARGET_COUNT_V1 or any(
-        not isinstance(value, bool) for value in state.override_enabled
+    if not isinstance(state.native_structs, CameraEngineNativeStructSnapshotV1):
+        raise CameraEngineApplicationError("invalid_native_struct_snapshot")
+    for field, payload in (
+        ("filmback", state.native_structs.filmback),
+        ("focus", state.native_structs.focus),
+        ("post_process", state.native_structs.post_process),
     ):
-        raise CameraEngineApplicationError("invalid_state_override_shape")
+        if not isinstance(payload, tuple) or any(
+            not isinstance(item, tuple) or len(item) != 2 or not isinstance(item[0], str)
+            for item in payload
+        ):
+            raise CameraEngineApplicationError(f"invalid_native_{field}_snapshot")
+        if len({item[0] for item in payload}) != len(payload):
+            raise CameraEngineApplicationError(f"duplicate_native_{field}_field")
     values = tuple(_finite(value, f"state_{TARGET_IDS_V1[index]}") for index, value in enumerate(state.target_values))
     if values[0] <= 0.0 or values[1] <= 0.0:
         raise CameraEngineApplicationError("invalid_state_filmback_dimensions")
     return CameraEngineStateSnapshotV1(
         state.filmback_preset_id,
         values,
-        tuple(state.override_enabled),
+        state.native_structs,
     )
 
 
@@ -228,15 +255,13 @@ def plan_camera_engine_application_v1(
         for target_id in unavailable
         if (
             target_values[_TARGET_INDEX[target_id]] != NEUTRAL_TARGET_VALUES_V1[_TARGET_INDEX[target_id]]
-            or current.target_values[_TARGET_INDEX[target_id]] != NEUTRAL_TARGET_VALUES_V1[_TARGET_INDEX[target_id]]
-            or current.override_enabled[_TARGET_INDEX[target_id]]
         )
     )
     if unsafe_unavailable:
         raise CameraEngineApplicationError("requested_target_unavailable", unsafe_unavailable)
 
     write_mask = capabilities.available
-    override_write_mask = tuple(
+    owned_post_process_mask = tuple(
         available and target_id in POST_PROCESS_OVERRIDE_TARGET_IDS_V1
         for target_id, available in zip(TARGET_IDS_V1, capabilities.available)
     )
@@ -244,7 +269,7 @@ def plan_camera_engine_application_v1(
         frame.filmback.preset_id,
         target_values,
         write_mask,
-        override_write_mask,
+        owned_post_process_mask,
         unavailable,
     )
 
@@ -257,17 +282,38 @@ def apply_camera_engine_frame_v1(
 
     plan = plan_camera_engine_application_v1(session, frame)
     values = list(session.current.target_values)
-    overrides = list(session.current.override_enabled)
     for index, should_write in enumerate(plan.write_mask):
         if should_write:
             values[index] = plan.target_values[index]
-    for index, should_write in enumerate(plan.override_write_mask):
-        if should_write:
-            overrides[index] = True
+
+    def replace_fields(
+        payload: tuple[tuple[str, object], ...], updates: dict[str, object]
+    ) -> tuple[tuple[str, object], ...]:
+        result = dict(payload)
+        result.update(updates)
+        return tuple(sorted(result.items()))
+
+    native = session.current.native_structs
+    filmback_updates = {
+        "SensorWidth": plan.target_values[0],
+        "SensorHeight": plan.target_values[1],
+    }
+    focus_updates = {"ManualFocusDistance": plan.target_values[_TARGET_INDEX["focus_distance_cm"]]}
+    post_process_updates: dict[str, object] = {}
+    for target_id, field in _POST_PROCESS_FIELDS_V1.items():
+        index = _TARGET_INDEX[target_id]
+        if plan.write_mask[index]:
+            post_process_updates[field] = plan.target_values[index]
+            post_process_updates[f"bOverride_{field}"] = True
+    current_native = CameraEngineNativeStructSnapshotV1(
+        replace_fields(native.filmback, filmback_updates),
+        replace_fields(native.focus, focus_updates),
+        replace_fields(native.post_process, post_process_updates),
+    )
     current = CameraEngineStateSnapshotV1(
         plan.filmback_preset_id,
         tuple(values),
-        tuple(overrides),
+        current_native,
     )
     return CameraEngineApplicationSessionV1(
         session.capabilities,

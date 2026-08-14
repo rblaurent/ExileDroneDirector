@@ -22,6 +22,7 @@ from camera_engine_application_reference import (
     TARGET_IDS_V1,
     CameraEngineApplicationError,
     CameraEngineCapabilitySnapshotV1,
+    CameraEngineNativeStructSnapshotV1,
     CameraEngineStateSnapshotV1,
     apply_camera_engine_frame_v1,
     begin_camera_engine_application_v1,
@@ -45,11 +46,28 @@ def state(*, value_delta: dict[str, float] | None = None, overrides: tuple[str, 
     values = list(NEUTRAL_TARGET_VALUES_V1)
     for target_id, value in (value_delta or {}).items():
         values[TARGET_IDS_V1.index(target_id)] = value
-    override_set = set(overrides)
+    post_process = {
+        "OpaqueToneCurve": (0.25, 0.75),
+        "AutoExposureBias": values[TARGET_IDS_V1.index("exposure_ev")],
+        "BloomIntensity": values[TARGET_IDS_V1.index("bloom_weight")],
+    }
+    for target_id in overrides:
+        field = {
+            "exposure_ev": "AutoExposureBias",
+            "bloom_weight": "BloomIntensity",
+            "vignette_weight": "VignetteIntensity",
+            "motion_blur_weight": "MotionBlurAmount",
+            "chromatic_aberration_weight": "SceneFringeIntensity",
+        }.get(target_id, target_id)
+        post_process[f"bOverride_{field}"] = True
     return CameraEngineStateSnapshotV1(
         "viewer_baseline",
         tuple(values),
-        tuple(target_id in override_set for target_id in TARGET_IDS_V1),
+        CameraEngineNativeStructSnapshotV1(
+            (("SensorHeight", values[1]), ("SensorWidth", values[0]), ("OpaqueFilmback", 7)),
+            (("ManualFocusDistance", values[TARGET_IDS_V1.index("focus_distance_cm")]), ("OpaqueFocus", "tracking")),
+            tuple(sorted(post_process.items())),
+        ),
     )
 
 
@@ -82,8 +100,16 @@ class CameraEngineApplicationContracts(unittest.TestCase):
         self.assertEqual(applied.current.target_values, camera_frame_target_values_v1(wanted))
         self.assertEqual(applied.current.filmback_preset_id, "authored_full_frame")
         self.assertEqual(applied.applied_frame_count, 1)
-        for target_id in POST_PROCESS_OVERRIDE_TARGET_IDS_V1:
-            self.assertTrue(applied.current.override_enabled[TARGET_IDS_V1.index(target_id)])
+        post_process = dict(applied.current.native_structs.post_process)
+        for target_id, field in {
+            "exposure_ev": "AutoExposureBias",
+            "bloom_weight": "BloomIntensity",
+            "vignette_weight": "VignetteIntensity",
+            "motion_blur_weight": "MotionBlurAmount",
+            "chromatic_aberration_weight": "SceneFringeIntensity",
+        }.items():
+            self.assertTrue(post_process[f"bOverride_{field}"], target_id)
+        self.assertEqual(post_process["OpaqueToneCurve"], (0.25, 0.75))
         self.assertEqual(session.current, baseline)
         self.assertEqual(session.baseline, baseline)
 
@@ -95,7 +121,10 @@ class CameraEngineApplicationContracts(unittest.TestCase):
         for target_id in applied.last_unavailable_target_ids:
             index = TARGET_IDS_V1.index(target_id)
             self.assertEqual(applied.current.target_values[index], NEUTRAL_TARGET_VALUES_V1[index])
-            self.assertFalse(applied.current.override_enabled[index])
+        applied_post = dict(applied.current.native_structs.post_process)
+        self.assertEqual(applied_post["OpaqueToneCurve"], (0.25, 0.75))
+        self.assertNotIn("sharpening_weight", applied_post)
+        self.assertNotIn("matte_weight", applied_post)
 
         active_frame = frame(authored=(channel("matte_weight", 0.2, 0.8),))
         before = applied
@@ -105,11 +134,13 @@ class CameraEngineApplicationContracts(unittest.TestCase):
         self.assertEqual(caught.exception.unavailable_target_ids, ("matte_weight",))
         self.assertEqual(applied, before)
 
-        contaminated = begin_camera_engine_application_v1(
-            state(value_delta={"sharpening_weight": 0.3}), manifest
+        # There is no concrete sharpening field to read. A non-neutral logical
+        # request fails, while unrelated opaque viewer fields remain untouched.
+        contaminated = begin_camera_engine_application_v1(state(), manifest)
+        self.assertEqual(
+            dict(apply_camera_engine_frame_v1(contaminated, frame()).current.native_structs.post_process)["OpaqueToneCurve"],
+            (0.25, 0.75),
         )
-        with self.assertRaises(CameraEngineApplicationError):
-            apply_camera_engine_frame_v1(contaminated, frame())
 
     def test_required_capability_failure_prevents_session_capture(self):
         for target_id in REQUIRED_TARGET_IDS_V1:
@@ -164,7 +195,7 @@ class CameraEngineApplicationContracts(unittest.TestCase):
         self.assertEqual(caught.exception.code, "frame_sample_value_mismatch")
         self.assertEqual(session, before)
 
-    def test_restore_is_exact_and_idempotent_including_override_flags(self):
+    def test_restore_is_exact_and_idempotent_including_hidden_struct_state(self):
         baseline = state(
             value_delta={"exposure_ev": -1.25, "bloom_weight": 0.4},
             overrides=("exposure_ev", "bloom_weight"),
@@ -178,6 +209,7 @@ class CameraEngineApplicationContracts(unittest.TestCase):
         self.assertFalse(restored.active)
         self.assertEqual(restored.current, baseline)
         self.assertEqual(restored.baseline, baseline)
+        self.assertIs(restored.current.native_structs, baseline.native_structs)
         self.assertEqual(restored.applied_frame_count, 1)
         self.assertEqual(restore_camera_engine_state_v1(restored), restored)
 

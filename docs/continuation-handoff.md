@@ -473,17 +473,17 @@ gated.
 Application is a preflighted transaction. Engine version, manifest identity,
 canonical capability shape, frame shape/order/ranges, camera session, and every
 unavailable target are checked before the first property write. An unavailable
-optional target is safe to skip only when its desired value and current viewer
-value are both neutral and its override flag is false; otherwise the entire
-frame rejects as unavailable without partial mutation. This prevents both false
-success and an unavailable cosmetic property unnecessarily blocking a genuinely
-neutral frame.
+optional target is safe to skip only when its desired logical value is neutral;
+there is no concrete engine field to inspect or mutate. Otherwise the entire
+frame rejects as unavailable without partial mutation. This prevents false
+success without inventing viewer state for a feature Enhanced does not expose.
 
-One active session captures exact baseline values and override flags once.
+One active session captures exact scalar baselines plus complete native
+Filmback, FocusSettings, and PostProcessSettings structs once.
 Repeated begin cannot overwrite that baseline or swap capability manifests.
-Restore returns every value and flag byte-for-value, is stable when repeated,
+Restore returns every scalar and complete native struct exactly, is stable when repeated,
 and remains mandatory before camera ownership is released. Seven reference and
-five schema tests pass, including full support, safe neutral skips, missing core
+seven schema tests pass, including full support, safe neutral skips, missing core
 properties, active unavailable rejection, poisoned frame rollback, repeated
 capture, exact restoration, and seeded forward/reverse application. The
 complete scaffold owns the four new files. Next: generate and interpret the
@@ -493,7 +493,7 @@ property probe before opening the editor.
 `ResetCameraEngineApplicationResultV1` is the first deterministic graph at 7
 full / 6 paste nodes. It clears only unavailable-target diagnostics, failure and
 result state, plus two per-call scratch scalars. Capability identity, normalized
-input, captured baseline values/override flags, current applied state, session
+input, captured scalar/native-struct baselines, current applied state, session
 activity, and applied-frame count are absent from the graph and proven to retain
 object identity under poisoned execution. Full/paste SHA-256 is
 `FE8D00786C2F0B2B03880AAA452C4FDC6CCA6525A3CAB8A93B0DEF48B7487FA8` /
@@ -572,6 +572,15 @@ may describe adapter ownership and diagnostics, but they must not pretend to be
 an exact read-back of hidden engine override bits. The next checkpoint must
 update the reference/schema around this stronger whole-struct baseline before
 generating capture, apply, restore, and the thin orchestrator.
+
+That correction is now frozen offline. The reference represents all three
+native structs explicitly, preserves unrelated opaque fields during supported
+member updates, and restores the original snapshots exactly. The Blueprint ABI
+removes the misleading baseline/current override arrays and instead owns three
+native baseline variables plus three same-typed apply scratch variables. Seven
+reference and seven schema tests pass. Existing reset/stage/validation graphs
+remain valid because they never touched the replaced state. Next: deterministic
+capture, apply, restore, and thin orchestrator generators/interpreters.
 
 ## Next ordered implementation
 

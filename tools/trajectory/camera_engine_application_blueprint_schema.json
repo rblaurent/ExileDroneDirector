@@ -16,11 +16,11 @@
     "boundary": "Only a valid complete CameraChannelResult frame may cross into engine application. Values and filmback are copied in canonical order; authored and compiled channel storage remains read-only.",
     "capabilities": "A read-only Enhanced DevKit probe freezes one engine-versioned manifest before concrete property graphs are generated. Runtime reflection, guessed properties, and silent capability upgrades are forbidden.",
     "atomicity": "Capability, frame-shape, range, session, camera-reference, and unavailable-target preflight completes before the first engine property write. A rejected frame performs zero camera or post-process writes.",
-    "unavailable": "Every required target must exist. An unavailable optional target may be skipped only while desired value, current value, and override state are all neutral; otherwise the complete frame fails with requested_target_unavailable.",
-    "capture": "Begin captures the exact engine values and override flags once per active session. Repeated begin cannot replace the baseline, and the capability manifest cannot change while active.",
+    "unavailable": "Every required target must exist. An unavailable optional target has no concrete engine field to inspect or mutate and may be skipped only while its desired logical value is neutral; otherwise the complete frame fails with requested_target_unavailable.",
+    "capture": "Begin captures focal length and aperture plus the complete native Filmback, FocusSettings, and PostProcessSettings structs once per active session. Repeated begin cannot replace the baseline, and the capability manifest cannot change while active.",
     "restore": "Every normal exit, emergency exit, completion, cancellation, and invalid-camera recovery routes through exact baseline restoration before camera ownership is released. Repeated restore is stable.",
     "ownership": "The application boundary owns only normalized input, capability, baseline/current snapshots, diagnostics, and session state. It cannot mutate camera-channel authored, candidate, compiled, or evaluated arrays.",
-    "overrides": "Post-process override flags are enabled only for supported targets actually owned by this adapter and are restored byte-for-value from the captured baseline."
+    "overrides": "Enhanced exposes post-process override ownership only implicitly through Set Members fields. No Blueprint Boolean array may claim exact override read-back; supported writes enable their implicit overrides, and verbatim restoration of the complete captured PostProcessSettings struct restores every value and hidden override bit."
   },
   "targets": {
     "count": 15,
@@ -70,10 +70,14 @@
     { "name": "CameraApplyInputValidV1", "type": "Boolean", "container": "None", "role": "input", "default": false },
     { "name": "CameraApplyBaselineFilmbackPresetIdV1", "type": "String", "container": "None", "role": "baseline", "default": "" },
     { "name": "CameraApplyBaselineTargetValuesV1", "type": "Float", "container": "Array", "role": "baseline" },
-    { "name": "CameraApplyBaselineOverrideFlagsV1", "type": "Boolean", "container": "Array", "role": "baseline" },
+    { "name": "CameraApplyBaselineFilmbackSettingsV1", "type": "Struct", "struct": "/Script/CinematicCamera.CameraFilmbackSettings", "container": "None", "role": "baseline" },
+    { "name": "CameraApplyBaselineFocusSettingsV1", "type": "Struct", "struct": "/Script/CinematicCamera.CameraFocusSettings", "container": "None", "role": "baseline" },
+    { "name": "CameraApplyBaselinePostProcessSettingsV1", "type": "Struct", "struct": "/Script/Engine.PostProcessSettings", "container": "None", "role": "baseline" },
     { "name": "CameraApplyCurrentFilmbackPresetIdV1", "type": "String", "container": "None", "role": "current", "default": "" },
     { "name": "CameraApplyCurrentTargetValuesV1", "type": "Float", "container": "Array", "role": "current" },
-    { "name": "CameraApplyCurrentOverrideFlagsV1", "type": "Boolean", "container": "Array", "role": "current" },
+    { "name": "CameraApplyScratchFilmbackSettingsV1", "type": "Struct", "struct": "/Script/CinematicCamera.CameraFilmbackSettings", "container": "None", "role": "scratch" },
+    { "name": "CameraApplyScratchFocusSettingsV1", "type": "Struct", "struct": "/Script/CinematicCamera.CameraFocusSettings", "container": "None", "role": "scratch" },
+    { "name": "CameraApplyScratchPostProcessSettingsV1", "type": "Struct", "struct": "/Script/Engine.PostProcessSettings", "container": "None", "role": "scratch" },
     { "name": "CameraApplySessionActiveV1", "type": "Boolean", "container": "None", "role": "session", "default": false },
     { "name": "CameraApplyAppliedFrameCountV1", "type": "Integer", "container": "None", "role": "session", "default": 0 },
     { "name": "CameraApplyUnavailableTargetIdsV1", "type": "String", "container": "Array", "role": "diagnostic" },
@@ -92,7 +96,7 @@
     { "name": "ApplyEvaluatedCameraChannelFrameV1", "stage": 6, "asset": "controller", "uses": ["ResetCameraEngineApplicationResultV1", "StageEvaluatedCameraChannelFrameV1", "ValidateCameraEngineApplicationInputsV1", "CaptureCameraEngineStateV1", "ApplyCameraEngineFrameV1"] }
   ],
   "acceptance": {
-    "offline": "Reference tests cover full support, safe neutral skips, active unsupported rejection, missing required targets, repeated capture, frozen manifests, poisoned frames, exact override restoration, and seeded forward/reverse application.",
+    "offline": "Reference tests cover full support, safe neutral skips, active unsupported rejection, missing required targets, repeated capture, frozen manifests, poisoned frames, opaque native-struct preservation and exact restoration, and seeded forward/reverse application.",
     "probe": "The read-only probe must record exact engine version, reflected property/call availability, component ownership, value types, writable/readable status, and post-process override partners. Its JSON is reviewed and checked in before concrete engine graphs.",
     "live": "One editor must prove precompile/postcompile contracts, warm CDO semantics where engine-neutral, real player-owned PIE property mutation, scrubbing, every exit/restoration route, guarded save/sync, fresh cold load, and complete regression."
   }

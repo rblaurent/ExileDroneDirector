@@ -1902,6 +1902,12 @@ before any polished editor UI or cook is attempted:
    reset, validation, translation integration, look integration, atomic commit,
    and policy-free coordination; deterministic graphs/interpreters are next
    before any editor work.
+   `ResetCameraOperatorOverrideStepV1` is now deterministic at 18 full / 17
+   paste nodes. It resets exactly validation, all private candidates, result
+   validity, failure, and scratch while preserving inputs, policy, complete
+   operator state, and the prior accepted result. Exact defaults, reciprocal
+   links, byte-identical regeneration, both executable forms, and the complete
+   135.5-second scaffold pass. Input validation is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

@@ -1312,6 +1312,16 @@ Next: generate and interpret `ResetCameraOperatorOverrideStepV1`, then input
 validation, translation integration, look integration, atomic commit, and the
 tiny coordinator before any editor work.
 
+`ResetCameraOperatorOverrideStepV1` is now deterministic at 18 full / 17 paste
+nodes. Its single execution chain converges exactly seventeen transient fields:
+validation, every private candidate, result validity, failure code, and scratch
+validity. All eleven inputs, nine policy fields, the complete seven-field
+operator state, and every prior accepted result value are structurally absent
+and preserve object identity in the executable interpreter. Both forms pass
+exact default-value, reciprocal-link, full/paste execution, and byte-identical
+regeneration checks; the complete MVP-required scaffold passes in 135.5
+seconds. Next: generate the fail-closed input-validation graph.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

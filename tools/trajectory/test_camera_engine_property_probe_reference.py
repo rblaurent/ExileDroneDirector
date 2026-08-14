@@ -101,6 +101,19 @@ class CameraEnginePropertyProbeContracts(unittest.TestCase):
         self.assertEqual(len(payload["manifestId"]), 64)
         self.assertEqual(forward.canonical_json, json.dumps(payload, sort_keys=True, separators=(",", ":")))
 
+    def test_checked_in_enhanced_manifest_replays_the_probe_exactly(self):
+        resolved = resolve_camera_engine_property_manifest_v1(
+            "5.6.1-370197+++exiles+release", self.observations, self.schema
+        )
+        manifest_path = Path(__file__).with_name(
+            "camera_engine_property_manifest_enhanced_5_6_1.json"
+        )
+        checked_in = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(
+            json.dumps(checked_in, sort_keys=True, separators=(",", ":")),
+            resolved.canonical_json,
+        )
+
     def test_malformed_candidate_schemas_fail_instead_of_guessing(self):
         cases = []
         wrong_order = deepcopy(self.schema)

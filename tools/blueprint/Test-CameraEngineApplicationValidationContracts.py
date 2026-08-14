@@ -41,6 +41,8 @@ BOUNDS = (
     (-20.0, 20.0, True),
     *((0.0, 1.0, True) for _ in range(8)),
 )
+ENGINE_VERSION = "5.6.1-370197+++exiles+release"
+MANIFEST_ID = "0425CCF862121F06C64732519AF40703C2AC73104B3FA10A3E065F914E1FB26E"
 
 
 def load(path: Path):
@@ -59,9 +61,9 @@ def member(node):
 def valid(state: dict) -> bool:
     if state.get("input_valid") is not True:
         return False
-    if not isinstance(state.get("engine_version"), str) or not state["engine_version"]:
+    if state.get("engine_version") != ENGINE_VERSION:
         return False
-    if not isinstance(state.get("manifest_id"), str) or not state["manifest_id"]:
+    if state.get("manifest_id") != MANIFEST_ID:
         return False
     if not isinstance(state.get("preset_id"), str) or not state["preset_id"]:
         return False
@@ -114,13 +116,15 @@ def main() -> None:
     )
     string_calls = [
         node for node in nodes.values()
-        if 'MemberName="NotEqual_StrStr"' in node.text
+        if 'MemberName="NotEqual_StrStr"' in node.text or 'MemberName="EqualEqual_StrStr"' in node.text
     ]
     contracts.require(len(string_calls) == 3, "exact three nonempty string comparisons")
     contracts.require(
         all("KismetStringLibrary" in node.text for node in string_calls),
         "string comparisons use string library",
     )
+    contracts.require(ENGINE_VERSION in text, "exact probed engine version guard")
+    contracts.require(MANIFEST_ID in text, "exact probed manifest identity guard")
 
     rng = random.Random(0xEDD712)
     valid_cases = []
@@ -134,8 +138,8 @@ def main() -> None:
         capabilities = tuple(True if item < 5 else bool(rng.getrandbits(1)) for item in range(15))
         case = {
             "input_valid": True,
-            "engine_version": "5.6.1",
-            "manifest_id": f"manifest_{index}",
+            "engine_version": ENGINE_VERSION,
+            "manifest_id": MANIFEST_ID,
             "preset_id": f"filmback_{index}",
             "capabilities": capabilities,
             "values": tuple(values),
@@ -146,8 +150,8 @@ def main() -> None:
     base = valid_cases[0]
     failures = [
         {**base, "input_valid": False},
-        {**base, "engine_version": ""},
-        {**base, "manifest_id": ""},
+        {**base, "engine_version": "5.6.1-wrong-build"},
+        {**base, "manifest_id": "F" * 64},
         {**base, "preset_id": ""},
         {**base, "capabilities": base["capabilities"][:-1]},
         {**base, "capabilities": (*base["capabilities"], True)},

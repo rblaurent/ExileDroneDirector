@@ -7,6 +7,11 @@
     "camera": "/Game/Mods/ExileDroneDirector/Core/Camera/BP_EDD_DroneCamera",
     "component": "DroneCamera"
   },
+  "capabilityManifest": {
+    "path": "tools/trajectory/camera_engine_property_manifest_enhanced_5_6_1.json",
+    "engineVersion": "5.6.1-370197+++exiles+release",
+    "manifestId": "0425CCF862121F06C64732519AF40703C2AC73104B3FA10A3E065F914E1FB26E"
+  },
   "invariants": {
     "boundary": "Only a valid complete CameraChannelResult frame may cross into engine application. Values and filmback are copied in canonical order; authored and compiled channel storage remains read-only.",
     "capabilities": "A read-only Enhanced DevKit probe freezes one engine-versioned manifest before concrete property graphs are generated. Runtime reflection, guessed properties, and silent capability upgrades are forbidden.",

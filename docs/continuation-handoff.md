@@ -534,11 +534,25 @@ that check correctly remains after baseline capture and immediately before
 engine writes. Both graph forms pass 80 seeded valid inputs and 56 failure
 families. Baseline/current/session state, camera references, engine properties,
 and all authored/candidate/compiled banks are absent. Full/paste SHA-256 is
-`12EDE09AE611112E92AD4A7FC382220BFDED8C1709F201948190ACDACB0EC993` /
-`E7185A7FA4BCF7B80B9BB2EDA6DD3E8EFF507A6D0D531C9834BB609642316D82`.
+`025A054997EDAC4CF5C9D9D0D6FD44F3B3801EEE6830FA2D4BF64EB183AA7CC0` /
+`8E74F36320E5D8C04E34C6F82EED611848E1A97C15C3B211B6FB0262C6745D0A`.
 The engine-neutral preflight set is complete. Next: open one editor, run the
 non-persistent property probe, review/freeze the actual manifest, then generate
 the concrete capture/apply/restore helpers against only proven paths.
+
+The single Enhanced 5.6.1 editor then ran the transient probe twice against the
+real `BP_EDD_DroneCamera` Cine Camera component. Both runs produced identical
+manifest ID
+`0425CCF862121F06C64732519AF40703C2AC73104B3FA10A3E065F914E1FB26E`,
+reported no missing required target, and destroyed the transient actor. The
+checked-in manifest marks filmback width/height, focal length, aperture, manual
+focus, exposure, bloom, vignette, motion blur, and scene fringe available; focus
+influence, grading, tint, sharpening, and matte remain unavailable. Every
+available post-process value has its exact writable Boolean override partner.
+The validation graph now requires the exact engine build string and manifest ID
+rather than merely nonempty identity. Next: derive concrete Blueprint node forms
+for the proven paths, then generate capture, apply, and restore offline before
+installing anything.
 
 ## Next ordered implementation
 

@@ -5280,3 +5280,18 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   Eighty valid and 56 invalid interpreter cases pass. It deliberately cannot
   read baseline/current/session or any engine property; optional unavailable-
   target safety belongs after actual state capture, directly before writes.
+- The non-persistent probe ran twice in one Enhanced 5.6.1 editor. Both runs
+  resolved the same manifest ID
+  `0425CCF862121F06C64732519AF40703C2AC73104B3FA10A3E065F914E1FB26E`,
+  found every mandatory target, and destroyed the transient mod camera. Direct
+  available targets are filmback width/height, focal length, aperture, manual
+  focus distance, exposure bias, bloom intensity, vignette intensity, motion
+  blur amount, and scene fringe intensity; all five post-process targets include
+  readable/writable override flags. Focus influence, grading, tint, sharpening,
+  and matte remain deliberately unavailable.
+- The manifest is checked in and replayed exactly by the offline resolver. The
+  validation graph now compares the exact
+  `5.6.1-370197+++exiles+release` build and manifest hash, so another nonempty
+  capability payload cannot impersonate this probe. This proves Python-level
+  property ownership on a transient instance; concrete Blueprint node-form
+  import/compile proof remains next.

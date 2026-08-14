@@ -10,6 +10,8 @@ from pathlib import Path
 
 
 FUNCTION = "ValidateCameraEngineApplicationInputsV1"
+ENGINE_VERSION = "5.6.1-370197+++exiles+release"
+MANIFEST_ID = "0425CCF862121F06C64732519AF40703C2AC73104B3FA10A3E065F914E1FB26E"
 BOUNDS = (
     (0.0, None, False),
     (0.0, None, False),
@@ -149,9 +151,9 @@ def main() -> None:
     input_valid = get("CameraApplyInputValidV1", "bool", 0, 0)
     input_valid_condition = compare("BooleanAND", input_valid, "CameraApplyInputValidV1", 256, 0, default="true")
     engine_version = get("CameraApplyCapabilityEngineVersionV1", "string", 0, 160)
-    engine_condition = compare("NotEqual_StrStr", engine_version, "CameraApplyCapabilityEngineVersionV1", 256, 160, default="", kind="string")
+    engine_condition = compare("EqualEqual_StrStr", engine_version, "CameraApplyCapabilityEngineVersionV1", 256, 160, default=ENGINE_VERSION, kind="string")
     manifest_id = get("CameraApplyCapabilityManifestIdV1", "string", 0, 320)
-    manifest_condition = compare("NotEqual_StrStr", manifest_id, "CameraApplyCapabilityManifestIdV1", 256, 320, default="", kind="string")
+    manifest_condition = compare("EqualEqual_StrStr", manifest_id, "CameraApplyCapabilityManifestIdV1", 256, 320, default=MANIFEST_ID, kind="string")
     preset_id = get("CameraApplyInputFilmbackPresetIdV1", "string", 0, 480)
     preset_condition = compare("NotEqual_StrStr", preset_id, "CameraApplyInputFilmbackPresetIdV1", 256, 480, default="", kind="string")
     capability = get("CameraApplyCapabilityAvailableV1", "bool", 0, 640, True)

@@ -48,6 +48,15 @@ class CameraEngineApplicationBlueprintSchemaContracts(unittest.TestCase):
         self.assertIn("CameraApplyCapabilityManifestIdV1", names)
         self.assertIn("CameraApplyCapabilityAvailableV1", names)
 
+    def test_live_capability_manifest_is_frozen_to_the_probed_engine(self):
+        manifest_contract = self.schema["capabilityManifest"]
+        manifest_path = Path(__file__).parents[2] / manifest_contract["path"]
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(manifest["engineVersion"], manifest_contract["engineVersion"])
+        self.assertEqual(manifest["manifestId"], manifest_contract["manifestId"])
+        self.assertEqual(tuple(manifest["targetIds"]), TARGET_IDS_V1)
+        self.assertFalse(manifest["missingRequiredTargetIds"])
+
     def test_function_order_separates_preflight_capture_apply_and_restore(self):
         functions = self.schema["functions"]
         self.assertEqual([item["stage"] for item in functions], list(range(7)))

@@ -1,0 +1,12 @@
+{
+  "available": [true, true, true, true, true, false, true, true, true, false, false, true, true, false, false],
+  "candidateSchema": "edd.camera-engine-property-candidates.v1",
+  "candidateVersion": 1,
+  "engineVersion": "5.6.1-370197+++exiles+release",
+  "manifestId": "0425CCF862121F06C64732519AF40703C2AC73104B3FA10A3E065F914E1FB26E",
+  "missingRequiredTargetIds": [],
+  "schema": "edd.camera-engine-property-manifest.v1",
+  "selectedOverridePaths": ["", "", "", "", "", "", "post_process_settings.override_auto_exposure_bias", "post_process_settings.override_bloom_intensity", "post_process_settings.override_vignette_intensity", "", "", "post_process_settings.override_motion_blur_amount", "post_process_settings.override_scene_fringe_intensity", "", ""],
+  "selectedValuePaths": ["filmback.sensor_width", "filmback.sensor_height", "current_focal_length", "current_aperture", "focus_settings.manual_focus_distance", "", "post_process_settings.auto_exposure_bias", "post_process_settings.bloom_intensity", "post_process_settings.vignette_intensity", "", "", "post_process_settings.motion_blur_amount", "post_process_settings.scene_fringe_intensity", "", ""],
+  "targetIds": ["filmback_sensor_width_mm", "filmback_sensor_height_mm", "focal_length_mm", "aperture_fstop", "focus_distance_cm", "focus_influence", "exposure_ev", "bloom_weight", "vignette_weight", "color_grading_weight", "tint_weight", "motion_blur_weight", "chromatic_aberration_weight", "sharpening_weight", "matte_weight"]
+}

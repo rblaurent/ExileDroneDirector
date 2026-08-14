@@ -161,6 +161,7 @@ $requiredFiles = @(
     'tools\trajectory\camera_engine_application_blueprint_schema.json',
     'tools\trajectory\test_camera_engine_application_blueprint_schema.py',
     'tools\trajectory\camera_engine_property_candidates_v1.json',
+    'tools\trajectory\camera_engine_property_manifest_enhanced_5_6_1.json',
     'tools\trajectory\camera_engine_property_probe_reference.py',
     'tools\trajectory\test_camera_engine_property_probe_reference.py',
     'tools\unreal\Probe-CameraEngineProperties.py',

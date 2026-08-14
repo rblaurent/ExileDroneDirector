@@ -113,7 +113,8 @@ def main():
 
     gimbal_input = get("CameraComfortInputGimbalQuatV1", "quat", 1600, 512)
     shake_quat = get("CameraComfortInputProceduralRotationOffsetV1", "quat", 1600, 704)
-    scaled_shake = b.add("scaled_shake", "quat_slerp", 1920, 704); pin_kind(scaled_shake, "A", "quat"); pin_kind(scaled_shake, "B", "quat"); pin_kind(scaled_shake, "Alpha", "real"); pin_kind(scaled_shake, "ReturnValue", "quat"); scalar.set_default(scaled_shake, "A", "0, 0, 0, 1"); bp.connect(shake_quat, "CameraComfortInputProceduralRotationOffsetV1", scaled_shake, "B"); bp.connect(effective[1], "ReturnValue", scaled_shake, "Alpha")
+    identity_quat = b.add("identity_quat", "rotator_to_quat", 1696, 896); scalar.set_default(identity_quat, "InRot", "0, 0, 0")
+    scaled_shake = b.add("scaled_shake", "quat_slerp", 1920, 704); pin_kind(scaled_shake, "A", "quat"); pin_kind(scaled_shake, "B", "quat"); pin_kind(scaled_shake, "Alpha", "real"); pin_kind(scaled_shake, "ReturnValue", "quat"); bp.connect(identity_quat, "ReturnValue", scaled_shake, "A"); bp.connect(shake_quat, "CameraComfortInputProceduralRotationOffsetV1", scaled_shake, "B"); bp.connect(effective[1], "ReturnValue", scaled_shake, "Alpha")
     shaken_raw = b.add("shaken_raw", "quat_multiply", 2144, 608); bp.connect(gimbal_input, "CameraComfortInputGimbalQuatV1", shaken_raw, "A"); bp.connect(scaled_shake, "ReturnValue", shaken_raw, "B")
     shaken = b.add("shaken", "quat_normalized", 2368, 608); bp.connect(shaken_raw, "ReturnValue", shaken, "Q"); scalar.set_default(shaken, "Tolerance", EPSILON)
     forward = b.add("forward", "quat_axis_x", 2592, 512); bp.connect(shaken, "ReturnValue", forward, "Q")

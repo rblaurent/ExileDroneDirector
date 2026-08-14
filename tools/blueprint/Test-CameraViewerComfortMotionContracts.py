@@ -46,7 +46,7 @@ def close_quat(left, right, tolerance=1e-10):
 def main():
     parser = argparse.ArgumentParser(); parser.add_argument("--project-root", type=Path, required=True); parser.add_argument("--graph", type=Path, required=True); parser.add_argument("--paste", action="store_true"); args = parser.parse_args()
     c = load(args.project_root / "tools/blueprint/Test-WaypointCaptureContracts.py", "edd_comfort_motion_contract_base")
-    nodes = c.parse_graph(args.graph); c.require(len(nodes) == (54 if args.paste else 55), f"node count {len(nodes)}")
+    nodes = c.parse_graph(args.graph); c.require(len(nodes) == (55 if args.paste else 56), f"node count {len(nodes)}")
     entries = [node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class]; c.require(len(entries) == (0 if args.paste else 1), "entry count")
     getters = {member(node) for node in nodes.values() if "K2Node_VariableGet" in node.node_class}; setters = {member(node) for node in nodes.values() if "K2Node_VariableSet" in node.node_class}
     c.require(getters == READS, "exact motion reads"); c.require(setters == WRITES, "exact motion writes")
@@ -54,10 +54,18 @@ def main():
     c.require(sum(member(node) == "Array_Add" for node in nodes.values()) == 5, "five exact effective weights")
     expected_calls = {"Multiply_VectorVector": 1, "Add_VectorVector": 1, "Quat_Slerp": 2, "Multiply_QuatQuat": 1,
                       "Quat_Normalized": 2, "Quat_GetAxisX": 1, "Quat_GetAxisZ": 1,
-                      "Dot_VectorVector": 1, "MakeRotFromXZ": 1, "Conv_RotatorToQuaternion": 1}
+                      "Dot_VectorVector": 1, "MakeRotFromXZ": 1, "Conv_RotatorToQuaternion": 2}
     for function, count in expected_calls.items(): c.require(sum(member(node) == function for node in nodes.values()) == count, f"{function} count")
     c.require(sum("K2Node_Select" in node.node_class for node in nodes.values()) == 6, "five effective-weight selects plus vertical up fallback")
     c.require(not any("K2Node_Knot" in node.node_class for node in nodes.values()), "no reroute knots")
+    slerps = [node for node in nodes.values() if member(node) == "Quat_Slerp"]
+    identity_conversions = [node for node in nodes.values() if member(node) == "Conv_RotatorToQuaternion" and not node.pins["InRot"].links]
+    c.require(len(identity_conversions) == 1, "one explicit zero-rotator identity quaternion")
+    c.require('DefaultValue="0, 0, 0"' in identity_conversions[0].pins["InRot"].body, "identity conversion is exactly zero rotation")
+    identity_slerps = [node for node in slerps if c.linked(identity_conversions[0], "ReturnValue", node, "A")]
+    c.require(len(identity_slerps) == 1, "shake Slerp A is wired to explicit identity quaternion")
+    c.require_link(identity_conversions[0], "ReturnValue", identity_slerps[0], "A", "explicit identity quaternion link")
+    c.require(all(node.pins["A"].links and node.pins["B"].links for node in slerps), "all by-reference Slerp quaternion inputs are wired")
     text = args.graph.read_text(encoding="utf-8"); c.require(not any(value in text for value in FORBIDDEN), "no channel/result/external authorship writes")
     validation_branch = next(node for node in nodes.values() if "K2Node_IfThenElse" in node.node_class)
     validation = next(node for node in nodes.values() if member(node) == "CameraComfortValidationValidV1")

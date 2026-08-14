@@ -1053,7 +1053,7 @@ look/channel/application, document/server/playback, and body/gimbal authorship.
 Exact links and byte-identical regeneration pass; the complete scaffold is green
 in 132.2 seconds. Next: local motion candidate construction.
 
-`BuildCameraViewerComfortMotionV1` is deterministic at 55 full / 54 paste
+`BuildCameraViewerComfortMotionV1` is deterministic at 56 full / 55 paste
 nodes. Five Boolean selects resolve disabled policy to exact 1.0 weights. The
 graph scales procedural translation, shortest-arc scales procedural rotation,
 composes only onto the already evaluated gimbal, reconstructs a vertical-safe
@@ -1061,7 +1061,9 @@ world-level frame from the final forward vector, and blends roll continuously.
 It rebuilds the five effective weights and publishes only private candidate
 position/gimbal/applied state; body, channels, validity, prior results, and all
 external authorship are absent. Eighty forward/reverse oracle cases and a false-
-validation no-op pass in both forms. Exact native calls/links and deterministic
+validation no-op pass in both forms. The shake Slerp receives identity from an
+explicit zero-Rotator-to-Quat conversion; no by-reference quaternion pin relies
+on an ignored literal default. Exact native calls/links and deterministic
 regeneration pass; the complete scaffold is green in 135.2 seconds. Next: copy
 all thirteen camera values and scale only the four comfort-sensitive outputs.
 
@@ -1088,8 +1090,8 @@ scaffold is green in 134.4 seconds. Next: the policy-free five-stage coordinator
 `ApplyCameraViewerComfortV1` completes the offline family at 6 full / 5 paste
 nodes. It contains exactly reset -> validation -> local motion -> camera values
 -> atomic commit, with no variables, branches, loops, reroutes, or hidden policy.
-All six graphs are now deterministic at 14, 146, 55, 29, 23, and 6 full nodes
-(273 total); both full and paste forms pass executable contracts and reciprocal
+All six graphs are now deterministic at 14, 146, 56, 29, 23, and 6 full nodes
+(274 total); both full and paste forms pass executable contracts and reciprocal
 link integrity. The complete repository scaffold is green in 136.4 seconds with
 Unreal closed. Next: prepare idempotent configuration, warm runtime oracle,
 automatic player-owned PIE, compile-safe restoration, and exact live topology
@@ -1114,6 +1116,19 @@ this clean preparedness checkpoint, then open exactly one editor for configure,
 six graph installations, exact pre/post-compile export comparison, warm runtime,
 three-session PIE, defaults restoration, idempotence, guarded shutdown, reverse
 sync, fresh runtime, cold load, and final full regression.
+
+The first one-editor compile exposed and contained a real Enhanced compiler
+boundary before any reverse sync: `Quat_Slerp.A` is a native const-reference
+input, so its serialized identity literal is ignored and compilation fails when
+the pin is unwired. The project mirror remains the prior accepted asset. The
+motion generator now produces identity through a pure zero-Rotator-to-Quat node
+and wires that value into `Slerp.A`; the contract requires both quaternion pins
+on every Slerp to be connected. Fresh full/paste generation is byte-identical,
+both 80-case interpreters pass, reciprocal integrity is 56 nodes / 79 links,
+and the complete scaffold passes in 189.6 seconds. Next: replace only the live
+motion body in the still-single editor, compile with zero errors, then repeat
+the exact topology, warm runtime, PIE, restore, guarded shutdown, reverse-sync,
+cold-load, and final-regression acceptance sequence.
 
 ## Next ordered implementation
 

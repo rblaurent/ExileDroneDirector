@@ -309,10 +309,40 @@ This accepts the reusable backend math and execution engine. It does not yet
 claim channel-owned lens/focus/effect storage, camera modes, event targets,
 debug controls, attended dogfood, or polished UI.
 
+## Offline camera channel-assembly state
+
+The lens/focus/effect ownership boundary is now frozen offline in
+`camera_channel_assembly_reference.py` and
+`camera_channel_assembly_blueprint_schema.json`. It defines one discrete
+filmback snapshot and thirteen independently authored scalar channels: focal
+length, aperture, focus distance, focus influence, exposure, and eight bounded
+effect weights. Focus distance alone may use reciprocal optical interpolation;
+no key array or compiled slice is shared between channels.
+
+Sparse channels expand at compile time into explicit constant tracks spanning
+the complete shot duration. Compilation builds a separate flattened candidate
+bank and atomically replaces the prior compiled bank only after all thirteen
+channels succeed. Evaluation stages committed slices into the accepted generic
+scalar engine without recompiling, evaluates every channel at one absolute
+time, and publishes a complete frame only after all samples succeed. Filmback
+remains discrete and carries a stable preset ID plus resolved positive sensor
+dimensions.
+
+Seven reference tests and four schema tests pass, including reciprocal 100/400
+focus producing a 160 midpoint, independent bounded effects, zero-duration
+shots, invalid filmback/domain/range rejection, failed-recompile snapshot
+preservation, and history-free forward/reverse scrubbing. The complete scaffold
+passes with 1,472 output lines in 108.5 seconds. This checkpoint is offline
+only: no channel assembly variables or functions have yet been installed in
+Client Director.
+
 ## Next ordered implementation
 
-Proceed with the channel-owned lens, focus, and bounded-effect storage and
-composition layer that feeds the accepted common scalar engine. Then implement
+Generate the nine channel-assembly graphs in frozen stage order, with exact
+full/paste snippets, semantic interpreters, and scaffold ownership. Only after
+the entire offline family is green, install and live-accept it in one editor,
+including runtime, real-world PIE, guarded save/sync, cold load, and full
+regression. Then implement
 Directed / Free Look / Carrier Freecam backend modes, followed by event tracks
 with bounded target adapters and authorization. Start each seam offline with an
 explicit reference/schema and deterministic graph generators/interpreters,

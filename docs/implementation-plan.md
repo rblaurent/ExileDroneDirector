@@ -1716,6 +1716,12 @@ before any polished editor UI or cook is attempted:
    orientation tracks.
 10. **Current:** implement lens/focus/effect tracks, Directed/Free Look/Carrier Freecam, and
    event tracks with bounded target adapters and authorization.
+   The camera-channel assembly reference/schema is frozen offline: one discrete
+   filmback snapshot plus thirteen independently owned scalar tracks, atomic
+   candidate-to-compiled publication, reciprocal focus only on the focus-distance
+   channel, bounded effect weights, explicit sparse defaults, and no per-frame
+   recompilation. Seven reference and four schema tests pass; deterministic
+   graph generation/interpreters are the next checkpoint before editor work.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

@@ -1,0 +1,50 @@
+{
+  "schema": "edd.camera-focus-helper.v1",
+  "version": 1,
+  "purpose": "Compile manual, fixed, rack, prebaked tracking, and smoothed autofocus into one deterministic focus-distance channel.",
+  "modes": ["manual_distance", "fixed_world", "rack_fixed", "track_prebaked", "smoothed_autofocus"],
+  "domains": ["linear", "reciprocal"],
+  "invariants": {
+    "trace": "Set Focus Here consumes a normalized local trace hit. A miss performs zero marker mutation; a hit atomically replaces one fixed world marker and advances its revision.",
+    "schedule": "All target resolution and autofocus smoothing compile chronologically onto the already accepted absolute-time schedule. Runtime evaluation reads compiled samples and is independent of query order.",
+    "tracking": "No transient actor pointer crosses the compiled boundary. Actor bindings must resolve into aligned target-position samples before focus compilation.",
+    "ownership": "This helper may publish only the focus_distance_cm authored channel. It cannot write focus influence, other camera channels, the camera engine application state, or any document/source/desired stream.",
+    "atomicity": "Candidate distances remain private. The prior compiled focus channel is replaced only after complete schedule, geometry, mode, domain, range, and cardinality validation.",
+    "exclusivity": "Exactly one mode-specific authorship source is populated: manual distances, one fixed marker, rack endpoints and weights, or an aligned prebaked target-position stream."
+  },
+  "variables": [
+    {"name":"CameraFocusInputModeV1","type":"String","container":"None","role":"input"},
+    {"name":"CameraFocusInputDomainV1","type":"String","container":"None","role":"input"},
+    {"name":"CameraFocusInputFixedStepSecondsV1","type":"Float","container":"None","role":"input"},
+    {"name":"CameraFocusInputTimesSecondsV1","type":"Float","container":"Array","role":"input"},
+    {"name":"CameraFocusInputCameraPositionsV1","type":"Vector","container":"Array","role":"input"},
+    {"name":"CameraFocusInputManualDistancesCmV1","type":"Float","container":"Array","role":"input"},
+    {"name":"CameraFocusInputTargetPositionsV1","type":"Vector","container":"Array","role":"input"},
+    {"name":"CameraFocusInputRackTargetAV1","type":"Vector","container":"None","role":"input"},
+    {"name":"CameraFocusInputRackTargetBV1","type":"Vector","container":"None","role":"input"},
+    {"name":"CameraFocusInputRackBlendWeightsV1","type":"Float","container":"Array","role":"input"},
+    {"name":"CameraFocusInputSmoothingResponseSecondsV1","type":"Float","container":"None","role":"input"},
+    {"name":"CameraFocusTraceHitValidV1","type":"Boolean","container":"None","role":"trace"},
+    {"name":"CameraFocusTraceHitPositionV1","type":"Vector","container":"None","role":"trace"},
+    {"name":"CameraFocusMarkerValidV1","type":"Boolean","container":"None","role":"marker"},
+    {"name":"CameraFocusMarkerPositionV1","type":"Vector","container":"None","role":"marker"},
+    {"name":"CameraFocusMarkerRevisionV1","type":"Integer","container":"None","role":"marker"},
+    {"name":"CameraFocusCandidateDistancesCmV1","type":"Float","container":"Array","role":"candidate"},
+    {"name":"CameraFocusCandidateValidV1","type":"Boolean","container":"None","role":"candidate"},
+    {"name":"CameraFocusCompiledTimesSecondsV1","type":"Float","container":"Array","role":"compiled"},
+    {"name":"CameraFocusCompiledDistancesCmV1","type":"Float","container":"Array","role":"compiled"},
+    {"name":"CameraFocusCompiledModeV1","type":"String","container":"None","role":"compiled"},
+    {"name":"CameraFocusCompiledDomainV1","type":"String","container":"None","role":"compiled"},
+    {"name":"CameraFocusCompileValidV1","type":"Boolean","container":"None","role":"result"},
+    {"name":"CameraFocusFailureCodeV1","type":"String","container":"None","role":"result"}
+  ],
+  "functions": [
+    {"name":"SetCameraFocusHereV1","boundary":"authoring","stage":null},
+    {"name":"ResetCameraFocusCompileV1","boundary":"compile","stage":0},
+    {"name":"ValidateCameraFocusInputsV1","boundary":"compile","stage":1},
+    {"name":"BuildCameraFocusDistanceCandidatesV1","boundary":"compile","stage":2},
+    {"name":"CommitCameraFocusDistanceChannelV1","boundary":"compile","stage":3},
+    {"name":"CompileCameraFocusDistanceChannelV1","boundary":"compile","stage":4,"uses":["ResetCameraFocusCompileV1","ValidateCameraFocusInputsV1","BuildCameraFocusDistanceCandidatesV1","CommitCameraFocusDistanceChannelV1"]}
+  ],
+  "limits": {"minimumDistanceCm":1.0,"minimumSamples":2,"maximumSamples":65536}
+}

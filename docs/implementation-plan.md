@@ -1720,13 +1720,12 @@ before any polished editor UI or cook is attempted:
    accepted: one discrete filmback snapshot plus thirteen independently owned
    scalar tracks, atomic candidate-to-compiled publication, reciprocal focus
    only on the focus-distance channel, bounded effect weights, explicit sparse
-   defaults, and no per-frame recompilation. The engine-application
-   reference/schema is now frozen offline: fifteen unique targets, mandatory
-   core camera properties, engine-versioned capability manifests, zero-write
-   rejection for unsafe unavailable properties, non-overwriting baseline
-   capture, and exact value/override restoration. Deterministic graphs and a
-   read-only property probe come next before live application, focus/dolly/
-   comfort helpers, and playback modes.
+   defaults, and no per-frame recompilation. The engine-application boundary is
+   live-accepted through exact native mutation/restoration, unsupported zero-
+   write rejection, real PIE, fresh process, and cold compile. The current seam
+   is focus authoring: manual, fixed-marker, rack, prebaked tracking, and
+   deterministic smoothed-autofocus contracts precede dolly/comfort helpers and
+   playback modes.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

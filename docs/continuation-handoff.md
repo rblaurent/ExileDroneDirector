@@ -657,6 +657,20 @@ implementing the remaining Phase 5 camera helpers, Directed / Free Look /
 Carrier Freecam modes, and bounded authorized event adapters toward debug
 dogfood.
 
+The first remaining focus-helper boundary is now frozen offline. A normalized
+Set Focus Here hit atomically replaces one fixed world marker while a trace miss
+is zero mutation. Manual distance, fixed marker, rack between two fixed targets,
+prebaked actor tracking, and smoothed autofocus all compile physical focus
+distance onto the already accepted absolute-time schedule; reciprocal rack
+focus retains the accepted optical-domain behavior. Stateful autofocus exists
+only during chronological compilation, never during query evaluation. Mode-
+specific inputs are mutually exclusive, transient actor pointers cannot cross
+the boundary, and the helper can publish only `focus_distance_cm`—never focus
+influence, another camera channel, engine state, or motion authorship. Eight
+reference tests, six schema tests, forty seeded cases, immutable-input checks,
+and eight failure families pass. Next: deterministic reset and Set Focus Here
+graphs, then validation/build/commit/orchestration before one-editor acceptance.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

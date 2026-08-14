@@ -164,6 +164,10 @@ $requiredFiles = @(
     'tools\trajectory\camera_engine_property_manifest_enhanced_5_6_1.json',
     'tools\trajectory\camera_engine_property_probe_reference.py',
     'tools\trajectory\test_camera_engine_property_probe_reference.py',
+    'tools\trajectory\camera_focus_helper_reference.py',
+    'tools\trajectory\test_camera_focus_helper_reference.py',
+    'tools\trajectory\camera_focus_helper_blueprint_schema.json',
+    'tools\trajectory\test_camera_focus_helper_blueprint_schema.py',
     'tools\unreal\Probe-CameraEngineProperties.py',
     'tools\blueprint\Test-CameraEngineNativeNodeForms.py',
     'tools\blueprint\templates\camera-engine-basic-node-forms.eddgraph',
@@ -1270,6 +1274,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\unreal\test_configure_camera_engine_application.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine live-configurator contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_focus_helper_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera focus-helper reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_focus_helper_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera focus-helper Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_camera_engine_application_validators.py')
 if ($LASTEXITCODE -ne 0) {

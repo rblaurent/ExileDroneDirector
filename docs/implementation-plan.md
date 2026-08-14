@@ -1871,6 +1871,13 @@ before any polished editor UI or cook is attempted:
    pass; body/channel/result/external state is absent. Exact native links,
    regeneration, and the complete 135.2-second scaffold pass. Comfort-sensitive
    camera-value candidate construction is next.
+   `BuildCameraViewerComfortChannelsV1` is deterministic at 29 full / 28 paste
+   nodes. One bounded canonical loop changes only focus influence, motion blur,
+   exposure EV, and chromatic aberration with their accepted effective weights;
+   nine other values pass through exactly, and validity publishes after all 13
+   appends. Eighty oracle frames plus disabled and direct-failure cases pass.
+   Motion/prior-result/external state is absent; exact links/regeneration and the
+   complete 135.9-second scaffold pass. Atomic local-result commit is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the viewer-comfort motion graph checkpoint
+Last updated: 2026-08-14 at the viewer-comfort channel graph checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the viewer-comfort motion graph described below; after
+- Current checkpoint is the viewer-comfort channel graph described below; after
   the checkpoint push, HEAD must equal `origin/main` before the next seam starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
@@ -1064,6 +1064,17 @@ external authorship are absent. Eighty forward/reverse oracle cases and a false-
 validation no-op pass in both forms. Exact native calls/links and deterministic
 regeneration pass; the complete scaffold is green in 135.2 seconds. Next: copy
 all thirteen camera values and scale only the four comfort-sensitive outputs.
+
+`BuildCameraViewerComfortChannelsV1` is deterministic at 29 full / 28 paste
+nodes. It clears and invalidates the private channel candidate, preflights exact
+13 source values plus five effective weights, and performs one bounded loop.
+Only focus influence and motion blur use blur weight, exposure EV uses exposure
+weight, and chromatic aberration uses its own weight; the other nine values are
+exact pass-through. Candidate validity publishes only after all 13 appends.
+Eighty forward/reverse oracle frames, disabled/effective-one pass-through, and
+three direct failure shapes pass in both forms. Motion candidates, prior result,
+external state, and authorship are absent. Exact links/regeneration pass; the
+complete scaffold is green in 135.9 seconds. Next: atomic local-result commit.
 
 ## Next ordered implementation
 

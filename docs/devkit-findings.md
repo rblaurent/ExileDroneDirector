@@ -5593,3 +5593,11 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   are absent. Eighty forward/reverse oracle cases and false-validation no-op
   pass in both forms; exact native calls/links, regeneration, and the complete
   135.2-second scaffold are green.
+- `BuildCameraViewerComfortChannelsV1` is 29 full / 28 paste nodes. It preflights
+  exact 13/5 source/effective shapes, loops once over canonical channel order,
+  scales only focus influence, motion blur, exposure EV, and chromatic
+  aberration, and publishes candidate validity after all 13 appends. The other
+  nine values are exact pass-through. Eighty oracle frames, disabled pass-
+  through, and three direct-failure shapes pass; motion/prior-result/external
+  state is absent. Exact links/regeneration and the complete 135.9-second
+  scaffold are green.

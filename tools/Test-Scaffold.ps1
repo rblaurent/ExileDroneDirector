@@ -176,6 +176,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraChannelCompileContracts.py',
     'tools\blueprint\snippets\compile-camera-channel-assembly-v1.eddgraph',
     'tools\blueprint\snippets\compile-camera-channel-assembly-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraChannelResultResetGraph.py',
+    'tools\blueprint\Test-CameraChannelResultResetContracts.py',
+    'tools\blueprint\snippets\reset-camera-channel-result-v1.eddgraph',
+    'tools\blueprint\snippets\reset-camera-channel-result-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraScalarTrackResetGraph.py',
     'tools\blueprint\Test-CameraScalarTrackResetContracts.py',
     'tools\blueprint\snippets\reset-camera-scalar-track-compile-v1.eddgraph',
@@ -1439,6 +1443,33 @@ if ($LASTEXITCODE -ne 0) { throw "Camera channel compile full contracts failed w
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraChannelCompileContracts.py') `
     --project-root $ProjectRoot --graph $cameraChannelCompilePaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera channel compile paste contracts failed with exit code $LASTEXITCODE." }
+$cameraChannelResultReset = Join-Path $cameraChannelRoot 'reset-camera-channel-result-v1.eddgraph'
+$cameraChannelResultResetPaste = Join-Path $cameraChannelRoot 'reset-camera-channel-result-v1-paste.eddgraph'
+$cameraChannelResultResetRepeat = Join-Path $cameraChannelRoot 'reset-camera-channel-result-v1-repeat.eddgraph'
+$cameraChannelResultResetRepeatPaste = Join-Path $cameraChannelRoot 'reset-camera-channel-result-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraChannelResultReset, $cameraChannelResultResetPaste), @($cameraChannelResultResetRepeat, $cameraChannelResultResetRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraChannelResultResetGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera channel result-reset generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraChannelResultReset, $cameraChannelResultResetRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-channel-result-v1.eddgraph')),
+    @($cameraChannelResultResetPaste, $cameraChannelResultResetRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-channel-result-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+        throw 'Camera channel result-reset generation is not byte deterministic.'
+    }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraChannelResultReset
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraChannelResultResetContracts.py') `
+    --project-root $ProjectRoot --graph $cameraChannelResultReset
+if ($LASTEXITCODE -ne 0) { throw "Camera channel result-reset full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraChannelResultResetContracts.py') `
+    --project-root $ProjectRoot --graph $cameraChannelResultResetPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera channel result-reset paste contracts failed with exit code $LASTEXITCODE." }
 $documentAdapterNonce = [guid]::NewGuid().ToString('N')
 $documentAdapterRoot = Join-Path $scratchRoot "edd-document-adapter-$documentAdapterNonce"
 New-Item -ItemType Directory -Path $documentAdapterRoot -Force | Out-Null

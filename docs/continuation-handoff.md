@@ -380,6 +380,13 @@ storage non-ownership, validation short-circuit, and late candidate failure
 short-circuit. Next: deterministic result reset, committed-slice staging,
 per-channel scalar publication, and the complete absolute-time evaluator.
 
+`ResetCameraChannelResultV1` is deterministic at 15 full / 14 paste nodes. It
+clears only the three outgoing value/velocity/acceleration arrays, filmback
+frame output, completion/validity, and evaluator indices/guard. The compiled
+bank, compile validity/failure code, authored inputs, and query time are absent
+from the graph and proven preserved in both forms. Next: stage one committed
+channel slice into generic scalar evaluation scratch without recompilation.
+
 ## Next ordered implementation
 
 Generate the nine channel-assembly graphs in frozen stage order, with exact

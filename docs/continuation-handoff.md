@@ -892,6 +892,14 @@ whole transaction, clears failure, and publishes validity last. Eighty snapshot
 cases and eight poisoned preflights pass in both forms. Next: the tiny ordered
 compile coordinator.
 
+The complete five-graph dolly-zoom family is now offline-green. The final
+`CompileCameraDollyZoomV1` graph is five full / four paste nodes and contains
+only reset -> validate -> build -> commit, with no variable, branch, loop,
+reroute, or hidden policy. All five graph pairs regenerate byte-identically and
+are structurally plus executably owned by the complete scaffold. Next: prepare
+the idempotent one-editor configurator, runtime oracle, automatic PIE probe, and
+separate post-PIE schema restore while Unreal remains closed.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

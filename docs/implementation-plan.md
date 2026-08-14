@@ -1778,6 +1778,10 @@ before any polished editor UI or cook is attempted:
    compiled snapshot on failure, and publishes times, distances, focal lengths,
    reference distance, then validity last on success. The tiny coordinator is
    next.
+   The full dolly-zoom family is now offline-green. Its five/four-node top-level
+   graph adds only the exact reset -> validate -> build -> commit order and no
+   state or policy. All five full/paste graph pairs are deterministic and
+   scaffold-owned. One-editor runtime/PIE acceptance tooling is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

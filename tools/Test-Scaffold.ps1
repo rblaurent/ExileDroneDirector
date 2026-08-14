@@ -192,6 +192,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraDollyZoomCommitContracts.py',
     'tools\blueprint\snippets\commit-camera-dolly-zoom-v1.eddgraph',
     'tools\blueprint\snippets\commit-camera-dolly-zoom-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraDollyZoomCompileGraph.py',
+    'tools\blueprint\Test-CameraDollyZoomCompileContracts.py',
+    'tools\blueprint\snippets\compile-camera-dolly-zoom-v1.eddgraph',
+    'tools\blueprint\snippets\compile-camera-dolly-zoom-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraDofDiagnosticsResetGraph.py',
     'tools\blueprint\Test-CameraDofDiagnosticsResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dof-diagnostics-v1.eddgraph',
@@ -1465,6 +1469,26 @@ foreach ($comparison in @(
 if ($LASTEXITCODE -ne 0) { throw "Camera dolly commit full contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDollyZoomCommitContracts.py') --project-root $ProjectRoot --graph $cameraDollyCommitPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera dolly commit paste contracts failed with exit code $LASTEXITCODE." }
+$cameraDollyCompile = Join-Path $cameraDollyRoot 'compile-camera-dolly-zoom-v1.eddgraph'
+$cameraDollyCompilePaste = Join-Path $cameraDollyRoot 'compile-camera-dolly-zoom-v1-paste.eddgraph'
+$cameraDollyCompileRepeat = Join-Path $cameraDollyRoot 'compile-camera-dolly-zoom-v1-repeat.eddgraph'
+$cameraDollyCompileRepeatPaste = Join-Path $cameraDollyRoot 'compile-camera-dolly-zoom-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraDollyCompile,$cameraDollyCompilePaste),@($cameraDollyCompileRepeat,$cameraDollyCompileRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraDollyZoomCompileGraph.py') --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera dolly compile generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraDollyCompile,$cameraDollyCompileRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\compile-camera-dolly-zoom-v1.eddgraph')),
+    @($cameraDollyCompilePaste,$cameraDollyCompileRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\compile-camera-dolly-zoom-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera dolly compile generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraDollyCompile
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDollyZoomCompileContracts.py') --project-root $ProjectRoot --graph $cameraDollyCompile
+if ($LASTEXITCODE -ne 0) { throw "Camera dolly compile full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDollyZoomCompileContracts.py') --project-root $ProjectRoot --graph $cameraDollyCompilePaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera dolly compile paste contracts failed with exit code $LASTEXITCODE." }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null
 $cameraDofReset = Join-Path $cameraDofRoot 'reset-camera-dof-diagnostics-v1.eddgraph'

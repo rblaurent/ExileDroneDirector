@@ -38,8 +38,16 @@ def stage(case):set_(obj,"CameraDollyInputTimesSecondsV1",list(case["times"]));s
 def input_snapshot():return tuple(normalized(get(obj,name)) for name in INPUTS)
 def authorship_snapshot():return tuple(normalized(get(obj,name)) for name in AUTHORSHIP)
 def expected(case):return oracle.compile_camera_dolly_zoom_v1(case["times"],case["positions"],case["subject"],case["reference"],case["focal"])
+def emit_stage_state(label):
+    emit("STAGE_STATE",f"{label}|validation:{get(obj,'CameraDollyValidationValidV1')}|candidate:{get(obj,'CameraDollyCandidateValidV1')}|compile:{get(obj,'CameraDollyCompileValidV1')}|distances:{len(get(obj,'CameraDollyCandidateSubjectDistancesCmV1'))}|focals:{len(get(obj,'CameraDollyCandidateFocalLengthsMmV1'))}|failure:{get(obj,'CameraDollyFailureCodeV1')}")
 def compile_case(case,label):
-    stage(case);before_inputs=input_snapshot();before_authorship=authorship_snapshot();wanted=expected(case);obj.call_method("CompileCameraDollyZoomV1");require(input_snapshot()==before_inputs,label+":inputs-mutated");require(authorship_snapshot()==before_authorship,label+":body-gimbal-mutated");require(bool(get(obj,"CameraDollyCompileValidV1")),label+":valid");require(str(get(obj,"CameraDollyFailureCodeV1"))=="",label+":failure")
+    stage(case);before_inputs=input_snapshot();before_authorship=authorship_snapshot();wanted=expected(case);obj.call_method("CompileCameraDollyZoomV1")
+    if not bool(get(obj,"CameraDollyCompileValidV1")):
+        emit("CASE_INVALID",f"{label}|validation:{get(obj,'CameraDollyValidationValidV1')}|candidate:{get(obj,'CameraDollyCandidateValidV1')}|distances:{len(get(obj,'CameraDollyCandidateSubjectDistancesCmV1'))}|focals:{len(get(obj,'CameraDollyCandidateFocalLengthsMmV1'))}|failure:{get(obj,'CameraDollyFailureCodeV1')}")
+        stage(case)
+        for method in ("ResetCameraDollyZoomV1","ValidateCameraDollyZoomInputsV1","BuildCameraDollyZoomCandidatesV1","CommitCameraDollyZoomV1"):
+            obj.call_method(method);emit_stage_state(method)
+    require(input_snapshot()==before_inputs,label+":inputs-mutated");require(authorship_snapshot()==before_authorship,label+":body-gimbal-mutated");require(bool(get(obj,"CameraDollyCompileValidV1")),label+":valid");require(str(get(obj,"CameraDollyFailureCodeV1"))=="",label+":failure")
     actual_times=tuple(float(value) for value in get(obj,"CameraDollyCompiledTimesSecondsV1"));actual_distances=tuple(float(value) for value in get(obj,"CameraDollyCompiledSubjectDistancesCmV1"));actual_focals=tuple(float(value) for value in get(obj,"CameraDollyCompiledFocalLengthsMmV1"));actual_reference=float(get(obj,"CameraDollyCompiledReferenceDistanceCmV1"));require(actual_times==wanted.times_seconds,label+":times");require(len(actual_distances)==len(wanted.subject_distances_cm) and all(close(a,b) for a,b in zip(actual_distances,wanted.subject_distances_cm)),label+":distances");require(len(actual_focals)==len(wanted.focal_lengths_mm) and all(close(a,b) for a,b in zip(actual_focals,wanted.focal_lengths_mm)),label+":focals");require(close(actual_reference,wanted.reference_distance_cm),label+":reference")
 try:
     cases=(

@@ -194,6 +194,8 @@ $requiredFiles = @(
     'tools\blueprint\snippets\commit-camera-dolly-zoom-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraDollyZoomCompileGraph.py',
     'tools\blueprint\Test-CameraDollyZoomCompileContracts.py',
+    'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py',
+    'tools\blueprint\Test-BlueprintGraphTopologyMatch.py',
     'tools\blueprint\snippets\compile-camera-dolly-zoom-v1.eddgraph',
     'tools\blueprint\snippets\compile-camera-dolly-zoom-v1-paste.eddgraph',
     'tools\unreal\Configure-CameraDollyZoom.py',
@@ -201,6 +203,11 @@ $requiredFiles = @(
     'tools\unreal\Validate-CameraDollyZoomRuntime.py',
     'tools\unreal\Validate-CameraDollyZoomPIE.py',
     'tools\unreal\test_camera_dolly_zoom_validators.py',
+    'tools\blueprint\live-snippets\reset-camera-dolly-zoom-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-camera-dolly-zoom-inputs-v1.eddgraph',
+    'tools\blueprint\live-snippets\build-camera-dolly-zoom-candidates-v1.eddgraph',
+    'tools\blueprint\live-snippets\commit-camera-dolly-zoom-v1.eddgraph',
+    'tools\blueprint\live-snippets\compile-camera-dolly-zoom-v1.eddgraph',
     'tools\blueprint\Build-CameraDofDiagnosticsResetGraph.py',
     'tools\blueprint\Test-CameraDofDiagnosticsResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dof-diagnostics-v1.eddgraph',
@@ -1494,8 +1501,47 @@ foreach ($comparison in @(
 if ($LASTEXITCODE -ne 0) { throw "Camera dolly compile full contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDollyZoomCompileContracts.py') --project-root $ProjectRoot --graph $cameraDollyCompilePaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera dolly compile paste contracts failed with exit code $LASTEXITCODE." }
+foreach ($generatedGraph in @(
+    $cameraDollyReset,$cameraDollyResetPaste,
+    $cameraDollyValidation,$cameraDollyValidationPaste,
+    $cameraDollyCandidates,$cameraDollyCandidatesPaste,
+    $cameraDollyCommit,$cameraDollyCommitPaste,
+    $cameraDollyCompile,$cameraDollyCompilePaste
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $generatedGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Generated camera dolly link integrity failed for $generatedGraph with exit code $LASTEXITCODE."
+    }
+}
 & python (Join-Path $ProjectRoot 'tools\unreal\test_camera_dolly_zoom_validators.py')
 if ($LASTEXITCODE -ne 0) { throw "Camera dolly zoom live-tool contracts failed with exit code $LASTEXITCODE." }
+$cameraDollyLiveContracts = @(
+    @('reset-camera-dolly-zoom-v1.eddgraph', 'Test-CameraDollyZoomResetContracts.py', $cameraDollyReset),
+    @('validate-camera-dolly-zoom-inputs-v1.eddgraph', 'Test-CameraDollyZoomValidationContracts.py', $cameraDollyValidation),
+    @('build-camera-dolly-zoom-candidates-v1.eddgraph', 'Test-CameraDollyZoomCandidatesContracts.py', $cameraDollyCandidates),
+    @('commit-camera-dolly-zoom-v1.eddgraph', 'Test-CameraDollyZoomCommitContracts.py', $cameraDollyCommit),
+    @('compile-camera-dolly-zoom-v1.eddgraph', 'Test-CameraDollyZoomCompileContracts.py', $cameraDollyCompile)
+)
+foreach ($liveContract in $cameraDollyLiveContracts) {
+    $liveGraph = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($liveContract[0])"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $liveGraph
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera dolly link integrity failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphTopologyMatch.py') `
+        --project-root $ProjectRoot --expected $liveContract[2] --actual $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera dolly topology changed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($liveContract[1])") `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera dolly graph contract failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+}
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null
 $cameraDofReset = Join-Path $cameraDofRoot 'reset-camera-dof-diagnostics-v1.eddgraph'

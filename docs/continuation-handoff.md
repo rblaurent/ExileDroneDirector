@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the frozen offline dolly-zoom contract checkpoint
+Last updated: 2026-08-14 after live dolly-zoom acceptance
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,8 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current live acceptance started from remote-equal `6c66099`, with the
-  accepted focus helper and frozen diagnostic boundary described below; HEAD must
-  equal `origin/main` before checkpoint work is committed
+- Current checkpoint is the accepted dolly-zoom helper described below; after
+  the checkpoint push, HEAD must equal `origin/main` before the next seam starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -910,6 +909,27 @@ Client Director and tear down themselves. The separate restore compiles before
 reacquiring the generated class and converges all schema defaults outside the
 Slate callback. Next: one-editor configure/paste/compile/save/runtime/PIE/
 restore/cold acceptance and final live exports.
+
+The dolly-zoom helper is now live-accepted in Enhanced 5.6.1. The five saved
+graphs contain 9, 29, 106, 31, and 5 nodes. Unreal initially discarded the four
+internal execution links in the validation body while preserving every data
+link and the manually connected native entry seam; the offline shape/oracle
+contract therefore produced a false green. The four links were repaired before
+save, and the scaffold now compares every live node/pin topology against the
+deterministic full graph in addition to requiring resolved reciprocal links.
+Final live exports pass that exact round-trip check. Runtime passes six physical
+routes in forward and reverse order, two fail-closed families, immutable inputs,
+and explicit preservation of distinct body/gimbal quaternion and angular-rate
+tracks. Three automatic PIE worlds pass shrinking focal values 100/50/25,
+expanding values 25/50/100, and invalid-input snapshot preservation on the real
+player-owned component. Defaults restore, the configurator is idempotent,
+guarded shutdown reaches `LogExit: Exiting.`, and reverse sync copies only Client
+Director. Live and mirror are both 21,599,167 bytes with SHA-256
+`CF31350826811204EAFD9CEC74E4B474EB09318A9F8472067DCB5CD4F012FBFF`.
+A fresh NullRHI cold load compiles all six Blueprints with zero errors and emits
+`EDD_COLD_LOAD|RESULT|PASS`. The five live exports are scaffold-owned. Next:
+verified effect/look helpers and local comfort overrides, then the documented
+camera modes and bounded event adapters before debug dogfood.
 
 ## Next ordered implementation
 

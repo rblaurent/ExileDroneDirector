@@ -5441,3 +5441,31 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Fresh NullRHI cold load compiled all six Blueprints with zero errors and
   emitted `EDD_COLD_LOAD|RESULT|PASS`. No UI, cook, deployment, or release work
   was included.
+
+## Camera dolly-zoom live acceptance (2026-08-14)
+
+- Client Director now owns exact reset, validation, candidate, atomic commit,
+  and coordinator graphs with 9, 29, 106, 31, and 5 nodes.
+- The first live validation body retained all data links and the manually wired
+  native entry, but Enhanced silently discarded its four internal execution
+  links. Node counts, reciprocal integrity of the links that remained, and the
+  separate reference oracle were insufficient to detect that loss; runtime
+  correctly failed with validation still false.
+- `Test-BlueprintGraphTopologyMatch.py` now resolves every pin ID to stable
+  node/pin identities and compares the full generated and postcompile topology.
+  Together with `Test-BlueprintGraphLinkIntegrity.py`, this rejects both missing
+  reciprocal halves and complete two-sided link loss. All five final live
+  exports pass both checks and their feature contracts.
+- Warm runtime passes six physical routes in forward and reverse order, two
+  fail-closed families, immutable inputs, and explicit body/gimbal quaternion
+  plus angular-rate preservation. Three automatic PIE worlds pass shrinking
+  focal values 100/50/25, expanding values 25/50/100, and invalid-input prior-
+  snapshot preservation on the real player-owned Client Director.
+- The separate restore converges all 15 defaults, and the configurator reports
+  all variables/functions already present without changing defaults. Guarded
+  shutdown reaches `LogExit: Exiting.`; reverse sync copies exactly Client
+  Director. Live/mirror size is 21,599,167 bytes and SHA-256 is
+  `CF31350826811204EAFD9CEC74E4B474EB09318A9F8472067DCB5CD4F012FBFF`.
+- Fresh NullRHI cold load compiles all six Blueprints with zero errors and emits
+  `EDD_COLD_LOAD|RESULT|PASS`. No UI, cook, deployment, or release work was
+  included.

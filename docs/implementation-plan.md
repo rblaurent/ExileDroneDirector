@@ -1785,7 +1785,15 @@ before any polished editor UI or cook is attempted:
    Live tooling is now prepared offline: an idempotent 15-variable/five-function
    configurator, six-case forward/reverse oracle runtime probe with explicit
    body/gimbal immutability, three-session automatic PIE probe, and separate
-   compile-safe default restore. One-editor acceptance is next.
+   compile-safe default restore. One-editor acceptance is complete: the saved
+   graphs contain 9, 29, 106, 31, and 5 nodes; exact deterministic-to-live
+   topology catches and prevents discarded execution seams; six forward plus
+   six reverse runtime routes and three automatic PIE worlds pass; invalid
+   requests preserve the prior lens snapshot; and distinct body/gimbal tracks
+   remain untouched. Guarded shutdown, one-package reverse sync, and a fresh
+   zero-error NullRHI cold compile pass. Live/mirror Client Director SHA-256 is
+   `CF31350826811204EAFD9CEC74E4B474EB09318A9F8472067DCB5CD4F012FBFF`.
+   Verified effect/look helpers and local comfort overrides are next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

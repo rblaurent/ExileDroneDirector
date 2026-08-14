@@ -5329,3 +5329,17 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   reject before capture/write. Seven reference and seven schema tests preserve
   unrelated opaque native fields through apply and restore the original three
   structs exactly.
+- Four deterministic production generators now implement that ABI offline.
+  Capture is 41/40 full/paste nodes with no engine setter. Apply is 60/59 nodes
+  and gates camera validity, session activity, staged validity, and all five
+  unavailable neutral values before a 10-target write chain. Restore is 28/27
+  nodes with exact baseline cardinality preflight and no Set Members nodes: the
+  three native baseline structs are assigned whole. The 9/8-node coordinator
+  calls reset, stage, validate, capture, and apply in order with two fail-closed
+  stage guards. Seeded interpreters prove 40 exact captures, 40 transactional
+  applies, 40 whole-struct restores, opaque-field preservation, zero-write
+  failure, repeated-capture protection, and idempotent restoration in full and
+  paste forms. This remains offline evidence until Enhanced compiles and runs
+  the installed graphs. The complete repository scaffold, including byte-
+  deterministic regeneration of all four new graph pairs, passes in 139.2
+  seconds.

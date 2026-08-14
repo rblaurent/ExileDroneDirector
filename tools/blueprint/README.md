@@ -48,6 +48,19 @@ Interactive editor automation uses a separate fail-closed seam:
   ownership is implicit in Unreal's exposed Set Members fields; individual
   `bOverride_*` pins are deliberately absent, so later exact restoration must
   retain and restore the complete native `PostProcessSettings` struct.
+- `Build-CameraEngineStateCaptureGraph.py`,
+  `Build-CameraEngineFrameApplyGraph.py`, and
+  `Build-CameraEngineStateRestoreGraph.py` compose the concrete native
+  application boundary from those accepted forms. Capture is read-only and
+  one-shot; apply performs complete unavailable-target/session/camera preflight
+  before its first write and mutates only ten supported targets; restore writes
+  all three captured structs whole. Their interpreters cover seeded opaque
+  native fields, zero-write rejection, repeated capture, and idempotent exact
+  restoration in both complete and paste-safe forms.
+- `Build-CameraEngineApplicationGraph.py` is the policy-free nine-node
+  reset/stage/validate/capture/apply coordinator. Two stage-validity guards
+  prevent capture after validation failure and prevent apply after capture
+  failure.
 - `Build-WaypointEditGraphs.py` composes guarded replace and six-channel atomic
   delete functions from live-harvested node forms.
 - `Build-ClientWaypointEditDispatch.py` extends the proven K capture tail with

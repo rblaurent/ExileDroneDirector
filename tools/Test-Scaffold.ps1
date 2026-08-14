@@ -180,6 +180,22 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraEngineApplicationValidationContracts.py',
     'tools\blueprint\snippets\validate-camera-engine-application-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-camera-engine-application-inputs-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraEngineStateCaptureGraph.py',
+    'tools\blueprint\Test-CameraEngineStateCaptureContracts.py',
+    'tools\blueprint\snippets\capture-camera-engine-state-v1.eddgraph',
+    'tools\blueprint\snippets\capture-camera-engine-state-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraEngineFrameApplyGraph.py',
+    'tools\blueprint\Test-CameraEngineFrameApplyContracts.py',
+    'tools\blueprint\snippets\apply-camera-engine-frame-v1.eddgraph',
+    'tools\blueprint\snippets\apply-camera-engine-frame-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraEngineStateRestoreGraph.py',
+    'tools\blueprint\Test-CameraEngineStateRestoreContracts.py',
+    'tools\blueprint\snippets\restore-camera-engine-state-v1.eddgraph',
+    'tools\blueprint\snippets\restore-camera-engine-state-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraEngineApplicationGraph.py',
+    'tools\blueprint\Test-CameraEngineApplicationContracts.py',
+    'tools\blueprint\snippets\apply-evaluated-camera-channel-frame-v1.eddgraph',
+    'tools\blueprint\snippets\apply-evaluated-camera-channel-frame-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraChannelCompileResetGraph.py',
     'tools\blueprint\Test-CameraChannelCompileResetContracts.py',
     'tools\blueprint\snippets\reset-camera-channel-compile-v1.eddgraph',
@@ -1356,6 +1372,39 @@ if ($LASTEXITCODE -ne 0) {
     --project-root $ProjectRoot --graph $cameraApplyValidationPaste --paste
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine-application validation paste contracts failed with exit code $LASTEXITCODE."
+}
+$cameraNativeSpecs = @(
+    @{ Label = 'capture'; Build = 'Build-CameraEngineStateCaptureGraph.py'; Test = 'Test-CameraEngineStateCaptureContracts.py'; Stem = 'capture-camera-engine-state-v1' },
+    @{ Label = 'apply'; Build = 'Build-CameraEngineFrameApplyGraph.py'; Test = 'Test-CameraEngineFrameApplyContracts.py'; Stem = 'apply-camera-engine-frame-v1' },
+    @{ Label = 'restore'; Build = 'Build-CameraEngineStateRestoreGraph.py'; Test = 'Test-CameraEngineStateRestoreContracts.py'; Stem = 'restore-camera-engine-state-v1' },
+    @{ Label = 'orchestrator'; Build = 'Build-CameraEngineApplicationGraph.py'; Test = 'Test-CameraEngineApplicationContracts.py'; Stem = 'apply-evaluated-camera-channel-frame-v1' }
+)
+foreach ($spec in $cameraNativeSpecs) {
+    $generated = Join-Path $cameraApplyResetRoot "$($spec.Stem).eddgraph"
+    $generatedPaste = Join-Path $cameraApplyResetRoot "$($spec.Stem)-paste.eddgraph"
+    $repeat = Join-Path $cameraApplyResetRoot "$($spec.Stem)-repeat.eddgraph"
+    $repeatPaste = Join-Path $cameraApplyResetRoot "$($spec.Stem)-repeat-paste.eddgraph"
+    foreach ($pair in @(@($generated, $generatedPaste), @($repeat, $repeatPaste))) {
+        & python (Join-Path $ProjectRoot "tools\blueprint\$($spec.Build)") `
+            --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+        if ($LASTEXITCODE -ne 0) {
+            throw "Camera engine $($spec.Label) generation failed with exit code $LASTEXITCODE."
+        }
+    }
+    foreach ($comparison in @(
+        @($generated, $repeat, (Join-Path $ProjectRoot "tools\blueprint\snippets\$($spec.Stem).eddgraph")),
+        @($generatedPaste, $repeatPaste, (Join-Path $ProjectRoot "tools\blueprint\snippets\$($spec.Stem)-paste.eddgraph"))
+    )) {
+        if ((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $comparison[1]).Hash -or
+            (Get-FileHash -Algorithm SHA256 $comparison[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $comparison[2]).Hash) {
+            throw "Camera engine $($spec.Label) generation is not byte deterministic."
+        }
+    }
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $generated
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($spec.Test)") --project-root $ProjectRoot --graph $generated
+    if ($LASTEXITCODE -ne 0) { throw "Camera engine $($spec.Label) full contracts failed with exit code $LASTEXITCODE." }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($spec.Test)") --project-root $ProjectRoot --graph $generatedPaste --paste
+    if ($LASTEXITCODE -ne 0) { throw "Camera engine $($spec.Label) paste contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraScalarNonce = [guid]::NewGuid().ToString('N')
 $cameraScalarRoot = Join-Path $scratchRoot "edd-camera-scalar-$cameraScalarNonce"

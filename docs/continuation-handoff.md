@@ -582,6 +582,23 @@ reference and seven schema tests pass. Existing reset/stage/validation graphs
 remain valid because they never touched the replaced state. Next: deterministic
 capture, apply, restore, and thin orchestrator generators/interpreters.
 
+The concrete offline family is now complete. `CaptureCameraEngineStateV1` is
+41/40 full/paste nodes and performs only native reads; it preserves an active
+baseline and captures all opaque struct fields. `ApplyCameraEngineFrameV1` is
+60/59 nodes, requires an active session, valid staged input, valid camera, and
+neutral values for all five unavailable logical targets before its first
+engine write; it changes only the ten manifest-supported targets and preserves
+unrelated fields in all three structs. `RestoreCameraEngineStateV1` is 28/27
+nodes and writes the captured Filmback, FocusSettings, and PostProcessSettings
+structs whole, plus exact focal/aperture scalars; inactive repetition is a no-op
+and failed preflight is zero-write/retryable. The nine/eight-node
+`ApplyEvaluatedCameraChannelFrameV1` coordinator owns no values or policy and
+short-circuits validation and capture failures. All four generators are byte-
+deterministic, both forms pass structural and executable interpreters, and the
+complete scaffold passes in 139.2 seconds and owns their sixteen
+generator/test/snippet files. Next: commit/push, then configure and install the full seven-
+graph family in the one existing editor for compile/runtime/PIE/cold acceptance.
+
 ## Next ordered implementation
 
 Continue the camera engine-application seam with deterministic reset,

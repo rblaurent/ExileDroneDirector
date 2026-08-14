@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Transient viewer-local reduction of roll, procedural shake, strong blur, exposure changes, and chromatic aberration after authored camera composition.",
+  "architecture": {
+    "placement": "This is the final deterministic camera-composition layer after authored body/gimbal evaluation, procedural offsets, named-look composition, and CameraChannel evaluation, and before engine property/view-transform application.",
+    "locality": "Every preference is transient and local to the current viewer. No preference or adjusted result may be written to a Flypath document, repository record, published revision, server state, or authored track.",
+    "authorship": "The helper consumes one already distinct evaluated gimbal quaternion and never accepts, manufactures, aliases, or writes a body track or an authored/compiled gimbal track. Its quaternion is a local final-view result only.",
+    "weights": "Five continuous normalized weights use one as exact authored behavior and zero as maximum reduction. Disabled policy resolves all effective weights to one but does not bypass input validation.",
+    "motion": "Procedural translation and rotation remain separate inputs. Shake weight scales translation linearly and rotation by identity-to-offset shortest-arc interpolation; roll weight shortest-arc blends a world-level forward-preserving orientation into the shaken gimbal.",
+    "cameraValues": "Blur weight scales focus influence and motion blur; exposure-change weight scales exposure EV about its neutral zero; chromatic-aberration weight scales only that channel. The other nine canonical camera values pass through exactly.",
+    "atomicity": "Reset invalidates publication and clears private candidates while preserving the prior accepted local result snapshot. Commit replaces the complete local pose/value/weight result only after every candidate is valid and publishes validity last."
+  },
+  "limits": {
+    "channelCount": 13,
+    "channelIds": ["focal_length_mm", "aperture_fstop", "focus_distance_cm", "focus_influence", "exposure_ev", "bloom_weight", "vignette_weight", "color_grading_weight", "tint_weight", "motion_blur_weight", "chromatic_aberration_weight", "sharpening_weight", "matte_weight"],
+    "comfortWeightIds": ["roll", "shake", "blur", "exposure_change", "chromatic_aberration"],
+    "comfortSensitiveChannelIds": ["focus_influence", "exposure_ev", "motion_blur_weight", "chromatic_aberration_weight"],
+    "quaternionUnitTolerance": 0.000001
+  },
+  "variables": [
+    {"name":"CameraComfortInputFrameValidV1","type":"Boolean","container":"None","role":"input","default":false},
+    {"name":"CameraComfortInputPositionV1","type":"Vector","container":"None","role":"input","default":[0.0,0.0,0.0]},
+    {"name":"CameraComfortInputGimbalQuatV1","type":"Quat","container":"None","role":"input","default":[0.0,0.0,0.0,1.0]},
+    {"name":"CameraComfortInputProceduralTranslationOffsetV1","type":"Vector","container":"None","role":"input","default":[0.0,0.0,0.0]},
+    {"name":"CameraComfortInputProceduralRotationOffsetV1","type":"Quat","container":"None","role":"input","default":[0.0,0.0,0.0,1.0]},
+    {"name":"CameraComfortInputChannelValuesV1","type":"Float","container":"Array","role":"input"},
+    {"name":"CameraComfortEnabledV1","type":"Boolean","container":"None","role":"preference","default":false},
+    {"name":"CameraComfortRollWeightV1","type":"Float","container":"None","role":"preference","default":1.0},
+    {"name":"CameraComfortShakeWeightV1","type":"Float","container":"None","role":"preference","default":1.0},
+    {"name":"CameraComfortBlurWeightV1","type":"Float","container":"None","role":"preference","default":1.0},
+    {"name":"CameraComfortExposureChangeWeightV1","type":"Float","container":"None","role":"preference","default":1.0},
+    {"name":"CameraComfortChromaticAberrationWeightV1","type":"Float","container":"None","role":"preference","default":1.0},
+    {"name":"CameraComfortValidationValidV1","type":"Boolean","container":"None","role":"validation","default":false},
+    {"name":"CameraComfortCandidatePositionV1","type":"Vector","container":"None","role":"candidate","default":[0.0,0.0,0.0]},
+    {"name":"CameraComfortCandidateGimbalQuatV1","type":"Quat","container":"None","role":"candidate","default":[0.0,0.0,0.0,1.0]},
+    {"name":"CameraComfortCandidateChannelValuesV1","type":"Float","container":"Array","role":"candidate"},
+    {"name":"CameraComfortCandidateEffectiveWeightsV1","type":"Float","container":"Array","role":"candidate"},
+    {"name":"CameraComfortCandidateAppliedV1","type":"Boolean","container":"None","role":"candidate","default":false},
+    {"name":"CameraComfortCandidateValidV1","type":"Boolean","container":"None","role":"candidate","default":false},
+    {"name":"CameraComfortResultPositionV1","type":"Vector","container":"None","role":"result","default":[0.0,0.0,0.0]},
+    {"name":"CameraComfortResultGimbalQuatV1","type":"Quat","container":"None","role":"result","default":[0.0,0.0,0.0,1.0]},
+    {"name":"CameraComfortResultChannelValuesV1","type":"Float","container":"Array","role":"result"},
+    {"name":"CameraComfortResultEffectiveWeightsV1","type":"Float","container":"Array","role":"result"},
+    {"name":"CameraComfortResultAppliedV1","type":"Boolean","container":"None","role":"result","default":false},
+    {"name":"CameraComfortResultValidV1","type":"Boolean","container":"None","role":"result","default":false},
+    {"name":"CameraComfortFailureCodeV1","type":"String","container":"None","role":"result","default":""},
+    {"name":"CameraComfortScratchChannelIndexV1","type":"Integer","container":"None","role":"scratch","default":0},
+    {"name":"CameraComfortScratchValidV1","type":"Boolean","container":"None","role":"scratch","default":false}
+  ],
+  "functions": [
+    {"name":"ResetCameraViewerComfortV1","stage":0},
+    {"name":"ValidateCameraViewerComfortInputsV1","stage":1},
+    {"name":"BuildCameraViewerComfortMotionV1","stage":2},
+    {"name":"BuildCameraViewerComfortChannelsV1","stage":3},
+    {"name":"CommitCameraViewerComfortV1","stage":4},
+    {"name":"ApplyCameraViewerComfortV1","stage":5,"uses":["ResetCameraViewerComfortV1","ValidateCameraViewerComfortInputsV1","BuildCameraViewerComfortMotionV1","BuildCameraViewerComfortChannelsV1","CommitCameraViewerComfortV1"]}
+  ],
+  "contracts": {
+    "validation": "A valid source frame, finite position/offset, normalized finite gimbal/shake quaternions, exact thirteen-value canonical camera shape, per-channel bounds, Boolean enabled flag, and all five finite 0..1 preferences are required before candidate publication.",
+    "disabled": "Disabled policy still validates every source and preference, then uses exact effective weights [1,1,1,1,1] so authored roll, full procedural shake, and every camera value remain enabled.",
+    "failure": "Any rejected request leaves the prior local result pose, channel values, effective weights, and applied flag byte-for-byte unchanged while publishing result validity false and a stable failure code.",
+    "ownership": "Only CameraComfort variables are writable. CameraChannel, CameraLook, CameraApply, procedural-source, position, Airframe, body, authored/compiled gimbal, document, repository, playback, and server state are read-only or absent.",
+    "integration": "The result is a local final-view candidate. Later mode integration may apply its position and gimbal once and stage its channel values into the accepted engine adapter; it must never feed the result back into authored or compiled inputs."
+  }
+}

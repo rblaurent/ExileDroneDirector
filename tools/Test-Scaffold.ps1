@@ -180,6 +180,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_base_look_reference.py',
     'tools\trajectory\camera_base_look_blueprint_schema.json',
     'tools\trajectory\test_camera_base_look_blueprint_schema.py',
+    'tools\trajectory\camera_viewer_comfort_reference.py',
+    'tools\trajectory\test_camera_viewer_comfort_reference.py',
+    'tools\trajectory\camera_viewer_comfort_blueprint_schema.json',
+    'tools\trajectory\test_camera_viewer_comfort_blueprint_schema.py',
     'tools\blueprint\Build-CameraBaseLookResetGraph.py',
     'tools\blueprint\Test-CameraBaseLookResetContracts.py',
     'tools\blueprint\snippets\reset-camera-look-composition-v1.eddgraph',
@@ -1445,6 +1449,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_base_look_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera base-look Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_viewer_comfort_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera viewer-comfort reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_viewer_comfort_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera viewer-comfort Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 $cameraDollyRoot = Join-Path $scratchRoot ("edd-camera-dolly-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDollyRoot -Force | Out-Null

@@ -5547,3 +5547,25 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   caught the 21-node surplus and immediate undo restored 46 nodes / 62 links.
   The rejected export was not retained, so the surplus node classes are not
   claimed; use one explicit native pin connection and re-export instead.
+
+## Viewer-local comfort boundary frozen offline (2026-08-14)
+
+- Comfort is a transient final-view adapter after authored body/gimbal,
+  procedural motion, named-look composition, and camera-channel evaluation. It
+  never mutates an authored, compiled, published, repository, or server value.
+- Inputs keep the already distinct gimbal quaternion and procedural translation/
+  rotation offsets separate. The result contains one local position, one local
+  gimbal quaternion, and one local camera-value frame; there is deliberately no
+  body-track input or output and no path that can manufacture body/gimbal
+  authorship from a single transform.
+- Five normalized weights continuously preserve/reduce roll, shake, blur
+  (focus influence plus motion blur), exposure change about neutral EV, and
+  chromatic aberration. Disabled resolves effective weights to five exact ones
+  but still rejects poisoned preferences. Nine other camera channels pass
+  through exactly.
+- Nine reference tests cover full suppression, continuous scaling, disabled
+  pass-through, immutable value snapshots, vertical-forward fallback, ten
+  failure classes, and 80 history-free forward/reverse seeded frames. Five
+  schema tests freeze 28 comfort-owned variables, six ordered functions,
+  locality, atomicity, and distinct-authorship isolation. The complete scaffold
+  passes in 132.7 seconds with Unreal closed.

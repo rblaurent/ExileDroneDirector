@@ -1837,6 +1837,18 @@ before any polished editor UI or cook is attempted:
    `0ED2F27BE019F43DA05908F32FB10F4F448777CCFA3ADBFD242DC871D5FCB386`.
    The separate local comfort layer is next and may consume, but not rewrite,
    named-look authorship.
+   That boundary is now frozen offline as a transient final-view adapter. It
+   consumes one already distinct evaluated gimbal, separate deterministic
+   procedural translation/rotation offsets, and the complete thirteen-channel
+   frame. Five normalized local weights continuously preserve or reduce roll,
+   shake, focus+motion blur, exposure change, and chromatic aberration; disabled
+   is exact authored behavior, and the remaining nine camera values pass
+   through unchanged. Nine reference tests (including 80 forward/reverse seeded
+   frames and ten rejection families) and five schema/ownership tests pass. Its
+   28 variables are exclusively `CameraComfort*`; body tracks, authored/compiled
+   gimbal storage, Flypaths, repositories, playback, server state, named looks,
+   camera-channel banks, and engine-application state cannot be written. Six
+   deterministic Blueprint graphs are next with Unreal closed.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

@@ -180,6 +180,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraFocusValidationContracts.py',
     'tools\blueprint\snippets\validate-camera-focus-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-camera-focus-inputs-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraFocusCandidatesGraph.py',
+    'tools\blueprint\Test-CameraFocusCandidatesContracts.py',
+    'tools\blueprint\snippets\build-camera-focus-distance-candidates-v1.eddgraph',
+    'tools\blueprint\snippets\build-camera-focus-distance-candidates-v1-paste.eddgraph',
     'tools\unreal\Probe-CameraEngineProperties.py',
     'tools\blueprint\Test-CameraEngineNativeNodeForms.py',
     'tools\blueprint\templates\camera-engine-basic-node-forms.eddgraph',
@@ -1357,6 +1361,26 @@ foreach ($comparison in @(
 if ($LASTEXITCODE -ne 0) { throw "Camera focus validation full contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraFocusValidationContracts.py') --project-root $ProjectRoot --graph $cameraFocusValidationPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera focus validation paste contracts failed with exit code $LASTEXITCODE." }
+$cameraFocusCandidates = Join-Path $cameraFocusRoot 'build-camera-focus-distance-candidates-v1.eddgraph'
+$cameraFocusCandidatesPaste = Join-Path $cameraFocusRoot 'build-camera-focus-distance-candidates-v1-paste.eddgraph'
+$cameraFocusCandidatesRepeat = Join-Path $cameraFocusRoot 'build-camera-focus-distance-candidates-v1-repeat.eddgraph'
+$cameraFocusCandidatesRepeatPaste = Join-Path $cameraFocusRoot 'build-camera-focus-distance-candidates-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraFocusCandidates,$cameraFocusCandidatesPaste),@($cameraFocusCandidatesRepeat,$cameraFocusCandidatesRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraFocusCandidatesGraph.py') --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera focus candidate generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraFocusCandidates,$cameraFocusCandidatesRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\build-camera-focus-distance-candidates-v1.eddgraph')),
+    @($cameraFocusCandidatesPaste,$cameraFocusCandidatesRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\build-camera-focus-distance-candidates-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera focus candidate generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraFocusCandidates
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraFocusCandidatesContracts.py') --project-root $ProjectRoot --graph $cameraFocusCandidates
+if ($LASTEXITCODE -ne 0) { throw "Camera focus candidate full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraFocusCandidatesContracts.py') --project-root $ProjectRoot --graph $cameraFocusCandidatesPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera focus candidate paste contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_camera_engine_application_validators.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine live-validator contracts failed with exit code $LASTEXITCODE."

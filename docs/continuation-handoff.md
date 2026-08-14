@@ -694,6 +694,19 @@ before each append. Both graph forms pass 80 seeded valid banks and twelve
 failure families; byte-identical regeneration and the complete scaffold pass
 in 115.2 seconds. Next: candidate construction.
 
+`BuildCameraFocusDistanceCandidatesV1` is now deterministic at 332 full / 331
+paste nodes. Five exclusive bounded lanes walk the accepted absolute schedule,
+so inactive mode arrays are never read. Every lane checks finite exact time,
+strict ordering, camera geometry, and its mode-owned source immediately before
+append. Manual, fixed-world, prebaked tracking, linear/reciprocal fixed-target
+rack, and chronological exponential autofocus all produce physical centimetre
+distances. Failure publishes no validity and leaves at most a private bounded
+prefix; success is published only when the built count equals the input count.
+Both graph forms match the reference across 80 seeded mode/domain cases and
+reject eleven poisoned per-sample families without mutating authored inputs;
+the complete repository scaffold passes in 115.8 seconds.
+Next: atomic focus-channel commit, then the tiny compile coordinator.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

@@ -188,6 +188,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraViewerComfortResetContracts.py',
     'tools\blueprint\snippets\reset-camera-viewer-comfort-v1.eddgraph',
     'tools\blueprint\snippets\reset-camera-viewer-comfort-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraViewerComfortValidationGraph.py',
+    'tools\blueprint\Test-CameraViewerComfortValidationContracts.py',
+    'tools\blueprint\snippets\validate-camera-viewer-comfort-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-camera-viewer-comfort-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraBaseLookResetGraph.py',
     'tools\blueprint\Test-CameraBaseLookResetContracts.py',
     'tools\blueprint\snippets\reset-camera-look-composition-v1.eddgraph',
@@ -1833,6 +1837,34 @@ foreach ($graph in @($cameraComfortReset,$cameraComfortResetPaste)) {
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
         --project-root $ProjectRoot --graph $graph
     if ($LASTEXITCODE -ne 0) { throw "Camera viewer-comfort reset link integrity failed with exit code $LASTEXITCODE." }
+}
+$cameraComfortValidation = Join-Path $cameraComfortRoot 'validate-camera-viewer-comfort-inputs-v1.eddgraph'
+$cameraComfortValidationPaste = Join-Path $cameraComfortRoot 'validate-camera-viewer-comfort-inputs-v1-paste.eddgraph'
+$cameraComfortValidationRepeat = Join-Path $cameraComfortRoot 'validate-camera-viewer-comfort-inputs-v1-repeat.eddgraph'
+$cameraComfortValidationRepeatPaste = Join-Path $cameraComfortRoot 'validate-camera-viewer-comfort-inputs-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraComfortValidation,$cameraComfortValidationPaste),@($cameraComfortValidationRepeat,$cameraComfortValidationRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraViewerComfortValidationGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera viewer-comfort validation generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraComfortValidation,$cameraComfortValidationRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-viewer-comfort-inputs-v1.eddgraph')),
+    @($cameraComfortValidationPaste,$cameraComfortValidationRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-viewer-comfort-inputs-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera viewer-comfort validation generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraComfortValidation
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraViewerComfortValidationContracts.py') `
+    --project-root $ProjectRoot --graph $cameraComfortValidation
+if ($LASTEXITCODE -ne 0) { throw "Camera viewer-comfort validation full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraViewerComfortValidationContracts.py') `
+    --project-root $ProjectRoot --graph $cameraComfortValidationPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera viewer-comfort validation paste contracts failed with exit code $LASTEXITCODE." }
+foreach ($graph in @($cameraComfortValidation,$cameraComfortValidationPaste)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graph
+    if ($LASTEXITCODE -ne 0) { throw "Camera viewer-comfort validation link integrity failed with exit code $LASTEXITCODE." }
 }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null

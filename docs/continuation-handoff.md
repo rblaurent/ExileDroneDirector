@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the viewer-comfort reset graph checkpoint
+Last updated: 2026-08-14 at the viewer-comfort validation graph checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the first viewer-comfort graph described below; after
+- Current checkpoint is the viewer-comfort validation graph described below; after
   the checkpoint push, HEAD must equal `origin/main` before the next seam starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
@@ -1041,6 +1041,17 @@ and the five-field prior accepted result snapshot. Full and paste interpreters
 execute poisoned state, exact reciprocal links pass, regeneration is byte-
 identical, and the complete scaffold passes in 131.2 seconds. Next: exact
 source-pose/quaternion/channel/preference validation.
+
+`ValidateCameraViewerComfortInputsV1` is deterministic at 146 full / 145 paste
+nodes. It requires a valid source frame, two finite vectors, two finite unit
+quaternions, exact thirteen-channel cardinality and canonical per-index bounds,
+plus five finite 0..1 preferences. Eighty seeded frames and ten failure families
+pass in both forms; all inputs/preferences remain immutable. It writes only
+validation/failure/scratch state, contains one bounded channel loop and no
+reroute knots, and structurally excludes candidates, prior results, camera
+look/channel/application, document/server/playback, and body/gimbal authorship.
+Exact links and byte-identical regeneration pass; the complete scaffold is green
+in 132.2 seconds. Next: local motion candidate construction.
 
 ## Next ordered implementation
 

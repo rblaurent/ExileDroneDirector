@@ -5576,3 +5576,11 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   structurally absent and retain object identity in the poisoned-state
   interpreter. Full/paste exact links and byte-identical regeneration pass; the
   complete scaffold remains green in 131.2 seconds.
+- `ValidateCameraViewerComfortInputsV1` is 146 full / 145 paste nodes. It checks
+  frame validity, two finite vectors, two finite unit quaternions, exact
+  thirteen-value canonical channel shape/ranges, and five 0..1 preferences.
+  Its only loop is bounded by the required 13-value input. Eighty valid seeded
+  frames and ten rejected families pass in both forms, with immutable inputs,
+  no reroute knots, and no candidate/result/external authorship writes. Exact
+  links and deterministic regeneration pass; the complete scaffold remains
+  green in 132.2 seconds.

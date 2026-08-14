@@ -1856,6 +1856,13 @@ before any polished editor UI or cook is attempted:
    and preserve object identity in executable contracts. Exact links,
    byte-identical regeneration, and the complete 131.2-second scaffold pass.
    Input validation is next.
+   `ValidateCameraViewerComfortInputsV1` is now deterministic at 146 full / 145
+   paste nodes. It owns finite vector/unit-quaternion checks, exact thirteen-
+   channel canonical bounds, five normalized preferences, and one bounded loop.
+   Eighty seeded valid frames and ten rejected families pass without mutating
+   inputs; candidates, prior results, external camera state, and body/gimbal
+   authorship are structurally absent. Exact links/regeneration and the complete
+   132.2-second scaffold pass. Local motion candidate construction is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

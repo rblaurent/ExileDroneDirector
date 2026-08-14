@@ -1810,7 +1810,11 @@ before any polished editor UI or cook is attempted:
    preset/channel catalogs, aligned unique overrides, finite values, and exact
    physical/normalized bounds. Eighty-eight valid and thirteen rejected cases,
    exact reciprocal links, and byte-identical regeneration are scaffold-owned.
-   Explicit base-value expansion is next.
+   `BuildCameraLookBaseValuesV1` then rebuilds the private base array through
+   eight explicit thirteen-value paths (136 full / 135 paste nodes, 104 literal
+   appends). Every preset matches the reference catalog, unavailable mappings
+   stay neutral, and exact links/regeneration are scaffold-owned. Sparse
+   authored override composition is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

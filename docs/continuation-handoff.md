@@ -965,6 +965,15 @@ reciprocal links and byte-identical regeneration. It writes only validation,
 failure, and private scratch state, so candidates and the last accepted camera
 look remain untouched. Next: explicit thirteen-value base preset expansion.
 
+`BuildCameraLookBaseValuesV1` is now deterministic at 136 full / 135 paste
+nodes. After validation it rebuilds the private base array from empty and maps
+each of the eight preset names through an explicit thirteen-append execution
+chain: 104 literal values are visible in the graph, including exact neutral
+values for unavailable direct mappings. The interpreter verifies every preset
+against the reference catalog; false validation remains a no-publication path.
+Both forms have exact reciprocal links and byte-identical regeneration. Next:
+apply sparse authored overrides in canonical channel order.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

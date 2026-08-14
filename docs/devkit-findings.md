@@ -5502,3 +5502,9 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   accepted requests and 13 failure families; exact link integrity and
   regeneration are scaffold-owned. Only validation/failure/private scratch
   state is writable, leaving candidate and accepted look snapshots unchanged.
+- `BuildCameraLookBaseValuesV1` is deterministic at 136 full / 135 paste nodes.
+  Eight explicit execution paths append all thirteen canonical values, exposing
+  104 literal preset values rather than hiding behavior in a switch or external
+  table. It rebuilds only private base candidates after validation; accepted
+  look, CameraChannel, engine, motion, document, playback, and comfort state are
+  absent. Every path matches the offline reference and link integrity is exact.

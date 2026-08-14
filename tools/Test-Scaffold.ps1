@@ -188,6 +188,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraBaseLookValidationContracts.py',
     'tools\blueprint\snippets\validate-camera-look-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-camera-look-inputs-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraBaseLookBaseValuesGraph.py',
+    'tools\blueprint\Test-CameraBaseLookBaseValuesContracts.py',
+    'tools\blueprint\snippets\build-camera-look-base-values-v1.eddgraph',
+    'tools\blueprint\snippets\build-camera-look-base-values-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraDollyZoomResetGraph.py',
     'tools\blueprint\Test-CameraDollyZoomResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dolly-zoom-v1.eddgraph',
@@ -1619,6 +1623,34 @@ foreach ($graph in @($cameraLookValidation,$cameraLookValidationPaste)) {
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
         --project-root $ProjectRoot --graph $graph
     if ($LASTEXITCODE -ne 0) { throw "Camera base-look validation link integrity failed with exit code $LASTEXITCODE." }
+}
+$cameraLookBase = Join-Path $cameraLookRoot 'build-camera-look-base-values-v1.eddgraph'
+$cameraLookBasePaste = Join-Path $cameraLookRoot 'build-camera-look-base-values-v1-paste.eddgraph'
+$cameraLookBaseRepeat = Join-Path $cameraLookRoot 'build-camera-look-base-values-v1-repeat.eddgraph'
+$cameraLookBaseRepeatPaste = Join-Path $cameraLookRoot 'build-camera-look-base-values-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraLookBase,$cameraLookBasePaste),@($cameraLookBaseRepeat,$cameraLookBaseRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraBaseLookBaseValuesGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera base-look value generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraLookBase,$cameraLookBaseRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\build-camera-look-base-values-v1.eddgraph')),
+    @($cameraLookBasePaste,$cameraLookBaseRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\build-camera-look-base-values-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera base-look value generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraLookBase
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraBaseLookBaseValuesContracts.py') `
+    --project-root $ProjectRoot --graph $cameraLookBase
+if ($LASTEXITCODE -ne 0) { throw "Camera base-look value full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraBaseLookBaseValuesContracts.py') `
+    --project-root $ProjectRoot --graph $cameraLookBasePaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera base-look value paste contracts failed with exit code $LASTEXITCODE." }
+foreach ($graph in @($cameraLookBase,$cameraLookBasePaste)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graph
+    if ($LASTEXITCODE -ne 0) { throw "Camera base-look value link integrity failed with exit code $LASTEXITCODE." }
 }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null

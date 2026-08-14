@@ -725,6 +725,16 @@ snippets and executable contracts. The complete repository scaffold passes in
 configure/paste/entry-wire repair/compile/save/runtime/PIE/cold
 acceptance for the whole focus helper before any later camera mode work.
 
+The focus-helper live-acceptance package is prepared while Unreal is closed.
+The schema now freezes every scalar/vector default; the idempotent configurator
+owns exactly 24 variables and six function seams; the runtime validator covers
+both query orders, every mode/domain, Set Here hit/miss, full-compile failure,
+direct-commit failure, immutable inputs, and complete default restoration. The
+PIE validator repeats reciprocal rack, Set Here, and fail-closed snapshot
+preservation on the real player-owned Client Director and owns automatic PIE
+teardown. Offline live-tool contracts and the complete repository scaffold pass
+in 116.2 seconds. Next: run the prepared one-editor installation and acceptance.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

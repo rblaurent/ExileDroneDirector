@@ -18,6 +18,10 @@ class CameraFocusHelperSchemaContracts(unittest.TestCase):
  def test_schedule_is_absolute_and_bounded(self):
   self.assertEqual(SCHEMA["limits"],{"minimumDistanceCm":1.0,"minimumSamples":2,"maximumSamples":65536});self.assertIn("independent of query order",SCHEMA["invariants"]["schedule"])
  def test_mode_inputs_are_exclusive(self):self.assertIn("Exactly one mode-specific",SCHEMA["invariants"]["exclusivity"])
+ def test_scalar_and_vector_defaults_are_explicit(self):
+  for item in SCHEMA["variables"]:
+   if item["container"]=="None":self.assertIn("default",item,item["name"])
+  defaults={item["name"]:item.get("default") for item in SCHEMA["variables"]};self.assertEqual(defaults["CameraFocusInputModeV1"],"manual_distance");self.assertEqual(defaults["CameraFocusInputDomainV1"],"linear");self.assertEqual(defaults["CameraFocusInputFixedStepSecondsV1"],0.1);self.assertEqual(defaults["CameraFocusMarkerRevisionV1"],0)
 
 
 if __name__=="__main__":unittest.main(verbosity=2)

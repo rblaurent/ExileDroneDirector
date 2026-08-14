@@ -192,6 +192,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraFocusCompileContracts.py',
     'tools\blueprint\snippets\compile-camera-focus-distance-channel-v1.eddgraph',
     'tools\blueprint\snippets\compile-camera-focus-distance-channel-v1-paste.eddgraph',
+    'tools\unreal\Configure-CameraFocusHelper.py',
+    'tools\unreal\Validate-CameraFocusHelperRuntime.py',
+    'tools\unreal\Validate-CameraFocusHelperPIE.py',
+    'tools\unreal\test_camera_focus_helper_validators.py',
     'tools\unreal\Probe-CameraEngineProperties.py',
     'tools\blueprint\Test-CameraEngineNativeNodeForms.py',
     'tools\blueprint\templates\camera-engine-basic-node-forms.eddgraph',
@@ -1429,6 +1433,8 @@ foreach ($comparison in @(
 if ($LASTEXITCODE -ne 0) { throw "Camera focus compile full contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraFocusCompileContracts.py') --project-root $ProjectRoot --graph $cameraFocusCompilePaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera focus compile paste contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\unreal\test_camera_focus_helper_validators.py')
+if ($LASTEXITCODE -ne 0) { throw "Camera focus live-tool contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_camera_engine_application_validators.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine live-validator contracts failed with exit code $LASTEXITCODE."

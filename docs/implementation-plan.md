@@ -1863,6 +1863,14 @@ before any polished editor UI or cook is attempted:
    inputs; candidates, prior results, external camera state, and body/gimbal
    authorship are structurally absent. Exact links/regeneration and the complete
    132.2-second scaffold pass. Local motion candidate construction is next.
+   `BuildCameraViewerComfortMotionV1` is deterministic at 55 full / 54 paste
+   nodes. It resolves five effective weights, scales separate translation and
+   quaternion shake, composes only onto the evaluated gimbal, applies vertical-
+   safe forward-preserving roll reduction, and publishes private motion/applied
+   candidates. Eighty forward/reverse oracle cases plus false-validation no-op
+   pass; body/channel/result/external state is absent. Exact native links,
+   regeneration, and the complete 135.2-second scaffold pass. Comfort-sensitive
+   camera-value candidate construction is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

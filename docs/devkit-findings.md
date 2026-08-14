@@ -5584,3 +5584,12 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   no reroute knots, and no candidate/result/external authorship writes. Exact
   links and deterministic regeneration pass; the complete scaffold remains
   green in 132.2 seconds.
+- `BuildCameraViewerComfortMotionV1` is 55 full / 54 paste nodes. It resolves
+  disabled policy through five exact-weight selects, scales separate procedural
+  translation and rotation, composes the latter only onto the already evaluated
+  gimbal, and performs vertical-safe forward-preserving roll attenuation. It
+  writes only private candidate position/gimbal/applied state and the rebuilt
+  five-weight array; body, channels, validity, prior results, and external state
+  are absent. Eighty forward/reverse oracle cases and false-validation no-op
+  pass in both forms; exact native calls/links, regeneration, and the complete
+  135.2-second scaffold are green.

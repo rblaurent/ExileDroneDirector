@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the viewer-comfort validation graph checkpoint
+Last updated: 2026-08-14 at the viewer-comfort motion graph checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the viewer-comfort validation graph described below; after
+- Current checkpoint is the viewer-comfort motion graph described below; after
   the checkpoint push, HEAD must equal `origin/main` before the next seam starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
@@ -1052,6 +1052,18 @@ reroute knots, and structurally excludes candidates, prior results, camera
 look/channel/application, document/server/playback, and body/gimbal authorship.
 Exact links and byte-identical regeneration pass; the complete scaffold is green
 in 132.2 seconds. Next: local motion candidate construction.
+
+`BuildCameraViewerComfortMotionV1` is deterministic at 55 full / 54 paste
+nodes. Five Boolean selects resolve disabled policy to exact 1.0 weights. The
+graph scales procedural translation, shortest-arc scales procedural rotation,
+composes only onto the already evaluated gimbal, reconstructs a vertical-safe
+world-level frame from the final forward vector, and blends roll continuously.
+It rebuilds the five effective weights and publishes only private candidate
+position/gimbal/applied state; body, channels, validity, prior results, and all
+external authorship are absent. Eighty forward/reverse oracle cases and a false-
+validation no-op pass in both forms. Exact native calls/links and deterministic
+regeneration pass; the complete scaffold is green in 135.2 seconds. Next: copy
+all thirteen camera values and scale only the four comfort-sensitive outputs.
 
 ## Next ordered implementation
 

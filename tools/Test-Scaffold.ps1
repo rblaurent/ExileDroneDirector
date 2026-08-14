@@ -164,6 +164,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraEngineApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-engine-application-result-v1.eddgraph',
     'tools\blueprint\snippets\reset-camera-engine-application-result-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraEngineApplicationStageGraph.py',
+    'tools\blueprint\Test-CameraEngineApplicationStageContracts.py',
+    'tools\blueprint\snippets\stage-evaluated-camera-channel-frame-v1.eddgraph',
+    'tools\blueprint\snippets\stage-evaluated-camera-channel-frame-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraChannelCompileResetGraph.py',
     'tools\blueprint\Test-CameraChannelCompileResetContracts.py',
     'tools\blueprint\snippets\reset-camera-channel-compile-v1.eddgraph',
@@ -1257,6 +1261,42 @@ if ($LASTEXITCODE -ne 0) {
     --project-root $ProjectRoot --graph $cameraApplyResetPaste --paste
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine-application reset paste contracts failed with exit code $LASTEXITCODE."
+}
+$cameraApplyStage = Join-Path $cameraApplyResetRoot 'stage-evaluated-camera-channel-frame-v1.eddgraph'
+$cameraApplyStagePaste = Join-Path $cameraApplyResetRoot 'stage-evaluated-camera-channel-frame-v1-paste.eddgraph'
+$cameraApplyStageRepeat = Join-Path $cameraApplyResetRoot 'stage-evaluated-camera-channel-frame-v1-repeat.eddgraph'
+$cameraApplyStageRepeatPaste = Join-Path $cameraApplyResetRoot 'stage-evaluated-camera-channel-frame-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($cameraApplyStage, $cameraApplyStagePaste),
+    @($cameraApplyStageRepeat, $cameraApplyStageRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraEngineApplicationStageGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) {
+        throw "Camera engine-application staging generation failed with exit code $LASTEXITCODE."
+    }
+}
+foreach ($comparison in @(
+    @($cameraApplyStage, $cameraApplyStageRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\stage-evaluated-camera-channel-frame-v1.eddgraph')),
+    @($cameraApplyStagePaste, $cameraApplyStageRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\stage-evaluated-camera-channel-frame-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $comparison[1]).Hash) {
+        throw "Camera engine-application staging generation is not deterministic: $($comparison[0])"
+    }
+    if ((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $comparison[2]).Hash) {
+        throw "Checked-in camera engine-application staging snippet drifted: $($comparison[2])"
+    }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraApplyStage
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraEngineApplicationStageContracts.py') `
+    --project-root $ProjectRoot --graph $cameraApplyStage
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine-application staging full contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraEngineApplicationStageContracts.py') `
+    --project-root $ProjectRoot --graph $cameraApplyStagePaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine-application staging paste contracts failed with exit code $LASTEXITCODE."
 }
 $cameraScalarNonce = [guid]::NewGuid().ToString('N')
 $cameraScalarRoot = Join-Path $scratchRoot "edd-camera-scalar-$cameraScalarNonce"

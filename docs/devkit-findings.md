@@ -5252,3 +5252,11 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   array and four result/scratch scalars while complete capability, input,
   baseline, current, and active-session state remains structurally absent and
   object-identical in the interpreter. No engine property is read or written.
+- `StageEvaluatedCameraChannelFrameV1` freezes the engine-neutral crossing as a
+  deterministic 58/57-node full/paste graph. A valid evaluated thirteen-channel
+  result becomes exactly fifteen adapter values: filmback width/height followed
+  by channel indices 0..12. The graph clears and invalidates first, validates
+  result shape and filmback identity/dimensions, and publishes input validity
+  last. Eight invalid families leave empty input; 80 seeded mappings preserve
+  the source. Capability, session, baseline/current, and engine properties are
+  structurally unreachable.

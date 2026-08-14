@@ -50,9 +50,10 @@ class CameraEngineApplicationBlueprintSchemaContracts(unittest.TestCase):
 
     def test_function_order_separates_preflight_capture_apply_and_restore(self):
         functions = self.schema["functions"]
-        self.assertEqual([item["stage"] for item in functions], list(range(6)))
+        self.assertEqual([item["stage"] for item in functions], list(range(7)))
         self.assertEqual([item["name"] for item in functions], [
             "ResetCameraEngineApplicationResultV1",
+            "StageEvaluatedCameraChannelFrameV1",
             "ValidateCameraEngineApplicationInputsV1",
             "CaptureCameraEngineStateV1",
             "ApplyCameraEngineFrameV1",
@@ -60,9 +61,9 @@ class CameraEngineApplicationBlueprintSchemaContracts(unittest.TestCase):
             "ApplyEvaluatedCameraChannelFrameV1",
         ])
         self.assertNotIn("RestoreCameraEngineStateV1", functions[-1]["uses"])
-        self.assertTrue(functions[2]["engineReads"])
-        self.assertTrue(functions[3]["engineWrites"])
+        self.assertTrue(functions[3]["engineReads"])
         self.assertTrue(functions[4]["engineWrites"])
+        self.assertTrue(functions[5]["engineWrites"])
 
     def test_contract_requires_zero_write_rejection_and_exact_restoration(self):
         contracts = self.schema["invariants"]

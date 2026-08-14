@@ -498,6 +498,19 @@ object identity under poisoned execution. Full/paste SHA-256 is
 `C7A4449A711CF6D0E1894EB5E4C4515F3EF7D5C934A5F3B7E9FDF33D386AA23B`.
 Next: stage the accepted fifteen-value frame without touching engine state.
 
+`StageEvaluatedCameraChannelFrameV1` is deterministic at 58 full / 57 paste
+nodes. It invalidates and clears prior adapter input first, requires a valid
+thirteen-value evaluated channel frame plus a finite positive filmback and
+nonempty preset ID, then appends width, height, and each canonical channel index
+0..12 exactly once. Input validity publishes last. Eight failure families leave
+an empty invalid adapter input, while 80 seeded frames preserve the source and
+map exactly. Capability, baseline/current, active-session, authored, candidate,
+and compiled storage is absent. Full/paste SHA-256 is
+`39C4C9FCF5BF1BFDC2651FFF2D4255F6611F3EFFAE442BEAEA22C0CF4542438C` /
+`A39EA6AD24B5B2C80C5CF09876FAE84C194AFA501AF1A82F7D7210F123C0C4F2`.
+Next: validate the frozen capability manifest and all fifteen staged values
+before any engine capture or write.
+
 ## Next ordered implementation
 
 Continue the camera engine-application seam with deterministic reset,

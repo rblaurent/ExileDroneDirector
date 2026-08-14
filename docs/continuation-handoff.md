@@ -808,6 +808,19 @@ are scaffold-owned. Next: prepare the idempotent configurator, runtime oracle,
 and automatic PIE probe while Unreal is closed, then install and accept the
 four-graph family in one editor.
 
+The DOF live-acceptance package is prepared while Unreal remains closed.
+`Configure-CameraDofDiagnostics.py` idempotently owns exactly 18 scalar
+variables and four functions. The runtime validator compares six bounded and
+unbounded optical frames in forward and reverse order to the independent
+reference, proves upstream frame immutability, and covers direct-compute plus
+invalid-frame failures. The automatic PIE validator exercises bounded,
+unbounded, and fail-closed frames on the real player-owned Client Director and
+tears down every PIE session itself. The separate post-PIE restore compiles
+outside the callback, reacquires the generated class, and restores both the 18
+DOF defaults and the four accepted upstream camera-frame defaults temporarily
+used by the probe. Next: one-editor configure/paste/compile/save/runtime/PIE/
+restore/cold acceptance and final live exports.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

@@ -1743,8 +1743,10 @@ before any polished editor UI or cook is attempted:
    bounded and unbounded far-depth domains and rejects ten direct-boundary
    failures without overwriting prior diagnostic scalars. The 4/3-node top-
    level helper adds only the exact reset → stage → compute order with no state
-   or policy. The complete four-graph family is now offline-green; one-editor
-   acceptance remains.
+   or policy. The complete four-graph family is now offline-green. Its
+   idempotent configurator, oracle runtime probe, three-session automatic PIE
+   probe, and post-PIE schema restore are prepared and offline-checked; one-
+   editor acceptance remains.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

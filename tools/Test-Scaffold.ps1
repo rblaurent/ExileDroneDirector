@@ -188,6 +188,11 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraDofDiagnosticsEvaluateContracts.py',
     'tools\blueprint\snippets\evaluate-camera-dof-diagnostics-v1.eddgraph',
     'tools\blueprint\snippets\evaluate-camera-dof-diagnostics-v1-paste.eddgraph',
+    'tools\unreal\Configure-CameraDofDiagnostics.py',
+    'tools\unreal\Restore-CameraDofDiagnosticsSchemaDefaults.py',
+    'tools\unreal\Validate-CameraDofDiagnosticsRuntime.py',
+    'tools\unreal\Validate-CameraDofDiagnosticsPIE.py',
+    'tools\unreal\test_camera_dof_diagnostics_validators.py',
     'tools\blueprint\Build-CameraFocusCompileResetGraph.py',
     'tools\blueprint\Test-CameraFocusCompileResetContracts.py',
     'tools\blueprint\snippets\reset-camera-focus-compile-v1.eddgraph',
@@ -1428,6 +1433,8 @@ foreach ($comparison in @(
 if ($LASTEXITCODE -ne 0) { throw "Camera DOF evaluate full contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDofDiagnosticsEvaluateContracts.py') --project-root $ProjectRoot --graph $cameraDofEvaluatePaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera DOF evaluate paste contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\unreal\test_camera_dof_diagnostics_validators.py')
+if ($LASTEXITCODE -ne 0) { throw "Camera DOF live-tool contracts failed with exit code $LASTEXITCODE." }
 $cameraFocusRoot = Join-Path $scratchRoot ("edd-camera-focus-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraFocusRoot -Force | Out-Null
 $cameraFocusReset = Join-Path $cameraFocusRoot 'reset-camera-focus-compile-v1.eddgraph'

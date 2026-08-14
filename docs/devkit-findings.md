@@ -5518,3 +5518,9 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   preset/channel identity plus all three value snapshots, and sets validity
   last. Eighty accepted snapshots and five rejected shapes prove deep-copy
   publication and byte-for-byte preservation of prior accepted data on failure.
+- `ComposeCameraLookV1` is the policy-free terminal graph at 6 full / 5 paste
+  nodes. It calls reset, validation, explicit base expansion, canonical sparse
+  overrides, and atomic commit in exact order. No variables, branches, loops,
+  camera math, or external state appear. The complete six-graph family passes
+  byte-identical regeneration, executable contracts, and reciprocal-link checks
+  before any editor mutation.

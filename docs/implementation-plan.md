@@ -1821,7 +1821,10 @@ before any polished editor UI or cook is attempted:
    implemented by `CommitCameraLookCompositionV1` (39 full / 38 paste nodes):
    exact 13/13/13 candidate shape, explicit canonical IDs, value snapshots, and
    validity-last publication. Eighty successes and five failure shapes pass;
-   failure preserves accepted data. The six-stage coordinator is next.
+   failure preserves accepted data. `ComposeCameraLookV1` completes the offline
+   family at 6 full / 5 paste nodes with exactly five ordered self-calls and no
+   hidden policy. All six graphs are deterministic, interpreter-checked, and
+   link-exact. Single-editor live and PIE acceptance is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

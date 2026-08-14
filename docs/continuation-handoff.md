@@ -991,6 +991,15 @@ five rejected shapes prove success isolation and prior accepted-data
 preservation. Both forms have exact reciprocal links and byte-identical
 regeneration. Next: the tiny six-stage composition coordinator.
 
+`ComposeCameraLookV1` completes the offline family at 6 full / 5 paste nodes.
+It contains exactly five self-calls in the frozen reset -> validate -> base-build
+-> authored-override -> atomic-commit order, with no variables, branches, loops,
+or hidden camera policy. All six named-look graphs now regenerate
+byte-identically, pass their interpreters and exact reciprocal-link checks, and
+the complete repository scaffold is green with Unreal still closed. Next:
+single-editor install, compile/topology verification, warm runtime routes, PIE
+acceptance, guarded shutdown, reverse sync, and cold-load proof.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

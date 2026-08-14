@@ -172,6 +172,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_dof_diagnostics_reference.py',
     'tools\trajectory\camera_dof_diagnostics_blueprint_schema.json',
     'tools\trajectory\test_camera_dof_diagnostics_blueprint_schema.py',
+    'tools\trajectory\camera_dolly_zoom_reference.py',
+    'tools\trajectory\test_camera_dolly_zoom_reference.py',
+    'tools\trajectory\camera_dolly_zoom_blueprint_schema.json',
+    'tools\trajectory\test_camera_dolly_zoom_blueprint_schema.py',
     'tools\blueprint\Build-CameraDofDiagnosticsResetGraph.py',
     'tools\blueprint\Test-CameraDofDiagnosticsResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dof-diagnostics-v1.eddgraph',
@@ -1354,6 +1358,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_dof_diagnostics_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera DOF diagnostic Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_dolly_zoom_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera dolly-zoom reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_dolly_zoom_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera dolly-zoom Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null

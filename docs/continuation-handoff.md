@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the live camera DOF-diagnostic checkpoint
+Last updated: 2026-08-14 at the frozen offline dolly-zoom contract checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -839,6 +839,22 @@ Blueprints, emitted `EDD_COLD_LOAD|RESULT|PASS`, and exited with zero errors.
 The four cold-editor exports are scaffold-owned under
 `tools/blueprint/live-snippets`. Next: continue Phase 5 with deterministic
 dolly-zoom authoring before comfort/effect helpers and playback modes.
+
+The dolly-zoom authoring boundary is now frozen offline. It accepts an explicit
+time schedule, separately authored camera positions, one fixed subject, a
+reference sample index, and a reference focal length. It derives focal length
+with `focal / subject-distance` held constant, assuming the independent gimbal
+or look-at author keeps the optical axis on that subject. It cannot write
+position, body, gimbal, focus, compiled camera-channel, engine, document, or
+playback state. Validation and bounded candidate construction have distinct
+validity flags; reset preserves the prior compiled snapshot; commit replaces
+the whole aligned result and publishes validity last. Derived focal lengths
+outside 1..1000 mm reject the result instead of being clamped, because clamping
+would break framing. Five executable reference tests cover exact optics,
+immutability, twelve failure cases, and 80 seeded forward/reverse routes; four
+schema tests freeze 15 variables and the ordered reset, validate, build, commit,
+and compile family. Next: generate and interpret those five Blueprint graphs in
+order before opening Unreal.
 
 ## Next ordered implementation
 

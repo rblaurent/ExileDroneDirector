@@ -1752,7 +1752,14 @@ before any polished editor UI or cook is attempted:
    separate restore proves all 22 temporarily touched defaults before cold
    compile. Live/mirror Client Director SHA-256 is
    `E7DFEBF802DC5B26278838445BBFF0C6C9818C47919DD903E7B7E551646F9120`.
-   Dolly-zoom authoring is the next Phase-5 seam.
+   Dolly-zoom authoring is now frozen as the next Phase-5 seam. Its explicit
+   schedule/position/subject inputs preserve genuinely separate position, body,
+   and gimbal authorship; it derives only a focal-length result by holding
+   focal-length/subject-distance constant. Validation and candidate validity are
+   separate, reset preserves the last compiled result, and atomic commit
+   publishes validity last. The accepted 1..1000 mm lens domain rejects rather
+   than clamps. Five reference tests and four schema tests own the offline
+   contract; the five deterministic Blueprint graphs are next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

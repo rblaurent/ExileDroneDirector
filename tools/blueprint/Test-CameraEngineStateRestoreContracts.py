@@ -68,6 +68,9 @@ def main() -> None:
     contracts.require(not active_guard.pins["else"].links, "inactive repeated restore is a stable no-op")
 
     text = args.graph.read_text(encoding="utf-8")
+    components = [node for node in nodes.values() if "K2Node_VariableGet" in node.node_class and member(node) == "DroneCamera"]
+    contracts.require(len(components) == 1 and "BP_EDD_DroneCamera.BP_EDD_DroneCamera_C" in components[0].text, "component getter has explicit actor owner")
+    contracts.require("bSelfContext=True" not in components[0].text, "component getter cannot alias director self")
     contracts.require(len([node for node in nodes.values() if "K2Node_IfThenElse" in node.node_class]) == 2, "active and complete restore preflight")
     contracts.require(len([node for node in nodes.values() if "K2Node_GetArrayItem" in node.node_class]) == 2, "only focal/aperture scalar baseline reads")
     contracts.require('DefaultValue="2"' in text and 'DefaultValue="3"' in text, "exact focal/aperture indices")

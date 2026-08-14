@@ -10,6 +10,7 @@ from pathlib import Path
 
 
 FUNCTION = "CaptureCameraEngineStateV1"
+DRONE_CAMERA_CLASS = "/Script/Engine.BlueprintGeneratedClass'/Game/Mods/ExileDroneDirector/Core/Camera/BP_EDD_DroneCamera.BP_EDD_DroneCamera_C'"
 STRUCTS = {
     "filmback": "/Script/CinematicCamera.CameraFilmbackSettings",
     "focus": "/Script/CinematicCamera.CameraFocusSettings",
@@ -67,6 +68,14 @@ def main() -> None:
         builder.nodes.append(node)
         return node
 
+    def external_component(node):
+        internal = 'VariableReference=(MemberName="DroneCamera",bSelfContext=True)'
+        external = f'VariableReference=(MemberParent="{DRONE_CAMERA_CLASS}",MemberName="DroneCamera")'
+        if node.text.count(internal) != 1:
+            raise RuntimeError("native DroneCamera component form is not the reviewed internal-owner shape")
+        node.text = node.text.replace(internal, external)
+        return node
+
     def pin_type(node, pin: str, kind: str, *, array: bool = False) -> None:
         category, subcategory, object_name = {
             "bool": ("bool", "", None),
@@ -121,7 +130,7 @@ def main() -> None:
     bp.connect(camera_guard, "then", active_guard, "execute")
     bp.connect(active, "CameraApplySessionActiveV1", active_guard, "Condition")
 
-    component = add_form("component", "component", 256, 320)
+    component = external_component(add_form("component", "component", 256, 320))
     bp.connect(camera_ref, "DroneCameraRef", component, "self")
     filmback = add_form("filmback", "filmback_get", 512, 320)
     focus = add_form("focus", "focus_get", 512, 640)

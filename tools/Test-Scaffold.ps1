@@ -196,6 +196,15 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraEngineApplicationContracts.py',
     'tools\blueprint\snippets\apply-evaluated-camera-channel-frame-v1.eddgraph',
     'tools\blueprint\snippets\apply-evaluated-camera-channel-frame-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-camera-engine-application-result-v1.eddgraph',
+    'tools\blueprint\live-snippets\stage-evaluated-camera-channel-frame-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-camera-engine-application-inputs-v1.eddgraph',
+    'tools\blueprint\live-snippets\capture-camera-engine-state-v1.eddgraph',
+    'tools\blueprint\live-snippets\apply-camera-engine-frame-v1.eddgraph',
+    'tools\blueprint\live-snippets\restore-camera-engine-state-v1.eddgraph',
+    'tools\blueprint\live-snippets\apply-evaluated-camera-channel-frame-v1.eddgraph',
+    'tools\unreal\Configure-CameraEngineApplication.py',
+    'tools\unreal\test_configure_camera_engine_application.py',
     'tools\blueprint\Build-CameraChannelCompileResetGraph.py',
     'tools\blueprint\Test-CameraChannelCompileResetContracts.py',
     'tools\blueprint\snippets\reset-camera-channel-compile-v1.eddgraph',
@@ -1255,6 +1264,10 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine-property probe contracts failed with exit code $LASTEXITCODE."
 }
+& python (Join-Path $ProjectRoot 'tools\unreal\test_configure_camera_engine_application.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine live-configurator contracts failed with exit code $LASTEXITCODE."
+}
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraEngineNativeNodeForms.py') `
     --project-root $ProjectRoot `
     --basic (Join-Path $ProjectRoot 'tools\blueprint\templates\camera-engine-basic-node-forms.eddgraph') `
@@ -1405,6 +1418,21 @@ foreach ($spec in $cameraNativeSpecs) {
     if ($LASTEXITCODE -ne 0) { throw "Camera engine $($spec.Label) full contracts failed with exit code $LASTEXITCODE." }
     & python (Join-Path $ProjectRoot "tools\blueprint\$($spec.Test)") --project-root $ProjectRoot --graph $generatedPaste --paste
     if ($LASTEXITCODE -ne 0) { throw "Camera engine $($spec.Label) paste contracts failed with exit code $LASTEXITCODE." }
+}
+$cameraEngineLiveSpecs = @(
+    @{ Label = 'reset'; Test = 'Test-CameraEngineApplicationResetContracts.py'; File = 'reset-camera-engine-application-result-v1.eddgraph' },
+    @{ Label = 'stage'; Test = 'Test-CameraEngineApplicationStageContracts.py'; File = 'stage-evaluated-camera-channel-frame-v1.eddgraph' },
+    @{ Label = 'validation'; Test = 'Test-CameraEngineApplicationValidationContracts.py'; File = 'validate-camera-engine-application-inputs-v1.eddgraph' },
+    @{ Label = 'capture'; Test = 'Test-CameraEngineStateCaptureContracts.py'; File = 'capture-camera-engine-state-v1.eddgraph' },
+    @{ Label = 'apply'; Test = 'Test-CameraEngineFrameApplyContracts.py'; File = 'apply-camera-engine-frame-v1.eddgraph' },
+    @{ Label = 'restore'; Test = 'Test-CameraEngineStateRestoreContracts.py'; File = 'restore-camera-engine-state-v1.eddgraph' },
+    @{ Label = 'orchestrator'; Test = 'Test-CameraEngineApplicationContracts.py'; File = 'apply-evaluated-camera-channel-frame-v1.eddgraph' }
+)
+foreach ($spec in $cameraEngineLiveSpecs) {
+    $liveGraph = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($spec.File)"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $liveGraph
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($spec.Test)") --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) { throw "Live camera engine $($spec.Label) contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraScalarNonce = [guid]::NewGuid().ToString('N')
 $cameraScalarRoot = Join-Path $scratchRoot "edd-camera-scalar-$cameraScalarNonce"

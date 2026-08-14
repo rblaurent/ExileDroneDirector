@@ -65,7 +65,7 @@ Begin Object Class=/Script/BlueprintGraph.K2Node_IfThenElse Name="K2Node_IfThenE
    CustomProperties Pin (PinId=E6FD0D0FBB0B5D0C9F491E0B9B898CF7,PinName="else",PinFriendlyName=NSLOCTEXT("K2Node", "false", "false"),Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,LinkedTo=(K2Node_CallArrayFunction_0 4E724D9615155DBA851839145C547A0D,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
 End Object
 Begin Object Class=/Script/BlueprintGraph.K2Node_VariableGet Name="K2Node_VariableGet_2" ExportPath="/Script/BlueprintGraph.K2Node_VariableGet'/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector:CaptureCameraEngineStateV1.K2Node_VariableGet_2'"
-   VariableReference=(MemberName="DroneCamera",bSelfContext=True)
+   VariableReference=(MemberParent="/Script/Engine.BlueprintGeneratedClass'/Game/Mods/ExileDroneDirector/Core/Camera/BP_EDD_DroneCamera.BP_EDD_DroneCamera_C'",MemberName="DroneCamera")
    NodePosX=256
    NodePosY=320
    NodeGuid=245F29863A3C5FA89671B162304868BA

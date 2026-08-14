@@ -68,6 +68,9 @@ def main() -> None:
         contracts.require_link(entries[0], "then", guard, "execute", "entry reaches complete preflight")
 
     text = args.graph.read_text(encoding="utf-8")
+    components = [node for node in nodes.values() if "K2Node_VariableGet" in node.node_class and member(node) == "DroneCamera"]
+    contracts.require(len(components) == 1 and "BP_EDD_DroneCamera.BP_EDD_DroneCamera_C" in components[0].text, "component getter has explicit actor owner")
+    contracts.require("bSelfContext=True" not in components[0].text, "component getter cannot alias director self")
     engine_members = ("Filmback", "FocusSettings", "PostProcessSettings", "CurrentFocalLength", "CurrentAperture")
     for name in engine_members:
         setters = [node for node in nodes.values() if "K2Node_VariableSet" in node.node_class and member(node) == name]

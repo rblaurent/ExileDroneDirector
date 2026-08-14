@@ -77,6 +77,9 @@ def main() -> None:
         contracts.require_link(entries[0], "then", camera_guard, "execute", "entry reaches camera guard")
 
     text = args.graph.read_text(encoding="utf-8")
+    component = one(nodes, cls="K2Node_VariableGet", name="DroneCamera")
+    contracts.require("BP_EDD_DroneCamera.BP_EDD_DroneCamera_C" in component.text, "component getter has explicit actor owner")
+    contracts.require("bSelfContext=True" not in component.text, "component getter cannot alias director self")
     contracts.require(text.count('MemberName="Array_Add"') == 15, "exact fifteen canonical baseline appends")
     contracts.require(text.count('MemberName="Array_Clear"') == 1, "baseline clears exactly once")
     contracts.require(text.count('MemberName="IsValid"') == 1, "one camera validity preflight")

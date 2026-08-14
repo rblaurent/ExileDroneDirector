@@ -5343,3 +5343,26 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   the installed graphs. The complete repository scaffold, including byte-
   deterministic regeneration of all four new graph pairs, passes in 139.2
   seconds.
+
+## 2026-08-14: camera engine application compiles after explicit component ownership
+
+- The seven installed Client Director graphs contain 7, 58, 171, 41, 60, 28,
+  and 9 nodes in reset-to-orchestration order. Exact contracts passed on all
+  seven precompile exports.
+- The first Enhanced compile exposed a real ownership defect in capture, apply,
+  and restore: the harvested internal `DroneCamera` component getter retained
+  `bSelfContext=True`, so the compiler searched Client Director for that
+  property. The compile was not saved.
+- The deterministic generators now rewrite that one reviewed native form to
+  `MemberParent=BP_EDD_DroneCamera_C` and remove self-context ownership while
+  keeping its typed target pin connected to `DroneCameraRef`. Contracts require
+  that exact external owner and reject director-self aliasing.
+- After replacing only the three affected unsaved bodies, a fresh marked
+  compile emitted no Blueprint compiler diagnostics and the editor showed the
+  green compile indicator. Save returned true. All seven postcompile exports
+  pass their exact contracts.
+- Guarded shutdown reached `LogExit: Exiting.`. Closed-editor sync found 16
+  unchanged packages and copied only Client Director. Live and mirror hash to
+  `C4D9AE3CE312D4305C46E41CC1033FD4B653F5D23B124178CE27F923D4CDE1C5`.
+- The complete scaffold with mirrored MVP assets and all seven live exports
+  passes in 113.1 seconds.

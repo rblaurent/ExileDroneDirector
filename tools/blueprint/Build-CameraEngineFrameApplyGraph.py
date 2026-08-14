@@ -11,6 +11,7 @@ from pathlib import Path
 
 FUNCTION = "ApplyCameraEngineFrameV1"
 TARGET_CLASS = "/Script/Engine.BlueprintGeneratedClass'/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector_C'"
+DRONE_CAMERA_CLASS = "/Script/Engine.BlueprintGeneratedClass'/Game/Mods/ExileDroneDirector/Core/Camera/BP_EDD_DroneCamera.BP_EDD_DroneCamera_C'"
 STRUCTS = {
     "filmback": "/Script/CinematicCamera.CameraFilmbackSettings",
     "focus": "/Script/CinematicCamera.CameraFocusSettings",
@@ -69,6 +70,14 @@ def main() -> None:
         builder.serial[cls] = index + 1
         node = bp.Node.clone(key, raw, f"{cls}_{index}", x, y)
         builder.nodes.append(node)
+        return node
+
+    def external_component(node):
+        internal = 'VariableReference=(MemberName="DroneCamera",bSelfContext=True)'
+        external = f'VariableReference=(MemberParent="{DRONE_CAMERA_CLASS}",MemberName="DroneCamera")'
+        if node.text.count(internal) != 1:
+            raise RuntimeError("native DroneCamera component form is not the reviewed internal-owner shape")
+        node.text = node.text.replace(internal, external)
         return node
 
     def pin_type(node, pin: str, kind: str, *, array: bool = False) -> None:
@@ -152,7 +161,7 @@ def main() -> None:
     failure = set_value("CameraApplyFailureCodeV1", "string", 3552, 3136, "application_preflight_failed")
     bp.connect(guard, "else", failure, "execute")
 
-    component = add_form("component", "component", 256, 1440)
+    component = external_component(add_form("component", "component", 256, 1440))
     bp.connect(camera_ref, "DroneCameraRef", component, "self")
     filmback_get = add_form("filmback_get", "filmback_get", 512, 1440)
     focus_get = add_form("focus_get", "focus_get", 512, 1600)

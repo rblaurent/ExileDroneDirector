@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the camera engine native-node checkpoint
+Last updated: 2026-08-14 at the saved camera engine compile checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,11 +23,10 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current implementation lineage starts from remote-equal `c03cb4e`, with the
-  accepted engine manifest and preflight graphs described below; HEAD must
+- Current camera-engine live work started from remote-equal `94c6739`, with the
+  accepted native ABI and seven offline graphs described below; HEAD must
   equal `origin/main` before checkpoint work is committed
-- Expected worktree while this checkpoint is in progress: only the native-form
-  templates, their contract test, scaffold ownership, and these docs
+- Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
 - One Enhanced editor is intentionally open for the single-editor acceptance
@@ -599,13 +598,45 @@ complete scaffold passes in 139.2 seconds and owns their sixteen
 generator/test/snippet files. Next: commit/push, then configure and install the full seven-
 graph family in the one existing editor for compile/runtime/PIE/cold acceptance.
 
+## Saved camera engine-application compile checkpoint
+
+The complete seven-graph family is now installed, compiled, saved, mirrored,
+and frozen as postcompile exports. This is a compile checkpoint, not runtime or
+PIE acceptance yet.
+
+- Saved graphs are reset 7 nodes, stage 58, validation 171, capture 41, apply
+  60, restore 28, and orchestration 9. Every exact full-graph contract passed
+  before compile and again on the checked-in postcompile exports.
+- The first real compile correctly rejected three native component getters
+  that still claimed director self-ownership. No bad compile was saved. The
+  capture/apply/restore generators now externalize `DroneCamera` with explicit
+  `BP_EDD_DroneCamera_C` ownership, their contracts reject `bSelfContext=True`,
+  and the three live bodies were replaced from the corrected deterministic
+  snippets.
+- The corrected compile produced no Blueprint compiler messages between the
+  fresh compile markers and Unreal displayed the green compile indicator.
+  Saving then returned true.
+- Guarded shutdown reached `LogExit: Exiting.`. Closed-editor reverse preview
+  reported 16 unchanged packages and exactly Client Director changed; sync
+  copied one package.
+- Live and mirrored Client Director SHA-256 is
+  `C4D9AE3CE312D4305C46E41CC1033FD4B653F5D23B124178CE27F923D4CDE1C5`.
+- The scaffold owns the configurator, explicit cross-Blueprint component
+  contract, generators, snippets, and all seven live exports. The complete
+  repository regression with mirrored MVP assets passes in 113.1 seconds.
+
+Next, keep this exact saved graph family unchanged and add runtime acceptance:
+two warm CDO runs with real native property mutation/restoration, unsupported-
+channel zero-write failures, repeated capture, opaque whole-struct restoration,
+and forward/reverse frames. Then run real PIE on the player-owned director,
+guarded shutdown/sync, fresh NullRHI runtime, cold asset load, and the complete
+scaffold. Only after that live acceptance may camera helpers/modes/events
+continue toward debug dogfood.
+
 ## Next ordered implementation
 
-Continue the camera engine-application seam with deterministic reset,
-validation, staging, and property-manifest probe generators/interpreters. Only
-after that offline family is green, use one editor to freeze actual Enhanced
-property availability and then complete compile/save/runtime/PIE/cold
-acceptance. Continue through the
+Continue the saved camera engine-application seam with runtime, real PIE,
+fresh-process, cold-load, and complete-regression acceptance. Continue through the
 remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,
 and bounded event adapters with authorization. After the complete backend,
 expose temporary debug controls and logs, run attended dogfood, and only then
@@ -766,6 +797,7 @@ Confidence is high in every live checkpoint explicitly accepted above, including
 complete live source-sampling bridge, lossless compiled-document adapter with
 post-boundary discontinuity diagnostics, scalar-track engine, and synchronized
 thirteen-channel lens/focus/effect frame assembly. The engine-application
-reference/schema is accepted offline only. Confidence is not yet claimed for
-live engine property application/restoration, camera modes, events, keyboard
+graphs are accepted through saved Enhanced compilation and exact postcompile
+exports; runtime/PIE/fresh-process acceptance remains pending. Confidence is
+not yet claimed for live engine property mutation/restoration, camera modes, events, keyboard
 dogfood, UI, cooking, Workshop, G-Portal, deployment, or whole-mod completion.

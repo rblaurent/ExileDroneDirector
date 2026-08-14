@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current DOF graph work started from remote-equal `81b3719`, with the
+- Current DOF graph work started from remote-equal `a8a9af3`, with the
   accepted focus helper and frozen diagnostic boundary described below; HEAD must
   equal `origin/main` before checkpoint work is committed
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
@@ -787,6 +787,18 @@ then copies only filmback plus canonical focal/aperture/focus indices and
 publishes stage validity last. Eighty seeded frames and nine corruption families
 pass in both forms; generation is byte-identical. Next: physical DOF
 calculation, then the tiny evaluator coordinator.
+
+The physical DOF calculation is now deterministic at 90 full / 89 paste nodes.
+It revalidates all six staged inputs, implements the frozen filmback-diagonal
+circle of confusion and thin-lens near/far equations, publishes an explicit
+bounded/unbounded far state, and sets result validity last on both terminal
+paths. The executable interpreter matches the independent reference across 80
+seeded camera states (seven bounded, 73 unbounded) and rejects ten invalid or
+physically impossible stages while preserving prior unpublished diagnostics.
+The graph reads only the six DOF stage scalars and cannot touch camera-channel,
+focus, airframe, document, transform, or engine state. Next: the tiny
+reset/stage/compute evaluator coordinator, then one-editor acceptance of all
+four graphs.
 
 ## Next ordered implementation
 

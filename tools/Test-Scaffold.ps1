@@ -180,6 +180,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraDofDiagnosticsStageContracts.py',
     'tools\blueprint\snippets\stage-evaluated-camera-dof-frame-v1.eddgraph',
     'tools\blueprint\snippets\stage-evaluated-camera-dof-frame-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraDofDiagnosticsComputeGraph.py',
+    'tools\blueprint\Test-CameraDofDiagnosticsComputeContracts.py',
+    'tools\blueprint\snippets\compute-camera-dof-diagnostics-v1.eddgraph',
+    'tools\blueprint\snippets\compute-camera-dof-diagnostics-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraFocusCompileResetGraph.py',
     'tools\blueprint\Test-CameraFocusCompileResetContracts.py',
     'tools\blueprint\snippets\reset-camera-focus-compile-v1.eddgraph',
@@ -1380,6 +1384,26 @@ foreach ($comparison in @(
 if ($LASTEXITCODE -ne 0) { throw "Camera DOF stage full contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDofDiagnosticsStageContracts.py') --project-root $ProjectRoot --graph $cameraDofStagePaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera DOF stage paste contracts failed with exit code $LASTEXITCODE." }
+$cameraDofCompute = Join-Path $cameraDofRoot 'compute-camera-dof-diagnostics-v1.eddgraph'
+$cameraDofComputePaste = Join-Path $cameraDofRoot 'compute-camera-dof-diagnostics-v1-paste.eddgraph'
+$cameraDofComputeRepeat = Join-Path $cameraDofRoot 'compute-camera-dof-diagnostics-v1-repeat.eddgraph'
+$cameraDofComputeRepeatPaste = Join-Path $cameraDofRoot 'compute-camera-dof-diagnostics-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraDofCompute,$cameraDofComputePaste),@($cameraDofComputeRepeat,$cameraDofComputeRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraDofDiagnosticsComputeGraph.py') --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera DOF compute generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraDofCompute,$cameraDofComputeRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\compute-camera-dof-diagnostics-v1.eddgraph')),
+    @($cameraDofComputePaste,$cameraDofComputeRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\compute-camera-dof-diagnostics-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera DOF compute generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraDofCompute
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDofDiagnosticsComputeContracts.py') --project-root $ProjectRoot --graph $cameraDofCompute
+if ($LASTEXITCODE -ne 0) { throw "Camera DOF compute full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDofDiagnosticsComputeContracts.py') --project-root $ProjectRoot --graph $cameraDofComputePaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera DOF compute paste contracts failed with exit code $LASTEXITCODE." }
 $cameraFocusRoot = Join-Path $scratchRoot ("edd-camera-focus-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraFocusRoot -Force | Out-Null
 $cameraFocusReset = Join-Path $cameraFocusRoot 'reset-camera-focus-compile-v1.eddgraph'

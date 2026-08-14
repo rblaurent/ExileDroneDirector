@@ -1737,8 +1737,12 @@ before any polished editor UI or cook is attempted:
    The following focal-plane/DOF diagnostic boundary is frozen offline: it reads
    one complete evaluated camera frame, applies an explicit thin-lens
    approximation, represents unbounded far depth without infinity, and owns
-   diagnostics only. Its 19/18-node reset and 100/99-node complete-frame stage
-   are now deterministic; physical computation and orchestration are next.
+   diagnostics only. Its 19/18-node reset, 100/99-node complete-frame stage,
+   and 90/89-node physical calculation are now deterministic and interpreter-
+   owned. The calculation matches 80 independent reference cases across both
+   bounded and unbounded far-depth domains and rejects ten direct-boundary
+   failures without overwriting prior diagnostic scalars. Only the tiny
+   reset/stage/compute orchestration and one-editor acceptance remain.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

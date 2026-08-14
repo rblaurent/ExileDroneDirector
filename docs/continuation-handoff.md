@@ -488,6 +488,16 @@ complete scaffold owns the four new files. Next: generate and interpret the
 engine-neutral reset/validation/staging graphs and a deterministic read-only
 property probe before opening the editor.
 
+`ResetCameraEngineApplicationResultV1` is the first deterministic graph at 7
+full / 6 paste nodes. It clears only unavailable-target diagnostics, failure and
+result state, plus two per-call scratch scalars. Capability identity, normalized
+input, captured baseline values/override flags, current applied state, session
+activity, and applied-frame count are absent from the graph and proven to retain
+object identity under poisoned execution. Full/paste SHA-256 is
+`FE8D00786C2F0B2B03880AAA452C4FDC6CCA6525A3CAB8A93B0DEF48B7487FA8` /
+`C7A4449A711CF6D0E1894EB5E4C4515F3EF7D5C934A5F3B7E9FDF33D386AA23B`.
+Next: stage the accepted fifteen-value frame without touching engine state.
+
 ## Next ordered implementation
 
 Continue the camera engine-application seam with deterministic reset,

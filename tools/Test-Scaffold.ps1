@@ -160,6 +160,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_engine_application_reference.py',
     'tools\trajectory\camera_engine_application_blueprint_schema.json',
     'tools\trajectory\test_camera_engine_application_blueprint_schema.py',
+    'tools\blueprint\Build-CameraEngineApplicationResetGraph.py',
+    'tools\blueprint\Test-CameraEngineApplicationResetContracts.py',
+    'tools\blueprint\snippets\reset-camera-engine-application-result-v1.eddgraph',
+    'tools\blueprint\snippets\reset-camera-engine-application-result-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraChannelCompileResetGraph.py',
     'tools\blueprint\Test-CameraChannelCompileResetContracts.py',
     'tools\blueprint\snippets\reset-camera-channel-compile-v1.eddgraph',
@@ -1214,6 +1218,45 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_engine_application_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine-application Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+$cameraApplyResetNonce = [guid]::NewGuid().ToString('N')
+$cameraApplyResetRoot = Join-Path $scratchRoot "edd-camera-apply-reset-$cameraApplyResetNonce"
+New-Item -ItemType Directory -Path $cameraApplyResetRoot -Force | Out-Null
+$cameraApplyReset = Join-Path $cameraApplyResetRoot 'reset-camera-engine-application-result-v1.eddgraph'
+$cameraApplyResetPaste = Join-Path $cameraApplyResetRoot 'reset-camera-engine-application-result-v1-paste.eddgraph'
+$cameraApplyResetRepeat = Join-Path $cameraApplyResetRoot 'reset-camera-engine-application-result-v1-repeat.eddgraph'
+$cameraApplyResetRepeatPaste = Join-Path $cameraApplyResetRoot 'reset-camera-engine-application-result-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($cameraApplyReset, $cameraApplyResetPaste),
+    @($cameraApplyResetRepeat, $cameraApplyResetRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraEngineApplicationResetGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) {
+        throw "Camera engine-application reset generation failed with exit code $LASTEXITCODE."
+    }
+}
+foreach ($comparison in @(
+    @($cameraApplyReset, $cameraApplyResetRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-engine-application-result-v1.eddgraph')),
+    @($cameraApplyResetPaste, $cameraApplyResetRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-engine-application-result-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $comparison[1]).Hash) {
+        throw "Camera engine-application reset generation is not deterministic: $($comparison[0])"
+    }
+    if ((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $comparison[2]).Hash) {
+        throw "Checked-in camera engine-application reset snippet drifted: $($comparison[2])"
+    }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraApplyReset
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraEngineApplicationResetContracts.py') `
+    --project-root $ProjectRoot --graph $cameraApplyReset
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine-application reset full contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraEngineApplicationResetContracts.py') `
+    --project-root $ProjectRoot --graph $cameraApplyResetPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine-application reset paste contracts failed with exit code $LASTEXITCODE."
 }
 $cameraScalarNonce = [guid]::NewGuid().ToString('N')
 $cameraScalarRoot = Join-Path $scratchRoot "edd-camera-scalar-$cameraScalarNonce"

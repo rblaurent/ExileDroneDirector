@@ -5247,3 +5247,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   property has been claimed available yet. The next offline checkpoint owns
   deterministic reset/validation/staging graphs and a read-only reflection
   manifest probe; editor work starts only after those contracts are green.
+- `ResetCameraEngineApplicationResultV1` freezes result-only ownership as a
+  deterministic 7/6-node full/paste graph. It clears one unavailable-target
+  array and four result/scratch scalars while complete capability, input,
+  baseline, current, and active-session state remains structurally absent and
+  object-identical in the interpreter. No engine property is read or written.

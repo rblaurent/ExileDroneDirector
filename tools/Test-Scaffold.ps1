@@ -188,6 +188,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraChannelPublishContracts.py',
     'tools\blueprint\snippets\publish-camera-channel-sample-v1.eddgraph',
     'tools\blueprint\snippets\publish-camera-channel-sample-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraChannelEvaluateGraph.py',
+    'tools\blueprint\Test-CameraChannelEvaluateContracts.py',
+    'tools\blueprint\snippets\evaluate-camera-channel-assembly-v1.eddgraph',
+    'tools\blueprint\snippets\evaluate-camera-channel-assembly-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraScalarTrackResetGraph.py',
     'tools\blueprint\Test-CameraScalarTrackResetContracts.py',
     'tools\blueprint\snippets\reset-camera-scalar-track-compile-v1.eddgraph',
@@ -1532,6 +1536,33 @@ if ($LASTEXITCODE -ne 0) { throw "Camera channel publication full contracts fail
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraChannelPublishContracts.py') `
     --project-root $ProjectRoot --graph $cameraChannelPublishPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera channel publication paste contracts failed with exit code $LASTEXITCODE." }
+$cameraChannelEvaluate = Join-Path $cameraChannelRoot 'evaluate-camera-channel-assembly-v1.eddgraph'
+$cameraChannelEvaluatePaste = Join-Path $cameraChannelRoot 'evaluate-camera-channel-assembly-v1-paste.eddgraph'
+$cameraChannelEvaluateRepeat = Join-Path $cameraChannelRoot 'evaluate-camera-channel-assembly-v1-repeat.eddgraph'
+$cameraChannelEvaluateRepeatPaste = Join-Path $cameraChannelRoot 'evaluate-camera-channel-assembly-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraChannelEvaluate, $cameraChannelEvaluatePaste), @($cameraChannelEvaluateRepeat, $cameraChannelEvaluateRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraChannelEvaluateGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera channel evaluation generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraChannelEvaluate, $cameraChannelEvaluateRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-camera-channel-assembly-v1.eddgraph')),
+    @($cameraChannelEvaluatePaste, $cameraChannelEvaluateRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-camera-channel-assembly-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+        throw 'Camera channel evaluation generation is not byte deterministic.'
+    }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraChannelEvaluate
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraChannelEvaluateContracts.py') `
+    --project-root $ProjectRoot --graph $cameraChannelEvaluate
+if ($LASTEXITCODE -ne 0) { throw "Camera channel evaluation full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraChannelEvaluateContracts.py') `
+    --project-root $ProjectRoot --graph $cameraChannelEvaluatePaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera channel evaluation paste contracts failed with exit code $LASTEXITCODE." }
 $documentAdapterNonce = [guid]::NewGuid().ToString('N')
 $documentAdapterRoot = Join-Path $scratchRoot "edd-document-adapter-$documentAdapterNonce"
 New-Item -ItemType Directory -Path $documentAdapterRoot -Force | Out-Null

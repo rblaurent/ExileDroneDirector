@@ -405,6 +405,17 @@ pass exact call, ownership, append-order, completion, and failure contracts.
 Next: the final reset/stage/publish loop and filmback/validity-last frame
 publication.
 
+`EvaluateCameraChannelAssemblyV1` completes the offline nine-graph family at 40
+full / 39 paste nodes. It resets, rejects non-finite queries or an invalid
+compiled bank, loops canonical channel indices 0..12 through stage and publish,
+requires exactly thirteen successful lockstep samples, then publishes the
+compiled filmback and frame validity last. Both forms match 840 forward plus
+reverse oracle frames and reject six query/compile/slice/domain/cardinality
+failures. All nine graphs now have deterministic full/paste snippets, exact
+structural/semantic interpreters, and complete scaffold ownership. Next: prepare
+one-editor configuration, live runtime, real-world PIE, save/sync, cold-load,
+and full regression tooling before opening Unreal.
+
 ## Next ordered implementation
 
 Generate the nine channel-assembly graphs in frozen stage order, with exact

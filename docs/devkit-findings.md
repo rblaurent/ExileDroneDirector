@@ -5513,3 +5513,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   appends either the exact authored value or base fallback with a parallel mask.
   Eighty forward/reverse interpreter cases prove order independence and input
   immutability; accepted result and external state are structurally absent.
+- `CommitCameraLookCompositionV1` is deterministic at 39 full / 38 paste nodes.
+  It guards on candidate validity and exact 13/13/13 shape, publishes explicit
+  preset/channel identity plus all three value snapshots, and sets validity
+  last. Eighty accepted snapshots and five rejected shapes prove deep-copy
+  publication and byte-for-byte preservation of prior accepted data on failure.

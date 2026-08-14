@@ -982,6 +982,15 @@ compositions prove input order independence and immutable input/base arrays;
 false-stage execution publishes nothing. Both forms have exact reciprocal links
 and byte-identical regeneration. Next: atomic accepted-result commit.
 
+`CommitCameraLookCompositionV1` is now deterministic at 39 full / 38 paste
+nodes. Candidate validity plus exact 13/13/13 base/effective/mask cardinality
+guards publication. On success it writes preset identity, rebuilds all thirteen
+canonical channel IDs, snapshots the three candidate arrays by value, clears
+failure, and publishes result validity last. Eighty randomized snapshots and
+five rejected shapes prove success isolation and prior accepted-data
+preservation. Both forms have exact reciprocal links and byte-identical
+regeneration. Next: the tiny six-stage composition coordinator.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

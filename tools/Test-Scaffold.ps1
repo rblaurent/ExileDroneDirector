@@ -196,6 +196,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraBaseLookOverridesContracts.py',
     'tools\blueprint\snippets\apply-camera-look-authored-overrides-v1.eddgraph',
     'tools\blueprint\snippets\apply-camera-look-authored-overrides-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraBaseLookCommitGraph.py',
+    'tools\blueprint\Test-CameraBaseLookCommitContracts.py',
+    'tools\blueprint\snippets\commit-camera-look-composition-v1.eddgraph',
+    'tools\blueprint\snippets\commit-camera-look-composition-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraDollyZoomResetGraph.py',
     'tools\blueprint\Test-CameraDollyZoomResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dolly-zoom-v1.eddgraph',
@@ -1683,6 +1687,34 @@ foreach ($graph in @($cameraLookOverrides,$cameraLookOverridesPaste)) {
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
         --project-root $ProjectRoot --graph $graph
     if ($LASTEXITCODE -ne 0) { throw "Camera base-look override link integrity failed with exit code $LASTEXITCODE." }
+}
+$cameraLookCommit = Join-Path $cameraLookRoot 'commit-camera-look-composition-v1.eddgraph'
+$cameraLookCommitPaste = Join-Path $cameraLookRoot 'commit-camera-look-composition-v1-paste.eddgraph'
+$cameraLookCommitRepeat = Join-Path $cameraLookRoot 'commit-camera-look-composition-v1-repeat.eddgraph'
+$cameraLookCommitRepeatPaste = Join-Path $cameraLookRoot 'commit-camera-look-composition-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraLookCommit,$cameraLookCommitPaste),@($cameraLookCommitRepeat,$cameraLookCommitRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraBaseLookCommitGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera base-look commit generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraLookCommit,$cameraLookCommitRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\commit-camera-look-composition-v1.eddgraph')),
+    @($cameraLookCommitPaste,$cameraLookCommitRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\commit-camera-look-composition-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera base-look commit generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraLookCommit
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraBaseLookCommitContracts.py') `
+    --project-root $ProjectRoot --graph $cameraLookCommit
+if ($LASTEXITCODE -ne 0) { throw "Camera base-look commit full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraBaseLookCommitContracts.py') `
+    --project-root $ProjectRoot --graph $cameraLookCommitPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera base-look commit paste contracts failed with exit code $LASTEXITCODE." }
+foreach ($graph in @($cameraLookCommit,$cameraLookCommitPaste)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graph
+    if ($LASTEXITCODE -ne 0) { throw "Camera base-look commit link integrity failed with exit code $LASTEXITCODE." }
 }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null

@@ -1817,7 +1817,11 @@ before any polished editor UI or cook is attempted:
    authorship is now composed by `ApplyCameraLookAuthoredOverridesV1` in a fixed
    0..12 canonical loop (46 full / 45 paste nodes). Eighty seeded forward/reverse
    cases prove order independence, exact base fallback, exact override masks,
-   input immutability, and false-stage no-publication. Atomic commit is next.
+   input immutability, and false-stage no-publication. Atomic publication is now
+   implemented by `CommitCameraLookCompositionV1` (39 full / 38 paste nodes):
+   exact 13/13/13 candidate shape, explicit canonical IDs, value snapshots, and
+   validity-last publication. Eighty successes and five failure shapes pass;
+   failure preserves accepted data. The six-stage coordinator is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

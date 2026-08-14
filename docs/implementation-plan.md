@@ -1773,6 +1773,11 @@ before any polished editor UI or cook is attempted:
    bounded aligned prefixes across 11 failures, rejects rather than clamps, and
    publishes candidate validity only after both whole-track lengths match. Atomic
    commit is next.
+   The 31/30-node commit is now deterministic and scaffold-owned. It rechecks
+   the complete aligned shape and reference index, preserves the prior four-field
+   compiled snapshot on failure, and publishes times, distances, focal lengths,
+   reference distance, then validity last on success. The tiny coordinator is
+   next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

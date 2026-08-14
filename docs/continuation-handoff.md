@@ -883,6 +883,15 @@ failure families in both forms, including spatial reversal, and cannot reference
 compiled data, body/gimbal authorship, engine, document, or playback state.
 Next: atomic whole-result commit.
 
+`CommitCameraDollyZoomV1` is now deterministic at 31 full / 30 paste nodes. It
+rechecks candidate validity, all three aligned array lengths, sample bounds, and
+the reference index before touching the accepted snapshot. Failure invalidates
+the result but preserves all four prior compiled fields. Success copies times,
+subject distances, focal lengths, and the exact indexed reference distance as a
+whole transaction, clears failure, and publishes validity last. Eighty snapshot
+cases and eight poisoned preflights pass in both forms. Next: the tiny ordered
+compile coordinator.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

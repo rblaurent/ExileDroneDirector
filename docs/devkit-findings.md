@@ -5469,3 +5469,25 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
 - Fresh NullRHI cold load compiles all six Blueprints with zero errors and emits
   `EDD_COLD_LOAD|RESULT|PASS`. No UI, cook, deployment, or release work was
   included.
+
+## Named camera base-look architecture frozen offline (2026-08-14)
+
+- A named look is an explicit authoring expansion, not opaque runtime policy.
+  Each of the eight v1 presets resolves all thirteen canonical camera-channel
+  values and publishes both base and effective arrays plus a per-channel
+  authored-override mask.
+- Sparse individual authorship is validated as aligned, unique, finite, and
+  within the accepted channel bounds. It replaces only the same channel and is
+  canonical-order independent. Eleven rejected request families publish no
+  partial composition; 80 seeded forward/reverse cases are deterministic.
+- Focus influence, grading, tint, sharpening, and matte remain at their accepted
+  neutral defaults in every v1 preset because the Enhanced 5.6.1 manifest has
+  no direct mapping for them. The look catalog cannot claim an unavailable
+  effect was applied.
+- The schema owns 17 new `CameraLook*` variables and six ordered functions:
+  reset, validate, build explicit base values, apply authored overrides, atomic
+  commit, and policy-free orchestration. It cannot mutate or alias the accepted
+  CameraChannel family or own engine, document, movement, body/gimbal, playback,
+  or local comfort state.
+- Eight reference tests and five schema tests pass. This is offline architecture
+  evidence; deterministic Blueprint generation starts next with Unreal closed.

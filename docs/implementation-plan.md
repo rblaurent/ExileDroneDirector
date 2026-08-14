@@ -1793,7 +1793,14 @@ before any polished editor UI or cook is attempted:
    remain untouched. Guarded shutdown, one-package reverse sync, and a fresh
    zero-error NullRHI cold compile pass. Live/mirror Client Director SHA-256 is
    `CF31350826811204EAFD9CEC74E4B474EB09318A9F8472067DCB5CD4F012FBFF`.
-   Verified effect/look helpers and local comfort overrides are next.
+   The named base-look boundary is now frozen offline as the next helper. Eight
+   presets expand to explicit values for all thirteen canonical channels; sparse
+   individual authorship replaces only matching values and publishes a complete
+   override mask. Currently unavailable direct mappings remain neutral instead
+   of being simulated, and the accepted CameraChannel bank is neither mutated
+   nor aliased. Eight reference tests and five schema tests pass. Six
+   deterministic composition graphs are next, followed by the separate local
+   comfort layer.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Resolve one named base lens/look into explicit canonical camera-channel values, then apply sparse individually authored channel overrides without mutating the accepted camera-channel bank.",
+  "architecture": {
+    "catalog": "The v1 catalog contains raw, clean_cinematic, epic_landscape, dreamy_shallow_focus, dark_sorcery, high_speed_fpv, vintage_lens, and documentary in exact order. Every preset expands to all thirteen canonical camera channels.",
+    "visibility": "Result storage publishes the preset ID, canonical channel IDs, complete base values, complete effective values, and one authored-override Boolean per channel. A named look cannot hide its resolved numeric values.",
+    "composition": "Sparse individually authored values replace only the matching base channel. Input order cannot change canonical result order, and no channel may be authored twice.",
+    "availability": "The current v1 catalog leaves focus influence, color grading, tint, sharpening, and matte at their canonical neutral defaults because Enhanced 5.6.1 has no accepted direct property mapping for them. Unsupported engine mappings are never impersonated.",
+    "atomicity": "Reset clears private candidates and invalidates the current result while preserving the prior accepted result snapshot. Commit replaces preset identity, channel identities, base values, effective values, and override mask only after the complete candidate is valid, then publishes validity last.",
+    "ownership": "This helper owns only CameraLook state. It cannot mutate CameraChannel inputs/compiled/results, CameraApply state, movement, position, body, gimbal, focus helpers, document state, playback state, or local comfort policy."
+  },
+  "limits": {
+    "channelCount": 13,
+    "maximumAuthoredOverrides": 13,
+    "presetIds": ["raw", "clean_cinematic", "epic_landscape", "dreamy_shallow_focus", "dark_sorcery", "high_speed_fpv", "vintage_lens", "documentary"],
+    "channelIds": ["focal_length_mm", "aperture_fstop", "focus_distance_cm", "focus_influence", "exposure_ev", "bloom_weight", "vignette_weight", "color_grading_weight", "tint_weight", "motion_blur_weight", "chromatic_aberration_weight", "sharpening_weight", "matte_weight"],
+    "directlyUnavailableChannels": ["focus_influence", "color_grading_weight", "tint_weight", "sharpening_weight", "matte_weight"]
+  },
+  "variables": [
+    {"name":"CameraLookInputPresetIdV1","type":"String","container":"None","role":"input","default":"raw"},
+    {"name":"CameraLookInputAuthoredChannelIdsV1","type":"String","container":"Array","role":"input"},
+    {"name":"CameraLookInputAuthoredValuesV1","type":"Float","container":"Array","role":"input"},
+    {"name":"CameraLookValidationValidV1","type":"Boolean","container":"None","role":"validation","default":false},
+    {"name":"CameraLookCandidateBaseValuesV1","type":"Float","container":"Array","role":"candidate"},
+    {"name":"CameraLookCandidateValuesV1","type":"Float","container":"Array","role":"candidate"},
+    {"name":"CameraLookCandidateOverrideMaskV1","type":"Boolean","container":"Array","role":"candidate"},
+    {"name":"CameraLookCandidateValidV1","type":"Boolean","container":"None","role":"candidate","default":false},
+    {"name":"CameraLookResultPresetIdV1","type":"String","container":"None","role":"result","default":""},
+    {"name":"CameraLookResultChannelIdsV1","type":"String","container":"Array","role":"result"},
+    {"name":"CameraLookResultBaseValuesV1","type":"Float","container":"Array","role":"result"},
+    {"name":"CameraLookResultValuesV1","type":"Float","container":"Array","role":"result"},
+    {"name":"CameraLookResultOverrideMaskV1","type":"Boolean","container":"Array","role":"result"},
+    {"name":"CameraLookResultValidV1","type":"Boolean","container":"None","role":"result","default":false},
+    {"name":"CameraLookFailureCodeV1","type":"String","container":"None","role":"result","default":""},
+    {"name":"CameraLookScratchChannelIndexV1","type":"Integer","container":"None","role":"scratch","default":0},
+    {"name":"CameraLookScratchValidV1","type":"Boolean","container":"None","role":"scratch","default":false}
+  ],
+  "functions": [
+    {"name":"ResetCameraLookCompositionV1","stage":0},
+    {"name":"ValidateCameraLookInputsV1","stage":1},
+    {"name":"BuildCameraLookBaseValuesV1","stage":2},
+    {"name":"ApplyCameraLookAuthoredOverridesV1","stage":3},
+    {"name":"CommitCameraLookCompositionV1","stage":4},
+    {"name":"ComposeCameraLookV1","stage":5,"uses":["ResetCameraLookCompositionV1","ValidateCameraLookInputsV1","BuildCameraLookBaseValuesV1","ApplyCameraLookAuthoredOverridesV1","CommitCameraLookCompositionV1"]}
+  ],
+  "contracts": {
+    "validation": "Preset identity, aligned override arrays, maximum count, supported unique channel IDs, finiteness, and exact per-channel physical/normalized bounds are checked before candidate publication.",
+    "base": "The selected preset appends exactly thirteen explicit base values in canonical channel order. Every directly unavailable channel remains at its accepted neutral default in every v1 preset.",
+    "override": "For each canonical channel, the composed value is the exact authored value when its unique ID exists and otherwise the exact selected base value; the Boolean mask records that choice.",
+    "failure": "Any rejected request leaves the prior result arrays and identities byte-for-byte unchanged and publishes result validity false with a stable failure code.",
+    "integration": "Later evaluation may feed explicit per-frame authored values into this helper and stage CameraLookResultValuesV1 to the engine adapter. The accepted CameraChannel family is composed, never modified or aliased.",
+    "comfort": "Viewer comfort policy is a later transient local layer after look composition. No comfort preference is stored in this schema or written to a Flypath document."
+  }
+}

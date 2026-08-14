@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 after live dolly-zoom acceptance
+Last updated: 2026-08-14 at the frozen offline named base-look contract
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -930,6 +930,22 @@ A fresh NullRHI cold load compiles all six Blueprints with zero errors and emits
 `EDD_COLD_LOAD|RESULT|PASS`. The five live exports are scaffold-owned. Next:
 verified effect/look helpers and local comfort overrides, then the documented
 camera modes and bounded event adapters before debug dogfood.
+
+The named base-look boundary is now frozen offline. Eight exact presets—Raw,
+Clean Cinematic, Epic Landscape, Dreamy Shallow Focus, Dark Sorcery, High-Speed
+FPV, Vintage Lens, and Documentary—each expand to all thirteen canonical camera
+channels. The result publishes the preset ID, channel IDs, complete base values,
+complete effective values, and one authored-override bit per channel, so a preset
+cannot hide its numbers. Sparse individual authorship wins only for the matching
+channel and input order cannot affect the canonical output. Channels without an
+accepted Enhanced 5.6.1 direct mapping remain at their exact neutral defaults in
+the v1 catalog rather than pretending an unavailable visual effect worked. The
+helper owns only new `CameraLook*` state and cannot mutate or alias the accepted
+camera-channel bank, engine application, document, body, gimbal, playback, or
+local comfort policy. Eight executable reference tests, including 80 seeded
+forward/reverse compositions and eleven failure families, plus five schema tests
+pass. Next: generate the six reset, validate, base-build, authored-overlay,
+atomic-commit, and coordinator graphs offline before reopening Unreal.
 
 ## Next ordered implementation
 

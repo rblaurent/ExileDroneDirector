@@ -716,6 +716,15 @@ six direct failure families pass in both graph forms; the complete repository
 scaffold passes in 116.2 seconds. Next: the tiny compile
 coordinator, followed by one-editor acceptance for the complete focus helper.
 
+`CompileCameraFocusDistanceChannelV1` completes the focus helper's offline
+compile family at 5 full / 4 paste nodes. It contains only the exact ordered
+reset, validate, build, and commit self-calls; it owns no variables, branches,
+loops, or policy. All six focus functions now have deterministic full/paste
+snippets and executable contracts. The complete repository scaffold passes in
+116.4 seconds. Next: one-editor
+configure/paste/entry-wire repair/compile/save/runtime/PIE/cold
+acceptance for the whole focus helper before any later camera mode work.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

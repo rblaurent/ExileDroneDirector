@@ -1878,6 +1878,12 @@ before any polished editor UI or cook is attempted:
    appends. Eighty oracle frames plus disabled and direct-failure cases pass.
    Motion/prior-result/external state is absent; exact links/regeneration and the
    complete 135.9-second scaffold pass. Atomic local-result commit is next.
+   `CommitCameraViewerComfortV1` is deterministic at 23 full / 22 paste nodes.
+   It invalidates first, rechecks valid 13/5 candidates, snapshots the complete
+   local pose/value/weight/applied result, and publishes validity last. Eighty
+   accepted deep snapshots and four rejected shapes preserve prior data; exact
+   links/regeneration and the complete 134.4-second scaffold pass. The tiny
+   five-stage coordinator is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

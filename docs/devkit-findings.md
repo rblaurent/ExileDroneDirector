@@ -5601,3 +5601,10 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   through, and three direct-failure shapes pass; motion/prior-result/external
   state is absent. Exact links/regeneration and the complete 135.9-second
   scaffold are green.
+- `CommitCameraViewerComfortV1` is 23 full / 22 paste nodes. It invalidates
+  publication first, rechecks candidate validity plus exact 13/5 shape, and
+  snapshots local position, gimbal, camera values, effective weights, and
+  applied flag before clearing failure and publishing validity last. Eighty
+  accepted deep snapshots and four rejected shapes prove prior-result
+  preservation. Exact links/regeneration and the complete 134.4-second scaffold
+  are green.

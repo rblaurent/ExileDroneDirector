@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the viewer-comfort channel graph checkpoint
+Last updated: 2026-08-14 at the viewer-comfort commit graph checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the viewer-comfort channel graph described below; after
+- Current checkpoint is the viewer-comfort commit graph described below; after
   the checkpoint push, HEAD must equal `origin/main` before the next seam starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
@@ -1075,6 +1075,15 @@ Eighty forward/reverse oracle frames, disabled/effective-one pass-through, and
 three direct failure shapes pass in both forms. Motion candidates, prior result,
 external state, and authorship are absent. Exact links/regeneration pass; the
 complete scaffold is green in 135.9 seconds. Next: atomic local-result commit.
+
+`CommitCameraViewerComfortV1` is deterministic at 23 full / 22 paste nodes. It
+invalidates publication first, rechecks candidate validity plus exact 13/5
+channel/weight shape, then snapshots local position, gimbal, values, weights,
+and applied flag in one ordered chain; failure clears and validity publishes
+last. Eighty accepted deep snapshots and four rejected shapes prove prior local
+result preservation in both forms. Inputs/preferences, source families, and all
+external state are absent. Exact links and regeneration pass; the complete
+scaffold is green in 134.4 seconds. Next: the policy-free five-stage coordinator.
 
 ## Next ordered implementation
 

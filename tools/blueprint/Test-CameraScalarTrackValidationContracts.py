@@ -12,7 +12,8 @@ def main():
  loops=[n for n in nodes.values() if "K2Node_MacroInstance" in n.node_class];c.require(len(loops)==2,"key and segment-mode loops");sets=[member(n) for n in nodes.values() if "K2Node_VariableSet" in n.node_class];c.require(set(sets)=={"CameraScalarTrackScratchValidV1","CameraScalarTrackFailureCodeV1"},"validation write ownership");c.require(sets.count("CameraScalarTrackScratchValidV1")==5 and sets.count("CameraScalarTrackFailureCodeV1")==2,"validation write counts")
  for name in ARRAYS:c.require(name in text,f"required authored array {name}")
  for mode in ("hold","linear","smooth","cinematic","hermite"):c.require(f'DefaultValue="{mode}"' in text,f"mode {mode}")
- for required in ("Max_IntInt","Greater_DoubleDouble","GreaterEqual_DoubleDouble","LessEqual_DoubleDouble","EqualEqual_StrStr","BooleanOR","BooleanAND"):c.require(f'MemberName="{required}"' in text,f"operator {required}")
+ for required in ("Greater_DoubleDouble","GreaterEqual_DoubleDouble","LessEqual_DoubleDouble","EqualEqual_StrStr","BooleanOR","BooleanAND"):c.require(f'MemberName="{required}"' in text,f"operator {required}")
+ c.require("Max_IntInt" not in text,"validation must not depend on an editor-unreconstructable integer max node");c.require(sum("K2Node_Select" in n.node_class for n in nodes.values())==1,"first-key safe previous-index selection")
  c.require('DefaultValue="5.562684646268003e-309"' in text,"reciprocal conversion must stay finite");c.require("CameraScalarTrackCandidate" not in text and "CameraScalarTrackCompileValidV1" not in text,"validation cannot publish candidates")
 
  ref=load(x.project_root/"tools/trajectory/camera_scalar_track_reference.py","edd_camera_scalar_validation_reference");valid=[]

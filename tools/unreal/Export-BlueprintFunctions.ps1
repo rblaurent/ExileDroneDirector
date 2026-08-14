@@ -49,6 +49,10 @@ foreach ($spec in $FunctionSpec) {
     & $inputHelper -WindowHandle $WindowHandle -Keys '{ENTER}' -PostDelayMilliseconds 550
     & $inputHelper -WindowHandle $WindowHandle -ClientX $ResultX -ClientY $ResultY -ClickCount 1 -PostDelayMilliseconds 100
     & $inputHelper -WindowHandle $WindowHandle -ClientX $ResultX -ClientY $ResultY -ClickCount 2 -PostDelayMilliseconds 500
+    # The first double-click can merely transfer focus from the previous
+    # function's canvas to Find Results. Repeat the activation before touching
+    # the canvas; reopening an already active function is harmless.
+    & $inputHelper -WindowHandle $WindowHandle -ClientX $ResultX -ClientY $ResultY -ClickCount 2 -PostDelayMilliseconds 500
     & $inputHelper -WindowHandle $WindowHandle -ClientX $CanvasX -ClientY $CanvasY -PostDelayMilliseconds 60
     & $inputHelper -WindowHandle $WindowHandle -Keys '^a' -PostDelayMilliseconds 40
     & $inputHelper -WindowHandle $WindowHandle -Keys '^c' -PostDelayMilliseconds 180

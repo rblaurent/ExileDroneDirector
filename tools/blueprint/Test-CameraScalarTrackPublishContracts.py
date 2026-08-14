@@ -195,8 +195,9 @@ def main() -> None:
     contracts.require(setters.count("CameraScalarTrackResultValidV1") == 2, "validity reset/last publication")
     text = args.graph.read_text(encoding="utf-8")
     contracts.require("CameraScalarTrackCandidate" not in text, "compiled snapshot is read-only")
-    for operation in ("Divide_DoubleDouble", "Max_DoubleDouble", "Min_DoubleDouble", "Greater_DoubleDouble", "Less_DoubleDouble"):
+    for operation in ("Divide_DoubleDouble", "Greater_DoubleDouble", "Less_DoubleDouble"):
         contracts.require(f'MemberName="{operation}"' in text, f"missing {operation}")
+    contracts.require("Max_DoubleDouble" not in text and "Min_DoubleDouble" not in text, "clamping must use reconstructable comparisons and typed selects")
 
     randomizer = random.Random(0xEDD5A9)
     cases = []

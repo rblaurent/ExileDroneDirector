@@ -56,8 +56,9 @@ def main() -> None:
     nodes = [entry]
     setters = []
     for index, (name, kind, value) in enumerate(SCALARS):
+        node_x, node_y = ((2130, -256) if index == 0 else (256 + index * 416, 0))
         node = bp.Node.clone(
-            f"set_{index}", setter_form, f"K2Node_VariableSet_{index}", 256 + index * 416, 0
+            f"set_{index}", setter_form, f"K2Node_VariableSet_{index}", node_x, node_y
         )
         reset.variable(node, "PlaybackActive", name, kind)
         reset.default(node, name, value)

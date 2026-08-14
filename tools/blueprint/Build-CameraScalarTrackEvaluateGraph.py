@@ -67,7 +67,7 @@ def main() -> None:
         node=add_form(f"call_{member}_{len(b.nodes)}","call",x,y);node.text=re.sub(r"FunctionReference=\([^\n]*\)",f'FunctionReference=(MemberName="{member}",bSelfContext=True)',node.text,1)
         node.mutate_pin("self",lambda line:re.sub(r'PinType.PinSubCategoryObject="/Script/Engine.BlueprintGeneratedClass\'[^\']+\'"',f"PinType.PinSubCategoryObject={TARGET}",line,1));return node
 
-    reset=call("ResetCameraScalarTrackResultV1",256,2400);bp.connect(b.entry,"then",reset,"execute")
+    reset=call("ResetCameraScalarTrackResultV1",1808,1440);bp.connect(b.entry,"then",reset,"execute")
     compile_valid=get("CameraScalarTrackCompileValidV1","bool",0,0);query=get("CameraScalarTrackQueryTimeV1","real",0,128);finite_query=b.finite(query,"CameraScalarTrackQueryTimeV1",256,128)
     guard_condition=operation("BooleanAND",compile_valid,"CameraScalarTrackCompileValidV1",704,64,finite_query,"ReturnValue",kind="bool",result="bool")
     guard=b.add("query_guard","branch",928,2400);bp.connect(reset,"then",guard,"execute");bp.connect(guard_condition,"ReturnValue",guard,"Condition")

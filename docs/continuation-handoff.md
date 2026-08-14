@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the live document-adapter acceptance checkpoint
+Last updated: 2026-08-14 at the live camera scalar-track acceptance checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,8 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current implementation lineage starts from remote-equal `f0f4b1b`, with the
-  live document-adapter checkpoint described below; HEAD must equal `origin/main`
+- Current implementation lineage starts from remote-equal `51cd7fa`, with the
+  live camera scalar-track checkpoint described below; HEAD must equal
+  `origin/main`
 - Expected worktree: clean
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -262,25 +263,70 @@ postcompile exports are scaffold-owned.
   103.3 seconds and validates generated full/paste forms plus all five saved
   live exports.
 
+## Live camera scalar-track engine state
+
+The common absolute-time scalar engine for lens, focus, and bounded effect
+channels is now live-accepted on Client Director. Its nine saved graphs are
+reset 25 nodes, validation 138, candidate construction 20, atomic commit 29,
+compile orchestration 5, result reset 13, sample publication 78, selected-
+segment evaluation 124, and top-level evaluation 40. Exact postcompile exports
+are checked in and scaffold-owned.
+
+### Camera scalar evidence
+
+- All nine native entry seams and complete generated bodies pass one unified
+  postcompile export audit. The interpreters cover 80 valid tracks plus nine
+  validation failure classes, 40 candidate tracks in both domains, atomic
+  commit and seven failure classes, 161 publication samples plus eight
+  fail-closed cases, 50 segment samples across every mode/domain combination,
+  and 288 forward/reverse top-level queries plus four failures.
+- Live installation exposed two Enhanced clipboard importer gaps. It silently
+  discarded `Max_IntInt`, and separately discarded `Max_DoubleDouble` plus
+  `Min_DoubleDouble`. Validation now uses a typed `Select` for the safe previous
+  index; output clamping uses comparisons plus typed `Select` nodes. Contracts
+  forbid the dropped calls and prove equivalent numeric behavior.
+- The Find Results automation now repeats result activation before any canvas
+  mutation. Exact-count audits found and removed every stale cross-paste before
+  the asset was allowed to compile or save.
+- Two warm runtime runs each pass 10 forward and 10 reverse tracks, 121 total
+  queries, all five interpolation modes, linear and reciprocal optical domains,
+  seven invalid families, immutable inputs, and exact default restoration.
+- PIE on the real player-controller-owned Client Director passes reciprocal
+  optical interpolation: authored 100/400 distance endpoints evaluate to the
+  expected 160 midpoint at alpha 0.5. The game-world result, input immutability,
+  default restoration, and automatic teardown all pass.
+- Guarded shutdown reached `LogExit: Exiting.`. Closed-editor preview reported
+  16 unchanged packages and exactly Client Director changed; sync copied one.
+  Live and mirrored Client Director SHA-256 is
+  `BE81A999B4E5729CBC83C1D18166BDCFF33ED6ECF3FED7F8C6036926E2CC38A7`.
+- An independent fresh NullRHI runtime repeats the full 121-query acceptance.
+  A separate cold commandlet loads all nine core assets and compiles all six
+  Blueprints with zero errors. The complete scaffold with mirrored MVP assets
+  passes in 106.3 seconds and owns deterministic full/paste generation plus all
+  nine saved live exports.
+
+This accepts the reusable backend math and execution engine. It does not yet
+claim channel-owned lens/focus/effect storage, camera modes, event targets,
+debug controls, attended dogfood, or polished UI.
+
 ## Next ordered implementation
 
-Proceed with ordered task 10: lens, focus, and effect tracks first, then the
-Directed / Free Look / Carrier Freecam backend modes, then event tracks with
-bounded target adapters and authorization. Start each seam offline with an
+Proceed with the channel-owned lens, focus, and bounded-effect storage and
+composition layer that feeds the accepted common scalar engine. Then implement
+Directed / Free Look / Carrier Freecam backend modes, followed by event tracks
+with bounded target adapters and authorization. Start each seam offline with an
 explicit reference/schema and deterministic graph generators/interpreters,
 then use one-editor compile/save/runtime/PIE/cold acceptance. After the complete
-backend, expose temporary debug controls and logs, run the attended dogfood,
-and only then implement the polished UI.
+backend, expose temporary debug controls and logs, run attended dogfood, and
+only then implement the polished UI.
 
-The first task-10 offline seam is now frozen in
+The first task-10 seam is now live-accepted from the frozen contracts in
 `camera_scalar_track_reference.py` and
 `camera_scalar_track_blueprint_schema.json`. It provides hold, linear, smooth,
 cinematic, and explicit-Hermite presets; value/velocity/acceleration output;
 linear physical units; reciprocal-distance optical focus; and bounded output
 without authored-key mutation. Eight reference and four schema tests pass. The
-next checkpoint is deterministic reset/validation/candidate/commit/evaluate
-Blueprint graphs for this common engine, followed by channel-owned lens/focus/
-effect storage and live acceptance.
+next checkpoint is channel-owned lens/focus/effect storage and composition.
 
 `ResetCameraScalarTrackCompileV1` is the first deterministic graph checkpoint:
 25 full / 24 paste nodes. It clears exactly the five generic candidate arrays,

@@ -20,7 +20,7 @@ def main():
   n=b.math("Multiply_DoubleDouble",x,y);scalar.retarget_function(n,member);[kind(n,p,"real") for p in ("A","B","ReturnValue")];bp.connect(left,left_pin,n,"A") if left is not None else scalar.set_default(n,"A",default_a);bp.connect(right,right_pin,n,"B") if right is not None else scalar.set_default(n,"B",default_b);return n
  def array_add(output,pin,item,item_pin,x,y):
   n=b.add(f"append_{len(b.nodes)}","array_add",x,y);kind(n,"TargetArray","real",True);kind(n,"NewItem","real");kind(n,"ReturnValue","int");bp.connect(output,pin,n,"TargetArray");bp.connect(item,item_pin,n,"NewItem");return n
- stage=get("CameraScalarTrackScratchValidV1","bool",0,0);guard=b.add("stage_guard","branch",256,1600);bp.connect(b.entry,"then",guard,"execute");bp.connect(stage,"CameraScalarTrackScratchValidV1",guard,"Condition");chain=[]
+ stage=get("CameraScalarTrackScratchValidV1","bool",0,0);guard=b.add("stage_guard","branch",1152,720);bp.connect(b.entry,"then",guard,"execute");bp.connect(stage,"CameraScalarTrackScratchValidV1",guard,"Condition");chain=[]
  for i,(source,target,value) in enumerate(COPIES):
   g=get(source,value,0,160+i*160,True);s=set_(target,value,512+i*256,1600,True);bp.connect(g,source,s,target);chain.append(s)
  bp.connect(guard,"then",chain[0],"execute");[bp.connect(l,"then",r,"execute") for l,r in zip(chain,chain[1:])]

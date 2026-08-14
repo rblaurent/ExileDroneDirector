@@ -5146,3 +5146,38 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   source for both orientation tracks. This checkpoint accepts the lossless v2
   boundary and diagnostics, not a lossy legacy migration. The next backend seam
   is lens/focus/effects and the documented camera modes, followed by events.
+
+### Camera scalar-track engine live acceptance (2026-08-14)
+
+- The reusable lens/focus/effect scalar engine is installed and saved on Client
+  Director as nine functions with exact node counts 25, 138, 20, 29, 5, 13,
+  78, 124, and 40. One unified precompile export and one unified postcompile
+  export pass every structural and executable contract.
+- Enhanced's clipboard importer silently omitted three otherwise valid-looking
+  native math calls: `Max_IntInt`, `Max_DoubleDouble`, and
+  `Min_DoubleDouble`. The accepted generators use reconstructable typed
+  `Select` nodes driven by comparisons instead. Contracts explicitly reject the
+  omitted calls and execute the replacement logic against seeded numeric
+  oracles.
+- Find Results can consume a first result double-click as focus transfer while
+  leaving the previous graph active. The open/export helpers now perform a
+  second idempotent activation before canvas input. Exact-count audits exposed
+  and removed stale cross-pastes in reset, validation, commit, and result reset
+  before the asset was compiled or saved.
+- Two warm CDO runs pass 10 forward plus 10 reverse tracks and 121 queries per
+  run across all interpolation modes and both physical/reciprocal domains, plus
+  seven invalid families, immutable inputs, and default restoration. A fresh
+  NullRHI process repeats the same runtime matrix successfully.
+- PIE on `/Game/Dev/AlmostEmpty` drives the real player-owned Client Director.
+  Reciprocal interpolation between physical focus distances 100 and 400 yields
+  the optical midpoint 160 at local alpha 0.5; game-world execution, input
+  immutability, default restoration, and automatic teardown all pass.
+- Guarded shutdown completed cleanly. Closed-editor sync found 16 unchanged
+  packages and only `BPC_EDD_ClientDirector.uasset` changed. Live and mirror
+  SHA-256 are both
+  `BE81A999B4E5729CBC83C1D18166BDCFF33ED6ECF3FED7F8C6036926E2CC38A7`.
+  Fresh cold asset load compiles all six Blueprints with zero errors, and the
+  complete scaffold with all nine live captures passes in 106.3 seconds.
+- This is backend engine acceptance, not channel integration or dogfood. The
+  next seam owns lens/focus/bounded-effect tracks, then camera modes and bounded
+  event adapters before temporary debug controls and attended dogfood.

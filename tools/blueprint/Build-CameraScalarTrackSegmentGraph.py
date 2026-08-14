@@ -125,7 +125,7 @@ def main() -> None:
     compile_valid = get("CameraScalarTrackCompileValidV1", "bool", 0, 0)
     staged = get("CameraScalarTrackScratchValidV1", "bool", 0, 128)
     initial_valid = and_all([(compile_valid, "CameraScalarTrackCompileValidV1"), (staged, "CameraScalarTrackScratchValidV1")], 256, 64)
-    initial_guard = builder.add("initial_guard", "branch", 512, 3200)
+    initial_guard = builder.add("initial_guard", "branch", 1920, 2064)
     bp.connect(builder.entry, "then", initial_guard, "execute"); bp.connect(initial_valid, "ReturnValue", initial_guard, "Condition")
     invalidate_stage = set_("CameraScalarTrackScratchValidV1", "bool", 736, 3200, "false")
     bp.connect(initial_guard, "then", invalidate_stage, "execute")

@@ -1255,6 +1255,20 @@ foreach ($stage in $cameraScalarPublicationStages) {
     & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[2])") --project-root $ProjectRoot --graph $generatedPaste --paste
     if ($LASTEXITCODE -ne 0) { throw "Camera scalar $($stage[0]) paste contracts failed with exit code $LASTEXITCODE." }
 }
+$cameraScalarLiveStages = @(
+    @('reset-camera-scalar-track-compile-v1', 'Test-CameraScalarTrackResetContracts.py'),
+    @('validate-camera-scalar-track-inputs-v1', 'Test-CameraScalarTrackValidationContracts.py'),
+    @('build-camera-scalar-track-candidates-v1', 'Test-CameraScalarTrackCandidatesContracts.py')
+) + @($cameraScalarPublicationStages | ForEach-Object { , @($_[0], $_[2]) })
+foreach ($stage in $cameraScalarLiveStages) {
+    $live = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($stage[0]).eddgraph"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $live
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($stage[1])") `
+        --project-root $ProjectRoot --graph $live
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera scalar $($stage[0]) contracts failed with exit code $LASTEXITCODE."
+    }
+}
 $documentAdapterNonce = [guid]::NewGuid().ToString('N')
 $documentAdapterRoot = Join-Path $scratchRoot "edd-document-adapter-$documentAdapterNonce"
 New-Item -ItemType Directory -Path $documentAdapterRoot -Force | Out-Null

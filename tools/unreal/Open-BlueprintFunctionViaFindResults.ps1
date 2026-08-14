@@ -32,5 +32,11 @@ Set-Clipboard -Value $FunctionName
     -ClickCount 1 -PostDelayMilliseconds 100
 & $inputHelper -WindowHandle $WindowHandle -ClientX $ResultX -ClientY $ResultY `
     -ClickCount 2 -PostDelayMilliseconds 500
+# On large function graphs Enhanced can consume the first double-click only as
+# a result-row focus change while the previous graph retains canvas focus. A
+# second explicit activation is idempotent once the graph is open and prevents
+# subsequent paste/export input from landing in the previous function.
+& $inputHelper -WindowHandle $WindowHandle -ClientX $ResultX -ClientY $ResultY `
+    -ClickCount 2 -PostDelayMilliseconds 500
 
 Write-Output "EDD_BLUEPRINT_FUNCTION_OPEN|$FunctionName|WINDOW:$WindowHandle"

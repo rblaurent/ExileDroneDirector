@@ -5608,3 +5608,9 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   accepted deep snapshots and four rejected shapes prove prior-result
   preservation. Exact links/regeneration and the complete 134.4-second scaffold
   are green.
+- `ApplyCameraViewerComfortV1` completes the offline family at 6 full / 5 paste
+  nodes. Its only nodes are the exact reset, validate, motion, channels, and
+  commit self-calls in order. No variables, branches, loops, reroutes, or policy
+  appear. The complete family contains 273 full nodes across 14/146/55/29/23/6;
+  full/paste interpreters, exact reciprocal links, deterministic regeneration,
+  and the complete 136.4-second scaffold pass with Unreal closed.

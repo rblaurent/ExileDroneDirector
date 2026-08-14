@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the viewer-comfort commit graph checkpoint
+Last updated: 2026-08-14 at the complete offline viewer-comfort family
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the viewer-comfort commit graph described below; after
+- Current checkpoint is the complete offline viewer-comfort family described below; after
   the checkpoint push, HEAD must equal `origin/main` before the next seam starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
@@ -1084,6 +1084,16 @@ last. Eighty accepted deep snapshots and four rejected shapes prove prior local
 result preservation in both forms. Inputs/preferences, source families, and all
 external state are absent. Exact links and regeneration pass; the complete
 scaffold is green in 134.4 seconds. Next: the policy-free five-stage coordinator.
+
+`ApplyCameraViewerComfortV1` completes the offline family at 6 full / 5 paste
+nodes. It contains exactly reset -> validation -> local motion -> camera values
+-> atomic commit, with no variables, branches, loops, reroutes, or hidden policy.
+All six graphs are now deterministic at 14, 146, 55, 29, 23, and 6 full nodes
+(273 total); both full and paste forms pass executable contracts and reciprocal
+link integrity. The complete repository scaffold is green in 136.4 seconds with
+Unreal closed. Next: prepare idempotent configuration, warm runtime oracle,
+automatic player-owned PIE, compile-safe restoration, and exact live topology
+acceptance tooling before opening one editor.
 
 ## Next ordered implementation
 

@@ -1884,6 +1884,13 @@ before any polished editor UI or cook is attempted:
    accepted deep snapshots and four rejected shapes preserve prior data; exact
    links/regeneration and the complete 134.4-second scaffold pass. The tiny
    five-stage coordinator is next.
+   `ApplyCameraViewerComfortV1` completes the offline family at 6 full / 5 paste
+   nodes with exactly reset -> validate -> motion -> channels -> commit and no
+   hidden state/policy. All six graphs total 273 full nodes, regenerate byte-
+   identically, and pass full/paste executable plus reciprocal-link contracts.
+   The complete 136.4-second scaffold is green with Unreal closed. Idempotent
+   configuration, warm runtime, automatic PIE, restoration, and exact live-
+   topology tooling are next before one-editor acceptance.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

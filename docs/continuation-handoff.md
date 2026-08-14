@@ -416,6 +416,16 @@ structural/semantic interpreters, and complete scaffold ownership. Next: prepare
 one-editor configuration, live runtime, real-world PIE, save/sync, cold-load,
 and full regression tooling before opening Unreal.
 
+The one-editor acceptance tooling is now prepared while Unreal remains closed.
+`Configure-CameraChannelAssembly.py` idempotently owns the schema variables and
+nine functions; `Validate-CameraChannelRuntime.py` covers sparse and fully
+authored forward/reverse compilation, frame equality, optical focus, independent
+effects, invalid transactions, compiled-bank preservation, input immutability,
+and complete default restoration; `Validate-CameraChannelPIE.py` repeats the
+critical optical/default/effect/filmback frame on the real player-owned Client
+Director and tears PIE down automatically. Next: syntax/scaffold-freeze this
+tooling, then perform the single-editor graph installation and acceptance.
+
 ## Next ordered implementation
 
 Generate the nine channel-assembly graphs in frozen stage order, with exact

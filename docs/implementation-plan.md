@@ -1763,6 +1763,11 @@ before any polished editor UI or cook is attempted:
    The nine/eight-node reset graph is now deterministic and scaffold-owned. It
    clears only validation/candidate/result scratch and explicitly preserves all
    inputs plus the previously compiled focal result. Input validation is next.
+   The 29/28-node preflight is now deterministic and scaffold-owned: it accepts
+   only aligned bounded schedule/position shapes, an in-range reference index,
+   and a finite 1..1000 mm reference focal length. It publishes a dedicated
+   validation flag and cannot touch subject samples, candidates, compiled data,
+   movement, orientation, or engine state. Candidate construction is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

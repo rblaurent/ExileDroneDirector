@@ -863,6 +863,15 @@ Exact ownership tests prove the five inputs and four-field prior compiled lens
 snapshot are never referenced. Both forms and byte-identical regeneration are
 owned by the complete scaffold. Next: input validation.
 
+`ValidateCameraDollyZoomInputsV1` is now deterministic at 29 full / 28 paste
+nodes. It checks the complete schedule/position shape, 2..65,536 sample bound,
+reference index, and finite 1..1000 mm reference lens value, then publishes its
+dedicated validation flag last. It reads exactly four inputs, writes only the
+validation flag and failure code, and cannot touch the fixed subject, candidate,
+compiled, movement, orientation, engine, document, or playback state. Eighty
+seeded valid cases and ten failure families pass in both graph forms. Next:
+bounded subject-distance and focal candidate construction.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

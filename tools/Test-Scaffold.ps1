@@ -180,6 +180,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraDollyZoomResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dolly-zoom-v1.eddgraph',
     'tools\blueprint\snippets\reset-camera-dolly-zoom-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraDollyZoomValidationGraph.py',
+    'tools\blueprint\Test-CameraDollyZoomValidationContracts.py',
+    'tools\blueprint\snippets\validate-camera-dolly-zoom-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-camera-dolly-zoom-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraDofDiagnosticsResetGraph.py',
     'tools\blueprint\Test-CameraDofDiagnosticsResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dof-diagnostics-v1.eddgraph',
@@ -1393,6 +1397,26 @@ foreach ($comparison in @(
 if ($LASTEXITCODE -ne 0) { throw "Camera dolly reset full contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDollyZoomResetContracts.py') --project-root $ProjectRoot --graph $cameraDollyResetPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera dolly reset paste contracts failed with exit code $LASTEXITCODE." }
+$cameraDollyValidation = Join-Path $cameraDollyRoot 'validate-camera-dolly-zoom-inputs-v1.eddgraph'
+$cameraDollyValidationPaste = Join-Path $cameraDollyRoot 'validate-camera-dolly-zoom-inputs-v1-paste.eddgraph'
+$cameraDollyValidationRepeat = Join-Path $cameraDollyRoot 'validate-camera-dolly-zoom-inputs-v1-repeat.eddgraph'
+$cameraDollyValidationRepeatPaste = Join-Path $cameraDollyRoot 'validate-camera-dolly-zoom-inputs-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraDollyValidation,$cameraDollyValidationPaste),@($cameraDollyValidationRepeat,$cameraDollyValidationRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraDollyZoomValidationGraph.py') --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera dolly validation generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraDollyValidation,$cameraDollyValidationRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-dolly-zoom-inputs-v1.eddgraph')),
+    @($cameraDollyValidationPaste,$cameraDollyValidationRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-dolly-zoom-inputs-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera dolly validation generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraDollyValidation
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDollyZoomValidationContracts.py') --project-root $ProjectRoot --graph $cameraDollyValidation
+if ($LASTEXITCODE -ne 0) { throw "Camera dolly validation full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraDollyZoomValidationContracts.py') --project-root $ProjectRoot --graph $cameraDollyValidationPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera dolly validation paste contracts failed with exit code $LASTEXITCODE." }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null
 $cameraDofReset = Join-Path $cameraDofRoot 'reset-camera-dof-diagnostics-v1.eddgraph'

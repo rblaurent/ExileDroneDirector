@@ -156,6 +156,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_channel_assembly_reference.py',
     'tools\trajectory\camera_channel_assembly_blueprint_schema.json',
     'tools\trajectory\test_camera_channel_assembly_blueprint_schema.py',
+    'tools\trajectory\camera_engine_application_reference.py',
+    'tools\trajectory\test_camera_engine_application_reference.py',
+    'tools\trajectory\camera_engine_application_blueprint_schema.json',
+    'tools\trajectory\test_camera_engine_application_blueprint_schema.py',
     'tools\blueprint\Build-CameraChannelCompileResetGraph.py',
     'tools\blueprint\Test-CameraChannelCompileResetContracts.py',
     'tools\blueprint\snippets\reset-camera-channel-compile-v1.eddgraph',
@@ -1202,6 +1206,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_channel_assembly_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera channel-assembly Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_engine_application_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine-application reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_engine_application_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine-application Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 $cameraScalarNonce = [guid]::NewGuid().ToString('N')
 $cameraScalarRoot = Join-Path $scratchRoot "edd-camera-scalar-$cameraScalarNonce"

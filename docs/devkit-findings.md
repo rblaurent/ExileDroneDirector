@@ -5221,3 +5221,29 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   to engine camera/post-process properties. The next seam must discover and
   freeze actual property availability, apply only supported values, expose
   unavailable properties explicitly, and restore the prior viewer state.
+
+### Camera engine-application architecture frozen offline (2026-08-14)
+
+- The normalized boundary has fifteen unique targets: filmback width/height
+  followed by the accepted thirteen channel values in exact canonical order.
+  Filmback, focal length, aperture, and manual focus distance are required;
+  optional focus/effect/look mappings must come from an engine-versioned,
+  reviewed capability manifest rather than guessed property names.
+- Complete preflight precedes every engine mutation. An unavailable optional
+  target is skippable only if desired value and current engine value equal the
+  frozen neutral and no override flag is active. Any active mismatch rejects
+  the complete frame with `requested_target_unavailable`, so the adapter neither
+  lies about visual output nor leaves a half-applied frame.
+- Baseline camera values and post-process override flags are captured exactly
+  once per session. Repeated begin cannot overwrite them or exchange capability
+  manifests; normal exit, emergency exit, completion, cancellation, and invalid-
+  camera recovery must restore them before camera ownership is released.
+- Seven reference tests and five schema tests pass. Coverage includes complete
+  availability, safe neutral gaps, each missing required target, active
+  unavailable targets, contaminated viewer baselines, malformed manifests and
+  frames, immutable failure behavior, exact idempotent restoration, and seeded
+  forward/reverse frame application.
+- This is offline architecture evidence. No Cine Camera or post-process
+  property has been claimed available yet. The next offline checkpoint owns
+  deterministic reset/validation/staging graphs and a read-only reflection
+  manifest probe; editor work starts only after those contracts are green.

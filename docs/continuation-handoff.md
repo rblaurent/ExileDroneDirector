@@ -457,12 +457,44 @@ success, and restore the viewer's prior camera state. Then continue with manual
 and target focus helpers, dolly zoom, comfort overrides, Directed / Free Look /
 Carrier Freecam modes, bounded event adapters, debug dogfood, and polished UI.
 
+## Offline camera engine-application state
+
+The engine-neutral application/restoration architecture is frozen in
+`camera_engine_application_reference.py` and
+`camera_engine_application_blueprint_schema.json`. It maps the discrete
+filmback dimensions plus all thirteen evaluated channels into fifteen unique
+canonical targets; no camera channel is reused or collapsed. Filmback width and
+height, focal length, aperture, and manual focus distance are required engine
+capabilities. Optional post-process/look targets are explicitly availability-
+gated.
+
+Application is a preflighted transaction. Engine version, manifest identity,
+canonical capability shape, frame shape/order/ranges, camera session, and every
+unavailable target are checked before the first property write. An unavailable
+optional target is safe to skip only when its desired value and current viewer
+value are both neutral and its override flag is false; otherwise the entire
+frame rejects as unavailable without partial mutation. This prevents both false
+success and an unavailable cosmetic property unnecessarily blocking a genuinely
+neutral frame.
+
+One active session captures exact baseline values and override flags once.
+Repeated begin cannot overwrite that baseline or swap capability manifests.
+Restore returns every value and flag byte-for-value, is stable when repeated,
+and remains mandatory before camera ownership is released. Seven reference and
+five schema tests pass, including full support, safe neutral skips, missing core
+properties, active unavailable rejection, poisoned frame rollback, repeated
+capture, exact restoration, and seeded forward/reverse application. The
+complete scaffold owns the four new files. Next: generate and interpret the
+engine-neutral reset/validation/staging graphs and a deterministic read-only
+property probe before opening the editor.
+
 ## Next ordered implementation
 
-Begin the camera engine-application seam offline with an explicit property-
-availability and restoration reference/schema, then deterministic generators,
-interpreters, and scaffold ownership. Only after that family is green, use one
-editor for compile/save/runtime/PIE/cold acceptance. Continue through the
+Continue the camera engine-application seam with deterministic reset,
+validation, staging, and property-manifest probe generators/interpreters. Only
+after that offline family is green, use one editor to freeze actual Enhanced
+property availability and then complete compile/save/runtime/PIE/cold
+acceptance. Continue through the
 remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,
 and bounded event adapters with authorization. After the complete backend,
 expose temporary debug controls and logs, run attended dogfood, and only then
@@ -619,9 +651,10 @@ git rev-parse origin/main
 
 ## Confidence statement
 
-Confidence is high in every checkpoint explicitly accepted above, including the
+Confidence is high in every live checkpoint explicitly accepted above, including the
 complete live source-sampling bridge, lossless compiled-document adapter with
 post-boundary discontinuity diagnostics, scalar-track engine, and synchronized
-thirteen-channel lens/focus/effect frame assembly. Confidence is not yet claimed
-for engine property application/restoration, camera modes, events, keyboard
+thirteen-channel lens/focus/effect frame assembly. The engine-application
+reference/schema is accepted offline only. Confidence is not yet claimed for
+live engine property application/restoration, camera modes, events, keyboard
 dogfood, UI, cooking, Workshop, G-Portal, deployment, or whole-mod completion.

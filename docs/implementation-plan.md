@@ -1814,7 +1814,10 @@ before any polished editor UI or cook is attempted:
    eight explicit thirteen-value paths (136 full / 135 paste nodes, 104 literal
    appends). Every preset matches the reference catalog, unavailable mappings
    stay neutral, and exact links/regeneration are scaffold-owned. Sparse
-   authored override composition is next.
+   authorship is now composed by `ApplyCameraLookAuthoredOverridesV1` in a fixed
+   0..12 canonical loop (46 full / 45 paste nodes). Eighty seeded forward/reverse
+   cases prove order independence, exact base fallback, exact override masks,
+   input immutability, and false-stage no-publication. Atomic commit is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

@@ -192,6 +192,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraBaseLookBaseValuesContracts.py',
     'tools\blueprint\snippets\build-camera-look-base-values-v1.eddgraph',
     'tools\blueprint\snippets\build-camera-look-base-values-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraBaseLookOverridesGraph.py',
+    'tools\blueprint\Test-CameraBaseLookOverridesContracts.py',
+    'tools\blueprint\snippets\apply-camera-look-authored-overrides-v1.eddgraph',
+    'tools\blueprint\snippets\apply-camera-look-authored-overrides-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraDollyZoomResetGraph.py',
     'tools\blueprint\Test-CameraDollyZoomResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dolly-zoom-v1.eddgraph',
@@ -1651,6 +1655,34 @@ foreach ($graph in @($cameraLookBase,$cameraLookBasePaste)) {
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
         --project-root $ProjectRoot --graph $graph
     if ($LASTEXITCODE -ne 0) { throw "Camera base-look value link integrity failed with exit code $LASTEXITCODE." }
+}
+$cameraLookOverrides = Join-Path $cameraLookRoot 'apply-camera-look-authored-overrides-v1.eddgraph'
+$cameraLookOverridesPaste = Join-Path $cameraLookRoot 'apply-camera-look-authored-overrides-v1-paste.eddgraph'
+$cameraLookOverridesRepeat = Join-Path $cameraLookRoot 'apply-camera-look-authored-overrides-v1-repeat.eddgraph'
+$cameraLookOverridesRepeatPaste = Join-Path $cameraLookRoot 'apply-camera-look-authored-overrides-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraLookOverrides,$cameraLookOverridesPaste),@($cameraLookOverridesRepeat,$cameraLookOverridesRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraBaseLookOverridesGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera base-look override generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraLookOverrides,$cameraLookOverridesRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\apply-camera-look-authored-overrides-v1.eddgraph')),
+    @($cameraLookOverridesPaste,$cameraLookOverridesRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\apply-camera-look-authored-overrides-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera base-look override generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraLookOverrides
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraBaseLookOverridesContracts.py') `
+    --project-root $ProjectRoot --graph $cameraLookOverrides
+if ($LASTEXITCODE -ne 0) { throw "Camera base-look override full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraBaseLookOverridesContracts.py') `
+    --project-root $ProjectRoot --graph $cameraLookOverridesPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera base-look override paste contracts failed with exit code $LASTEXITCODE." }
+foreach ($graph in @($cameraLookOverrides,$cameraLookOverridesPaste)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graph
+    if ($LASTEXITCODE -ne 0) { throw "Camera base-look override link integrity failed with exit code $LASTEXITCODE." }
 }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null

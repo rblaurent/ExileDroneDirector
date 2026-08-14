@@ -5508,3 +5508,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   table. It rebuilds only private base candidates after validation; accepted
   look, CameraChannel, engine, motion, document, playback, and comfort state are
   absent. Every path matches the offline reference and link integrity is exact.
+- `ApplyCameraLookAuthoredOverridesV1` is deterministic at 46 full / 45 paste
+  nodes. A fixed thirteen-channel loop performs one lookup per canonical ID and
+  appends either the exact authored value or base fallback with a parallel mask.
+  Eighty forward/reverse interpreter cases prove order independence and input
+  immutability; accepted result and external state are structurally absent.

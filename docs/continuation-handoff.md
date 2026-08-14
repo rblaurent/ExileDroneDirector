@@ -974,6 +974,14 @@ against the reference catalog; false validation remains a no-publication path.
 Both forms have exact reciprocal links and byte-identical regeneration. Next:
 apply sparse authored overrides in canonical channel order.
 
+`ApplyCameraLookAuthoredOverridesV1` is now deterministic at 46 full / 45
+paste nodes. A fixed 0..12 loop reconstructs the canonical channel ID, performs
+one authored lookup, and appends either that exact authored value or the exact
+base value plus the matching Boolean mask. Eighty seeded forward/reverse
+compositions prove input order independence and immutable input/base arrays;
+false-stage execution publishes nothing. Both forms have exact reciprocal links
+and byte-identical regeneration. Next: atomic accepted-result commit.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

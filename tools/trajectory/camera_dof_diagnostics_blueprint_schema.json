@@ -1,0 +1,47 @@
+{
+  "schema": "edd.camera-dof-diagnostics.v1",
+  "version": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Read one complete evaluated camera-channel frame and publish focal-plane plus approximate near/far depth-of-field diagnostics without mutating camera authorship or engine state.",
+  "constants": {
+    "channelCount": 13,
+    "focalLengthIndex": 0,
+    "apertureIndex": 1,
+    "focusDistanceIndex": 2,
+    "circleOfConfusionDiagonalDivisor": 1500.0,
+    "unboundedFarSentinelCm": 0.0
+  },
+  "invariants": {
+    "source": "Stage reads only CameraChannelResultValidV1, the evaluated filmback dimensions, and the canonical 13-value result array. It never compiles or mutates a camera track.",
+    "model": "The diagnostic uses a thin-lens approximation with circle of confusion equal to filmback diagonal divided by 1500. Focus distance must lie beyond focal length.",
+    "unbounded": "Far depth of field is explicit: CameraDofFarUnboundedV1 is true and CameraDofFarLimitCmV1 plus CameraDofRearDepthCmV1 are zero. Infinity and arbitrary large sentinels are forbidden.",
+    "ownership": "This helper publishes diagnostics only. It cannot write camera-channel authored/candidate/compiled/result arrays, focus-marker state, native camera properties, motion authorship, or document state.",
+    "atomicity": "Reset invalidates and clears every stage/result field. Stage publishes validity last after complete-frame preflight. Compute validates all physical inputs before publishing every derived scalar and result validity last."
+  },
+  "variables": [
+    {"name":"CameraDofStageFilmbackWidthMmV1","type":"Float","container":"None","role":"stage","default":0.0},
+    {"name":"CameraDofStageFilmbackHeightMmV1","type":"Float","container":"None","role":"stage","default":0.0},
+    {"name":"CameraDofStageFocalLengthMmV1","type":"Float","container":"None","role":"stage","default":0.0},
+    {"name":"CameraDofStageApertureFstopV1","type":"Float","container":"None","role":"stage","default":0.0},
+    {"name":"CameraDofStageFocusDistanceCmV1","type":"Float","container":"None","role":"stage","default":0.0},
+    {"name":"CameraDofStageValidV1","type":"Boolean","container":"None","role":"stage","default":false},
+    {"name":"CameraDofCircleOfConfusionMmV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"CameraDofHyperfocalDistanceCmV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"CameraDofFocalPlaneDistanceCmV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"CameraDofNearLimitCmV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"CameraDofFarLimitCmV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"CameraDofFarUnboundedV1","type":"Boolean","container":"None","role":"result","default":false},
+    {"name":"CameraDofFrontDepthCmV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"CameraDofRearDepthCmV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"CameraDofFocalPlaneWidthCmV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"CameraDofFocalPlaneHeightCmV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"CameraDofFailureCodeV1","type":"String","container":"None","role":"result","default":""},
+    {"name":"CameraDofResultValidV1","type":"Boolean","container":"None","role":"result","default":false}
+  ],
+  "functions": [
+    {"name":"ResetCameraDofDiagnosticsV1","stage":0},
+    {"name":"StageEvaluatedCameraDofFrameV1","stage":1,"reads":["CameraChannelResultValidV1","CameraChannelResultFilmbackSensorWidthMmV1","CameraChannelResultFilmbackSensorHeightMmV1","CameraChannelResultValuesV1"]},
+    {"name":"ComputeCameraDofDiagnosticsV1","stage":2},
+    {"name":"EvaluateCameraDofDiagnosticsV1","stage":3,"uses":["ResetCameraDofDiagnosticsV1","StageEvaluatedCameraDofFrameV1","ComputeCameraDofDiagnosticsV1"]}
+  ]
+}

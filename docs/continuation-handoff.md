@@ -23,8 +23,8 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current focus-helper live work started from remote-equal `2be94a7`, with the
-  accepted offline family and live tooling described below; HEAD must
+- Current DOF-diagnostic work started from remote-equal `f65adf4`, with the
+  accepted focus helper and frozen diagnostic boundary described below; HEAD must
   equal `origin/main` before checkpoint work is committed
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
@@ -764,6 +764,19 @@ Next: continue task 10 with the remaining Phase 5 camera helpersâ€”focal-pl
 depth-of-field debug diagnostics, dolly-zoom authoring, verified effect/look
 helpers, and local comfort overridesâ€”before Directed / Free Look / Carrier
 Freecam playback modes and bounded authorized event adapters.
+
+The focal-plane / depth-of-field diagnostic boundary is now frozen offline.
+It reads only one complete evaluated 13-channel camera frame and its filmback,
+then publishes circle of confusion, hyperfocal distance, focal plane, bounded
+near/far limits, front/rear depth, and focal-plane size. The thin-lens model
+uses filmback diagonal / 1500 for approximate circle of confusion. An
+unbounded far limit is a Boolean plus zero scalar sentinelâ€”never infinity or an
+arbitrary huge distance. Six executable reference tests include exact full-
+frame math, hyperfocal transition, aperture behavior, immutable input, invalid
+families, and 80 seeded forward/reverse evaluations. Four schema tests freeze
+18 scalar variables, four ordered functions, complete-frame staging, atomic
+publication, and diagnostic-only ownership. Next: deterministic reset, stage,
+compute, and tiny evaluation graphs before one-editor acceptance.
 
 ## Next ordered implementation
 

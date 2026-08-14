@@ -168,6 +168,14 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_focus_helper_reference.py',
     'tools\trajectory\camera_focus_helper_blueprint_schema.json',
     'tools\trajectory\test_camera_focus_helper_blueprint_schema.py',
+    'tools\blueprint\Build-CameraFocusCompileResetGraph.py',
+    'tools\blueprint\Test-CameraFocusCompileResetContracts.py',
+    'tools\blueprint\snippets\reset-camera-focus-compile-v1.eddgraph',
+    'tools\blueprint\snippets\reset-camera-focus-compile-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraFocusSetHereGraph.py',
+    'tools\blueprint\Test-CameraFocusSetHereContracts.py',
+    'tools\blueprint\snippets\set-camera-focus-here-v1.eddgraph',
+    'tools\blueprint\snippets\set-camera-focus-here-v1-paste.eddgraph',
     'tools\unreal\Probe-CameraEngineProperties.py',
     'tools\blueprint\Test-CameraEngineNativeNodeForms.py',
     'tools\blueprint\templates\camera-engine-basic-node-forms.eddgraph',
@@ -1283,6 +1291,48 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Camera focus-helper Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
+$cameraFocusRoot = Join-Path $scratchRoot ("edd-camera-focus-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $cameraFocusRoot -Force | Out-Null
+$cameraFocusReset = Join-Path $cameraFocusRoot 'reset-camera-focus-compile-v1.eddgraph'
+$cameraFocusResetPaste = Join-Path $cameraFocusRoot 'reset-camera-focus-compile-v1-paste.eddgraph'
+$cameraFocusResetRepeat = Join-Path $cameraFocusRoot 'reset-camera-focus-compile-v1-repeat.eddgraph'
+$cameraFocusResetRepeatPaste = Join-Path $cameraFocusRoot 'reset-camera-focus-compile-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraFocusReset,$cameraFocusResetPaste),@($cameraFocusResetRepeat,$cameraFocusResetRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraFocusCompileResetGraph.py') --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera focus reset generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraFocusReset,$cameraFocusResetRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-focus-compile-v1.eddgraph')),
+    @($cameraFocusResetPaste,$cameraFocusResetRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-focus-compile-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera focus reset generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraFocusReset
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraFocusCompileResetContracts.py') --project-root $ProjectRoot --graph $cameraFocusReset
+if ($LASTEXITCODE -ne 0) { throw "Camera focus reset full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraFocusCompileResetContracts.py') --project-root $ProjectRoot --graph $cameraFocusResetPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera focus reset paste contracts failed with exit code $LASTEXITCODE." }
+$cameraFocusSetHere = Join-Path $cameraFocusRoot 'set-camera-focus-here-v1.eddgraph'
+$cameraFocusSetHerePaste = Join-Path $cameraFocusRoot 'set-camera-focus-here-v1-paste.eddgraph'
+$cameraFocusSetHereRepeat = Join-Path $cameraFocusRoot 'set-camera-focus-here-v1-repeat.eddgraph'
+$cameraFocusSetHereRepeatPaste = Join-Path $cameraFocusRoot 'set-camera-focus-here-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraFocusSetHere,$cameraFocusSetHerePaste),@($cameraFocusSetHereRepeat,$cameraFocusSetHereRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraFocusSetHereGraph.py') --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera focus Set Here generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraFocusSetHere,$cameraFocusSetHereRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\set-camera-focus-here-v1.eddgraph')),
+    @($cameraFocusSetHerePaste,$cameraFocusSetHereRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\set-camera-focus-here-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera focus Set Here generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraFocusSetHere
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraFocusSetHereContracts.py') --project-root $ProjectRoot --graph $cameraFocusSetHere
+if ($LASTEXITCODE -ne 0) { throw "Camera focus Set Here full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraFocusSetHereContracts.py') --project-root $ProjectRoot --graph $cameraFocusSetHerePaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera focus Set Here paste contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_camera_engine_application_validators.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine live-validator contracts failed with exit code $LASTEXITCODE."

@@ -671,6 +671,17 @@ reference tests, six schema tests, forty seeded cases, immutable-input checks,
 and eight failure families pass. Next: deterministic reset and Set Focus Here
 graphs, then validation/build/commit/orchestration before one-editor acceptance.
 
+The first two focus graphs are now deterministic and scaffold-owned. Compile
+reset is 6 full / 5 paste nodes: it clears only private candidate distances,
+invalidates candidate/compile results, clears the failure code, and preserves
+every authored input, trace/marker value, and the complete prior compiled focus
+snapshot. `SetCameraFocusHereV1` is 9 full / 8 paste nodes and remains outside
+the compile coordinator: trace validity is its sole execution guard, the miss
+path has no marker write, and a hit commits exact impact position, marker
+validity, and incremented revision in that order. Full/paste executable
+contracts and byte-identical repeated generation pass; the complete scaffold
+passes in 115.0 seconds. Next: focus input validation.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

@@ -525,6 +525,21 @@ wrong/missing core types, observation-order-independent identity, path-alias
 rejection, and non-persistent script structure. Next: the fifteen-value and
 capability validation graph, then run the probe in the first single editor.
 
+`ValidateCameraEngineApplicationInputsV1` is deterministic at 171 full / 170
+paste nodes. It fail-closes staged validity, nonempty engine/manifest/filmback
+identity, exact 15-value and 15-capability shapes, all five mandatory capability
+bits, finiteness, positive filmback dimensions, and every accepted physical/
+normalized channel range. It does not inspect optional current-state neutrality;
+that check correctly remains after baseline capture and immediately before
+engine writes. Both graph forms pass 80 seeded valid inputs and 56 failure
+families. Baseline/current/session state, camera references, engine properties,
+and all authored/candidate/compiled banks are absent. Full/paste SHA-256 is
+`12EDE09AE611112E92AD4A7FC382220BFDED8C1709F201948190ACDACB0EC993` /
+`E7185A7FA4BCF7B80B9BB2EDA6DD3E8EFF507A6D0D531C9834BB609642316D82`.
+The engine-neutral preflight set is complete. Next: open one editor, run the
+non-persistent property probe, review/freeze the actual manifest, then generate
+the concrete capture/apply/restore helpers against only proven paths.
+
 ## Next ordered implementation
 
 Continue the camera engine-application seam with deterministic reset,

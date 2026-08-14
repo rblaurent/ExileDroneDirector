@@ -5273,3 +5273,10 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   state, path-alias rejection, and a probe script with transient destruction in
   `finally` and no asset-save API. Actual Enhanced availability is not claimed
   until that non-persistent probe runs in the single editor.
+- `ValidateCameraEngineApplicationInputsV1` freezes static preflight as a
+  deterministic 171/170-node full/paste graph. It checks exact staged/capability
+  cardinality, identity, all five mandatory capability bits, fifteen finite
+  values, positive filmback dimensions, and every physical/normalized bound.
+  Eighty valid and 56 invalid interpreter cases pass. It deliberately cannot
+  read baseline/current/session or any engine property; optional unavailable-
+  target safety belongs after actual state capture, directly before writes.

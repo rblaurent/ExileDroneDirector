@@ -172,6 +172,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraEngineApplicationStageContracts.py',
     'tools\blueprint\snippets\stage-evaluated-camera-channel-frame-v1.eddgraph',
     'tools\blueprint\snippets\stage-evaluated-camera-channel-frame-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraEngineApplicationValidationGraph.py',
+    'tools\blueprint\Test-CameraEngineApplicationValidationContracts.py',
+    'tools\blueprint\snippets\validate-camera-engine-application-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-camera-engine-application-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraChannelCompileResetGraph.py',
     'tools\blueprint\Test-CameraChannelCompileResetContracts.py',
     'tools\blueprint\snippets\reset-camera-channel-compile-v1.eddgraph',
@@ -1305,6 +1309,42 @@ if ($LASTEXITCODE -ne 0) {
     --project-root $ProjectRoot --graph $cameraApplyStagePaste --paste
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine-application staging paste contracts failed with exit code $LASTEXITCODE."
+}
+$cameraApplyValidation = Join-Path $cameraApplyResetRoot 'validate-camera-engine-application-inputs-v1.eddgraph'
+$cameraApplyValidationPaste = Join-Path $cameraApplyResetRoot 'validate-camera-engine-application-inputs-v1-paste.eddgraph'
+$cameraApplyValidationRepeat = Join-Path $cameraApplyResetRoot 'validate-camera-engine-application-inputs-v1-repeat.eddgraph'
+$cameraApplyValidationRepeatPaste = Join-Path $cameraApplyResetRoot 'validate-camera-engine-application-inputs-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($cameraApplyValidation, $cameraApplyValidationPaste),
+    @($cameraApplyValidationRepeat, $cameraApplyValidationRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraEngineApplicationValidationGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) {
+        throw "Camera engine-application validation generation failed with exit code $LASTEXITCODE."
+    }
+}
+foreach ($comparison in @(
+    @($cameraApplyValidation, $cameraApplyValidationRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-engine-application-inputs-v1.eddgraph')),
+    @($cameraApplyValidationPaste, $cameraApplyValidationRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-engine-application-inputs-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $comparison[1]).Hash) {
+        throw "Camera engine-application validation generation is not deterministic: $($comparison[0])"
+    }
+    if ((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash -ne (Get-FileHash -Algorithm SHA256 $comparison[2]).Hash) {
+        throw "Checked-in camera engine-application validation snippet drifted: $($comparison[2])"
+    }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraApplyValidation
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraEngineApplicationValidationContracts.py') `
+    --project-root $ProjectRoot --graph $cameraApplyValidation
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine-application validation full contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraEngineApplicationValidationContracts.py') `
+    --project-root $ProjectRoot --graph $cameraApplyValidationPaste --paste
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine-application validation paste contracts failed with exit code $LASTEXITCODE."
 }
 $cameraScalarNonce = [guid]::NewGuid().ToString('N')
 $cameraScalarRoot = Join-Path $scratchRoot "edd-camera-scalar-$cameraScalarNonce"

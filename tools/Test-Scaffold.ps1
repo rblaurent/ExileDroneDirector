@@ -196,6 +196,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraOperatorOverrideValidationContracts.py',
     'tools\blueprint\snippets\validate-camera-operator-override-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-camera-operator-override-inputs-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraOperatorOverrideTranslationGraph.py',
+    'tools\blueprint\Test-CameraOperatorOverrideTranslationContracts.py',
+    'tools\blueprint\snippets\build-camera-operator-translation-v1.eddgraph',
+    'tools\blueprint\snippets\build-camera-operator-translation-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraViewerComfortResetGraph.py',
     'tools\blueprint\Test-CameraViewerComfortResetContracts.py',
     'tools\blueprint\snippets\reset-camera-viewer-comfort-v1.eddgraph',
@@ -1583,6 +1587,40 @@ if ($LASTEXITCODE -ne 0) { throw "Camera operator validation full contracts fail
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraOperatorOverrideValidationContracts.py') `
     --project-root $ProjectRoot --graph $cameraOperatorValidationPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera operator validation paste contracts failed with exit code $LASTEXITCODE." }
+$cameraOperatorTranslation = Join-Path $cameraOperatorRoot 'build-camera-operator-translation-v1.eddgraph'
+$cameraOperatorTranslationPaste = Join-Path $cameraOperatorRoot 'build-camera-operator-translation-v1-paste.eddgraph'
+$cameraOperatorTranslationRepeat = Join-Path $cameraOperatorRoot 'build-camera-operator-translation-v1-repeat.eddgraph'
+$cameraOperatorTranslationRepeatPaste = Join-Path $cameraOperatorRoot 'build-camera-operator-translation-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($cameraOperatorTranslation,$cameraOperatorTranslationPaste),
+    @($cameraOperatorTranslationRepeat,$cameraOperatorTranslationRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraOperatorOverrideTranslationGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera operator translation generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraOperatorTranslation,$cameraOperatorTranslationRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\build-camera-operator-translation-v1.eddgraph')),
+    @($cameraOperatorTranslationPaste,$cameraOperatorTranslationRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\build-camera-operator-translation-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+        throw 'Camera operator translation generation is not byte deterministic.'
+    }
+}
+foreach ($graph in @($cameraOperatorTranslation,$cameraOperatorTranslationPaste)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graph
+    if ($LASTEXITCODE -ne 0) { throw "Camera operator translation link integrity failed with exit code $LASTEXITCODE." }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraOperatorOverrideTranslationContracts.py') `
+    --project-root $ProjectRoot --graph $cameraOperatorTranslation
+if ($LASTEXITCODE -ne 0) { throw "Camera operator translation full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraOperatorOverrideTranslationContracts.py') `
+    --project-root $ProjectRoot --graph $cameraOperatorTranslationPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera operator translation paste contracts failed with exit code $LASTEXITCODE." }
 $cameraDollyRoot = Join-Path $scratchRoot ("edd-camera-dolly-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDollyRoot -Force | Out-Null
 $cameraDollyReset = Join-Path $cameraDollyRoot 'reset-camera-dolly-zoom-v1.eddgraph'

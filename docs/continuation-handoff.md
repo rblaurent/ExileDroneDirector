@@ -1343,9 +1343,31 @@ snapshots. Regeneration is byte-identical with SHA-256
 for the full form and
 `D70D97CDA77E4B087D951A07E6ADCFCF5385012ABBB05CCDEC7E0AC360DD2D72`
 for paste. The complete MVP-required scaffold passes in 136.1 seconds with
-Unreal closed. Next: generate and interpret the translation-integration graph;
-then look integration, atomic commit, and the tiny coordinator before editor
-work.
+Unreal closed.
+
+`BuildCameraOperatorTranslationV1` is now deterministic at 105 full / 104
+paste nodes with 158 / 157 reciprocal links. It resolves Return to Directed,
+maintains the latched Recenter contract, normalizes diagonal input, rotates only
+carrier-relative translation through the separate carrier-frame quaternion,
+and integrates bounded velocity and offset with acceleration limits. Directed
+and Free Look decay inherited translation instead of snapping. Soft tethering
+clamps only the local offset and removes only outward radial velocity; the
+authored position and both authored rotations are structurally absent. The
+first accepted frame always publishes zero local translation, even with queued
+input.
+
+The executable oracle exposed a real floating-point edge before editor work:
+normalizing the old offset and scaling it is mathematically equivalent to the
+reference decay but can round across exact zero one frame earlier. The accepted
+graph preserves the reference evaluation order, `offset * (-speed / length)`,
+and uses a selected safe denominator only for the already-settled branch. Both
+forms match 160 history-explicit forward/reverse candidates plus explicit
+world/carrier isolation and false-validation preservation. Full/paste SHA-256
+is `A6B5ABF693BF1B671AA72F9D0884F1180F7AA40F473601A69F26B6D0BDC2A95A` /
+`EECB8B04B739465886558DE783A22C0CA2B5589FF3B4A4CFFD8A0E980FE22287`.
+The complete MVP-required scaffold passes in 138.1 seconds with Unreal closed.
+Next: generate and interpret look integration, then atomic commit and the tiny
+coordinator before editor work.
 
 ## Critical design mismatch
 

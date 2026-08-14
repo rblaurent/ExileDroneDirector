@@ -1917,6 +1917,16 @@ before any polished editor UI or cook is attempted:
    result, external-camera, Flypath, playback/event-time, repository, or server
    access. Exact regeneration and the complete 136.1-second scaffold pass with
    Unreal closed. Translation integration is next.
+   `BuildCameraOperatorTranslationV1` is now deterministic at 105 full / 104
+   paste nodes with 158 / 157 reciprocal links. It implements exact mode and
+   recenter latching, normalized world/carrier input, acceleration-bounded
+   velocity, snap-free decay, exact-zero crossing, and soft-tether radial
+   removal while reading the separate carrier quaternion and no authored pose
+   track. The graph preserves the reference's floating-point decay order after
+   the oracle rejected a mathematically equivalent normalization that could
+   settle one frame early. Both forms match 160 history-explicit forward/reverse
+   candidates; exact regeneration and the complete 138.1-second scaffold pass
+   with Unreal closed. Look integration is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

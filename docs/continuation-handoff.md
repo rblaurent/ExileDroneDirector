@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after integrated scalar-engine re-acceptance
+Last updated: 2026-08-15 after offline camera-operator input validation
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,8 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the integrated scalar-engine re-acceptance package described below; after
-  the checkpoint push, HEAD must equal `origin/main` before the next seam starts
+- Current checkpoint is the offline camera-operator validation package described
+  below; after the checkpoint push, HEAD must equal `origin/main` before the
+  translation-integration seam starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1321,6 +1322,30 @@ and preserve object identity in the executable interpreter. Both forms pass
 exact default-value, reciprocal-link, full/paste execution, and byte-identical
 regeneration checks; the complete MVP-required scaffold passes in 135.5
 seconds. Next: generate the fail-closed input-validation graph.
+
+`ValidateCameraOperatorOverrideInputsV1` is now deterministic at 259 full /
+258 paste nodes with 345 / 344 reciprocal links. It invalidates first and reads
+only the 24 source, authored-pose, operator-input, policy, and prior-state fields
+needed at this boundary. It accepts only the three frozen modes, world/carrier
+translation frames, finite bounded controls and delta time, positive bounded
+policy values, normalized and finite authored body, authored gimbal, carrier,
+and state quaternions, and a canonical zero/identity state when uninitialized.
+It writes only validation plus failure code, publishes success last, and cannot
+touch candidates, prior accepted results, camera engine state, Flypaths,
+repositories, playback/event time, or server authority. Distinct authored body,
+gimbal, and carrier-frame getters are structurally required; there is no
+`CameraTransform` alias.
+
+Both full and paste forms accept 100 seeded valid sequential frames and reject
+all 30 poisoned families while preserving input, policy, and prior-state
+snapshots. Regeneration is byte-identical with SHA-256
+`14F61F4181F0548542E00B6DA882A38FB068D1AA6B941BA70220395ED0C51419`
+for the full form and
+`D70D97CDA77E4B087D951A07E6ADCFCF5385012ABBB05CCDEC7E0AC360DD2D72`
+for paste. The complete MVP-required scaffold passes in 136.1 seconds with
+Unreal closed. Next: generate and interpret the translation-integration graph;
+then look integration, atomic commit, and the tiny coordinator before editor
+work.
 
 ## Critical design mismatch
 

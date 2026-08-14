@@ -1908,6 +1908,15 @@ before any polished editor UI or cook is attempted:
    operator state, and the prior accepted result. Exact defaults, reciprocal
    links, byte-identical regeneration, both executable forms, and the complete
    135.5-second scaffold pass. Input validation is next.
+   `ValidateCameraOperatorOverrideInputsV1` is now deterministic at 259 full /
+   258 paste nodes with 345 / 344 reciprocal links. It fail-closes the exact 24
+   source/authorship/control/policy/state inputs, requires separate normalized
+   authored-body, authored-gimbal, carrier-frame, and state quaternions, and
+   publishes only validation/failure. One hundred valid sequential oracle
+   frames plus 30 rejected families pass in both forms without candidate,
+   result, external-camera, Flypath, playback/event-time, repository, or server
+   access. Exact regeneration and the complete 136.1-second scaffold pass with
+   Unreal closed. Translation integration is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

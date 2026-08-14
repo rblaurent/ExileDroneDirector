@@ -180,6 +180,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_base_look_reference.py',
     'tools\trajectory\camera_base_look_blueprint_schema.json',
     'tools\trajectory\test_camera_base_look_blueprint_schema.py',
+    'tools\blueprint\Build-CameraBaseLookResetGraph.py',
+    'tools\blueprint\Test-CameraBaseLookResetContracts.py',
+    'tools\blueprint\snippets\reset-camera-look-composition-v1.eddgraph',
+    'tools\blueprint\snippets\reset-camera-look-composition-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraDollyZoomResetGraph.py',
     'tools\blueprint\Test-CameraDollyZoomResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dolly-zoom-v1.eddgraph',
@@ -1553,6 +1557,36 @@ foreach ($liveContract in $cameraDollyLiveContracts) {
     if ($LASTEXITCODE -ne 0) {
         throw "Live camera dolly graph contract failed for $($liveContract[0]) with exit code $LASTEXITCODE."
     }
+}
+$cameraLookRoot = Join-Path $scratchRoot ("edd-camera-look-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $cameraLookRoot -Force | Out-Null
+$cameraLookReset = Join-Path $cameraLookRoot 'reset-camera-look-composition-v1.eddgraph'
+$cameraLookResetPaste = Join-Path $cameraLookRoot 'reset-camera-look-composition-v1-paste.eddgraph'
+$cameraLookResetRepeat = Join-Path $cameraLookRoot 'reset-camera-look-composition-v1-repeat.eddgraph'
+$cameraLookResetRepeatPaste = Join-Path $cameraLookRoot 'reset-camera-look-composition-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraLookReset,$cameraLookResetPaste),@($cameraLookResetRepeat,$cameraLookResetRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraBaseLookResetGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera base-look reset generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraLookReset,$cameraLookResetRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-look-composition-v1.eddgraph')),
+    @($cameraLookResetPaste,$cameraLookResetRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-look-composition-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera base-look reset generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraLookReset
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraBaseLookResetContracts.py') `
+    --project-root $ProjectRoot --graph $cameraLookReset
+if ($LASTEXITCODE -ne 0) { throw "Camera base-look reset full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraBaseLookResetContracts.py') `
+    --project-root $ProjectRoot --graph $cameraLookResetPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera base-look reset paste contracts failed with exit code $LASTEXITCODE." }
+foreach ($graph in @($cameraLookReset,$cameraLookResetPaste)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graph
+    if ($LASTEXITCODE -ne 0) { throw "Camera base-look reset link integrity failed with exit code $LASTEXITCODE." }
 }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null

@@ -947,6 +947,15 @@ forward/reverse compositions and eleven failure families, plus five schema tests
 pass. Next: generate the six reset, validate, base-build, authored-overlay,
 atomic-commit, and coordinator graphs offline before reopening Unreal.
 
+`ResetCameraLookCompositionV1` is now deterministic at 13 full / 12 paste
+nodes. It clears exactly the three private candidate arrays, invalidates
+validation/candidate/result publication, clears failure, and converges the two
+scratch scalars. Every authored input and all five fields of the prior accepted
+look snapshot are structurally absent and retain object identity in the reset
+interpreter. The full and paste forms regenerate byte-identically, require the
+complete reciprocal execution chain, and are scaffold-owned. Next: exact preset,
+shape, uniqueness, finiteness, and per-channel bounds validation.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

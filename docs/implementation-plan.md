@@ -1801,6 +1801,11 @@ before any polished editor UI or cook is attempted:
    nor aliased. Eight reference tests and five schema tests pass. Six
    deterministic composition graphs are next, followed by the separate local
    comfort layer.
+   The first look graph is now deterministic: `ResetCameraLookCompositionV1`
+   contains 13 full / 12 paste nodes, clears only private candidates and
+   transient validity/failure/scratch state, and preserves every authored input
+   plus the prior accepted look snapshot. Exact reciprocal execution and byte-
+   identical regeneration are scaffold-owned. Input validation is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

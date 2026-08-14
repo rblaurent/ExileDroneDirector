@@ -5491,3 +5491,8 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   or local comfort state.
 - Eight reference tests and five schema tests pass. This is offline architecture
   evidence; deterministic Blueprint generation starts next with Unreal closed.
+- `ResetCameraLookCompositionV1` is the first deterministic graph at 13 full /
+  12 paste nodes. It owns exactly three candidate clears and six transient
+  setters, preserves all inputs and accepted result arrays/identity, and passes
+  explicit reciprocal-chain plus poisoned-state reset contracts. No accepted
+  CameraChannel, engine, motion, document, playback, or comfort state appears.

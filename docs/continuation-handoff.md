@@ -344,6 +344,16 @@ bank. Both forms pass exact ownership and execution contracts and are now owned
 by the complete scaffold. Next: validate the flattened authored bank, its
 filmback snapshot, channel uniqueness, gap-free slices, domains, and policies.
 
+`ValidateCameraChannelInputsV1` follows at 126 full / 125 paste nodes. It
+accepts zero to thirteen sparse authored channels; proves supported unique IDs,
+gap-free disjoint key slices, exact flattened cardinalities, 1..512 keys per
+authored channel, finite non-negative duration, and a resolved positive
+filmback. Non-focus channels must be linear; focus distance alone may be linear
+or reciprocal. Both graph forms pass 81 seeded valid banks and 17 failure
+families without touching candidate or compiled storage. Next: expand sparse
+defaults and compile/copy each canonical channel into the private candidate
+bank through the accepted scalar engine.
+
 ## Next ordered implementation
 
 Generate the nine channel-assembly graphs in frozen stage order, with exact

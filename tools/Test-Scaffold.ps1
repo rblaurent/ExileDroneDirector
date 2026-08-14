@@ -160,6 +160,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraChannelCompileResetContracts.py',
     'tools\blueprint\snippets\reset-camera-channel-compile-v1.eddgraph',
     'tools\blueprint\snippets\reset-camera-channel-compile-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraChannelValidationGraph.py',
+    'tools\blueprint\Test-CameraChannelValidationContracts.py',
+    'tools\blueprint\snippets\validate-camera-channel-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-camera-channel-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraScalarTrackResetGraph.py',
     'tools\blueprint\Test-CameraScalarTrackResetContracts.py',
     'tools\blueprint\snippets\reset-camera-scalar-track-compile-v1.eddgraph',
@@ -1315,6 +1319,33 @@ if ($LASTEXITCODE -ne 0) { throw "Camera channel compile-reset full contracts fa
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraChannelCompileResetContracts.py') `
     --project-root $ProjectRoot --graph $cameraChannelResetPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera channel compile-reset paste contracts failed with exit code $LASTEXITCODE." }
+$cameraChannelValidation = Join-Path $cameraChannelRoot 'validate-camera-channel-inputs-v1.eddgraph'
+$cameraChannelValidationPaste = Join-Path $cameraChannelRoot 'validate-camera-channel-inputs-v1-paste.eddgraph'
+$cameraChannelValidationRepeat = Join-Path $cameraChannelRoot 'validate-camera-channel-inputs-v1-repeat.eddgraph'
+$cameraChannelValidationRepeatPaste = Join-Path $cameraChannelRoot 'validate-camera-channel-inputs-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraChannelValidation, $cameraChannelValidationPaste), @($cameraChannelValidationRepeat, $cameraChannelValidationRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraChannelValidationGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera channel validation generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraChannelValidation, $cameraChannelValidationRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-channel-inputs-v1.eddgraph')),
+    @($cameraChannelValidationPaste, $cameraChannelValidationRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-channel-inputs-v1-paste.eddgraph'))
+)) {
+    if ((Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[1] -Algorithm SHA256).Hash -or
+        (Get-FileHash -LiteralPath $comparison[0] -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $comparison[2] -Algorithm SHA256).Hash) {
+        throw 'Camera channel validation generation is not byte deterministic.'
+    }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraChannelValidation
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraChannelValidationContracts.py') `
+    --project-root $ProjectRoot --graph $cameraChannelValidation
+if ($LASTEXITCODE -ne 0) { throw "Camera channel validation full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraChannelValidationContracts.py') `
+    --project-root $ProjectRoot --graph $cameraChannelValidationPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera channel validation paste contracts failed with exit code $LASTEXITCODE." }
 $documentAdapterNonce = [guid]::NewGuid().ToString('N')
 $documentAdapterRoot = Join-Path $scratchRoot "edd-document-adapter-$documentAdapterNonce"
 New-Item -ItemType Directory -Path $documentAdapterRoot -Force | Out-Null

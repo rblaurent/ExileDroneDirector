@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the live camera focus-helper checkpoint
+Last updated: 2026-08-14 at the live camera DOF-diagnostic checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current DOF graph work started from remote-equal `05f8348`, with the
+- Current live acceptance started from remote-equal `6c66099`, with the
   accepted focus helper and frozen diagnostic boundary described below; HEAD must
   equal `origin/main` before checkpoint work is committed
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
@@ -820,6 +820,25 @@ outside the callback, reacquires the generated class, and restores both the 18
 DOF defaults and the four accepted upstream camera-frame defaults temporarily
 used by the probe. Next: one-editor configure/paste/compile/save/runtime/PIE/
 restore/cold acceptance and final live exports.
+
+The focal-plane / approximate depth-of-field diagnostic is now live-accepted.
+The four saved graphs contain 19, 100, 90, and 4 nodes in reset/stage/compute/
+evaluate order, and fresh postcompile exports pass their exact structural and
+executable contracts. Live runtime matches the independent thin-lens oracle for
+six camera frames in forward and reverse order, covers both bounded and
+unbounded far depth, preserves the evaluated camera frame, and passes direct-
+compute plus invalid-frame failures. Three automatic PIE worlds pass bounded,
+unbounded, and fail-closed scenarios on the real player-owned Client Director.
+The separate post-PIE restore compiles outside the callback and verifies all 18
+DOF plus four staged upstream defaults before an idempotent configurator rerun.
+Guarded quit reached `LogExit: Exiting.`; reverse sync copied only Client
+Director. Live/mirror packages are both 21,167,373 bytes with SHA-256
+`E7DFEBF802DC5B26278838445BBFF0C6C9818C47919DD903E7B7E551646F9120`.
+A fresh NullRHI commandlet loaded all nine core assets, compiled all six
+Blueprints, emitted `EDD_COLD_LOAD|RESULT|PASS`, and exited with zero errors.
+The four cold-editor exports are scaffold-owned under
+`tools/blueprint/live-snippets`. Next: continue Phase 5 with deterministic
+dolly-zoom authoring before comfort/effect helpers and playback modes.
 
 ## Next ordered implementation
 

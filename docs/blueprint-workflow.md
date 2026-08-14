@@ -468,10 +468,13 @@ Enhanced PIE may reinstance a generated Blueprint class and retain temporary
 class-default values in Blueprint-owned default data even when the currently
 visible CDO is restored in memory. For the camera-focus helper, always run
 `Restore-CameraFocusHelperSchemaDefaults.py` immediately after the automatic
-PIE result, before any configurator or save. That tool must compile first,
-reacquire the generated class/CDO, apply the frozen schema defaults, verify all
-24 properties, and save. Follow it with the idempotent configurator and require
-every array default count to be zero.
+PIE result, before any configurator or save. For the DOF family, run
+`Restore-CameraDofDiagnosticsSchemaDefaults.py`; it restores all 18 owned
+diagnostic fields plus the four accepted upstream camera-frame defaults staged
+by that probe. Each tool must compile first, reacquire the generated class/CDO,
+apply the frozen schema defaults, verify every touched property, and save.
+Follow it with the matching idempotent configurator; focus arrays must all have
+zero default count.
 
 Never compile a Blueprint from a Slate post-tick callback immediately after PIE
 teardown. In Enhanced 5.6.1 this invalidated the Python callback during class

@@ -1746,7 +1746,13 @@ before any polished editor UI or cook is attempted:
    or policy. The complete four-graph family is now offline-green. Its
    idempotent configurator, oracle runtime probe, three-session automatic PIE
    probe, and post-PIE schema restore are prepared and offline-checked; one-
-   editor acceptance remains.
+   editor acceptance is now complete: four saved graphs contain 19, 100, 90,
+   and 4 nodes; live runtime matches six bounded/unbounded oracle frames in both
+   orders; three automatic PIE worlds pass on the player-owned component; and a
+   separate restore proves all 22 temporarily touched defaults before cold
+   compile. Live/mirror Client Director SHA-256 is
+   `E7DFEBF802DC5B26278838445BBFF0C6C9818C47919DD903E7B7E551646F9120`.
+   Dolly-zoom authoring is the next Phase-5 seam.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

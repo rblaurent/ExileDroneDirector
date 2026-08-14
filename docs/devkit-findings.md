@@ -5421,3 +5421,23 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   only Client Director; live and Git mirror are both 20,628,898 bytes with
   SHA-256
   `F0458A4C426DFF2DE4BD34E357F5A76D7D76A2B58C19E180FB23D19BC0D95635`.
+## Camera focal-plane / DOF diagnostic live acceptance (2026-08-14)
+
+- Client Director now contains exact reset, complete-frame stage, thin-lens
+  compute, and policy-free evaluate graphs at 19, 100, 90, and 4 nodes.
+- Fresh postcompile exports pass exact ownership/link contracts. Runtime matches
+  six independent bounded/unbounded optical cases in forward and reverse order,
+  preserves the upstream evaluated frame, and rejects both direct physical and
+  full-frame failures.
+- Three automatic PIE worlds pass bounded, explicit unbounded-far, and malformed
+  frame cases on the real player-owned component, with automatic teardown.
+- PIE staging touched 18 DOF defaults and four accepted camera-frame defaults.
+  `Restore-CameraDofDiagnosticsSchemaDefaults.py` compiled only after the Slate
+  callback ended, reacquired the current class/CDO, restored and verified all
+  22 values, saved, then passed an idempotent configurator rerun.
+- Guarded quit reached `LogExit: Exiting.`. Reverse sync copied only Client
+  Director. Live/mirror size is 21,167,373 bytes and SHA-256 is
+  `E7DFEBF802DC5B26278838445BBFF0C6C9818C47919DD903E7B7E551646F9120`.
+- Fresh NullRHI cold load compiled all six Blueprints with zero errors and
+  emitted `EDD_COLD_LOAD|RESULT|PASS`. No UI, cook, deployment, or release work
+  was included.

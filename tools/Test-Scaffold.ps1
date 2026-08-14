@@ -193,6 +193,10 @@ $requiredFiles = @(
     'tools\unreal\Validate-CameraDofDiagnosticsRuntime.py',
     'tools\unreal\Validate-CameraDofDiagnosticsPIE.py',
     'tools\unreal\test_camera_dof_diagnostics_validators.py',
+    'tools\blueprint\live-snippets\reset-camera-dof-diagnostics-v1.eddgraph',
+    'tools\blueprint\live-snippets\stage-evaluated-camera-dof-frame-v1.eddgraph',
+    'tools\blueprint\live-snippets\compute-camera-dof-diagnostics-v1.eddgraph',
+    'tools\blueprint\live-snippets\evaluate-camera-dof-diagnostics-v1.eddgraph',
     'tools\blueprint\Build-CameraFocusCompileResetGraph.py',
     'tools\blueprint\Test-CameraFocusCompileResetContracts.py',
     'tools\blueprint\snippets\reset-camera-focus-compile-v1.eddgraph',
@@ -1435,6 +1439,21 @@ if ($LASTEXITCODE -ne 0) { throw "Camera DOF evaluate full contracts failed with
 if ($LASTEXITCODE -ne 0) { throw "Camera DOF evaluate paste contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_camera_dof_diagnostics_validators.py')
 if ($LASTEXITCODE -ne 0) { throw "Camera DOF live-tool contracts failed with exit code $LASTEXITCODE." }
+$cameraDofLiveContracts = @(
+    @('reset-camera-dof-diagnostics-v1.eddgraph', 'Test-CameraDofDiagnosticsResetContracts.py'),
+    @('stage-evaluated-camera-dof-frame-v1.eddgraph', 'Test-CameraDofDiagnosticsStageContracts.py'),
+    @('compute-camera-dof-diagnostics-v1.eddgraph', 'Test-CameraDofDiagnosticsComputeContracts.py'),
+    @('evaluate-camera-dof-diagnostics-v1.eddgraph', 'Test-CameraDofDiagnosticsEvaluateContracts.py')
+)
+foreach ($liveContract in $cameraDofLiveContracts) {
+    $liveGraph = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($liveContract[0])"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $liveGraph
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($liveContract[1])") `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera DOF graph contract failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+}
 $cameraFocusRoot = Join-Path $scratchRoot ("edd-camera-focus-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraFocusRoot -Force | Out-Null
 $cameraFocusReset = Join-Path $cameraFocusRoot 'reset-camera-focus-compile-v1.eddgraph'

@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the saved camera engine compile checkpoint
+Last updated: 2026-08-14 at the live camera engine application checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -29,8 +29,8 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
-- One Enhanced editor is intentionally open for the single-editor acceptance
-  sequence. Never start a second instance.
+- No Enhanced editor is intentionally open at this checkpoint. Never start a
+  second instance if a later seam opens one.
 
 Re-establish state before editing:
 
@@ -598,11 +598,11 @@ complete scaffold passes in 139.2 seconds and owns their sixteen
 generator/test/snippet files. Next: commit/push, then configure and install the full seven-
 graph family in the one existing editor for compile/runtime/PIE/cold acceptance.
 
-## Saved camera engine-application compile checkpoint
+## Live-accepted camera engine application
 
-The complete seven-graph family is now installed, compiled, saved, mirrored,
-and frozen as postcompile exports. This is a compile checkpoint, not runtime or
-PIE acceptance yet.
+The complete seven-graph family is installed, compiled, saved, mirrored,
+frozen as postcompile exports, and accepted through engine-neutral runtime,
+real native PIE mutation/restoration, fresh process, and cold load.
 
 - Saved graphs are reset 7 nodes, stage 58, validation 171, capture 41, apply
   60, restore 28, and orchestration 9. Every exact full-graph contract passed
@@ -625,32 +625,41 @@ PIE acceptance yet.
   contract, generators, snippets, and all seven live exports. The complete
   repository regression with mirrored MVP assets passes in 113.1 seconds.
 
-Next, keep this exact saved graph family unchanged and add runtime acceptance:
-two warm CDO runs with real native property mutation/restoration, unsupported-
-channel zero-write failures, repeated capture, opaque whole-struct restoration,
-and forward/reverse frames. Then run real PIE on the player-owned director,
-guarded shutdown/sync, fresh NullRHI runtime, cold asset load, and the complete
-scaffold. Only after that live acceptance may camera helpers/modes/events
-continue toward debug dogfood.
+- Two warm CDO runs in both frame orders pass canonical staging, exact manifest
+  validation, camera-less fail-closed capture, inactive restoration, immutable
+  channel results, and complete default restoration. A separate fresh NullRHI
+  process repeats those engine-neutral checks and exits successfully.
+- Native actor references cannot legally be assigned to a class default or to
+  this non-instance-editable Blueprint variable from Unreal Python. The
+  validator preserves that engine ownership boundary rather than bypassing it;
+  real writes execute only on the player-owned component in PIE.
+- Three sequential real PIE worlds pass: one forward frame, one reverse frame,
+  and one unsupported focus-influence request. Each valid world applies its
+  frame twice, produces exact supported native values and implicit override
+  ownership, increments the frame count, preserves the first baseline across a
+  repeated capture, restores the complete Filmback/Focus/PostProcess structs
+  plus focal length/aperture exactly, and makes repeated restore a no-op.
+- The unsupported request returns `application_preflight_failed`, performs zero
+  native writes, and does not increment the applied-frame count. All three
+  scenarios preserve the eight evaluated channel-result properties, exit Drone
+  Mode, restore CDO defaults, and tear PIE down automatically.
+- Guarded shutdown closed every asset editor and reached `LogExit: Exiting.`.
+  Closed-editor preview and sync both reported all 17 packages unchanged.
+  Live and mirrored Client Director remain byte-identical at SHA-256
+  `C4D9AE3CE312D4305C46E41CC1033FD4B653F5D23B124178CE27F923D4CDE1C5`.
+- Fresh cold load opens all nine core assets and compiles all six Blueprints
+  with zero errors. The complete scaffold, including deterministic regeneration,
+  full/paste interpreters, all seven postcompile exports, and validator ownership,
+  passes in 114.7 seconds.
 
-The deterministic runtime acceptance package is now prepared offline. The warm
-validator attaches one transient `BP_EDD_DroneCamera` to the Client Director
-CDO, applies the saved seven-graph family in both frame orders across two runs,
-and requires unsupported-target zero writes, non-overwriting repeated capture,
-complete native Filmback/Focus/PostProcess restoration, exact frame counts,
-input immutability, default restoration, and transient destruction. The PIE
-validator repeats the mutation and restoration contract on the real player-
-owned Client Director after `EnterDroneMode`, then exits Drone Mode and PIE
-automatically. A separate offline ownership test compiles both validators and
-requires every critical behavioral seam. Neither validator edits or saves an
-asset. Next: run the package in exactly one Enhanced editor, then fresh-process
-and cold-load acceptance.
+This accepts the camera engine-application boundary. Next: preserve it while
+implementing the remaining Phase 5 camera helpers, Directed / Free Look /
+Carrier Freecam modes, and bounded authorized event adapters toward debug
+dogfood.
 
 ## Next ordered implementation
 
-Continue the saved camera engine-application seam with runtime, real PIE,
-fresh-process, cold-load, and complete-regression acceptance. Continue through the
-remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,
+Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,
 and bounded event adapters with authorization. After the complete backend,
 expose temporary debug controls and logs, run attended dogfood, and only then
 implement the polished UI.
@@ -809,8 +818,7 @@ git rev-parse origin/main
 Confidence is high in every live checkpoint explicitly accepted above, including the
 complete live source-sampling bridge, lossless compiled-document adapter with
 post-boundary discontinuity diagnostics, scalar-track engine, and synchronized
-thirteen-channel lens/focus/effect frame assembly. The engine-application
-graphs are accepted through saved Enhanced compilation and exact postcompile
-exports; runtime/PIE/fresh-process acceptance remains pending. Confidence is
-not yet claimed for live engine property mutation/restoration, camera modes, events, keyboard
+thirteen-channel lens/focus/effect frame assembly, and exact transactional
+engine property application/restoration. Confidence is not yet claimed for
+camera modes, events, keyboard
 dogfood, UI, cooking, Workshop, G-Portal, deployment, or whole-mod completion.

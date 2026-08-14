@@ -5366,3 +5366,30 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `C4D9AE3CE312D4305C46E41CC1033FD4B653F5D23B124178CE27F923D4CDE1C5`.
 - The complete scaffold with mirrored MVP assets and all seven live exports
   passes in 113.1 seconds.
+
+## 2026-08-14: camera engine application passes real native PIE acceptance
+
+- Unreal rejects assigning the world-owned `BP_EDD_DroneCamera` actor to
+  `DroneCameraRef` on the Client Director CDO, and also reports that the
+  Blueprint variable cannot be edited on instances from Python. Runtime
+  automation must not bypass this ownership rule. Engine-neutral staging and
+  validation run on the CDO; native application runs on the real player-owned
+  component after `EnterDroneMode`.
+- Two warm CDO runs and one independent fresh NullRHI run pass canonical
+  forward/reverse staging, exact capability validation, camera-less fail-closed
+  capture, inactive restore, immutable results, and default restoration.
+- Three sequential PIE worlds prove the real boundary. Forward and reverse
+  frames each apply twice to the real Cine Camera component, update all ten
+  manifest-supported targets, enable the five implicit post-process overrides,
+  keep the original baseline across repeated capture, and restore the complete
+  Filmback, FocusSettings, and PostProcessSettings structs plus focal/aperture
+  scalars exactly. Repeated restore is stable.
+- A non-neutral unavailable focus-influence request fails with
+  `application_preflight_failed`, performs zero native writes, and leaves the
+  applied-frame count at zero. Inputs stay immutable; Drone Mode and PIE exit
+  automatically; CDO defaults are restored.
+- Guarded shutdown reached `LogExit: Exiting.`. Closed-editor preview and sync
+  found all 17 packages unchanged. Live/mirror Client Director SHA-256 remains
+  `C4D9AE3CE312D4305C46E41CC1033FD4B653F5D23B124178CE27F923D4CDE1C5`.
+  Fresh cold load compiles all six Blueprints with zero errors, and the complete
+  scaffold passes in 114.7 seconds.

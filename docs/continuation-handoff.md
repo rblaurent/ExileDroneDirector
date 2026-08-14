@@ -396,6 +396,15 @@ channels across five absolute queries each and reject sixteen poisoned
 metadata/slice/domain/index cases. Next: evaluate that staged channel and append
 its scalar sample to the assembly result arrays.
 
+`PublishCameraChannelSampleV1` is deterministic at 25 full / 24 paste nodes.
+It forwards the one assembly query into the staged scalar evaluator, requires a
+valid scalar result, appends value/velocity/acceleration in lockstep, and folds
+completion across canonical channels. Invalid evaluation sets the assembly
+stage false and cannot append or touch compiled/authored storage. Both forms
+pass exact call, ownership, append-order, completion, and failure contracts.
+Next: the final reset/stage/publish loop and filmback/validity-last frame
+publication.
+
 ## Next ordered implementation
 
 Generate the nine channel-assembly graphs in frozen stage order, with exact

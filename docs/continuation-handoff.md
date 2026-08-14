@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the complete offline viewer-comfort family
+Last updated: 2026-08-14 at viewer-comfort live-acceptance readiness
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the complete offline viewer-comfort family described below; after
+- Current checkpoint is the viewer-comfort live-acceptance readiness package described below; after
   the checkpoint push, HEAD must equal `origin/main` before the next seam starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
@@ -1094,6 +1094,26 @@ link integrity. The complete repository scaffold is green in 136.4 seconds with
 Unreal closed. Next: prepare idempotent configuration, warm runtime oracle,
 automatic player-owned PIE, compile-safe restoration, and exact live topology
 acceptance tooling before opening one editor.
+
+The complete live-acceptance harness is now frozen while Unreal remains closed.
+`Configure-CameraViewerComfort.py` idempotently creates and verifies the exact
+28-variable/six-function schema with native Vector and Quat types;
+`Restore-CameraViewerComfortSchemaDefaults.py` compiles before reacquiring the
+generated class, restores every scalar/array/struct default, verifies it, and
+saves. `Validate-CameraViewerComfortRuntime.py` runs eight oracle cases in both
+orders, five rejected input families, and a direct malformed commit while
+proving immutable inputs, prior accepted snapshot preservation, complete state
+restoration, and no writes to body/gimbal, named-look, camera-channel, or
+engine-application results. `Validate-CameraViewerComfortPIE.py` owns its Slate
+lifecycle and runs three independent sessions on the real player-owned Client
+Director: disabled exact behavior, maximum reduction, and fail-closed snapshot
+preservation. Static tooling contracts forbid `CameraTransform`, component
+mutation, authorship writes, and PIE-time compilation. The complete repository
+scaffold owns all five scripts and passes in 137.8 seconds. Next: commit/push
+this clean preparedness checkpoint, then open exactly one editor for configure,
+six graph installations, exact pre/post-compile export comparison, warm runtime,
+three-session PIE, defaults restoration, idempotence, guarded shutdown, reverse
+sync, fresh runtime, cold load, and final full regression.
 
 ## Next ordered implementation
 

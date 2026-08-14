@@ -208,6 +208,11 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraViewerComfortApplyContracts.py',
     'tools\blueprint\snippets\apply-camera-viewer-comfort-v1.eddgraph',
     'tools\blueprint\snippets\apply-camera-viewer-comfort-v1-paste.eddgraph',
+    'tools\unreal\Configure-CameraViewerComfort.py',
+    'tools\unreal\Restore-CameraViewerComfortSchemaDefaults.py',
+    'tools\unreal\Validate-CameraViewerComfortRuntime.py',
+    'tools\unreal\Validate-CameraViewerComfortPIE.py',
+    'tools\unreal\test_camera_viewer_comfort_validators.py',
     'tools\blueprint\Build-CameraBaseLookResetGraph.py',
     'tools\blueprint\Test-CameraBaseLookResetContracts.py',
     'tools\blueprint\snippets\reset-camera-look-composition-v1.eddgraph',
@@ -1994,6 +1999,8 @@ foreach ($graph in @($cameraComfortApply,$cameraComfortApplyPaste)) {
         --project-root $ProjectRoot --graph $graph
     if ($LASTEXITCODE -ne 0) { throw "Camera viewer-comfort apply link integrity failed with exit code $LASTEXITCODE." }
 }
+& python (Join-Path $ProjectRoot 'tools\unreal\test_camera_viewer_comfort_validators.py')
+if ($LASTEXITCODE -ne 0) { throw "Camera viewer-comfort live-tool contracts failed with exit code $LASTEXITCODE." }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null
 $cameraDofReset = Join-Path $cameraDofRoot 'reset-camera-dof-diagnostics-v1.eddgraph'

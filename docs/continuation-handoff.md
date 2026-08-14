@@ -872,6 +872,17 @@ compiled, movement, orientation, engine, document, or playback state. Eighty
 seeded valid cases and ten failure families pass in both graph forms. Next:
 bounded subject-distance and focal candidate construction.
 
+`BuildCameraDollyZoomCandidatesV1` is now deterministic at 106 full / 105 paste
+nodes. One bounded loop verifies the fixed subject, reference and per-sample
+camera vectors, absolute timeline, minimum one-centimetre subject distance, and
+the unclamped 1..1000 mm derived lens domain. Each accepted sample appends one
+distance and one focal value; a failure breaks with an aligned bounded prefix,
+and candidate validity is published only when both lengths equal the full input
+count. The graph matches the independent oracle across 80 seeded routes and 11
+failure families in both forms, including spatial reversal, and cannot reference
+compiled data, body/gimbal authorship, engine, document, or playback state.
+Next: atomic whole-result commit.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

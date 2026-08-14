@@ -1768,6 +1768,11 @@ before any polished editor UI or cook is attempted:
    and a finite 1..1000 mm reference focal length. It publishes a dedicated
    validation flag and cannot touch subject samples, candidates, compiled data,
    movement, orientation, or engine state. Candidate construction is next.
+   Candidate construction is now 106/105 nodes with one bounded loop and aligned
+   distance/focal appends. It matches 80 independent reference routes, preserves
+   bounded aligned prefixes across 11 failures, rejects rather than clamps, and
+   publishes candidate validity only after both whole-track lengths match. Atomic
+   commit is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

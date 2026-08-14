@@ -1000,6 +1000,18 @@ the complete repository scaffold is green with Unreal still closed. Next:
 single-editor install, compile/topology verification, warm runtime routes, PIE
 acceptance, guarded shutdown, reverse sync, and cold-load proof.
 
+The named-look live-acceptance package is now prepared while Unreal remains
+closed. The configurator idempotently owns exactly 17 variables and six
+functions. The warm harness checks all eight presets forward and reverse,
+sparse overrides, full-input immutability, explicit body/gimbal compiled-track
+immutability, two full-compose failures, and one direct commit-shape failure.
+Three automatic PIE worlds cover Raw, a two-channel authored override, and
+fail-closed prior-snapshot preservation on the real player-owned Client
+Director, then tear themselves down and restore class defaults. A separate
+post-PIE restore compiles before reacquiring the generated class. Offline
+ownership/lifecycle contracts pass. Next: one-editor configure/install/compile/
+export/runtime/PIE/restore/cold acceptance.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

@@ -5524,3 +5524,9 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   camera math, or external state appear. The complete six-graph family passes
   byte-identical regeneration, executable contracts, and reciprocal-link checks
   before any editor mutation.
+- The live-acceptance package is prepared before editor mutation: an idempotent
+  17-variable/six-function configurator, an eight-preset forward/reverse CDO
+  harness with three fail-closed boundaries, a three-world automatic PIE probe,
+  and a compile-before-reacquire schema restore. Offline tooling contracts prove
+  that neither warm nor PIE validation writes body/gimbal authorship or legacy
+  `CameraTransform` state.

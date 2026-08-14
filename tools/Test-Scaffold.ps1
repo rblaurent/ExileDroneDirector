@@ -204,6 +204,11 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraBaseLookComposeContracts.py',
     'tools\blueprint\snippets\compose-camera-look-v1.eddgraph',
     'tools\blueprint\snippets\compose-camera-look-v1-paste.eddgraph',
+    'tools\unreal\Configure-CameraBaseLook.py',
+    'tools\unreal\Restore-CameraBaseLookSchemaDefaults.py',
+    'tools\unreal\Validate-CameraBaseLookRuntime.py',
+    'tools\unreal\Validate-CameraBaseLookPIE.py',
+    'tools\unreal\test_camera_base_look_validators.py',
     'tools\blueprint\Build-CameraDollyZoomResetGraph.py',
     'tools\blueprint\Test-CameraDollyZoomResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dolly-zoom-v1.eddgraph',
@@ -1748,6 +1753,8 @@ foreach ($graph in @($cameraLookCompose,$cameraLookComposePaste)) {
         --project-root $ProjectRoot --graph $graph
     if ($LASTEXITCODE -ne 0) { throw "Camera base-look compose link integrity failed with exit code $LASTEXITCODE." }
 }
+& python (Join-Path $ProjectRoot 'tools\unreal\test_camera_base_look_validators.py')
+if ($LASTEXITCODE -ne 0) { throw "Camera base-look live-tool contracts failed with exit code $LASTEXITCODE." }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null
 $cameraDofReset = Join-Path $cameraDofRoot 'reset-camera-dof-diagnostics-v1.eddgraph'

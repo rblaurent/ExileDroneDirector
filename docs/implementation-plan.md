@@ -1824,7 +1824,10 @@ before any polished editor UI or cook is attempted:
    failure preserves accepted data. `ComposeCameraLookV1` completes the offline
    family at 6 full / 5 paste nodes with exactly five ordered self-calls and no
    hidden policy. All six graphs are deterministic, interpreter-checked, and
-   link-exact. Single-editor live and PIE acceptance is next.
+   link-exact. The idempotent 17-variable/six-function configurator, eight-preset
+   forward/reverse warm harness, three-world automatic PIE probe, and separate
+   post-PIE default restore are prepared and pass offline lifecycle/ownership
+   contracts. Single-editor live and PIE acceptance is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

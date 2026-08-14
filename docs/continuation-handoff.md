@@ -682,6 +682,18 @@ validity, and incremented revision in that order. Full/paste executable
 contracts and byte-identical repeated generation pass; the complete scaffold
 passes in 115.0 seconds. Next: focus input validation.
 
+`ValidateCameraFocusInputsV1` is now deterministic at 78 full / 77 paste
+nodes. It fail-closes the private candidate-valid flag, accepts only the five
+frozen modes and two focus domains, bounds the schedule to 2..65,536 samples,
+requires the camera-position count to match, and enforces mutually exclusive
+mode-specific source cardinality plus the smoothed-autofocus response domain.
+It cannot read trace/marker state, prior compiled focus, engine application,
+documents, or motion authorship. Per-sample finite time/geometry/distance and
+rack-range checks deliberately remain with candidate construction immediately
+before each append. Both graph forms pass 80 seeded valid banks and twelve
+failure families; byte-identical regeneration and the complete scaffold pass
+in 115.2 seconds. Next: candidate construction.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

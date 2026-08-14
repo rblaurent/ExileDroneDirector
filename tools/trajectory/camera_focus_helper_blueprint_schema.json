@@ -9,7 +9,7 @@
     "schedule": "All target resolution and autofocus smoothing compile chronologically onto the already accepted absolute-time schedule. Runtime evaluation reads compiled samples and is independent of query order.",
     "tracking": "No transient actor pointer crosses the compiled boundary. Actor bindings must resolve into aligned target-position samples before focus compilation.",
     "ownership": "This helper may publish only the focus_distance_cm authored channel. It cannot write focus influence, other camera channels, the camera engine application state, or any document/source/desired stream.",
-    "atomicity": "Candidate distances remain private. The prior compiled focus channel is replaced only after complete schedule, geometry, mode, domain, range, and cardinality validation.",
+    "atomicity": "Candidate distances remain private. Preflight owns mode, domain, source exclusivity, and cardinality; candidate construction owns per-sample finite schedule, geometry, distance, and rack-range checks before each append. The prior compiled focus channel is replaced only after both stages succeed completely.",
     "exclusivity": "Exactly one mode-specific authorship source is populated: manual distances, one fixed marker, rack endpoints and weights, or an aligned prebaked target-position stream."
   },
   "variables": [

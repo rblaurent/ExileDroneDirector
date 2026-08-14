@@ -1891,6 +1891,17 @@ before any polished editor UI or cook is attempted:
    The complete 136.4-second scaffold is green with Unreal closed. Idempotent
    configuration, warm runtime, automatic PIE, restoration, and exact live-
    topology tooling are next before one-editor acceptance.
+   The first interactive playback-mode contract is now frozen offline after the
+   integrated scalar re-acceptance. Directed, Free Look, and Carrier Freecam
+   consume distinct authored position/body/gimbal plus an independently
+   transported carrier-frame quaternion; body remains exact and only the local
+   final-view gimbal receives ephemeral look. Snap-free bounded transitions,
+   latched recenter, return-to-directed, world/carrier translation, soft tether,
+   paused local inspection, and strict non-authoritative ownership pass 12
+   executable reference plus six schema tests. The six Blueprint stages are
+   reset, validation, translation integration, look integration, atomic commit,
+   and policy-free coordination; deterministic graphs/interpreters are next
+   before any editor work.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

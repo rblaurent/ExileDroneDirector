@@ -184,6 +184,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_viewer_comfort_reference.py',
     'tools\trajectory\camera_viewer_comfort_blueprint_schema.json',
     'tools\trajectory\test_camera_viewer_comfort_blueprint_schema.py',
+    'tools\trajectory\camera_operator_override_reference.py',
+    'tools\trajectory\test_camera_operator_override_reference.py',
+    'tools\trajectory\camera_operator_override_blueprint_schema.json',
+    'tools\trajectory\test_camera_operator_override_blueprint_schema.py',
     'tools\blueprint\Build-CameraViewerComfortResetGraph.py',
     'tools\blueprint\Test-CameraViewerComfortResetContracts.py',
     'tools\blueprint\snippets\reset-camera-viewer-comfort-v1.eddgraph',
@@ -1495,6 +1499,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_viewer_comfort_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera viewer-comfort Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_operator_override_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera operator-override reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_operator_override_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera operator-override Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 $cameraDollyRoot = Join-Path $scratchRoot ("edd-camera-dolly-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDollyRoot -Force | Out-Null

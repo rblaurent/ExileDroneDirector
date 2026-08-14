@@ -1282,6 +1282,36 @@ complete MVP-required scaffold passes in 140.1 seconds. Next: continue the
 remaining backend camera-mode/event-adapter sequence toward debug dogfood; the
 scalar engine is no longer pending.
 
+The first interactive playback-mode boundary is now frozen offline in
+`camera_operator_override_reference.py` and
+`camera_operator_override_blueprint_schema.json`. It consumes already distinct
+authored position, body, and gimbal values plus a fourth, independently
+transported carrier-frame quaternion. Body is copied exactly; only the local
+final-view gimbal may compose an ephemeral look offset. Carrier-relative input
+uses only the separate carrier frame, never body, gimbal, or the lossy legacy
+`CameraTransform` rotation.
+
+Directed, Free Look, and Carrier Freecam have explicit state and transitions.
+The first accepted frame is exact authored output; return-to-directed and mode
+changes preserve offsets and decay them under bounded linear/angular speed and
+acceleration; a one-shot Recenter remains latched until exact zero or permitted
+new live input cancels it. Free Look smoothly removes inherited carrier
+translation, Carrier Freecam supports world or carrier-relative translation,
+and the soft tether clamps only the local offset while removing outward radial
+velocity. Real local delta time is separate from Flypath/event time, so paused
+inspection cannot advance Cues or State Clips. All state is viewer-local and
+absent from Flypaths, publication, repositories, and server authority.
+
+Twelve executable reference tests cover exact first-frame and settled Directed
+behavior, distinct authorship, all mode transitions, carrier-frame isolation,
+tethering, acceleration bounds, recenter/return, deterministic sequences, and
+fourteen rejection families. Six schema tests freeze 51 operator-owned variables
+and the six-stage reset/validate/translation/look/commit/coordinator ABI. The
+complete MVP-required scaffold passes in 134.9 seconds with Unreal closed.
+Next: generate and interpret `ResetCameraOperatorOverrideStepV1`, then input
+validation, translation integration, look integration, atomic commit, and the
+tiny coordinator before any editor work.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

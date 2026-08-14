@@ -856,6 +856,13 @@ schema tests freeze 15 variables and the ordered reset, validate, build, commit,
 and compile family. Next: generate and interpret those five Blueprint graphs in
 order before opening Unreal.
 
+`ResetCameraDollyZoomV1` is now deterministic at nine full / eight paste nodes.
+It unconditionally clears the two private candidate arrays, invalidates input
+validation, candidate publication, and compilation, and clears the failure code.
+Exact ownership tests prove the five inputs and four-field prior compiled lens
+snapshot are never referenced. Both forms and byte-identical regeneration are
+owned by the complete scaffold. Next: input validation.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

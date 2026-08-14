@@ -1760,6 +1760,9 @@ before any polished editor UI or cook is attempted:
    publishes validity last. The accepted 1..1000 mm lens domain rejects rather
    than clamps. Five reference tests and four schema tests own the offline
    contract; the five deterministic Blueprint graphs are next.
+   The nine/eight-node reset graph is now deterministic and scaffold-owned. It
+   clears only validation/candidate/result scratch and explicitly preserves all
+   inputs plus the previously compiled focal result. Input validation is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current DOF graph work started from remote-equal `a8a9af3`, with the
+- Current DOF graph work started from remote-equal `05f8348`, with the
   accepted focus helper and frozen diagnostic boundary described below; HEAD must
   equal `origin/main` before checkpoint work is committed
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
@@ -799,6 +799,14 @@ The graph reads only the six DOF stage scalars and cannot touch camera-channel,
 focus, airframe, document, transform, or engine state. Next: the tiny
 reset/stage/compute evaluator coordinator, then one-editor acceptance of all
 four graphs.
+
+The offline DOF family is complete. `EvaluateCameraDofDiagnosticsV1` is four
+full / three paste nodes and contains only the exact ordered calls reset →
+stage → compute. It owns no variables, policy, branch, loop, reroute, or hidden
+alternate path; compute is terminal. Both forms and deterministic regeneration
+are scaffold-owned. Next: prepare the idempotent configurator, runtime oracle,
+and automatic PIE probe while Unreal is closed, then install and accept the
+four-graph family in one editor.
 
 ## Next ordered implementation
 

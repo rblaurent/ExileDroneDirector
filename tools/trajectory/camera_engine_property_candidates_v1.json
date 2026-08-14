@@ -1,0 +1,29 @@
+{
+  "schema": "edd.camera-engine-property-candidates.v1",
+  "version": 1,
+  "componentClass": "CineCameraComponent",
+  "componentName": "DroneCamera",
+  "rules": {
+    "availability": "A target is available only when one declared candidate value path is readable and same-value writable with the exact expected scalar type. A declared override path must also be readable and same-value writable as bool.",
+    "selection": "Candidates are evaluated in declared order. The first complete candidate wins; discovery order and Python symbol order cannot affect the manifest.",
+    "absence": "An empty candidate list is deliberate unsupported state, never permission to alias another target or guess a nearby property.",
+    "persistence": "The Unreal probe may write the same value only on a transient spawned mod camera and must destroy it in finally. It cannot save or dirty an asset."
+  },
+  "targets": [
+    { "id": "filmback_sensor_width_mm", "required": true, "expectedType": "float", "neutral": 36.0, "candidates": [{ "valuePath": "filmback.sensor_width" }] },
+    { "id": "filmback_sensor_height_mm", "required": true, "expectedType": "float", "neutral": 24.0, "candidates": [{ "valuePath": "filmback.sensor_height" }] },
+    { "id": "focal_length_mm", "required": true, "expectedType": "float", "neutral": 35.0, "candidates": [{ "valuePath": "current_focal_length" }] },
+    { "id": "aperture_fstop", "required": true, "expectedType": "float", "neutral": 2.8, "candidates": [{ "valuePath": "current_aperture" }] },
+    { "id": "focus_distance_cm", "required": true, "expectedType": "float", "neutral": 1000.0, "candidates": [{ "valuePath": "focus_settings.manual_focus_distance" }] },
+    { "id": "focus_influence", "required": false, "expectedType": "float", "neutral": 1.0, "candidates": [] },
+    { "id": "exposure_ev", "required": false, "expectedType": "float", "neutral": 0.0, "candidates": [{ "valuePath": "post_process_settings.auto_exposure_bias", "overridePath": "post_process_settings.override_auto_exposure_bias" }] },
+    { "id": "bloom_weight", "required": false, "expectedType": "float", "neutral": 0.0, "candidates": [{ "valuePath": "post_process_settings.bloom_intensity", "overridePath": "post_process_settings.override_bloom_intensity" }] },
+    { "id": "vignette_weight", "required": false, "expectedType": "float", "neutral": 0.0, "candidates": [{ "valuePath": "post_process_settings.vignette_intensity", "overridePath": "post_process_settings.override_vignette_intensity" }] },
+    { "id": "color_grading_weight", "required": false, "expectedType": "float", "neutral": 0.0, "candidates": [] },
+    { "id": "tint_weight", "required": false, "expectedType": "float", "neutral": 0.0, "candidates": [] },
+    { "id": "motion_blur_weight", "required": false, "expectedType": "float", "neutral": 0.0, "candidates": [{ "valuePath": "post_process_settings.motion_blur_amount", "overridePath": "post_process_settings.override_motion_blur_amount" }] },
+    { "id": "chromatic_aberration_weight", "required": false, "expectedType": "float", "neutral": 0.0, "candidates": [{ "valuePath": "post_process_settings.scene_fringe_intensity", "overridePath": "post_process_settings.override_scene_fringe_intensity" }] },
+    { "id": "sharpening_weight", "required": false, "expectedType": "float", "neutral": 0.0, "candidates": [] },
+    { "id": "matte_weight", "required": false, "expectedType": "float", "neutral": 0.0, "candidates": [] }
+  ]
+}

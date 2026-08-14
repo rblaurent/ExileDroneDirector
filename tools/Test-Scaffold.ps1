@@ -160,6 +160,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_engine_application_reference.py',
     'tools\trajectory\camera_engine_application_blueprint_schema.json',
     'tools\trajectory\test_camera_engine_application_blueprint_schema.py',
+    'tools\trajectory\camera_engine_property_candidates_v1.json',
+    'tools\trajectory\camera_engine_property_probe_reference.py',
+    'tools\trajectory\test_camera_engine_property_probe_reference.py',
+    'tools\unreal\Probe-CameraEngineProperties.py',
     'tools\blueprint\Build-CameraEngineApplicationResetGraph.py',
     'tools\blueprint\Test-CameraEngineApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-engine-application-result-v1.eddgraph',
@@ -1222,6 +1226,10 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_engine_application_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine-application Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_engine_property_probe_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine-property probe contracts failed with exit code $LASTEXITCODE."
 }
 $cameraApplyResetNonce = [guid]::NewGuid().ToString('N')
 $cameraApplyResetRoot = Join-Path $scratchRoot "edd-camera-apply-reset-$cameraApplyResetNonce"

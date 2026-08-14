@@ -5260,3 +5260,16 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   last. Eight invalid families leave empty input; 80 seeded mappings preserve
   the source. Capability, session, baseline/current, and engine properties are
   structurally unreachable.
+- Camera property discovery is now candidate-driven rather than reflective
+  guesswork. Ten direct candidates are declared for the five mandatory camera
+  targets plus exposure, bloom, vignette, motion blur, and scene fringe. Every
+  post-process candidate also requires its exact Boolean override partner.
+  Focus influence, grading, tint, sharpening, and matte intentionally have no
+  direct candidate until a separate look/focus adapter can represent them.
+- The resolver selects candidates only in declared order when value and override
+  paths are readable, same-value writable, and exactly typed, then hashes one
+  canonical engine-versioned manifest. Seven offline tests prove deterministic
+  identity, missing/wrong core detection, override loss, deliberate unsupported
+  state, path-alias rejection, and a probe script with transient destruction in
+  `finally` and no asset-save API. Actual Enhanced availability is not claimed
+  until that non-persistent probe runs in the single editor.

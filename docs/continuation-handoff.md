@@ -511,6 +511,20 @@ and compiled storage is absent. Full/paste SHA-256 is
 Next: validate the frozen capability manifest and all fifteen staged values
 before any engine capture or write.
 
+The non-persistent property-discovery package is frozen offline before any
+editor launch. `camera_engine_property_candidates_v1.json` declares exact,
+unique candidate paths and override partners in the same fifteen-target order;
+`camera_engine_property_probe_reference.py` resolves only readable,
+same-value-writable, exactly typed candidates and hashes a canonical engine-
+versioned manifest; `Probe-CameraEngineProperties.py` spawns one transient mod
+camera, observes only those declared paths, and destroys it in `finally` without
+any asset-save API. Five targets deliberately have no direct candidate—focus
+influence, grading, tint, sharpening, and matte—so they cannot silently alias a
+nearby property. Seven probe contracts pass, including override-partner loss,
+wrong/missing core types, observation-order-independent identity, path-alias
+rejection, and non-persistent script structure. Next: the fifteen-value and
+capability validation graph, then run the probe in the first single editor.
+
 ## Next ordered implementation
 
 Continue the camera engine-application seam with deterministic reset,

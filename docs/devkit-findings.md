@@ -5569,3 +5569,10 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   schema tests freeze 28 comfort-owned variables, six ordered functions,
   locality, atomicity, and distinct-authorship isolation. The complete scaffold
   passes in 132.7 seconds with Unreal closed.
+- `ResetCameraViewerComfortV1` is 14 full / 13 paste nodes. It clears the two
+  private candidate arrays, converges candidate pose/applied/validity plus
+  validation/failure/scratch, and invalidates current publication. Every source
+  input, all five preferences, and all five prior accepted result fields are
+  structurally absent and retain object identity in the poisoned-state
+  interpreter. Full/paste exact links and byte-identical regeneration pass; the
+  complete scaffold remains green in 131.2 seconds.

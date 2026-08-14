@@ -1849,6 +1849,13 @@ before any polished editor UI or cook is attempted:
    gimbal storage, Flypaths, repositories, playback, server state, named looks,
    camera-channel banks, and engine-application state cannot be written. Six
    deterministic Blueprint graphs are next with Unreal closed.
+   The first graph, `ResetCameraViewerComfortV1`, is now deterministic at 14
+   full / 13 paste nodes. It clears only two private arrays and transient
+   validation/candidate/publication/failure/scratch fields; all source inputs,
+   local preferences, and the prior accepted local result snapshot are absent
+   and preserve object identity in executable contracts. Exact links,
+   byte-identical regeneration, and the complete 131.2-second scaffold pass.
+   Input validation is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

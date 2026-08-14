@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the frozen offline viewer-comfort contract
+Last updated: 2026-08-14 at the viewer-comfort reset graph checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the offline viewer-comfort contract described below; after
+- Current checkpoint is the first viewer-comfort graph described below; after
   the checkpoint push, HEAD must equal `origin/main` before the next seam starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
@@ -1032,6 +1032,15 @@ including 80 seeded forward/reverse frames and ten rejected families, plus five
 schema tests pass. The complete scaffold passes in 132.7 seconds. Next: generate
 reset, validation, local-motion, channel-adjustment, atomic-commit, and tiny
 coordinator graphs with Unreal closed.
+
+`ResetCameraViewerComfortV1` is deterministic at 14 full / 13 paste nodes. It
+clears exactly the two private candidate arrays, resets candidate pose/applied/
+validity state plus validation/failure/scratch, and invalidates current result
+publication while preserving every source input, all five local preferences,
+and the five-field prior accepted result snapshot. Full and paste interpreters
+execute poisoned state, exact reciprocal links pass, regeneration is byte-
+identical, and the complete scaffold passes in 131.2 seconds. Next: exact
+source-pose/quaternion/channel/preference validation.
 
 ## Next ordered implementation
 

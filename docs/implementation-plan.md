@@ -1826,8 +1826,17 @@ before any polished editor UI or cook is attempted:
    hidden policy. All six graphs are deterministic, interpreter-checked, and
    link-exact. The idempotent 17-variable/six-function configurator, eight-preset
    forward/reverse warm harness, three-world automatic PIE probe, and separate
-   post-PIE default restore are prepared and pass offline lifecycle/ownership
-   contracts. Single-editor live and PIE acceptance is next.
+   post-PIE default restore pass offline lifecycle/ownership contracts. The
+   family is now live-accepted: saved graphs contain 13, 91, 136, 46, 39, and 6
+   nodes and match the frozen post-compile topology exactly; eight forward plus
+   eight reverse warm and fresh-process routes pass; three player-owned PIE
+   worlds pass; rejected requests preserve the prior snapshot; and distinct
+   body/gimbal compiled tracks remain untouched. Guarded shutdown, one-package
+   reverse sync, fresh zero-error NullRHI compilation, and the complete scaffold
+   pass. Live/mirror Client Director SHA-256 is
+   `0ED2F27BE019F43DA05908F32FB10F4F448777CCFA3ADBFD242DC871D5FCB386`.
+   The separate local comfort layer is next and may consume, but not rewrite,
+   named-look authorship.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

@@ -36,10 +36,23 @@ def member(node):
 
 
 def default(node, pin_name: str) -> float:
-    match = re.search(rf'PinName="{re.escape(pin_name)}"[^\n]*DefaultValue="([^"]+)"', node.text)
-    if match is None:
-        raise RuntimeError(f"missing {pin_name} default on {node.name}")
-    return float(match.group(1))
+    pin = re.search(rf'PinName="{re.escape(pin_name)}"[^\n]*', node.text)
+    if pin is None:
+        raise RuntimeError(f"missing {pin_name} pin on {node.name}")
+    match = re.search(r'DefaultValue="([^"]+)"', pin.group(0))
+    if match is not None:
+        return float(match.group(1))
+    # Unreal's live clipboard serializer omits an explicit DefaultValue only
+    # for a typed numeric zero. Keep that normalization local to the generated
+    # double Array_Add item pin; every other absent default remains an error.
+    if (
+        pin_name == "NewItem"
+        and 'PinType.PinCategory="real"' in pin.group(0)
+        and 'PinType.PinSubCategory="double"' in pin.group(0)
+        and 'PinType.ContainerType=None' in pin.group(0)
+    ):
+        return 0.0
+    raise RuntimeError(f"missing {pin_name} default on {node.name}")
 
 
 def next_node(nodes, node, pin_name: str):

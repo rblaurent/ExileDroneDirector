@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the frozen offline named base-look contract
+Last updated: 2026-08-14 at the live-accepted named base-look checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the accepted dolly-zoom helper described below; after
+- Current checkpoint is the accepted named base-look helper described below; after
   the checkpoint push, HEAD must equal `origin/main` before the next seam starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
@@ -1000,17 +1000,22 @@ the complete repository scaffold is green with Unreal still closed. Next:
 single-editor install, compile/topology verification, warm runtime routes, PIE
 acceptance, guarded shutdown, reverse sync, and cold-load proof.
 
-The named-look live-acceptance package is now prepared while Unreal remains
-closed. The configurator idempotently owns exactly 17 variables and six
-functions. The warm harness checks all eight presets forward and reverse,
-sparse overrides, full-input immutability, explicit body/gimbal compiled-track
-immutability, two full-compose failures, and one direct commit-shape failure.
-Three automatic PIE worlds cover Raw, a two-channel authored override, and
-fail-closed prior-snapshot preservation on the real player-owned Client
-Director, then tear themselves down and restore class defaults. A separate
-post-PIE restore compiles before reacquiring the generated class. Offline
-ownership/lifecycle contracts pass. Next: one-editor configure/install/compile/
-export/runtime/PIE/restore/cold acceptance.
+The named-look helper is now live-accepted. Its six saved native graphs contain
+13, 91, 136, 46, 39, and 6 nodes, and their post-compile exports exactly match
+the frozen deterministic topology. All eight looks pass forward and reverse in
+both the warm editor and a separate fresh NullRHI process; sparse authorship and
+all three fail-closed boundaries preserve the prior accepted snapshot, and the
+distinct body/gimbal compiled tracks remain untouched. Three automatic PIE
+worlds pass Raw, a two-channel authored override, and rejected-input snapshot
+preservation on the real player-owned Client Director. The separate restore
+proves all 17 defaults, and a repeated configure is a no-op. Guarded shutdown
+reached `LogExit: Exiting.`; reverse sync copied only Client Director; all nine
+core assets load and all six Blueprints compile with zero errors from cold.
+Live/mirror Client Director SHA-256 is
+`0ED2F27BE019F43DA05908F32FB10F4F448777CCFA3ADBFD242DC871D5FCB386`.
+The complete scaffold, including every frozen live snippet, passes in 135.4
+seconds. Next: the separate local comfort layer; it must consume accepted look
+output without rewriting named-look authorship.
 
 ## Next ordered implementation
 
@@ -1144,6 +1149,11 @@ canonical fields, but must never manufacture both from `CameraTransform`.
 - Direct desired commit preflight preserves an already accepted downstream
   snapshot while invalidating desired validity; that narrower helper contract is
   intentional.
+- Do not use Blueprint Assist `Q` to repair frozen graph entry wiring. In the
+  named-look acceptance it connected the visible seam but inserted 21 extra
+  nodes; exact export rejected the 67-node result and immediate undo restored
+  the expected 46 nodes / 62 links. Use the single explicit pin connection and
+  verify exact post-compile topology.
 
 ## Standard commands
 

@@ -5530,3 +5530,20 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   and a compile-before-reacquire schema restore. Offline tooling contracts prove
   that neither warm nor PIE validation writes body/gimbal authorship or legacy
   `CameraTransform` state.
+- One-editor acceptance saved exact 13, 91, 136, 46, 39, and 6-node native
+  graphs. Post-compile exports match every frozen generator topology; warm and
+  separate fresh NullRHI runs each pass eight forward plus eight reverse looks,
+  three fail-closed families, distinct body/gimbal track preservation, and
+  default restoration. Three automatic player-owned PIE worlds pass Raw,
+  two-channel authored override, and rejected-input snapshot preservation.
+- Guarded shutdown reached `LogExit: Exiting.`. Closed-editor reverse sync
+  copied exactly Client Director with 16 other files unchanged; a second preview
+  found 17/17 unchanged. Live/mirror size is 22,477,253 bytes and SHA-256 is
+  `0ED2F27BE019F43DA05908F32FB10F4F448777CCFA3ADBFD242DC871D5FCB386`.
+  A fresh NullRHI process loaded all nine core assets and compiled all six
+  Blueprints with zero errors. The complete scaffold passed in 135.4 seconds.
+- Blueprint Assist `Q` is unsafe for frozen-topology entry repair: it connected
+  the visible edge but produced 67 nodes where 46 were required. Exact export
+  caught the 21-node surplus and immediate undo restored 46 nodes / 62 links.
+  The rejected export was not retained, so the surplus node classes are not
+  claimed; use one explicit native pin connection and re-export instead.

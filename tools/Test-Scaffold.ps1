@@ -184,26 +184,32 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraBaseLookResetContracts.py',
     'tools\blueprint\snippets\reset-camera-look-composition-v1.eddgraph',
     'tools\blueprint\snippets\reset-camera-look-composition-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-camera-look-composition-v1.eddgraph',
     'tools\blueprint\Build-CameraBaseLookValidationGraph.py',
     'tools\blueprint\Test-CameraBaseLookValidationContracts.py',
     'tools\blueprint\snippets\validate-camera-look-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-camera-look-inputs-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\validate-camera-look-inputs-v1.eddgraph',
     'tools\blueprint\Build-CameraBaseLookBaseValuesGraph.py',
     'tools\blueprint\Test-CameraBaseLookBaseValuesContracts.py',
     'tools\blueprint\snippets\build-camera-look-base-values-v1.eddgraph',
     'tools\blueprint\snippets\build-camera-look-base-values-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\build-camera-look-base-values-v1.eddgraph',
     'tools\blueprint\Build-CameraBaseLookOverridesGraph.py',
     'tools\blueprint\Test-CameraBaseLookOverridesContracts.py',
     'tools\blueprint\snippets\apply-camera-look-authored-overrides-v1.eddgraph',
     'tools\blueprint\snippets\apply-camera-look-authored-overrides-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\apply-camera-look-authored-overrides-v1.eddgraph',
     'tools\blueprint\Build-CameraBaseLookCommitGraph.py',
     'tools\blueprint\Test-CameraBaseLookCommitContracts.py',
     'tools\blueprint\snippets\commit-camera-look-composition-v1.eddgraph',
     'tools\blueprint\snippets\commit-camera-look-composition-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\commit-camera-look-composition-v1.eddgraph',
     'tools\blueprint\Build-CameraBaseLookComposeGraph.py',
     'tools\blueprint\Test-CameraBaseLookComposeContracts.py',
     'tools\blueprint\snippets\compose-camera-look-v1.eddgraph',
     'tools\blueprint\snippets\compose-camera-look-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\compose-camera-look-v1.eddgraph',
     'tools\unreal\Configure-CameraBaseLook.py',
     'tools\unreal\Restore-CameraBaseLookSchemaDefaults.py',
     'tools\unreal\Validate-CameraBaseLookRuntime.py',
@@ -1755,6 +1761,33 @@ foreach ($graph in @($cameraLookCompose,$cameraLookComposePaste)) {
 }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_camera_base_look_validators.py')
 if ($LASTEXITCODE -ne 0) { throw "Camera base-look live-tool contracts failed with exit code $LASTEXITCODE." }
+$cameraLookLiveContracts = @(
+    @('reset-camera-look-composition-v1.eddgraph', 'Test-CameraBaseLookResetContracts.py', $cameraLookReset),
+    @('validate-camera-look-inputs-v1.eddgraph', 'Test-CameraBaseLookValidationContracts.py', $cameraLookValidation),
+    @('build-camera-look-base-values-v1.eddgraph', 'Test-CameraBaseLookBaseValuesContracts.py', $cameraLookBase),
+    @('apply-camera-look-authored-overrides-v1.eddgraph', 'Test-CameraBaseLookOverridesContracts.py', $cameraLookOverrides),
+    @('commit-camera-look-composition-v1.eddgraph', 'Test-CameraBaseLookCommitContracts.py', $cameraLookCommit),
+    @('compose-camera-look-v1.eddgraph', 'Test-CameraBaseLookComposeContracts.py', $cameraLookCompose)
+)
+foreach ($liveContract in $cameraLookLiveContracts) {
+    $liveGraph = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($liveContract[0])"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $liveGraph
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera base-look link integrity failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphTopologyMatch.py') `
+        --project-root $ProjectRoot --expected $liveContract[2] --actual $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera base-look topology changed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($liveContract[1])") `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera base-look graph contract failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+}
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null
 $cameraDofReset = Join-Path $cameraDofRoot 'reset-camera-dof-diagnostics-v1.eddgraph'

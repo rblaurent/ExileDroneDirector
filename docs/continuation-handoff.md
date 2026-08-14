@@ -707,6 +707,15 @@ reject eleven poisoned per-sample families without mutating authored inputs;
 the complete repository scaffold passes in 115.8 seconds.
 Next: atomic focus-channel commit, then the tiny compile coordinator.
 
+`CommitCameraFocusDistanceChannelV1` is now deterministic at 37 full / 36
+paste nodes. It invalidates the result before preflight, preserves the prior
+compiled snapshot on every failure, rechecks candidate stage, bounded equal
+cardinality, and exact mode/domain identity, then value-copies times, distances,
+mode, and domain before publishing validity last. Eighty seeded snapshots and
+six direct failure families pass in both graph forms; the complete repository
+scaffold passes in 116.2 seconds. Next: the tiny compile
+coordinator, followed by one-editor acceptance for the complete focus helper.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

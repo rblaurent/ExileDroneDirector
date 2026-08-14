@@ -387,6 +387,15 @@ bank, compile validity/failure code, authored inputs, and query time are absent
 from the graph and proven preserved in both forms. Next: stage one committed
 channel slice into generic scalar evaluation scratch without recompilation.
 
+`StageCompiledCameraChannelV1` is deterministic at 119 full / 118 paste nodes.
+It bounds-checks one canonical disjoint slice and domain, copies the five
+compiled arrays into generic scalar evaluation scratch, and stages the fixed
+physical/bounds policy. It never reads authored keys, calls the compiler, or
+writes the packed compiled bank. Both forms match 520 independently staged
+channels across five absolute queries each and reject sixteen poisoned
+metadata/slice/domain/index cases. Next: evaluate that staged channel and append
+its scalar sample to the assembly result arrays.
+
 ## Next ordered implementation
 
 Generate the nine channel-assembly graphs in frozen stage order, with exact

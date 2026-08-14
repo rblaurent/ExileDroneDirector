@@ -5295,3 +5295,28 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   capability payload cannot impersonate this probe. This proves Python-level
   property ownership on a transient instance; concrete Blueprint node-form
   import/compile proof remains next.
+
+### Camera engine native node forms accepted (2026-08-14)
+
+- A disposable pair of functions on `BP_EDD_DroneCamera` compiled the exact
+  Enhanced 5.6.1 forms for the `DroneCamera` component; Filmback,
+  FocusSettings, PostProcessSettings, CurrentFocalLength, and CurrentAperture
+  getters/setters; and Filmback/Focus/PostProcess Break and Set Members nodes.
+  Both temporary functions were removed, the package was reloaded from disk,
+  and neither function remained. No production graph or probe residue was
+  saved.
+- The accepted compact templates contain 12 nodes / 38 pins and 7 nodes / 40
+  pins. Their contract locks exact native owners, member identities, float
+  precision, struct identities, component targets, reciprocal links, and the
+  deliberately exposed struct fields.
+- `FPostProcessSettings` serializes these nodes with
+  `bMadeAfterOverridePinRemoval=True`. Each exposed supported value carries
+  `bHasOverridePin=True` metadata, but the graph has no readable individual
+  `bOverride_*` pins. Treating a logical Boolean array as an exact engine
+  override snapshot would therefore be false.
+- The exact restoration architecture is consequently whole-struct: capture the
+  complete native Filmback, FocusSettings, and PostProcessSettings structs once
+  per camera session and restore those opaque baselines verbatim. Apply may
+  mutate only the explicitly supported fields through Set Members. The offline
+  reference/schema must freeze that ownership model before production graph
+  generation.

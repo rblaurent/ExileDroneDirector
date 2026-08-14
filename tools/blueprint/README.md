@@ -39,6 +39,15 @@ Interactive editor automation uses a separate fail-closed seam:
 - `Build-ClientWaypointDispatch.py` appends the guarded K-edge capture call
   after roll/horizon processing and is byte-for-byte deterministic and
   idempotent.
+- `camera-engine-basic-node-forms.eddgraph` and
+  `camera-engine-struct-node-forms.eddgraph` are Enhanced 5.6.1 compile-proven
+  native forms for the Cine Camera component, its five supported property
+  getter/setter pairs, and exact Filmback/Focus/PostProcess struct mutation.
+  `Test-CameraEngineNativeNodeForms.py` locks every owner/member/type identity,
+  component target, exposed field, and reciprocal link. Post-process override
+  ownership is implicit in Unreal's exposed Set Members fields; individual
+  `bOverride_*` pins are deliberately absent, so later exact restoration must
+  retain and restore the complete native `PostProcessSettings` struct.
 - `Build-WaypointEditGraphs.py` composes guarded replace and six-channel atomic
   delete functions from live-harvested node forms.
 - `Build-ClientWaypointEditDispatch.py` extends the proven K capture tail with

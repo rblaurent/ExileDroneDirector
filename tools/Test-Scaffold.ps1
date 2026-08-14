@@ -165,6 +165,9 @@ $requiredFiles = @(
     'tools\trajectory\camera_engine_property_probe_reference.py',
     'tools\trajectory\test_camera_engine_property_probe_reference.py',
     'tools\unreal\Probe-CameraEngineProperties.py',
+    'tools\blueprint\Test-CameraEngineNativeNodeForms.py',
+    'tools\blueprint\templates\camera-engine-basic-node-forms.eddgraph',
+    'tools\blueprint\templates\camera-engine-struct-node-forms.eddgraph',
     'tools\blueprint\Build-CameraEngineApplicationResetGraph.py',
     'tools\blueprint\Test-CameraEngineApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-engine-application-result-v1.eddgraph',
@@ -1235,6 +1238,13 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_engine_property_probe_reference.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine-property probe contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraEngineNativeNodeForms.py') `
+    --project-root $ProjectRoot `
+    --basic (Join-Path $ProjectRoot 'tools\blueprint\templates\camera-engine-basic-node-forms.eddgraph') `
+    --structs (Join-Path $ProjectRoot 'tools\blueprint\templates\camera-engine-struct-node-forms.eddgraph')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine native node-form contracts failed with exit code $LASTEXITCODE."
 }
 $cameraApplyResetNonce = [guid]::NewGuid().ToString('N')
 $cameraApplyResetRoot = Join-Path $scratchRoot "edd-camera-apply-reset-$cameraApplyResetNonce"

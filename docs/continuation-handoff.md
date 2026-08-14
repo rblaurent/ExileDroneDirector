@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the live camera channel-assembly acceptance checkpoint
+Last updated: 2026-08-14 at the camera engine native-node checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,13 +23,15 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current implementation lineage starts from remote-equal `836f6f5`, with the
-  live camera channel-assembly checkpoint described below; HEAD must equal
-  `origin/main`
-- Expected worktree: clean
+- Current implementation lineage starts from remote-equal `c03cb4e`, with the
+  accepted engine manifest and preflight graphs described below; HEAD must
+  equal `origin/main` before checkpoint work is committed
+- Expected worktree while this checkpoint is in progress: only the native-form
+  templates, their contract test, scaffold ownership, and these docs
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
-- The Unreal editor was closed at this handoff.
+- One Enhanced editor is intentionally open for the single-editor acceptance
+  sequence. Never start a second instance.
 
 Re-establish state before editing:
 
@@ -553,6 +555,23 @@ The validation graph now requires the exact engine build string and manifest ID
 rather than merely nonempty identity. Next: derive concrete Blueprint node forms
 for the proven paths, then generate capture, apply, and restore offline before
 installing anything.
+
+The follow-up live node-form probe is also complete and fully cleaned from the
+Blueprint. Enhanced compiled exact native getters and setters for Filmback,
+FocusSettings, PostProcessSettings, CurrentFocalLength, and CurrentAperture,
+plus Break/Set Members forms for the three native structs. The harvested forms
+are now deterministic repository templates with a structural regression test;
+no production engine-application graph was installed or saved at this point.
+
+One important contract correction is explicit before production generation:
+Enhanced serializes exposed post-process Set Members fields with implicit
+override ownership and does not expose readable `bOverride_*` output pins.
+Therefore exact session restoration will capture and restore the complete
+native Filmback, FocusSettings, and PostProcessSettings structs. Logical arrays
+may describe adapter ownership and diagnostics, but they must not pretend to be
+an exact read-back of hidden engine override bits. The next checkpoint must
+update the reference/schema around this stronger whole-struct baseline before
+generating capture, apply, restore, and the thin orchestrator.
 
 ## Next ordered implementation
 

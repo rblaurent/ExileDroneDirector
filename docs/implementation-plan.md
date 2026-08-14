@@ -1737,7 +1737,8 @@ before any polished editor UI or cook is attempted:
    The following focal-plane/DOF diagnostic boundary is frozen offline: it reads
    one complete evaluated camera frame, applies an explicit thin-lens
    approximation, represents unbounded far depth without infinity, and owns
-   diagnostics only. Deterministic Blueprint graph generation is next.
+   diagnostics only. Its 19/18-node reset and 100/99-node complete-frame stage
+   are now deterministic; physical computation and orchestration are next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

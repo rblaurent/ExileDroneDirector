@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current DOF-diagnostic work started from remote-equal `f65adf4`, with the
+- Current DOF graph work started from remote-equal `81b3719`, with the
   accepted focus helper and frozen diagnostic boundary described below; HEAD must
   equal `origin/main` before checkpoint work is committed
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
@@ -777,6 +777,16 @@ families, and 80 seeded forward/reverse evaluations. Four schema tests freeze
 18 scalar variables, four ordered functions, complete-frame staging, atomic
 publication, and diagnostic-only ownership. Next: deterministic reset, stage,
 compute, and tiny evaluation graphs before one-editor acceptance.
+
+The first two DOF graphs are now deterministic and scaffold-owned. Reset is 19
+full / 18 paste nodes and clears all six stage plus twelve result fields in one
+unconditional chain. Complete-frame staging is 100 full / 99 paste nodes: it
+invalidates and clears its owned stage first, requires upstream frame validity,
+exactly thirteen finite channel values, and finite positive filmback dimensions,
+then copies only filmback plus canonical focal/aperture/focus indices and
+publishes stage validity last. Eighty seeded frames and nine corruption families
+pass in both forms; generation is byte-identical. Next: physical DOF
+calculation, then the tiny evaluator coordinator.
 
 ## Next ordered implementation
 

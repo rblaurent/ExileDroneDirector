@@ -373,6 +373,13 @@ Validity is the final write. Both forms pass varied atomic success plus twelve
 stage/shape/offset/count failures, each preserving the prior compiled snapshot.
 Next: the top-level reset/validate/thirteen-channel compile/commit coordinator.
 
+`CompileCameraChannelAssemblyV1` completes offline assembly compilation at 11
+full / 10 paste nodes. It is a policy-free reset -> validate -> bounded 0..12
+candidate loop -> guarded commit coordinator. Both forms prove the exact order,
+storage non-ownership, validation short-circuit, and late candidate failure
+short-circuit. Next: deterministic result reset, committed-slice staging,
+per-channel scalar publication, and the complete absolute-time evaluator.
+
 ## Next ordered implementation
 
 Generate the nine channel-assembly graphs in frozen stage order, with exact

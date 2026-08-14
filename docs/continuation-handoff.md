@@ -365,6 +365,14 @@ defaults and reciprocal focus, while an invalid authored channel preserves the
 prior candidate prefix. Next: atomic whole-bank commit after exact thirteen-
 channel preflight.
 
+`CommitCameraChannelAssemblyV1` is deterministic at 71 full / 70 paste nodes.
+It independently proves exactly thirteen disjoint candidate slices, exact five-
+array cardinality, domain cardinality, and 1..512 keys per channel before one
+synchronous publication chain copies the bank, duration, and filmback snapshot.
+Validity is the final write. Both forms pass varied atomic success plus twelve
+stage/shape/offset/count failures, each preserving the prior compiled snapshot.
+Next: the top-level reset/validate/thirteen-channel compile/commit coordinator.
+
 ## Next ordered implementation
 
 Generate the nine channel-assembly graphs in frozen stage order, with exact

@@ -1,0 +1,19 @@
+"""Exact graph and execution contracts for camera channel compile reset."""
+from __future__ import annotations
+import argparse,importlib.util,re,sys
+from pathlib import Path
+ARRAYS=("CameraChannelCandidateKeyOffsetsV1","CameraChannelCandidateKeyCountsV1","CameraChannelCandidateKeyTimesV1","CameraChannelCandidateDomainValuesV1","CameraChannelCandidateInterpolationModesV1","CameraChannelCandidateArriveTangentsV1","CameraChannelCandidateLeaveTangentsV1","CameraChannelCandidateDomainsV1","CameraChannelResultValuesV1","CameraChannelResultVelocitiesV1","CameraChannelResultAccelerationsV1")
+SCALARS=("CameraChannelCompileValidV1","CameraChannelFailureCodeV1","CameraChannelScratchChannelIndexV1","CameraChannelScratchKeyIndexV1","CameraChannelScratchValidV1","CameraChannelResultFilmbackPresetIdV1","CameraChannelResultFilmbackSensorWidthMmV1","CameraChannelResultFilmbackSensorHeightMmV1","CameraChannelResultCompleteV1","CameraChannelResultValidV1")
+PRESERVED=("CameraChannelInputChannelIdsV1","CameraChannelInputKeyTimesV1","CameraChannelInputKeyValuesV1","CameraChannelCompiledKeyTimesV1","CameraChannelCompiledDomainValuesV1","CameraChannelCompiledDomainsV1","CameraChannelCompiledDurationV1","CameraChannelCompiledFilmbackPresetIdV1","CameraChannelQueryTimeV1")
+def load(path):s=importlib.util.spec_from_file_location("edd_camera_channel_reset_contract_base",path);m=importlib.util.module_from_spec(s);sys.modules[s.name]=m;s.loader.exec_module(m);return m
+def member(node):m=re.search(r'MemberName="([^"]+)"',node.text);return None if m is None else m.group(1)
+def main():
+ a=argparse.ArgumentParser();a.add_argument("--project-root",type=Path,required=True);a.add_argument("--graph",type=Path,required=True);a.add_argument("--paste",action="store_true");x=a.parse_args();c=load(x.project_root/"tools/blueprint/Test-WaypointCaptureContracts.py");nodes=c.parse_graph(x.graph);c.require(len(nodes)==(32 if x.paste else 33),f"node count {len(nodes)}")
+ entries=[n for n in nodes.values() if "K2Node_FunctionEntry" in n.node_class];c.require(len(entries)==(0 if x.paste else 1),"entry count");clears=[n for n in nodes.values() if member(n)=="Array_Clear"];c.require(len(clears)==11,"candidate/result clears");root=nodes["K2Node_CallArrayFunction_0"];c.require(not root.pins["execute"].links,"paste execution root") if x.paste else c.require_link(entries[0],"then",root,"execute","native entry to first clear")
+ getters=[n for n in nodes.values() if "K2Node_VariableGet" in n.node_class];c.require({member(n) for n in getters}==set(ARRAYS),"clear ownership");setters=[n for n in nodes.values() if "K2Node_VariableSet" in n.node_class];c.require({member(n) for n in setters}==set(SCALARS),"scalar reset ownership");text=x.graph.read_text(encoding="utf-8");c.require(not any(name in text for name in PRESERVED),"input or accepted compiled-bank mutation")
+ state={name:["poison"] for name in ARRAYS};state.update({name:"poison" for name in SCALARS});state.update({name:[name] for name in PRESERVED});before={name:state[name] for name in PRESERVED}
+ for name in ARRAYS:state[name]=[]
+ state.update(CameraChannelCompileValidV1=False,CameraChannelFailureCodeV1="",CameraChannelScratchChannelIndexV1=0,CameraChannelScratchKeyIndexV1=0,CameraChannelScratchValidV1=False,CameraChannelResultFilmbackPresetIdV1="",CameraChannelResultFilmbackSensorWidthMmV1=0.0,CameraChannelResultFilmbackSensorHeightMmV1=0.0,CameraChannelResultCompleteV1=False,CameraChannelResultValidV1=False)
+ c.require(all(state[name]==[] for name in ARRAYS) and not state["CameraChannelCompileValidV1"] and not state["CameraChannelResultValidV1"],"reset execution");c.require(all(state[name]==before[name] for name in PRESERVED),"preserved inputs/compiled bank");print(f"Camera channel compile-reset contracts passed ({'paste' if x.paste else 'full'}): {len(nodes)} nodes")
+if __name__=="__main__":main()
+

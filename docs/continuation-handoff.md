@@ -336,6 +336,14 @@ passes with 1,472 output lines in 108.5 seconds. This checkpoint is offline
 only: no channel assembly variables or functions have yet been installed in
 Client Director.
 
+`ResetCameraChannelCompileV1` is the first deterministic assembly graph at 33
+full / 32 paste nodes. It clears exactly the eight candidate arrays and three
+frame-result arrays, resets compile/evaluation scratch and validity, preserves
+all authored input, and—critically—does not touch the last accepted compiled
+bank. Both forms pass exact ownership and execution contracts and are now owned
+by the complete scaffold. Next: validate the flattened authored bank, its
+filmback snapshot, channel uniqueness, gap-free slices, domains, and policies.
+
 ## Next ordered implementation
 
 Generate the nine channel-assembly graphs in frozen stage order, with exact

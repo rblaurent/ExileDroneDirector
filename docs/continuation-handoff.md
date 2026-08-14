@@ -1120,15 +1120,35 @@ sync, fresh runtime, cold load, and final full regression.
 The first one-editor compile exposed and contained a real Enhanced compiler
 boundary before any reverse sync: `Quat_Slerp.A` is a native const-reference
 input, so its serialized identity literal is ignored and compilation fails when
-the pin is unwired. The project mirror remains the prior accepted asset. The
+the pin is unwired. At detection time the project mirror still held the prior
+accepted asset. The
 motion generator now produces identity through a pure zero-Rotator-to-Quat node
 and wires that value into `Slerp.A`; the contract requires both quaternion pins
 on every Slerp to be connected. Fresh full/paste generation is byte-identical,
 both 80-case interpreters pass, reciprocal integrity is 56 nodes / 79 links,
-and the complete scaffold passes in 189.6 seconds. Next: replace only the live
-motion body in the still-single editor, compile with zero errors, then repeat
-the exact topology, warm runtime, PIE, restore, guarded shutdown, reverse-sync,
-cold-load, and final-regression acceptance sequence.
+and the complete scaffold passes in 189.6 seconds.
+
+The viewer-comfort family is now fully live-accepted. Only the rejected motion
+body was replaced; all six saved postcompile functions exactly match their
+frozen topology at 14, 146, 56, 29, 23, and 6 nodes (274 total), with 13, 195,
+79, 38, 24, and 5 reciprocal links. The latest compile/save window contains no
+K2, Blueprint, or Python error. Warm runtime passes eight cases in both orders,
+five input failures plus malformed direct commit, immutable inputs, accepted-
+snapshot preservation, and distinct body/gimbal plus upstream ownership. Three
+automatic player-owned PIE sessions pass disabled exact behavior, maximum
+reduction, and fail-closed preservation; all defaults restore. Repeated schema
+configuration creates nothing and verifies the exact 28 variables / six
+functions. Guarded shutdown closes both asset editors and reaches
+`LogExit: Exiting.` without assertion. Reverse sync copies only Client Director;
+live and mirror SHA-256 are
+`DE7D799BAED829FE698609CD259260E55ED97AE423B72BA27D2965719C1E73D8`.
+A fresh NullRHI runtime repeats all 22 behavior/failure cases with zero errors;
+a separate cold process loads all nine core assets and compiles every Blueprint
+with zero errors. The six postcompile exports are now scaffold-owned under
+`tools/blueprint/live-snippets`; the complete MVP-required scaffold passes in
+134.9 seconds. Next: run the already frozen nine-graph scalar camera engine
+through its documented one-editor configure/paste/entry-wire/compile/save/
+runtime/PIE/restore/reverse-sync/cold acceptance package.
 
 ## Next ordered implementation
 
@@ -1295,8 +1315,9 @@ git rev-parse origin/main
 
 Confidence is high in every live checkpoint explicitly accepted above, including the
 complete live source-sampling bridge, lossless compiled-document adapter with
-post-boundary discontinuity diagnostics, scalar-track engine, and synchronized
-thirteen-channel lens/focus/effect frame assembly, and exact transactional
-engine property application/restoration. Confidence is not yet claimed for
+post-boundary discontinuity diagnostics, named-look composition, the separate
+viewer-local comfort layer, scalar-track engine, and synchronized thirteen-
+channel lens/focus/effect frame assembly, and exact transactional engine
+property application/restoration. Confidence is not yet claimed for
 camera modes, events, keyboard
 dogfood, UI, cooking, Workshop, G-Portal, deployment, or whole-mod completion.

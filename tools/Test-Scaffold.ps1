@@ -188,26 +188,32 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraViewerComfortResetContracts.py',
     'tools\blueprint\snippets\reset-camera-viewer-comfort-v1.eddgraph',
     'tools\blueprint\snippets\reset-camera-viewer-comfort-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-camera-viewer-comfort-v1.eddgraph',
     'tools\blueprint\Build-CameraViewerComfortValidationGraph.py',
     'tools\blueprint\Test-CameraViewerComfortValidationContracts.py',
     'tools\blueprint\snippets\validate-camera-viewer-comfort-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-camera-viewer-comfort-inputs-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\validate-camera-viewer-comfort-inputs-v1.eddgraph',
     'tools\blueprint\Build-CameraViewerComfortMotionGraph.py',
     'tools\blueprint\Test-CameraViewerComfortMotionContracts.py',
     'tools\blueprint\snippets\build-camera-viewer-comfort-motion-v1.eddgraph',
     'tools\blueprint\snippets\build-camera-viewer-comfort-motion-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\build-camera-viewer-comfort-motion-v1.eddgraph',
     'tools\blueprint\Build-CameraViewerComfortChannelsGraph.py',
     'tools\blueprint\Test-CameraViewerComfortChannelsContracts.py',
     'tools\blueprint\snippets\build-camera-viewer-comfort-channels-v1.eddgraph',
     'tools\blueprint\snippets\build-camera-viewer-comfort-channels-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\build-camera-viewer-comfort-channels-v1.eddgraph',
     'tools\blueprint\Build-CameraViewerComfortCommitGraph.py',
     'tools\blueprint\Test-CameraViewerComfortCommitContracts.py',
     'tools\blueprint\snippets\commit-camera-viewer-comfort-v1.eddgraph',
     'tools\blueprint\snippets\commit-camera-viewer-comfort-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\commit-camera-viewer-comfort-v1.eddgraph',
     'tools\blueprint\Build-CameraViewerComfortApplyGraph.py',
     'tools\blueprint\Test-CameraViewerComfortApplyContracts.py',
     'tools\blueprint\snippets\apply-camera-viewer-comfort-v1.eddgraph',
     'tools\blueprint\snippets\apply-camera-viewer-comfort-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\apply-camera-viewer-comfort-v1.eddgraph',
     'tools\unreal\Configure-CameraViewerComfort.py',
     'tools\unreal\Restore-CameraViewerComfortSchemaDefaults.py',
     'tools\unreal\Validate-CameraViewerComfortRuntime.py',
@@ -2001,6 +2007,33 @@ foreach ($graph in @($cameraComfortApply,$cameraComfortApplyPaste)) {
 }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_camera_viewer_comfort_validators.py')
 if ($LASTEXITCODE -ne 0) { throw "Camera viewer-comfort live-tool contracts failed with exit code $LASTEXITCODE." }
+$cameraComfortLiveContracts = @(
+    @('reset-camera-viewer-comfort-v1.eddgraph', 'Test-CameraViewerComfortResetContracts.py', $cameraComfortReset),
+    @('validate-camera-viewer-comfort-inputs-v1.eddgraph', 'Test-CameraViewerComfortValidationContracts.py', $cameraComfortValidation),
+    @('build-camera-viewer-comfort-motion-v1.eddgraph', 'Test-CameraViewerComfortMotionContracts.py', $cameraComfortMotion),
+    @('build-camera-viewer-comfort-channels-v1.eddgraph', 'Test-CameraViewerComfortChannelsContracts.py', $cameraComfortChannels),
+    @('commit-camera-viewer-comfort-v1.eddgraph', 'Test-CameraViewerComfortCommitContracts.py', $cameraComfortCommit),
+    @('apply-camera-viewer-comfort-v1.eddgraph', 'Test-CameraViewerComfortApplyContracts.py', $cameraComfortApply)
+)
+foreach ($liveContract in $cameraComfortLiveContracts) {
+    $liveGraph = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($liveContract[0])"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $liveGraph
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera viewer-comfort link integrity failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphTopologyMatch.py') `
+        --project-root $ProjectRoot --expected $liveContract[2] --actual $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera viewer-comfort topology changed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($liveContract[1])") `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera viewer-comfort graph contract failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+}
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null
 $cameraDofReset = Join-Path $cameraDofRoot 'reset-camera-dof-diagnostics-v1.eddgraph'

@@ -461,3 +461,20 @@ Blueprint package dirty. Close the editor, choose Don't Save, and require
 asset from before the test. A pass is valid only when the log also contains
 `PRESERVED_AUTHORED_SEGMENT_VALID:True`,
 `INVALID_INPUT_ROLLBACK_VALID:True`, and `CLASS_DEFAULTS_RESTORED:True`.
+
+## PIE class-default probes and Blueprint reinstancing
+
+Enhanced PIE may reinstance a generated Blueprint class and retain temporary
+class-default values in Blueprint-owned default data even when the currently
+visible CDO is restored in memory. For the camera-focus helper, always run
+`Restore-CameraFocusHelperSchemaDefaults.py` immediately after the automatic
+PIE result, before any configurator or save. That tool must compile first,
+reacquire the generated class/CDO, apply the frozen schema defaults, verify all
+24 properties, and save. Follow it with the idempotent configurator and require
+every array default count to be zero.
+
+Never compile a Blueprint from a Slate post-tick callback immediately after PIE
+teardown. In Enhanced 5.6.1 this invalidated the Python callback during class
+reinstancing and produced an access violation. Let the callback end PIE and
+unregister itself; perform compile/save restoration through a subsequent remote
+command.

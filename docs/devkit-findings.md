@@ -5393,3 +5393,31 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `C4D9AE3CE312D4305C46E41CC1033FD4B653F5D23B124178CE27F923D4CDE1C5`.
   Fresh cold load compiles all six Blueprints with zero errors, and the complete
   scaffold passes in 114.7 seconds.
+
+## 2026-08-14: camera focus helper live acceptance and post-PIE restoration
+
+- The six installed Client Director focus graphs contain 6, 9, 78, 332, 37,
+  and 5 nodes. Exact precompile, postcompile, and independent cold-editor
+  exports pass the same executable contracts with zero reroute knots.
+- Warm runtime passes all five focus modes in both linear and reciprocal domains
+  in forward and reverse order, plus Set Here miss/hit and two fail-closed
+  boundaries. Inputs are immutable and the prior compiled focus snapshot is
+  preserved on rejection.
+- Three sequential automatic PIE worlds pass reciprocal rack focus (100, 160,
+  400 cm), trace miss zero-mutation, trace hit atomic marker/revision update,
+  and invalid-rack snapshot preservation on the real player-owned Client
+  Director. PIE teardown is automatic.
+- CDO writes used to stage PIE can survive generated-class reinstancing in
+  Blueprint-owned default data. An in-memory restoration marker alone is not
+  persistence proof. The accepted cleanup is a separate post-PIE command that
+  compiles first, reacquires the current CDO, writes all 24 frozen defaults,
+  verifies them, and saves; a subsequent configurator compile confirms every
+  array default has count zero.
+- Compiling the Blueprint inside the Slate post-tick callback after final PIE
+  teardown caused a Python-plugin access violation. That transaction shape is
+  rejected. The editor was restarted, and a fresh cold load compiled all nine
+  core assets successfully from the previously clean on-disk package.
+- The final guarded shutdown reached `LogExit: Exiting.` Reverse sync copied
+  only Client Director; live and Git mirror are both 20,628,898 bytes with
+  SHA-256
+  `F0458A4C426DFF2DE4BD34E357F5A76D7D76A2B58C19E180FB23D19BC0D95635`.

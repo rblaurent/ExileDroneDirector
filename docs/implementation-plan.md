@@ -1726,6 +1726,14 @@ before any polished editor UI or cook is attempted:
    is focus authoring: manual, fixed-marker, rack, prebaked tracking, and
    deterministic smoothed-autofocus contracts precede dolly/comfort helpers and
    playback modes.
+   The focus helper is now live-accepted: six exact cold-editor graphs total
+   467 nodes with zero reroute knots; ten mode/domain cases pass forward and
+   reverse runtime order; and three real player-owned PIE worlds pass reciprocal
+   rack, Set Here miss/hit, and fail-closed snapshot preservation. A dedicated
+   post-PIE schema restore handles Enhanced class reinstancing and proves all 24
+   persisted defaults before the next camera helper. Guarded shutdown and
+   reverse sync leave live/mirror Client Director SHA-256 at
+   `F0458A4C426DFF2DE4BD34E357F5A76D7D76A2B58C19E180FB23D19BC0D95635`.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

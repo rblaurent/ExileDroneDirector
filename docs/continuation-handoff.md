@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-14 at the live camera engine application checkpoint
+Last updated: 2026-08-14 at the live camera focus-helper checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,8 +23,8 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current camera-engine live work started from remote-equal `94c6739`, with the
-  accepted native ABI and seven offline graphs described below; HEAD must
+- Current focus-helper live work started from remote-equal `2be94a7`, with the
+  accepted offline family and live tooling described below; HEAD must
   equal `origin/main` before checkpoint work is committed
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
@@ -725,7 +725,7 @@ snippets and executable contracts. The complete repository scaffold passes in
 configure/paste/entry-wire repair/compile/save/runtime/PIE/cold
 acceptance for the whole focus helper before any later camera mode work.
 
-The focus-helper live-acceptance package is prepared while Unreal is closed.
+The focus-helper live-acceptance package was prepared while Unreal was closed.
 The schema now freezes every scalar/vector default; the idempotent configurator
 owns exactly 24 variables and six function seams; the runtime validator covers
 both query orders, every mode/domain, Set Here hit/miss, full-compile failure,
@@ -733,7 +733,37 @@ direct-commit failure, immutable inputs, and complete default restoration. The
 PIE validator repeats reciprocal rack, Set Here, and fail-closed snapshot
 preservation on the real player-owned Client Director and owns automatic PIE
 teardown. Offline live-tool contracts and the complete repository scaffold pass
-in 116.2 seconds. Next: run the prepared one-editor installation and acceptance.
+in 116.2 seconds.
+
+The complete camera focus helper is now live-accepted in Enhanced 5.6.1. The
+six cold-editor exports contain 6, 9, 78, 332, 37, and 5 nodes (467 total) with
+zero reroute knots and pass the exact reset, Set Here, validation, candidate,
+commit, and orchestration contracts. Unreal compile/save succeeds. Runtime
+execution passes ten mode/domain cases in forward and reverse order, Set Here
+miss/hit, invalid full compile, invalid direct commit, immutable inputs, and
+default restoration. Three automatic PIE worlds pass reciprocal rack focus at
+160 cm, Set Here miss, Set Here hit, and prior-snapshot preservation on the
+real player-owned Client Director; PIE exits automatically.
+
+PIE class-default probes must be followed immediately by
+`Restore-CameraFocusHelperSchemaDefaults.py`. Enhanced can persist temporary
+Blueprint-owned defaults across class reinstancing even after an in-memory CDO
+restore. The restore tool compiles first, reacquires the current generated
+class, converges all 24 variables to the frozen schema, saves, and verifies.
+The subsequent idempotent configurator reports all eight array defaults at
+count zero. Never compile this Blueprint from inside a Slate post-tick callback
+after PIE teardown: that rejected experiment crashed in the Python plugin. A
+fresh editor then cold-loaded and compiled all nine core assets, proving the
+persisted package remained clean. Final live exports are scaffold-owned under
+`tools/blueprint/live-snippets`.
+Guarded shutdown reached `LogExit: Exiting.`; reverse sync copied only Client
+Director, and live/mirror packages are both 20,628,898 bytes with SHA-256
+`F0458A4C426DFF2DE4BD34E357F5A76D7D76A2B58C19E180FB23D19BC0D95635`.
+
+Next: continue task 10 with the remaining Phase 5 camera helpersâ€”focal-plane /
+depth-of-field debug diagnostics, dolly-zoom authoring, verified effect/look
+helpers, and local comfort overridesâ€”before Directed / Free Look / Carrier
+Freecam playback modes and bounded authorized event adapters.
 
 ## Next ordered implementation
 

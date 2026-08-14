@@ -1805,7 +1805,12 @@ before any polished editor UI or cook is attempted:
    contains 13 full / 12 paste nodes, clears only private candidates and
    transient validity/failure/scratch state, and preserves every authored input
    plus the prior accepted look snapshot. Exact reciprocal execution and byte-
-   identical regeneration are scaffold-owned. Input validation is next.
+   identical regeneration are scaffold-owned. `ValidateCameraLookInputsV1` is
+   also deterministic at 91 full / 90 paste nodes. It accepts only the frozen
+   preset/channel catalogs, aligned unique overrides, finite values, and exact
+   physical/normalized bounds. Eighty-eight valid and thirteen rejected cases,
+   exact reciprocal links, and byte-identical regeneration are scaffold-owned.
+   Explicit base-value expansion is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

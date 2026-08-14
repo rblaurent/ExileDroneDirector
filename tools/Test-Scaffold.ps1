@@ -184,6 +184,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraBaseLookResetContracts.py',
     'tools\blueprint\snippets\reset-camera-look-composition-v1.eddgraph',
     'tools\blueprint\snippets\reset-camera-look-composition-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraBaseLookValidationGraph.py',
+    'tools\blueprint\Test-CameraBaseLookValidationContracts.py',
+    'tools\blueprint\snippets\validate-camera-look-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-camera-look-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraDollyZoomResetGraph.py',
     'tools\blueprint\Test-CameraDollyZoomResetContracts.py',
     'tools\blueprint\snippets\reset-camera-dolly-zoom-v1.eddgraph',
@@ -1587,6 +1591,34 @@ foreach ($graph in @($cameraLookReset,$cameraLookResetPaste)) {
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
         --project-root $ProjectRoot --graph $graph
     if ($LASTEXITCODE -ne 0) { throw "Camera base-look reset link integrity failed with exit code $LASTEXITCODE." }
+}
+$cameraLookValidation = Join-Path $cameraLookRoot 'validate-camera-look-inputs-v1.eddgraph'
+$cameraLookValidationPaste = Join-Path $cameraLookRoot 'validate-camera-look-inputs-v1-paste.eddgraph'
+$cameraLookValidationRepeat = Join-Path $cameraLookRoot 'validate-camera-look-inputs-v1-repeat.eddgraph'
+$cameraLookValidationRepeatPaste = Join-Path $cameraLookRoot 'validate-camera-look-inputs-v1-repeat-paste.eddgraph'
+foreach ($pair in @(@($cameraLookValidation,$cameraLookValidationPaste),@($cameraLookValidationRepeat,$cameraLookValidationRepeatPaste))) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraBaseLookValidationGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera base-look validation generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraLookValidation,$cameraLookValidationRepeat,(Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-look-inputs-v1.eddgraph')),
+    @($cameraLookValidationPaste,$cameraLookValidationRepeatPaste,(Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-camera-look-inputs-v1-paste.eddgraph'))
+)) {
+    $hashes=@((Get-FileHash -Algorithm SHA256 $comparison[0]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[1]).Hash,(Get-FileHash -Algorithm SHA256 $comparison[2]).Hash)
+    if (@($hashes|Select-Object -Unique).Count -ne 1) { throw "Camera base-look validation generation or checked-in snippet drifted." }
+}
+& (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $cameraLookValidation
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraBaseLookValidationContracts.py') `
+    --project-root $ProjectRoot --graph $cameraLookValidation
+if ($LASTEXITCODE -ne 0) { throw "Camera base-look validation full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraBaseLookValidationContracts.py') `
+    --project-root $ProjectRoot --graph $cameraLookValidationPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera base-look validation paste contracts failed with exit code $LASTEXITCODE." }
+foreach ($graph in @($cameraLookValidation,$cameraLookValidationPaste)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graph
+    if ($LASTEXITCODE -ne 0) { throw "Camera base-look validation link integrity failed with exit code $LASTEXITCODE." }
 }
 $cameraDofRoot = Join-Path $scratchRoot ("edd-camera-dof-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDofRoot -Force | Out-Null

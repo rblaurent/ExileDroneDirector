@@ -956,6 +956,15 @@ interpreter. The full and paste forms regenerate byte-identically, require the
 complete reciprocal execution chain, and are scaffold-owned. Next: exact preset,
 shape, uniqueness, finiteness, and per-channel bounds validation.
 
+`ValidateCameraLookInputsV1` is now deterministic at 91 full / 90 paste nodes.
+It accepts exactly the eight frozen presets, requires aligned override arrays
+with at most thirteen entries, and rejects unknown or duplicate channels plus
+non-finite or out-of-bound values. Eighty-eight valid requests and thirteen
+failure families pass the executable interpreter; both forms have exact
+reciprocal links and byte-identical regeneration. It writes only validation,
+failure, and private scratch state, so candidates and the last accepted camera
+look remain untouched. Next: explicit thirteen-value base preset expansion.
+
 ## Next ordered implementation
 
 Continue through the remaining Phase 5 camera helpers, Directed / Free Look / Carrier Freecam modes,

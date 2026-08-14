@@ -5496,3 +5496,9 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   setters, preserves all inputs and accepted result arrays/identity, and passes
   explicit reciprocal-chain plus poisoned-state reset contracts. No accepted
   CameraChannel, engine, motion, document, playback, or comfort state appears.
+- `ValidateCameraLookInputsV1` is deterministic at 91 full / 90 paste nodes.
+  Its bounded loop verifies the exact preset/channel allowlists, aligned arrays,
+  uniqueness, finiteness, and per-channel bounds. The interpreter covers 88
+  accepted requests and 13 failure families; exact link integrity and
+  regeneration are scaffold-owned. Only validation/failure/private scratch
+  state is writable, leaving candidate and accepted look snapshots unchanged.

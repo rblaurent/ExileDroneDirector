@@ -205,6 +205,9 @@ $requiredFiles = @(
     'tools\blueprint\live-snippets\apply-evaluated-camera-channel-frame-v1.eddgraph',
     'tools\unreal\Configure-CameraEngineApplication.py',
     'tools\unreal\test_configure_camera_engine_application.py',
+    'tools\unreal\Validate-CameraEngineApplicationRuntime.py',
+    'tools\unreal\Validate-CameraEngineApplicationPIE.py',
+    'tools\unreal\test_camera_engine_application_validators.py',
     'tools\blueprint\Build-CameraChannelCompileResetGraph.py',
     'tools\blueprint\Test-CameraChannelCompileResetContracts.py',
     'tools\blueprint\snippets\reset-camera-channel-compile-v1.eddgraph',
@@ -1267,6 +1270,10 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\unreal\test_configure_camera_engine_application.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera engine live-configurator contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\unreal\test_camera_engine_application_validators.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera engine live-validator contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraEngineNativeNodeForms.py') `
     --project-root $ProjectRoot `

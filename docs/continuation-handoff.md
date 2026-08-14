@@ -633,6 +633,19 @@ guarded shutdown/sync, fresh NullRHI runtime, cold asset load, and the complete
 scaffold. Only after that live acceptance may camera helpers/modes/events
 continue toward debug dogfood.
 
+The deterministic runtime acceptance package is now prepared offline. The warm
+validator attaches one transient `BP_EDD_DroneCamera` to the Client Director
+CDO, applies the saved seven-graph family in both frame orders across two runs,
+and requires unsupported-target zero writes, non-overwriting repeated capture,
+complete native Filmback/Focus/PostProcess restoration, exact frame counts,
+input immutability, default restoration, and transient destruction. The PIE
+validator repeats the mutation and restoration contract on the real player-
+owned Client Director after `EnterDroneMode`, then exits Drone Mode and PIE
+automatically. A separate offline ownership test compiles both validators and
+requires every critical behavioral seam. Neither validator edits or saves an
+asset. Next: run the package in exactly one Enhanced editor, then fresh-process
+and cold-load acceptance.
+
 ## Next ordered implementation
 
 Continue the saved camera engine-application seam with runtime, real PIE,

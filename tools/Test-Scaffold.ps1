@@ -204,6 +204,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1.eddgraph',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraPlaybackNativeApplicationStageGraph.py',
+    'tools\blueprint\Test-CameraPlaybackNativeApplicationStageContracts.py',
+    'tools\blueprint\snippets\stage-camera-playback-native-application-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\stage-camera-playback-native-application-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraPlaybackFrameResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackFrameResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-frame-v1.eddgraph',
@@ -1950,6 +1954,37 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Camera playback native reset contracts failed with exit code $LASTEXITCODE." }
+}
+$cameraPlaybackNativeStage = Join-Path $cameraPlaybackNativeRoot 'stage-camera-playback-native-application-inputs-v1.eddgraph'
+$cameraPlaybackNativeStagePaste = Join-Path $cameraPlaybackNativeRoot 'stage-camera-playback-native-application-inputs-v1-paste.eddgraph'
+$cameraPlaybackNativeStageRepeat = Join-Path $cameraPlaybackNativeRoot 'stage-camera-playback-native-application-inputs-v1-repeat.eddgraph'
+$cameraPlaybackNativeStageRepeatPaste = Join-Path $cameraPlaybackNativeRoot 'stage-camera-playback-native-application-inputs-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($cameraPlaybackNativeStage, $cameraPlaybackNativeStagePaste),
+    @($cameraPlaybackNativeStageRepeat, $cameraPlaybackNativeStageRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraPlaybackNativeApplicationStageGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera playback native staging generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraPlaybackNativeStage, $cameraPlaybackNativeStageRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\stage-camera-playback-native-application-inputs-v1.eddgraph')),
+    @($cameraPlaybackNativeStagePaste, $cameraPlaybackNativeStageRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\stage-camera-playback-native-application-inputs-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Camera playback native staging regeneration diverged." }
+}
+foreach ($graphCase in @(
+    @($cameraPlaybackNativeStage, $false),
+    @($cameraPlaybackNativeStagePaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Camera playback native staging link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraPlaybackNativeApplicationStageContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Camera playback native staging contracts failed with exit code $LASTEXITCODE." }
 }
 $carrierFrameRoot = Join-Path $scratchRoot ("edd-carrier-frame-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $carrierFrameRoot -Force | Out-Null

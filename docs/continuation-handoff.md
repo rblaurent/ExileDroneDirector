@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after complete carrier-frame live acceptance
+Last updated: 2026-08-15 after native playback-application input staging
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the complete live-accepted eight-graph carrier-frame
-  family described below. Its editor, warm runtime, three-world PIE, reverse-
-  sync, fresh runtime, cold-load, and complete-regression gates all pass.
+- Current checkpoint is the deterministic native playback-application input
+  staging graph described below, downstream of the complete live-accepted
+  seven-graph playback-frame family. Unreal remains closed.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1983,6 +1983,30 @@ identity for every baseline/session field and regenerate byte-for-byte. The
 complete MVP-required scaffold passes in 164.1 seconds. Next: value-copy the
 accepted pose plus final filmback/13-channel frame into distinct native pose
 inputs and the canonical existing `CameraApplyInput*` bank.
+
+`StageCameraPlaybackNativeApplicationInputsV1` now performs that value-copy at
+70 full / 69 paste nodes with 104 / 103 reciprocal links. It stages position,
+body-world, gimbal-world, and gimbal-relative into four distinct native inputs;
+body and gimbal authorship are never aliased. It also constructs the canonical
+15-value engine target bank as filmback width, filmback height, then the 13
+comfort-adjusted playback channels, without mutating the accepted playback
+snapshot.
+
+Staging invalidates native-input, native-stage, and engine-input authority and
+clears the engine target id/list before checking the accepted playback result,
+exact 13-channel shape, nonempty preset, and positive finite filmback. On
+failure, prior native pose data remains nonauthoritative while the engine
+transaction is empty; on success engine authority publishes before native
+input authority and native-stage authority publishes last. Legacy
+`CameraTransform`, cinematic/carrier rotation, engine baseline/session state,
+and native baseline/session state are structurally absent. Both graph forms
+regenerate byte-identically, pass exact reciprocal-link and executable
+contracts across 80 seeded valid frames and eight failure families, and are
+owned by the complete scaffold. The complete MVP-required regression passes in
+163.5 seconds with 2,267 output lines and Unreal closed. Next: build the
+read-only native preflight validator, including exact body-relative-gimbal
+reconstruction and native target/capability readiness, before any capture or
+write graph.
 
 ## Critical design mismatch
 

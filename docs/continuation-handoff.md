@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after policy-safe manual Cue re-arming
+Last updated: 2026-08-15 after the complete bounded-event offline family
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,8 +23,8 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is policy-safe atomic manual Cue ledger re-arming in the
-  offline event-adapter family, downstream of the complete
+- Current checkpoint is the complete green eight-function bounded-event
+  offline family, downstream of the complete
   live-accepted seven-graph native playback-application boundary. Unreal remains
   closed; no event graph has been installed or executed yet.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
@@ -2380,6 +2380,31 @@ request remain preserved. The complete MVP-required regression passes with
 2,374 captured output lines in 172.8 seconds; Unreal remains closed. Next: build
 the tiny policy-free dispatcher coordinator and run the full offline-family gate.
 Only then begin the documented single-editor live acceptance sequence.
+
+`DispatchBoundedPlaybackEventsV1` closes the offline family at 6 full / 5 paste
+nodes with 5 / 4 reciprocal links. Its exact unconditional order is reset,
+validate plan, collect crossings, select repeat-eligible Cue, then authorize.
+It owns no variable, policy, branch, loop, reroute, external graph link, adapter
+execution, ledger mutation, camera, repository, HUD, UI, or world state. It
+deliberately stops at a typed decision; a bounded adapter must separately publish
+a receipt before the ledger-commit function can run.
+
+All eight functions are now offline-green. Full graphs total 633 nodes and 805
+reciprocal links: reset 17/16, validation 117/138, crossing collection 67/91,
+selection 66/80, authorization 179/232, ledger commit 93/123, manual reset
+88/120, and coordinator 6/5. Paste graphs total 625 nodes and 797 links. Every
+generator regenerates byte-identically, every graph has an exact structural
+contract and reciprocal-link proof, and the behavioral graphs are checked by
+independent seeded interpreters. The complete MVP-required regression passes
+with 2,378 captured output lines in 173.0 seconds; Unreal remains closed.
+
+Next: build and scaffold-own the idempotent 60-variable/eight-function Client
+Director configurator, exact defaults restorer, precompile/postcompile exporter
+contracts, warm runtime oracle, and automatic player-owned PIE/cleanup probe.
+Then run the documented single-editor configure/install/precompile-contract/
+compile/postcompile-export/runtime/PIE/default-restore/save/shutdown/reverse-sync/
+cold-load sequence. Do not begin keyboard dogfood until that live boundary and
+the remaining documented bounded target/adapter seams are accepted.
 
 ## Critical design mismatch
 

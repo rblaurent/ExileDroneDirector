@@ -232,6 +232,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-BoundedEventManualLedgerResetContracts.py',
     'tools\blueprint\snippets\reset-manual-cue-ledger-entry-v1.eddgraph',
     'tools\blueprint\snippets\reset-manual-cue-ledger-entry-v1-paste.eddgraph',
+    'tools\blueprint\Build-BoundedEventDispatchCoordinatorGraph.py',
+    'tools\blueprint\Test-BoundedEventDispatchCoordinatorContracts.py',
+    'tools\blueprint\snippets\dispatch-bounded-playback-events-v1.eddgraph',
+    'tools\blueprint\snippets\dispatch-bounded-playback-events-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1.eddgraph',
@@ -1964,6 +1968,37 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventManualLedgerResetContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Bounded event manual ledger-reset contracts failed with exit code $LASTEXITCODE." }
+}
+$boundedEventCoordinator = Join-Path $boundedEventRoot 'dispatch-bounded-playback-events-v1.eddgraph'
+$boundedEventCoordinatorPaste = Join-Path $boundedEventRoot 'dispatch-bounded-playback-events-v1-paste.eddgraph'
+$boundedEventCoordinatorRepeat = Join-Path $boundedEventRoot 'dispatch-bounded-playback-events-v1-repeat.eddgraph'
+$boundedEventCoordinatorRepeatPaste = Join-Path $boundedEventRoot 'dispatch-bounded-playback-events-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($boundedEventCoordinator, $boundedEventCoordinatorPaste),
+    @($boundedEventCoordinatorRepeat, $boundedEventCoordinatorRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-BoundedEventDispatchCoordinatorGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event dispatcher generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($boundedEventCoordinator, $boundedEventCoordinatorRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\dispatch-bounded-playback-events-v1.eddgraph')),
+    @($boundedEventCoordinatorPaste, $boundedEventCoordinatorRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\dispatch-bounded-playback-events-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Bounded event dispatcher regeneration diverged." }
+}
+foreach ($graphCase in @(
+    @($boundedEventCoordinator, $false),
+    @($boundedEventCoordinatorPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event dispatcher link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventDispatchCoordinatorContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event dispatcher contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraPlaybackRoot = Join-Path $scratchRoot ("edd-camera-playback-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraPlaybackRoot -Force | Out-Null

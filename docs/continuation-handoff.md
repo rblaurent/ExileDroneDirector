@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after offline camera-operator input validation
+Last updated: 2026-08-15 after offline camera-operator atomic commit
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the offline camera-operator validation package described
-  below; after the checkpoint push, HEAD must equal `origin/main` before the
-  translation-integration seam starts
+- Current checkpoint is the offline camera-operator atomic commit package
+  described below; after the checkpoint push, HEAD must equal `origin/main`
+  before the tiny coordinator starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1389,6 +1389,27 @@ Full/paste SHA-256 is
 `0BA709263311782641D24CB84D63806624A9EB2A11401F1EAC6769054385F172`.
 The complete MVP-required scaffold passes in 139.0 seconds with Unreal closed.
 Next: atomic commit, then the tiny five-call coordinator before editor work.
+
+`CommitCameraOperatorOverrideV1` is now deterministic at 116 full / 115 paste
+nodes with 152 / 151 reciprocal links. It invalidates the result first and
+requires validation, translation, and look stages to have succeeded. Incomplete
+upstream work preserves the earlier failure and cannot mutate accepted state or
+result values. A complete but poisoned candidate fails closed with the stable
+`candidate_invalid` code after independently checking the mode, four finite
+vectors, and three finite normalized quaternions. Success atomically copies all
+seven state fields and all seven result values/flags, clears failure, and
+publishes result validity last. Candidate body and gimbal remain separate
+getter-to-setter paths; neither can alias the other or `CameraTransform`.
+
+Both forms match 100 complete reference snapshots, reject 11 poisoned candidate
+families, and preserve all accepted data across three incomplete-stage cases.
+Full/paste SHA-256 is
+`644D546EBC6B4AF6569F89329B7A735F29B9338DA9F2F245D8BCCC948FA9BE01` /
+`93276321509C905BC936D7B2C66E0BD85496177D10A1CFD0E3789D91C4D6D6C1`.
+The complete MVP-required scaffold passes in 139.3 seconds with Unreal closed.
+Next: build the tiny reset -> validate -> translation -> look -> commit
+coordinator, then accept the complete six-graph family offline before any editor
+work.
 
 ## Critical design mismatch
 

@@ -1935,6 +1935,16 @@ before any polished editor UI or cook is attempted:
    history-explicit forward/reverse frames match position, body, gimbal, state,
    and flags; false scratch is a no-op. Exact regeneration and the complete
    139.0-second scaffold pass with Unreal closed. Atomic commit is next.
+   `CommitCameraOperatorOverrideV1` is now deterministic at 116 full / 115
+   paste nodes with 152 / 151 reciprocal links. It invalidates first, requires
+   all three upstream stages, independently revalidates mode, four finite
+   vectors, and three finite unit quaternions, then atomically copies the
+   complete seven-field state and seven-value/flag result before publishing
+   validity last. Distinct body and gimbal candidate paths are structurally
+   frozen. Both forms match 100 accepted snapshots, reject 11 poisoned
+   candidates, and preserve accepted data in three incomplete-stage cases;
+   exact regeneration and the complete 139.3-second scaffold pass with Unreal
+   closed. The tiny five-call coordinator is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

@@ -236,6 +236,12 @@ $requiredFiles = @(
     'tools\blueprint\Test-BoundedEventDispatchCoordinatorContracts.py',
     'tools\blueprint\snippets\dispatch-bounded-playback-events-v1.eddgraph',
     'tools\blueprint\snippets\dispatch-bounded-playback-events-v1-paste.eddgraph',
+    'tools\unreal\Configure-BoundedEventAdapter.py',
+    'tools\unreal\Restore-BoundedEventAdapterSchemaDefaults.py',
+    'tools\unreal\test_bounded_event_adapter_configuration.py',
+    'tools\unreal\Validate-BoundedEventAdapterRuntime.py',
+    'tools\unreal\Validate-BoundedEventAdapterPIE.py',
+    'tools\unreal\test_bounded_event_adapter_validators.py',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1.eddgraph',
@@ -1749,6 +1755,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\events\test_bounded_event_adapter_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Bounded event-adapter Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\unreal\test_bounded_event_adapter_configuration.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Bounded event-adapter configuration contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\unreal\test_bounded_event_adapter_validators.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Bounded event-adapter live-tool contracts failed with exit code $LASTEXITCODE."
 }
 $boundedEventRoot = Join-Path $scratchRoot ("edd-bounded-events-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $boundedEventRoot -Force | Out-Null

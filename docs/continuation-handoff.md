@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after the complete bounded-event offline family
+Last updated: 2026-08-15 after bounded-event live-acceptance preparedness
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,8 +23,8 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the complete green eight-function bounded-event
-  offline family, downstream of the complete
+- Current checkpoint is complete offline preparedness for the bounded-event
+  single-editor live-acceptance sequence, downstream of the complete
   live-accepted seven-graph native playback-application boundary. Unreal remains
   closed; no event graph has been installed or executed yet.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
@@ -2405,6 +2405,33 @@ Then run the documented single-editor configure/install/precompile-contract/
 compile/postcompile-export/runtime/PIE/default-restore/save/shutdown/reverse-sync/
 cold-load sequence. Do not begin keyboard dogfood until that live boundary and
 the remaining documented bounded target/adapter seams are accepted.
+
+The bounded-event live-acceptance tools are now scaffold-owned and offline-
+green. `Configure-BoundedEventAdapter.py` idempotently creates exactly the 60
+schema variables and eight functions, compiles after each new variable,
+preserves every existing default on rerun, verifies the generated properties and
+graphs, and saves once. The exact default restorer compiles before reacquiring
+the generated class, restores scalar/array defaults, verifies all 60 values, and
+saves once.
+
+The warm runtime harness exercises all five manifest capabilities, typed remote
+rejection, failed versus accepted adapter receipts, success-only ledger commit,
+scrub zero-dispatch, reverse selection order, and manual re-arming. It snapshots
+and restores all 60 owned defaults and proves the existing body/gimbal quaternion
+and angular-rate channels never change. The automatic PIE harness runs three
+independent player-owned sessions: local decision plus successful receipt,
+remote missing-token rejection, and manual-reset plus scrub isolation. It
+compiles nothing inside the Slate callback, ends every PIE world, unregisters
+its callback, and restores all class defaults on success or exception.
+
+Static lifecycle contracts compile all four live tools, require their scenario/
+cleanup markers, and forbid legacy `CameraTransform`, body/gimbal writes, camera,
+repository, HUD, or UI ownership. The complete MVP-required regression passes
+with 2,380 captured output lines in 170.5 seconds and Unreal closed. Next: push
+this preparedness checkpoint, then run exactly one Enhanced editor through
+configure, eight body installs with native-entry repair, precompile contracts,
+compile, postcompile exports/contracts, warm runtime, automatic PIE, defaults
+restore, save, guarded shutdown, one-file reverse sync, and fresh cold load.
 
 ## Critical design mismatch
 

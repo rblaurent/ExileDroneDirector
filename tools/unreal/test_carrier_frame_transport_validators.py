@@ -16,6 +16,9 @@ for name in ("CameraOperatorInputCarrierFrameQuatV1","CameraOperatorResultBodyQu
     assert name in RUNTIME and name in PIE;assert f'set_(obj,"{name}"' not in RUNTIME;assert f'set_(obj,"{name}"' not in PIE;assert f'set_(component,"{name}"' not in PIE
 for token in ("CompileCarrierFrameTransportV1","EvaluateCompiledCarrierFrameTransportV1","PARTIAL_TERMINAL_RESULT","VERTICAL_TRANSPORT_RESULT","FAIL_CLOSED_RESULT","DEFAULTS_RESTORED","editor_request_begin_play","editor_request_end_play"):assert token in PIE
 assert 'SCENARIOS=("partial_terminal","vertical_transport","fail_closed")' in PIE
+assert 'set_(obj,"CarrierFrameInputElapsedSecondsV1",elapsed)' in PIE
+assert 'set_(component,"CarrierFrameInputElapsedSecondsV1"' not in PIE
+assert 'require(close(get(component,"CarrierFrameInputElapsedSecondsV1"),elapsed),"staged elapsed")' in PIE
 assert "compile_blueprint" not in PIE and "call_method(\"CompileCarrierFrameTransportV1\")" in PIE
 assert "only_if_is_dirty=False" in RESTORE;assert RESTORE.index("compile_blueprint(blueprint)")<RESTORE.index("load_blueprint_class(CLIENT)");assert 'spec["container"]=="Array"' in RESTORE and "return []" in RESTORE
 print("carrier-frame transport live-tool contracts passed")

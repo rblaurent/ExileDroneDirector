@@ -1976,6 +1976,23 @@ before any polished editor UI or cook is attempted:
    atomic commit, policy-free compile coordination, and evaluation. The complete
    scaffold passes in 145.3 seconds. Deterministic graph checkpoints are next
    before the carrier result may feed `CameraOperatorInputCarrierFrameQuatV1`.
+   The carrier-frame family is now fully live-accepted. Its eight exact saved
+   graphs contain 25, 13, 74, 72, 128, 67, 7, and 117 nodes (503 total, 700
+   reciprocal links), and every postcompile export matches the deterministic
+   generator topology. Warm and fresh NullRHI runs each pass ten forward plus
+   ten reverse tracks and 120 evaluations with body/gimbal and downstream state
+   unchanged. Three player-owned PIE worlds pass partial-terminal, exactly
+   vertical, and invalid-upstream scenarios with complete restoration. Runtime
+   acceptance found and corrected the vertical least-aligned-axis tie from
+   `<=` to strict `<`, preserving the reference's lexicographic Y fallback
+   instead of adapting the oracle to the Blueprint. Guarded shutdown, one-file
+   reverse sync, all-17 mirror equality, fresh zero-error cold compilation, and
+   the complete 160.5-second scaffold pass. Live/mirror Client Director SHA-256
+   is `96CE3CA0E16B35C285EBDD858E439FAAF0BCFF2623CD92A4E4B94C16F72F90AB`.
+   Next freeze the playback-frame integration boundary that evaluates this
+   independent carrier track and feeds only `CameraOperatorInputCarrierFrameQuatV1`;
+   authored body and gimbal remain distinct. Bounded event adapters and the
+   debug surface follow before attended keyboard dogfood.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

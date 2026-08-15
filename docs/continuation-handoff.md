@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after carrier-frame live-acceptance preparedness checkpoint
+Last updated: 2026-08-15 after complete carrier-frame live acceptance
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,10 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the complete eight-graph offline carrier-frame family
-  plus its offline-green live-acceptance harness described below; after the
-  checkpoint push, HEAD must equal `origin/main` before the one-editor live
-  installation begins
+- Current checkpoint is the complete live-accepted eight-graph carrier-frame
+  family described below. Its editor, warm runtime, three-world PIE, reverse-
+  sync, fresh runtime, cold-load, and complete-regression gates all pass.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -64,6 +63,11 @@ evaluation, combined cinematic pose, five flight profiles and C2 smoothing,
 stateless airframe/gimbal solving, angular-rate-limited fixed-step prebake, and
 complete desired-airframe stream composition. The source-sampling bridge that
 feeds that accepted desired stream is also live-accepted end to end.
+
+The independent carrier-frame transport is now live-accepted too. It consumes
+only accepted sampled positions, never reads or aliases authored body/gimbal
+rotation, and publishes a third quaternion track for carrier-relative operator
+translation.
 
 The prior desired-stream live acceptance is `8d8b603`:
 
@@ -1698,6 +1702,48 @@ this preparedness checkpoint, then open exactly one editor for schema creation,
 the eight exact graph installations, compile/save/export, warm runtime,
 automatic PIE, schema restoration, idempotence rerun, guarded shutdown,
 reverse sync, cold runtime/load proof, and final remote-equal checkpoint.
+
+That one-editor acceptance is complete. The eight saved graphs contain 25, 13,
+74, 72, 128, 67, 7, and 117 nodes: 503 nodes and 700 reciprocal links in total.
+All eight postcompile exports are now owned under
+`tools/blueprint/live-snippets`; every one passes snippet integrity, exact
+generated-to-live topology, and its full executable contract.
+
+The first warm runtime run correctly caught a real exactly-vertical mismatch:
+the live X/Y least-aligned fallback used `<=`, selecting X on a tie, while the
+frozen reference's lexicographic rule selects Y. The generator now uses strict
+`<`; contracts lock the exact comparison counts and the vertical first
+quaternion `(-0.5, -0.5, -0.5, 0.5)`. The corrected postcompile graph passes ten
+forward plus ten reverse tracks and 120 absolute-time evaluations, including
+partial-terminal, vertical, held, reversing, invalid-upstream, corrupt-track,
+immutable-compiled-state, external-state isolation, and complete restoration.
+
+Three automatic player-owned PIE worlds pass partial-terminal interpolation,
+vertical transport, and fail-closed invalid input. Because Enhanced does not
+permit editor-property writes to that private elapsed input on a spawned game
+component, each scenario stages elapsed on the class default before PIE and
+then explicitly verifies the spawned component inherited the exact value; this
+does not mutate the component during acceptance or weaken the behavior gate.
+Body/gimbal authorship and downstream operator state remain unchanged, every
+PIE session ends, and all staged defaults restore. The 24-variable/eight-
+function configurator reruns with every member already present and every schema
+default preserved.
+
+Guarded shutdown reached `LogExit: Exiting.`. Closed-editor reverse sync found
+exactly `BPC_EDD_ClientDirector.uasset` changed with 16 other managed files
+unchanged, copied that one package, and a second preview found all 17 unchanged.
+Live and mirror are both 26,641,162 bytes with SHA-256
+`96CE3CA0E16B35C285EBDD858E439FAAF0BCFF2623CD92A4E4B94C16F72F90AB`.
+A fresh NullRHI process repeats the 10 + 10 / 120 runtime matrix; a second fresh
+process loads all nine core assets and compiles all six Blueprints with zero
+errors. The complete MVP-required scaffold, including deterministic regeneration
+and all eight live topologies, passes in 160.5 seconds.
+
+Next: continue ordered task 10 offline by freezing the playback-frame integration
+boundary that evaluates this third carrier track and feeds only
+`CameraOperatorInputCarrierFrameQuatV1` while body and gimbal keep their own
+authored paths. Then continue into the remaining bounded event adapters and
+debug surface before keyboard dogfood; no polished UI starts before dogfood.
 
 ## Critical design mismatch
 

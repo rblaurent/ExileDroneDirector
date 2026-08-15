@@ -5614,3 +5614,33 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   appear. The complete family contains 273 full nodes across 14/146/55/29/23/6;
   full/paste interpreters, exact reciprocal links, deterministic regeneration,
   and the complete 136.4-second scaffold pass with Unreal closed.
+
+## Carrier-frame transport live acceptance
+
+- The independent carrier frame is installed as eight exact functions with
+  25/13/74/72/128/67/7/117 nodes and 700 reciprocal links total. Postcompile
+  exports for all eight functions are repository-owned and match deterministic
+  topology while preserving complete full-graph behavior contracts.
+- Warm runtime caught an exactly-vertical tie-break defect that structural
+  generation alone could not: the Blueprint selected X for equal X/Y alignment
+  while the frozen lexicographic reference selects Y. Changing the generated
+  comparison from `<=` to strict `<` repaired the implementation; the oracle
+  was not weakened. Contracts now lock both comparison counts and the exact
+  first vertical quaternion `(-0.5, -0.5, -0.5, 0.5)`.
+- Corrected warm and independent fresh NullRHI runs each pass ten forward plus
+  ten reverse tracks and 120 absolute-time evaluations, including holds,
+  reversals, partial-terminal intervals, invalid upstream, corrupt compiled
+  state, immutable evaluation snapshots, distinct body/gimbal authorship, and
+  complete default restoration.
+- Three automatic player-owned PIE sessions pass partial-terminal, vertical,
+  and fail-closed scenarios. Enhanced rejects private elapsed-property writes
+  on the spawned component, so the harness stages elapsed on the class default
+  before each PIE world and proves the runtime instance inherited it exactly;
+  no component mutation or behavior assertion was removed.
+- Guarded shutdown reached `LogExit: Exiting.`. Closed-editor FromDevKit preview
+  found 16 unchanged packages and exactly Client Director changed; forced sync
+  copied that one package and the second preview found all 17 unchanged. Live
+  and mirror are 26,641,162 bytes with SHA-256
+  `96CE3CA0E16B35C285EBDD858E439FAAF0BCFF2623CD92A4E4B94C16F72F90AB`.
+  A separate cold process loads all nine core assets and compiles all six
+  Blueprints with zero errors; the complete scaffold passes in 160.5 seconds.

@@ -40,9 +40,9 @@ def director(world):controller=unreal.GameplayStatics.get_player_controller(worl
 sys.path.insert(0,str(ROOT/"tools/trajectory"));import carrier_frame_transport_reference as oracle;oracle=importlib.reload(oracle)
 def stage_case(obj,scenario,originals):
     for name,value in originals.items():set_(obj,name,clone(value))
-    if scenario=="fail_closed":positions,total,step=CASES["partial_terminal"][:3];valid=False
-    else:positions,total,step,_elapsed=CASES[scenario];valid=True
-    set_(obj,UPSTREAM[0],valid);set_(obj,UPSTREAM[1],[unreal.Vector(*point) for point in positions]);set_(obj,UPSTREAM[2],total);set_(obj,UPSTREAM[3],step)
+    if scenario=="fail_closed":positions,total,step=CASES["partial_terminal"][:3];elapsed=0.;valid=False
+    else:positions,total,step,elapsed=CASES[scenario];valid=True
+    set_(obj,UPSTREAM[0],valid);set_(obj,UPSTREAM[1],[unreal.Vector(*point) for point in positions]);set_(obj,UPSTREAM[2],total);set_(obj,UPSTREAM[3],step);set_(obj,"CarrierFrameInputElapsedSecondsV1",elapsed)
 def run_scenario(component,scenario):
     before_upstream=snapshot(component,UPSTREAM);before_external=snapshot(component,AUTHORSHIP+DOWNSTREAM);component.call_method("CompileCarrierFrameTransportV1");require(snapshot(component,UPSTREAM)==before_upstream,"upstream mutated");require(snapshot(component,AUTHORSHIP+DOWNSTREAM)==before_external,"external state mutated")
     if scenario=="fail_closed":
@@ -50,7 +50,7 @@ def run_scenario(component,scenario):
     else:
         positions,total,step,elapsed=CASES[scenario];track=oracle.compile_carrier_frame_transport_v1(positions,total,step);require(bool(get(component,"CarrierFrameCompileValidV1")),"compile invalid");require(len(get(component,"CarrierFrameCompiledTangentsV1"))==len(track.tangents),"tangent count");require(len(get(component,"CarrierFrameCompiledQuatsV1"))==len(track.rotations),"quat count")
         for index,(actual,wanted) in enumerate(zip(get(component,"CarrierFrameCompiledTangentsV1"),track.tangents)):require(vector_close(actual,wanted),f"tangent:{index}")
-        set_(component,"CarrierFrameInputElapsedSecondsV1",elapsed);compiled=snapshot(component,("CarrierFrameCompiledTangentsV1","CarrierFrameCompiledQuatsV1","CarrierFrameCompiledTotalSecondsV1","CarrierFrameCompiledFixedStepSecondsV1","CarrierFrameCompileValidV1"));component.call_method("EvaluateCompiledCarrierFrameTransportV1");expected=oracle.evaluate_carrier_frame_transport_v1(track,elapsed)
+        require(close(get(component,"CarrierFrameInputElapsedSecondsV1"),elapsed),"staged elapsed");compiled=snapshot(component,("CarrierFrameCompiledTangentsV1","CarrierFrameCompiledQuatsV1","CarrierFrameCompiledTotalSecondsV1","CarrierFrameCompiledFixedStepSecondsV1","CarrierFrameCompileValidV1"));component.call_method("EvaluateCompiledCarrierFrameTransportV1");expected=oracle.evaluate_carrier_frame_transport_v1(track,elapsed)
         require(bool(get(component,"CarrierFrameResultValidV1")),"evaluation invalid");require(bool(get(component,"CarrierFrameResultCompleteV1"))==expected.complete,"complete");require(int(get(component,"CarrierFrameResultSegmentIndexV1"))==expected.segment_index,"segment");require(close(get(component,"CarrierFrameResultAlphaV1"),expected.alpha),"alpha");require(same_rotation(get(component,"CarrierFrameResultQuatV1"),expected.rotation),"rotation");require(snapshot(component,("CarrierFrameCompiledTangentsV1","CarrierFrameCompiledQuatsV1","CarrierFrameCompiledTotalSecondsV1","CarrierFrameCompiledFixedStepSecondsV1","CarrierFrameCompileValidV1"))==compiled,"compiled mutated");require(snapshot(component,AUTHORSHIP+DOWNSTREAM)==before_external,"evaluation external state")
         emit("PARTIAL_TERMINAL_RESULT" if scenario=="partial_terminal" else "VERTICAL_TRANSPORT_RESULT","PASS")
     emit("DISTINCT_BODY_GIMBAL_AUTHORSHIP_PRESERVED",True);emit("SCENARIO_RESULT",scenario+":PASS")

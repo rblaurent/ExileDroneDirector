@@ -25,7 +25,7 @@ def main():
  getters=[n for n in nodes.values() if "K2Node_VariableGet" in n.node_class];setters=[n for n in nodes.values() if "K2Node_VariableSet" in n.node_class];c.require({member(n) for n in getters}==READS,"exact transport reads");c.require({member(n) for n in setters}==WRITES,"exact transport writes")
  c.require(sum("K2Node_MacroInstance" in n.node_class for n in nodes.values())==1,"single ordered sample loop");c.require(sum("K2Node_GetArrayItem" in n.node_class for n in nodes.values())==2,"current tangent and prior quaternion reads");c.require(sum("K2Node_IfThenElse" in n.node_class for n in nodes.values())==9,"exact transport phase guards")
  names=[member(n) for n in nodes.values()]
- for name,count in {"Array_Clear":1,"Array_Length":2,"Array_Add":1,"MakeRotFromXZ":2,"Conv_RotatorToQuaternion":2,"Quat_Normalized":3,"Quat_SetComponents":3,"BreakQuat":2,"Quat_RotateVector":1,"Cross_VectorVector":6,"Dot_VectorVector":5,"VSize":7}.items():c.require(names.count(name)==count,f"{name} count {names.count(name)}")
+ for name,count in {"Array_Clear":1,"Array_Length":2,"Array_Add":1,"MakeRotFromXZ":2,"Conv_RotatorToQuaternion":2,"Quat_Normalized":3,"Quat_SetComponents":3,"BreakQuat":2,"Quat_RotateVector":1,"Cross_VectorVector":6,"Dot_VectorVector":5,"VSize":7,"Less_DoubleDouble":2,"LessEqual_DoubleDouble":2}.items():c.require(names.count(name)==count,f"{name} count {names.count(name)}")
  text=a.graph.read_text(encoding="utf-8");c.require(not any(v in text for v in FORBIDDEN),"authored/external/Frenet ownership forbidden")
  for token in ('DefaultValue="0.999999"','DefaultValue="-0.999999999"','DefaultValue="0.999999999"','DefaultValue="1e-9"','DefaultValue="transport_build_failed"'):c.require(token in text,f"frozen transport token missing:{token}")
  clear=next(n for n in nodes.values() if member(n)=="Array_Clear");candidate=next(n for n in getters if member(n)=="CarrierFrameCandidateQuatsV1");c.require_link(candidate,"CarrierFrameCandidateQuatsV1",clear,"TargetArray","candidate quaternion clear")
@@ -52,6 +52,6 @@ def main():
   c.require(all(dot(left,right)>=-1e-9 for left,right in zip(track.rotations,track.rotations[1:])),f"hemisphere {index}")
  c.require(list(reversed([ref.compile_carrier_frame_transport_v1(v,(len(v)-1)*0.125,0.125).rotations for v in reversed(cases)]))==results,"forward/reverse deterministic transport")
  planar=ref.compile_carrier_frame_transport_v1(cases[3],0.5,0.125);c.require(all(rotate(q,(0.,0.,1.))[2]>0.999999 for q in planar.rotations),"planar world-up stability")
- vertical=ref.compile_carrier_frame_transport_v1(cases[1],0.25,0.125);c.require(vertical.rotations==ref.compile_carrier_frame_transport_v1(cases[1],0.25,0.125).rotations,"vertical fallback determinism")
+ vertical=ref.compile_carrier_frame_transport_v1(cases[1],0.25,0.125);c.require(vertical.rotations==ref.compile_carrier_frame_transport_v1(cases[1],0.25,0.125).rotations,"vertical fallback determinism");c.require(vertical.rotations[0]==(-0.5,-0.5,-0.5,0.5),"vertical X/Y tie selects lexicographic Y fallback")
  print(f"Carrier-frame transport sample contracts passed ({'paste' if a.paste else 'full'}): {len(cases)} forward/reverse paths")
 if __name__=="__main__":main()

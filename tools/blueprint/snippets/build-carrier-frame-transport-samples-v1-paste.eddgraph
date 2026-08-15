@@ -233,7 +233,7 @@ Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallF
 End Object
 Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallFunction_10" ExportPath="/Script/BlueprintGraph.K2Node_CallFunction'/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector:BuildCarrierFrameTransportSamplesV1.K2Node_CallFunction_10'"
    bDefaultsToPureFunc=True
-   FunctionReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.KismetMathLibrary'",MemberName="LessEqual_DoubleDouble")
+   FunctionReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.KismetMathLibrary'",MemberName="Less_DoubleDouble")
    NodePosX=2432
    NodePosY=1040
    NodeGuid=76E313357B0155319F2ED83BA01C8666

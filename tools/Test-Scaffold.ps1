@@ -196,34 +196,42 @@ $requiredFiles = @(
     'tools\blueprint\Test-CarrierFrameTransportResetContracts.py',
     'tools\blueprint\snippets\reset-carrier-frame-transport-v1.eddgraph',
     'tools\blueprint\snippets\reset-carrier-frame-transport-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-carrier-frame-transport-v1.eddgraph',
     'tools\blueprint\Build-CarrierFrameTransportStageGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportStageContracts.py',
     'tools\blueprint\snippets\stage-carrier-frame-transport-inputs-v1.eddgraph',
     'tools\blueprint\snippets\stage-carrier-frame-transport-inputs-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\stage-carrier-frame-transport-inputs-v1.eddgraph',
     'tools\blueprint\Build-CarrierFrameTransportValidationGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportValidationContracts.py',
     'tools\blueprint\snippets\validate-carrier-frame-transport-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-carrier-frame-transport-inputs-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\validate-carrier-frame-transport-inputs-v1.eddgraph',
     'tools\blueprint\Build-CarrierFrameTransportTangentsGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportTangentsContracts.py',
     'tools\blueprint\snippets\build-carrier-frame-tangents-v1.eddgraph',
     'tools\blueprint\snippets\build-carrier-frame-tangents-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\build-carrier-frame-tangents-v1.eddgraph',
     'tools\blueprint\Build-CarrierFrameTransportSamplesGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportSamplesContracts.py',
     'tools\blueprint\snippets\build-carrier-frame-transport-samples-v1.eddgraph',
     'tools\blueprint\snippets\build-carrier-frame-transport-samples-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\build-carrier-frame-transport-samples-v1.eddgraph',
     'tools\blueprint\Build-CarrierFrameTransportCommitGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportCommitContracts.py',
     'tools\blueprint\snippets\commit-compiled-carrier-frame-transport-v1.eddgraph',
     'tools\blueprint\snippets\commit-compiled-carrier-frame-transport-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\commit-compiled-carrier-frame-transport-v1.eddgraph',
     'tools\blueprint\Build-CarrierFrameTransportCompileGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportCompileContracts.py',
     'tools\blueprint\snippets\compile-carrier-frame-transport-v1.eddgraph',
     'tools\blueprint\snippets\compile-carrier-frame-transport-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\compile-carrier-frame-transport-v1.eddgraph',
     'tools\blueprint\Build-CarrierFrameTransportEvaluatorGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportEvaluatorContracts.py',
     'tools\blueprint\snippets\evaluate-compiled-carrier-frame-transport-v1.eddgraph',
     'tools\blueprint\snippets\evaluate-compiled-carrier-frame-transport-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\evaluate-compiled-carrier-frame-transport-v1.eddgraph',
     'tools\unreal\Configure-CarrierFrameTransport.py',
     'tools\unreal\Restore-CarrierFrameTransportSchemaDefaults.py',
     'tools\unreal\Validate-CarrierFrameTransportRuntime.py',
@@ -1851,6 +1859,35 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CarrierFrameTransportEvaluatorContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Carrier-frame evaluator contracts failed with exit code $LASTEXITCODE." }
+}
+$carrierFrameLiveContracts = @(
+    @('reset-carrier-frame-transport-v1.eddgraph', 'Test-CarrierFrameTransportResetContracts.py', $carrierFrameReset),
+    @('stage-carrier-frame-transport-inputs-v1.eddgraph', 'Test-CarrierFrameTransportStageContracts.py', $carrierFrameStage),
+    @('validate-carrier-frame-transport-inputs-v1.eddgraph', 'Test-CarrierFrameTransportValidationContracts.py', $carrierFrameValidation),
+    @('build-carrier-frame-tangents-v1.eddgraph', 'Test-CarrierFrameTransportTangentsContracts.py', $carrierFrameTangents),
+    @('build-carrier-frame-transport-samples-v1.eddgraph', 'Test-CarrierFrameTransportSamplesContracts.py', $carrierFrameTransport),
+    @('commit-compiled-carrier-frame-transport-v1.eddgraph', 'Test-CarrierFrameTransportCommitContracts.py', $carrierFrameCommit),
+    @('compile-carrier-frame-transport-v1.eddgraph', 'Test-CarrierFrameTransportCompileContracts.py', $carrierFrameCompile),
+    @('evaluate-compiled-carrier-frame-transport-v1.eddgraph', 'Test-CarrierFrameTransportEvaluatorContracts.py', $carrierFrameEvaluator)
+)
+foreach ($liveContract in $carrierFrameLiveContracts) {
+    $liveGraph = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($liveContract[0])"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $liveGraph
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live carrier-frame link integrity failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphTopologyMatch.py') `
+        --project-root $ProjectRoot --expected $liveContract[2] --actual $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live carrier-frame topology changed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($liveContract[1])") `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live carrier-frame graph contract failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
 }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_carrier_frame_transport_validators.py')
 if ($LASTEXITCODE -ne 0) { throw "Carrier-frame live-tool contracts failed with exit code $LASTEXITCODE." }

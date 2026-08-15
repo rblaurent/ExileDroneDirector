@@ -204,6 +204,10 @@ $requiredFiles = @(
     'tools\events\test_bounded_event_adapter_reference.py',
     'tools\events\bounded_event_adapter_blueprint_schema.json',
     'tools\events\test_bounded_event_adapter_blueprint_schema.py',
+    'tools\blueprint\Build-BoundedEventDispatchResetGraph.py',
+    'tools\blueprint\Test-BoundedEventDispatchResetContracts.py',
+    'tools\blueprint\snippets\reset-bounded-event-dispatch-result-v1.eddgraph',
+    'tools\blueprint\snippets\reset-bounded-event-dispatch-result-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1.eddgraph',
@@ -1717,6 +1721,39 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\events\test_bounded_event_adapter_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Bounded event-adapter Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+$boundedEventRoot = Join-Path $scratchRoot ("edd-bounded-events-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $boundedEventRoot -Force | Out-Null
+$boundedEventReset = Join-Path $boundedEventRoot 'reset-bounded-event-dispatch-result-v1.eddgraph'
+$boundedEventResetPaste = Join-Path $boundedEventRoot 'reset-bounded-event-dispatch-result-v1-paste.eddgraph'
+$boundedEventResetRepeat = Join-Path $boundedEventRoot 'reset-bounded-event-dispatch-result-v1-repeat.eddgraph'
+$boundedEventResetRepeatPaste = Join-Path $boundedEventRoot 'reset-bounded-event-dispatch-result-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($boundedEventReset, $boundedEventResetPaste),
+    @($boundedEventResetRepeat, $boundedEventResetRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-BoundedEventDispatchResetGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event reset generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($boundedEventReset, $boundedEventResetRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-bounded-event-dispatch-result-v1.eddgraph')),
+    @($boundedEventResetPaste, $boundedEventResetRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-bounded-event-dispatch-result-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Bounded event reset regeneration diverged." }
+}
+foreach ($graphCase in @(
+    @($boundedEventReset, $false),
+    @($boundedEventResetPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event reset link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventDispatchResetContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event reset contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraPlaybackRoot = Join-Path $scratchRoot ("edd-camera-playback-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraPlaybackRoot -Force | Out-Null

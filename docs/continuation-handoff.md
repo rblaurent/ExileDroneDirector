@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after bounded event-adapter reference/schema freeze
+Last updated: 2026-08-15 after bounded event-dispatch reset graph
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,10 +23,10 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the first bounded event-adapter boundary frozen offline
-  at executable reference and Blueprint-schema level, downstream of the complete
-  live-accepted seven-graph native playback-application boundary. Unreal remains
-  closed; no event graph has been installed or executed yet.
+- Current checkpoint is the first deterministic graph in the offline bounded
+  event-adapter family, downstream of the complete live-accepted seven-graph
+  native playback-application boundary. Unreal remains closed; no event graph
+  has been installed or executed yet.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -2243,6 +2243,16 @@ the complete offline family is green should one editor be opened for live
 acceptance. State Clips, target resolution/anchor work, and mutating server
 adapters remain later bounded seams before temporary debug controls and full
 keyboard dogfood. Polished UI starts only after dogfood.
+
+`ResetBoundedEventDispatchResultV1` is the first deterministic event graph at 5
+full / 4 paste nodes with 4 / 3 reciprocal links. It fail-closes result authority,
+authorization, selected index, and diagnostic code while preserving the complete
+compiled Cue plan, playback query/session identity, authorization context,
+crossing scratch, and execution ledger. Both forms execute exact ownership
+contracts, regenerate byte-identically, and are scaffold-owned. The complete
+MVP-required regression passes with 2,349 output lines in 172.8 seconds. Next:
+build the complete parallel-array plan validator before any crossing or adapter
+work.
 
 ## Critical design mismatch
 

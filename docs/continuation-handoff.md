@@ -1871,6 +1871,18 @@ editor may now be opened only through the documented single-editor acceptance
 sequence after deterministic configurator, export/interpreter, restore,
 runtime, PIE, cold-load, and topology tools for this family are ready offline.
 
+The 30-variable/seven-function playback schema configurator and exact default
+restorer are now frozen offline. The configurator creates native Vector/Quat,
+scalar, string, boolean, and array members idempotently, preserves every
+existing default on rerun, and verifies every generated property and function.
+The restorer compiles before reacquiring the generated class, converges and
+verifies every schema default, and saves once. Static contracts compile both
+tools, lock their schema source and lifecycle, and forbid legacy
+`CameraTransform` access. The complete MVP-required scaffold passes in 159.9
+seconds. Next: build the playback runtime oracle and automatic player-owned PIE
+probe, including distinct body/gimbal reconstruction, fail-closed corruption,
+upstream immutability, and complete touched-default restoration.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

@@ -224,6 +224,9 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraPlaybackFrameComposeContracts.py',
     'tools\blueprint\snippets\compose-camera-playback-frame-v1.eddgraph',
     'tools\blueprint\snippets\compose-camera-playback-frame-v1-paste.eddgraph',
+    'tools\unreal\Configure-CameraPlaybackFrame.py',
+    'tools\unreal\Restore-CameraPlaybackFrameSchemaDefaults.py',
+    'tools\unreal\test_camera_playback_frame_validators.py',
     'tools\blueprint\Build-CarrierFrameTransportResetGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportResetContracts.py',
     'tools\blueprint\snippets\reset-carrier-frame-transport-v1.eddgraph',
@@ -1859,6 +1862,8 @@ if ($LASTEXITCODE -ne 0) { throw "Camera playback compose paste contracts failed
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
     --project-root $ProjectRoot --graph $cameraPlaybackComposePaste
 if ($LASTEXITCODE -ne 0) { throw "Camera playback compose paste links failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\unreal\test_camera_playback_frame_validators.py')
+if ($LASTEXITCODE -ne 0) { throw "Camera playback-frame live-tool contracts failed with exit code $LASTEXITCODE." }
 $carrierFrameRoot = Join-Path $scratchRoot ("edd-carrier-frame-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $carrierFrameRoot -Force | Out-Null
 $carrierFrameReset = Join-Path $carrierFrameRoot 'reset-carrier-frame-transport-v1.eddgraph'

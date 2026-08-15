@@ -212,6 +212,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CarrierFrameTransportSamplesContracts.py',
     'tools\blueprint\snippets\build-carrier-frame-transport-samples-v1.eddgraph',
     'tools\blueprint\snippets\build-carrier-frame-transport-samples-v1-paste.eddgraph',
+    'tools\blueprint\Build-CarrierFrameTransportCommitGraph.py',
+    'tools\blueprint\Test-CarrierFrameTransportCommitContracts.py',
+    'tools\blueprint\snippets\commit-compiled-carrier-frame-transport-v1.eddgraph',
+    'tools\blueprint\snippets\commit-compiled-carrier-frame-transport-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraOperatorOverrideResetGraph.py',
     'tools\blueprint\Test-CameraOperatorOverrideResetContracts.py',
     'tools\blueprint\snippets\reset-camera-operator-override-step-v1.eddgraph',
@@ -1741,6 +1745,37 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CarrierFrameTransportSamplesContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Carrier-frame transport contracts failed with exit code $LASTEXITCODE." }
+}
+$carrierFrameCommit = Join-Path $carrierFrameRoot 'commit-compiled-carrier-frame-transport-v1.eddgraph'
+$carrierFrameCommitPaste = Join-Path $carrierFrameRoot 'commit-compiled-carrier-frame-transport-v1-paste.eddgraph'
+$carrierFrameCommitRepeat = Join-Path $carrierFrameRoot 'commit-compiled-carrier-frame-transport-v1-repeat.eddgraph'
+$carrierFrameCommitRepeatPaste = Join-Path $carrierFrameRoot 'commit-compiled-carrier-frame-transport-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($carrierFrameCommit, $carrierFrameCommitPaste),
+    @($carrierFrameCommitRepeat, $carrierFrameCommitRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CarrierFrameTransportCommitGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame commit generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($carrierFrameCommit, $carrierFrameCommitRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\commit-compiled-carrier-frame-transport-v1.eddgraph')),
+    @($carrierFrameCommitPaste, $carrierFrameCommitRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\commit-compiled-carrier-frame-transport-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw 'Carrier-frame commit generation is not byte deterministic.' }
+}
+foreach ($graphCase in @(
+    @($carrierFrameCommit, $false),
+    @($carrierFrameCommitPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame commit link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CarrierFrameTransportCommitContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame commit contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraOperatorRoot = Join-Path $scratchRoot ("edd-camera-operator-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraOperatorRoot -Force | Out-Null

@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after carrier-frame transport-sample checkpoint
+Last updated: 2026-08-15 after carrier-frame atomic-commit checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is deterministic twist-minimizing carrier-frame quaternion
-  transport described below; after the checkpoint push, HEAD must equal
-  `origin/main` before atomic compiled-track commit work starts
+- Current checkpoint is the atomic compiled carrier-frame publication described
+  below; after the checkpoint push, HEAD must equal `origin/main` before the
+  compile coordinator and absolute-time evaluator graphs are built
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1608,6 +1608,26 @@ is byte-identical, reciprocal links are exact, and the complete MVP-required
 scaffold passes in 142.7 seconds with Unreal closed. Next: preflight and
 atomically copy the complete tangent/quaternion pair plus timing, publishing
 compiled validity last.
+
+`CommitCompiledCarrierFrameTransportV1` is now deterministic at 67 full / 66
+paste nodes with 91 / 90 reciprocal links. It invalidates compiled authority
+first, requires successful transport plus exact 2..65,536 candidate/position
+cardinality, and rechecks every tangent/quaternion pair. Tangents and
+quaternions must be finite and unit within `1e-6`; the quaternion X axis must
+match its tangent within `1e-6`; consecutive quaternion dots may not cross the
+negative hemisphere tolerance. Only a wholly valid loop reaches the success
+chain that copies both arrays and both timing fields, clears the diagnostic,
+and publishes compile validity last.
+
+Both forms execute 100 complete reference snapshots and seven invalid-stage,
+shape, unit, alignment, and hemisphere failures. Every failure preserves the
+prior compiled arrays and timing by object identity while validity remains
+false. Authored tracks, desired-stream state, evaluation results, operator,
+playback, document, event, repository, and server state are absent. Exact
+regeneration and reciprocal links pass, and the complete MVP-required scaffold
+is green in 143.5 seconds with Unreal closed. Next: the tiny six-call compile
+coordinator, then immutable absolute-time quaternion evaluation including the
+real partial terminal interval.
 
 ## Critical design mismatch
 

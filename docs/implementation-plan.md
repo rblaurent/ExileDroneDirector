@@ -2021,6 +2021,14 @@ before any polished editor UI or cook is attempted:
    alternate path; both forms pass exact call/link and injected-failure
    contracts, and the complete MVP-required scaffold passes in 158.5 seconds.
    Distinct operator staging is next.
+   `StageCameraOperatorFromPlaybackV1` is deterministic at 93 full / 92 paste
+   nodes and 108 / 107 reciprocal links. It validates eight authority flags,
+   four exact positive finite totals, and four aligned completion decisions,
+   then stages cinematic position, distinct prebaked body/gimbal, independent
+   carrier, and six operator controls through exact links. Eighty valid and 17
+   fail-closed cases execute in both forms; legacy cinematic rotation is absent.
+   The complete MVP-required scaffold passes in 157.5 seconds. Viewer-comfort
+   staging is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

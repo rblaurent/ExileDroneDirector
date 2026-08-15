@@ -1795,6 +1795,27 @@ identically and pass exact call/link contracts. The complete MVP-required
 scaffold passes in 158.5 seconds. Next: validate the four result
 families and stage distinct operator inputs without reading cinematic rotation.
 
+`StageCameraOperatorFromPlaybackV1` is now deterministic at 93 full / 92 paste
+nodes with 108 / 107 reciprocal links. It invalidates combined-source,
+operator-stage, and operator-source authority first; requires all four compiled
+families and all four evaluations valid; proves four positive finite totals are
+exactly equal; and requires the four completion flags to agree. Only then does
+it publish source validity and copy ten fields into the operator: requested
+mode, cinematic position, distinct prebaked body, distinct prebaked gimbal,
+independent carrier, translation, look, delta, recenter, and return-to-directed.
+Operator-stage validity and `CameraOperatorInputSourceValidV1` publish last.
+
+Both forms execute 80 valid frames and 17 stage/source/timeline/completion
+failures. Failed staging preserves every prior operator data input and all
+compiled/result/operator/comfort/engine/persistence state while emitting the
+stable first-boundary code `source_invalid`, `timeline_mismatch`, or
+`completion_mismatch`; an earlier `query_invalid` survives a failed time stage.
+`CinematicPoseResultQuatV1` and `CameraTransform` are structurally absent, and
+exact body/gimbal/carrier getter-to-setter links are frozen. The complete MVP-
+required scaffold passes in 157.5 seconds. Next: stage the
+accepted operator result plus raw channels/procedural offsets into viewer
+comfort, without touching body authorship.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

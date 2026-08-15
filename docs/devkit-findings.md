@@ -5687,3 +5687,15 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   ownership in each already-accepted evaluator and lets the following staging
   boundary make one explicit atomic decision across all four results. The
   complete MVP-required scaffold passes in 158.5 seconds.
+- The combined-source decision belongs immediately before operator staging, not
+  in the four-call evaluator coordinator. The 93/92-node stage validates all
+  eight authority flags, exact timeline equality, and aligned completion before
+  copying any operator data. This preserves the accepted helpers' individual
+  fail-closed behavior while preventing a mixed-time or partially stale frame
+  from gaining operator authority.
+- The graph freezes three different quaternion wires: prebaked body to authored
+  body, prebaked gimbal to authored gimbal, and carrier transport to carrier
+  frame. Cinematic pose supplies position only. Exported-link execution covers
+  80 valid and 17 invalid cases without a `CinematicPoseResultQuatV1` or legacy
+  `CameraTransform` reference anywhere in the graph. The complete MVP-required
+  scaffold passes in 157.5 seconds.

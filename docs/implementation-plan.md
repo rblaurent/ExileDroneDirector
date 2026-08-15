@@ -2029,6 +2029,13 @@ before any polished editor UI or cook is attempted:
    fail-closed cases execute in both forms; legacy cinematic rotation is absent.
    The complete MVP-required scaffold passes in 157.5 seconds. Viewer-comfort
    staging is next.
+   `StageCameraComfortFromPlaybackV1` is deterministic at 26 full / 25 paste
+   nodes and 25 / 24 reciprocal links. It stages operator position/gimbal,
+   procedural offsets, and a by-value 13-channel snapshot after separate
+   operator/source guards, while body authorship and all external state remain
+   absent. Eighty valid and four fail-closed cases pass in both forms; the
+   complete MVP-required scaffold passes in 158.0 seconds. Atomic final-frame
+   commit is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

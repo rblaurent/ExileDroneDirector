@@ -212,6 +212,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraPlaybackFrameOperatorStageContracts.py',
     'tools\blueprint\snippets\stage-camera-operator-from-playback-v1.eddgraph',
     'tools\blueprint\snippets\stage-camera-operator-from-playback-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraPlaybackFrameComfortStageGraph.py',
+    'tools\blueprint\Test-CameraPlaybackFrameComfortStageContracts.py',
+    'tools\blueprint\snippets\stage-camera-comfort-from-playback-v1.eddgraph',
+    'tools\blueprint\snippets\stage-camera-comfort-from-playback-v1-paste.eddgraph',
     'tools\blueprint\Build-CarrierFrameTransportResetGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportResetContracts.py',
     'tools\blueprint\snippets\reset-carrier-frame-transport-v1.eddgraph',
@@ -1754,6 +1758,37 @@ if ($LASTEXITCODE -ne 0) { throw "Camera playback operator-stage paste contracts
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
     --project-root $ProjectRoot --graph $cameraPlaybackOperatorPaste
 if ($LASTEXITCODE -ne 0) { throw "Camera playback operator-stage paste links failed with exit code $LASTEXITCODE." }
+$cameraPlaybackComfort = Join-Path $cameraPlaybackRoot 'stage-camera-comfort-from-playback-v1.eddgraph'
+$cameraPlaybackComfortPaste = Join-Path $cameraPlaybackRoot 'stage-camera-comfort-from-playback-v1-paste.eddgraph'
+$cameraPlaybackComfortRepeat = Join-Path $cameraPlaybackRoot 'stage-camera-comfort-from-playback-v1-repeat.eddgraph'
+$cameraPlaybackComfortRepeatPaste = Join-Path $cameraPlaybackRoot 'stage-camera-comfort-from-playback-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($cameraPlaybackComfort, $cameraPlaybackComfortPaste),
+    @($cameraPlaybackComfortRepeat, $cameraPlaybackComfortRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraPlaybackFrameComfortStageGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera playback comfort-stage generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraPlaybackComfort, $cameraPlaybackComfortRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\stage-camera-comfort-from-playback-v1.eddgraph')),
+    @($cameraPlaybackComfortPaste, $cameraPlaybackComfortRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\stage-camera-comfort-from-playback-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Camera playback comfort-stage regeneration diverged." }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraPlaybackFrameComfortStageContracts.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackComfort
+if ($LASTEXITCODE -ne 0) { throw "Camera playback comfort-stage full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackComfort
+if ($LASTEXITCODE -ne 0) { throw "Camera playback comfort-stage full links failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraPlaybackFrameComfortStageContracts.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackComfortPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera playback comfort-stage paste contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackComfortPaste
+if ($LASTEXITCODE -ne 0) { throw "Camera playback comfort-stage paste links failed with exit code $LASTEXITCODE." }
 $carrierFrameRoot = Join-Path $scratchRoot ("edd-carrier-frame-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $carrierFrameRoot -Force | Out-Null
 $carrierFrameReset = Join-Path $carrierFrameRoot 'reset-carrier-frame-transport-v1.eddgraph'

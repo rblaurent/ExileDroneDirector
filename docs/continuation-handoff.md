@@ -1816,6 +1816,23 @@ required scaffold passes in 157.5 seconds. Next: stage the
 accepted operator result plus raw channels/procedural offsets into viewer
 comfort, without touching body authorship.
 
+`StageCameraComfortFromPlaybackV1` is deterministic at 26 full / 25 paste
+nodes with 25 / 24 reciprocal links. It invalidates its stage flag and comfort
+input authority first, separately requires accepted operator and source/channel
+validity, then copies operator position, operator final-view gimbal, playback
+procedural translation/rotation, and the 13-channel array into comfort. The
+channel array is copied by value; comfort-stage validity publishes before
+`CameraComfortInputFrameValidV1`, which is last.
+
+Both forms execute 80 valid frames plus four operator/source failures. Rejected
+staging preserves every prior comfort data input and all body, airframe, carrier,
+operator-state, comfort-preference, engine, cinematic-rotation, persistence,
+and playback state. Body rotation is structurally absent: viewer comfort owns
+only position, final-view gimbal, procedural motion, and channel attenuation.
+The complete MVP-required scaffold passes in 158.0 seconds. Next: atomically
+commit the final body world, gimbal world, derived gimbal-
+relative, filmback, channel, operator, completion, and comfort snapshot.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

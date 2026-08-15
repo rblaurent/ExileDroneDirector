@@ -5699,3 +5699,10 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   80 valid and 17 invalid cases without a `CinematicPoseResultQuatV1` or legacy
   `CameraTransform` reference anywhere in the graph. The complete MVP-required
   scaffold passes in 157.5 seconds.
+- Comfort staging deliberately does not carry body rotation. The body remains
+  an operator output for the final actor; viewer comfort consumes only the
+  final-view gimbal, position, procedural offsets, and camera channels. The
+  26/25-node stage copies the channel array by value, publishes comfort input
+  authority last, and preserves prior inputs on four injected operator/source
+  failures across both exported forms. The complete MVP-required scaffold
+  passes in 158.0 seconds.

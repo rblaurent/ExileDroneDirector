@@ -1972,6 +1972,18 @@ Next: deterministic reset, stage, validate, capture, apply, restore, and thin
 orchestrator graphs/interpreters, plus offline configurator/runtime/PIE tooling,
 before the next single-editor acceptance session.
 
+`ResetCameraPlaybackNativeApplicationResultV1` is deterministic at 6 full / 5
+paste nodes with 5 / 4 reciprocal links. It invalidates only staged input,
+stage, preflight, and final native-application authority before clearing its
+local diagnostic. Pose inputs, both exact native Transform baselines, native
+session state/frame count, the complete playback result, accepted engine
+application state, actor/component properties, persistence, events, server,
+HUD, UI, and input dispatch are structurally absent. Both forms preserve object
+identity for every baseline/session field and regenerate byte-for-byte. The
+complete MVP-required scaffold passes in 164.1 seconds. Next: value-copy the
+accepted pose plus final filmback/13-channel frame into distinct native pose
+inputs and the canonical existing `CameraApplyInput*` bank.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

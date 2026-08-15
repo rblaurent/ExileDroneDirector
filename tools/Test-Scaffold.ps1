@@ -204,6 +204,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CarrierFrameTransportValidationContracts.py',
     'tools\blueprint\snippets\validate-carrier-frame-transport-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-carrier-frame-transport-inputs-v1-paste.eddgraph',
+    'tools\blueprint\Build-CarrierFrameTransportTangentsGraph.py',
+    'tools\blueprint\Test-CarrierFrameTransportTangentsContracts.py',
+    'tools\blueprint\snippets\build-carrier-frame-tangents-v1.eddgraph',
+    'tools\blueprint\snippets\build-carrier-frame-tangents-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraOperatorOverrideResetGraph.py',
     'tools\blueprint\Test-CameraOperatorOverrideResetContracts.py',
     'tools\blueprint\snippets\reset-camera-operator-override-step-v1.eddgraph',
@@ -1667,6 +1671,39 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CarrierFrameTransportValidationContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Carrier-frame validation contracts failed with exit code $LASTEXITCODE." }
+}
+$carrierFrameTangents = Join-Path $carrierFrameRoot 'build-carrier-frame-tangents-v1.eddgraph'
+$carrierFrameTangentsPaste = Join-Path $carrierFrameRoot 'build-carrier-frame-tangents-v1-paste.eddgraph'
+$carrierFrameTangentsRepeat = Join-Path $carrierFrameRoot 'build-carrier-frame-tangents-v1-repeat.eddgraph'
+$carrierFrameTangentsRepeatPaste = Join-Path $carrierFrameRoot 'build-carrier-frame-tangents-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($carrierFrameTangents, $carrierFrameTangentsPaste),
+    @($carrierFrameTangentsRepeat, $carrierFrameTangentsRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CarrierFrameTransportTangentsGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame tangent generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($carrierFrameTangents, $carrierFrameTangentsRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\build-carrier-frame-tangents-v1.eddgraph')),
+    @($carrierFrameTangentsPaste, $carrierFrameTangentsRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\build-carrier-frame-tangents-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) {
+        throw 'Carrier-frame tangent generation is not byte deterministic.'
+    }
+}
+foreach ($graphCase in @(
+    @($carrierFrameTangents, $false),
+    @($carrierFrameTangentsPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame tangent link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CarrierFrameTransportTangentsContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame tangent contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraOperatorRoot = Join-Path $scratchRoot ("edd-camera-operator-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraOperatorRoot -Force | Out-Null

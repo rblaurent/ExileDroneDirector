@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after carrier-frame input-validation checkpoint
+Last updated: 2026-08-15 after carrier-frame tangent checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is deterministic carrier-frame input validation described
-  below; after the checkpoint push, HEAD must equal `origin/main` before tangent
-  construction graph work starts
+- Current checkpoint is deterministic carrier-frame tangent construction
+  described below; after the checkpoint push, HEAD must equal `origin/main`
+  before twist-minimizing quaternion transport graph work starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1566,6 +1566,26 @@ the staged snapshot or protected state. Exact regeneration and reciprocal links
 pass, and the complete MVP-required scaffold is green in 142.6 seconds with
 Unreal closed. Next: build the deterministic nearest-nonzero tangent track for
 every sample, including holds, without reading authored rotation.
+
+`BuildCarrierFrameTangentsV1` is now deterministic at 72 full / 71 paste nodes
+with 112 / 111 reciprocal links. It clears only its owned tangent candidate,
+requires successful validation, and evaluates the exact reference priority per
+sample: centered difference first for interior samples, then immediate forward,
+immediate backward, and nearest outward forward/backward candidates. The first
+vector longer than `1e-9` is normalized and appended through one frozen append
+site. Runs of held samples therefore inherit a deterministic nearby path
+direction without introducing a Frenet normal.
+
+Unexpected missing directions fail with `tangent_missing`; incomplete final
+cardinality fails with `tangent_build_failed` and cannot publish scratch
+validity. Both forms execute 104 straight/vertical/held/reversing/curved/seeded
+paths forward and reverse, match the reference candidate priority component by
+component, prove unit output, preserve source positions, and reject a forced
+stationary path. Generation is byte-identical, reciprocal links are exact, and
+the complete MVP-required scaffold passes in 141.1 seconds with Unreal closed.
+Next: build the actual carrier quaternion samples by deterministic initial-basis
+selection and shortest-arc parallel transport, keeping this tangent track and
+authored body/gimbal immutable.
 
 ## Critical design mismatch
 

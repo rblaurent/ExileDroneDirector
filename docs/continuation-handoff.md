@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after offline camera-operator atomic commit
+Last updated: 2026-08-15 after complete offline camera-operator family
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the offline camera-operator atomic commit package
+- Current checkpoint is the complete offline camera-operator override family
   described below; after the checkpoint push, HEAD must equal `origin/main`
-  before the tiny coordinator starts
+  before the documented single-editor acceptance sequence starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1410,6 +1410,25 @@ The complete MVP-required scaffold passes in 139.3 seconds with Unreal closed.
 Next: build the tiny reset -> validate -> translation -> look -> commit
 coordinator, then accept the complete six-graph family offline before any editor
 work.
+
+`ApplyCameraOperatorOverrideV1` completes the offline family at 6 full / 5
+paste nodes with exactly reset -> validate -> translation -> look -> commit and
+5 / 4 reciprocal execution links. It contains no variables, branches, macros,
+reroutes, hidden policy, or alternate terminal. Full and paste contracts freeze
+the exact stage identities and order; regeneration is byte-identical with
+SHA-256
+`6857BC85D589D4827A4018D281DC39544ABC31DE28CCAB42F92CEB76F78C8842` /
+`10C90BD9C4D9C10C7FCF82A389525EEED1700381738FD61459171E81838891BB`.
+
+All six operator graphs are now green offline: 651 full nodes with 893
+reciprocal links, or 645 paste nodes with 887 links. Their generators,
+checked-in snippets, link interpreters, executable oracles, ownership barriers,
+and repeat hashes all pass in the complete 138.2-second MVP-required scaffold
+with Unreal closed. Distinct authored body and gimbal paths remain structurally
+separate across validation, look construction, and atomic publication. Next:
+prepare idempotent tooling, then run the documented one-editor configuration,
+compile/save/export, warm-runtime, automatic PIE, restoration, and exact
+postcompile-topology sequence. Do not open a second editor.
 
 ## Critical design mismatch
 

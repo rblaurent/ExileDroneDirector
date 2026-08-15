@@ -1945,6 +1945,15 @@ before any polished editor UI or cook is attempted:
    candidates, and preserve accepted data in three incomplete-stage cases;
    exact regeneration and the complete 139.3-second scaffold pass with Unreal
    closed. The tiny five-call coordinator is next.
+   `ApplyCameraOperatorOverrideV1` completes the offline family at 6 full / 5
+   paste nodes and exactly reset -> validate -> translation -> look -> commit,
+   with no hidden variables, policy, branches, macros, or reroutes. Its full and
+   paste snippets regenerate byte-identically and pass exact call-order plus
+   reciprocal-link contracts. All six graphs total 651 full nodes and 893
+   reciprocal links (645 / 887 in paste form); their complete executable,
+   ownership, topology, and determinism suite passes in 138.2 seconds with
+   Unreal closed. Idempotent configuration and the documented one-editor live
+   acceptance sequence are next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

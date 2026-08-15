@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after carrier-frame upstream staging checkpoint
+Last updated: 2026-08-15 after carrier-frame input-validation checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is deterministic carrier-frame upstream staging described
-  below; after the checkpoint push, HEAD must equal `origin/main` before input
-  validation graph work starts
+- Current checkpoint is deterministic carrier-frame input validation described
+  below; after the checkpoint push, HEAD must equal `origin/main` before tangent
+  construction graph work starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1546,6 +1546,26 @@ byte-identical, link integrity is exact, and the complete MVP-required scaffold
 passes in 140.4 seconds with Unreal closed. Next: validate staged shape,
 schedule, finite position values, and the existence of a usable path direction
 without mutating the staged snapshot.
+
+`ValidateCarrierFrameTransportInputsV1` is now deterministic at 74 full / 73
+paste nodes with 97 / 96 reciprocal links. It requires a successful staged
+snapshot, 2..65,536 positions, finite bounded total/fixed-step timing, and the
+exact zero/integer-step/terminal schedule expressed by
+`(count - 2) * step < total <= (count - 1) * step`. It checks every Vector
+component for finiteness and separately proves that at least one position
+differs from the first by more than the frozen squared epsilon. Holds,
+reversals, and vertical paths remain valid; only a wholly stationary path is
+directionless.
+
+The graph writes only diagnostic/scratch state and never derives or publishes a
+tangent. Its stable failures are `input_invalid`, `position_not_finite`, and
+`path_has_no_direction`; validation authority publishes last on success. Both
+forms execute 84 straight/held/reversing/partial/seeded valid paths and 14
+stage/count/timing/schedule/finite/direction failure families without mutating
+the staged snapshot or protected state. Exact regeneration and reciprocal links
+pass, and the complete MVP-required scaffold is green in 142.6 seconds with
+Unreal closed. Next: build the deterministic nearest-nonzero tangent track for
+every sample, including holds, without reading authored rotation.
 
 ## Critical design mismatch
 

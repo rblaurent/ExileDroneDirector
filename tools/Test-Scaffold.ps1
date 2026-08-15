@@ -200,6 +200,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CarrierFrameTransportStageContracts.py',
     'tools\blueprint\snippets\stage-carrier-frame-transport-inputs-v1.eddgraph',
     'tools\blueprint\snippets\stage-carrier-frame-transport-inputs-v1-paste.eddgraph',
+    'tools\blueprint\Build-CarrierFrameTransportValidationGraph.py',
+    'tools\blueprint\Test-CarrierFrameTransportValidationContracts.py',
+    'tools\blueprint\snippets\validate-carrier-frame-transport-inputs-v1.eddgraph',
+    'tools\blueprint\snippets\validate-carrier-frame-transport-inputs-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraOperatorOverrideResetGraph.py',
     'tools\blueprint\Test-CameraOperatorOverrideResetContracts.py',
     'tools\blueprint\snippets\reset-camera-operator-override-step-v1.eddgraph',
@@ -1630,6 +1634,39 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CarrierFrameTransportStageContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Carrier-frame stage contracts failed with exit code $LASTEXITCODE." }
+}
+$carrierFrameValidation = Join-Path $carrierFrameRoot 'validate-carrier-frame-transport-inputs-v1.eddgraph'
+$carrierFrameValidationPaste = Join-Path $carrierFrameRoot 'validate-carrier-frame-transport-inputs-v1-paste.eddgraph'
+$carrierFrameValidationRepeat = Join-Path $carrierFrameRoot 'validate-carrier-frame-transport-inputs-v1-repeat.eddgraph'
+$carrierFrameValidationRepeatPaste = Join-Path $carrierFrameRoot 'validate-carrier-frame-transport-inputs-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($carrierFrameValidation, $carrierFrameValidationPaste),
+    @($carrierFrameValidationRepeat, $carrierFrameValidationRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CarrierFrameTransportValidationGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame validation generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($carrierFrameValidation, $carrierFrameValidationRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-carrier-frame-transport-inputs-v1.eddgraph')),
+    @($carrierFrameValidationPaste, $carrierFrameValidationRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-carrier-frame-transport-inputs-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) {
+        throw 'Carrier-frame validation generation is not byte deterministic.'
+    }
+}
+foreach ($graphCase in @(
+    @($carrierFrameValidation, $false),
+    @($carrierFrameValidationPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame validation link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CarrierFrameTransportValidationContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame validation contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraOperatorRoot = Join-Path $scratchRoot ("edd-camera-operator-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraOperatorRoot -Force | Out-Null

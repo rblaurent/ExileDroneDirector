@@ -2112,6 +2112,26 @@ required regression passes in 165.9 seconds with 2,286 output lines and Unreal
 closed. Next: generate the corrected thin coordinator and prove the complete
 seven-graph native adapter family together.
 
+`ApplyComposedCameraPlaybackFrameV1` completes the seven-graph offline native
+adapter family at 11 full / 10 paste nodes with 10 / 9 reciprocal links. Its
+only behavior is the exact safe chain: reset native result; reset engine result;
+stage the accepted playback frame; validate native plus engine input; guard
+preflight authority; capture native plus engine baselines; guard native session
+authority; apply the frame. It owns no pose, camera target, baseline, policy,
+failure handling, persistence, events, server, HUD, or UI state.
+
+The fresh engine-result reset is structurally before staging, validation failure
+cannot reach capture or apply, and capture failure cannot reach apply. Both
+forms regenerate byte-identically and pass exact reciprocal-link/call-order
+contracts. Across all seven full graphs, the family now contains 314 nodes and
+415 reciprocal links (reset 6/5, stage 70/104, preflight 99/135, capture 20/20,
+apply 85/115, restore 23/26, coordinator 11/10). The complete MVP-required
+regression passes in 166.2 seconds with 2,288 output lines and Unreal closed.
+Next: build the idempotent 13-variable/seven-function configurator, exact
+default restorer, postcompile exporter/interpreter ownership, warm runtime
+oracle, and automatic player-owned PIE mutation/restoration probe before the
+single-editor acceptance sequence.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-16 after bounded-event decision/ledger live acceptance
+Last updated: 2026-08-16 after State Clip reference/schema freeze
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,11 +23,11 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the complete live-accepted bounded-event decision and
+- Current live checkpoint is the complete bounded-event decision and
   execution-ledger boundary, downstream of the complete live-accepted
-  seven-graph native playback-application boundary. Unreal is closed. The
-  closed five-operation manifest can validate, collect, select, authorize, and
-  receipt-gate Cue execution without owning a target or mutating the world.
+  seven-graph native playback-application boundary. The next ordered seam,
+  absolute-time State Clip evaluation, is frozen offline at executable
+  reference/schema level. Unreal is closed.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -2476,13 +2476,52 @@ UI work.
   Blueprints with zero errors. The complete MVP-required regression passes with
   2,419 captured output lines in 179.9 seconds.
 
-Next: freeze the backend target-binding resolution and EDD Event Anchor seam
-offline, including immutable published identity, clone reauthorization,
-region/range checks, typed unresolved/ambiguous/stale results, and diagnostics.
-Only then install it in one editor and proceed to the read-only `Wait Until
-Open` door adapter. Mutating interaction, bounded state leases, temporary debug
-controls, and attended keyboard dogfood remain later ordered gates before
-polished UI.
+The next authoritative step is absolute-time, scrub-safe State Clip evaluation
+with a local test adapter. Its reference/schema freeze is complete; evidence
+follows. Target-binding resolution and EDD Event Anchors remain downstream,
+followed by the read-only `Wait Until Open` door adapter. Mutating interaction,
+bounded state leases, temporary debug controls, and attended keyboard dogfood
+remain later ordered gates before polished UI.
+
+## Offline State Clip evaluation state
+
+The second event-system seam is frozen offline at executable reference and
+Blueprint-schema level. It deliberately uses only a closed, non-world
+`local.state_test` adapter so absolute-time semantics and explicit scrub preview
+can be accepted before target resolution, Event Anchors, door state reads, RPCs,
+or leases exist.
+
+- Active intervals are exactly `start <= time < end`. Adjacent clips on one
+  binding replace state at the shared boundary; overlapping active intervals on
+  the same binding/adapter/version fail the complete plan closed. Simultaneous
+  clips on different bindings remain valid and ordered deterministically.
+- Evaluation is a pure history-free absolute-time query. Finite negative and
+  overshoot times return valid empty results. Forty seeded schedules produce
+  identical results in forward and reverse query order.
+- Scrubbing always returns predicted state. A preview action is allowed only
+  when both the clip and current query explicitly request it, and only for the
+  closed `local.state_test` / `local_channel` capability. Playback evaluation
+  cannot masquerade as preview authority.
+- Enter/exit lead values remain bounded scheduling metadata and never expand
+  the active interval. Stable Clip IDs, binding shape, adapter/version, desired
+  state, restore/conflict/failure policies, timeout, and preview policy are all
+  validated before a plan snapshot can publish.
+- Nine executable reference tests cover empty/zero-duration plans, exact
+  boundaries, adjacency, simultaneous targets, scrub policy, overlap and 16
+  unsafe input families, nonfinite queries, immutability, and seeded query-order
+  invariance. Five exact schema tests freeze 49 variables and five functions.
+- The complete MVP-required regression passes with 2,443 captured output lines
+  in 176.7 seconds while Unreal remains closed.
+- The five-function graph order is reset, validate plan, collect active clips,
+  atomic commit, then a policy-free coordinator. The result owns nine aligned
+  arrays plus evaluated time and publishes validity last. No graph has been
+  generated or installed yet.
+
+Next: implement deterministic full/paste generators, independent interpreters,
+exact ownership/link contracts, and scaffold ownership for those five graphs in
+order. Only after the complete offline family is green should one editor be
+opened for live acceptance. Target binding and Event Anchors remain the next
+seam after State Clips, exactly as ordered in `docs/event-system.md`.
 
 ## Critical design mismatch
 

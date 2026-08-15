@@ -204,6 +204,10 @@ $requiredFiles = @(
     'tools\events\test_bounded_event_adapter_reference.py',
     'tools\events\bounded_event_adapter_blueprint_schema.json',
     'tools\events\test_bounded_event_adapter_blueprint_schema.py',
+    'tools\events\state_clip_evaluation_reference.py',
+    'tools\events\test_state_clip_evaluation_reference.py',
+    'tools\events\state_clip_evaluation_blueprint_schema.json',
+    'tools\events\test_state_clip_evaluation_blueprint_schema.py',
     'tools\blueprint\Build-BoundedEventDispatchResetGraph.py',
     'tools\blueprint\Test-BoundedEventDispatchResetContracts.py',
     'tools\blueprint\snippets\reset-bounded-event-dispatch-result-v1.eddgraph',
@@ -1763,6 +1767,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\events\test_bounded_event_adapter_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Bounded event-adapter Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\events\test_state_clip_evaluation_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "State Clip evaluation reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\events\test_state_clip_evaluation_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "State Clip evaluation Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_bounded_event_adapter_configuration.py')
 if ($LASTEXITCODE -ne 0) {

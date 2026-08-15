@@ -1,0 +1,103 @@
+{
+  "schema": "edd.state-clip-evaluation.v1",
+  "version": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Evaluate a compiled local-test State Clip plan at one absolute time with half-open intervals and explicit scrub-preview authority, without resolving or mutating any shared-world target.",
+  "dependencies": {
+    "eventArchitecture": "docs/event-system.md",
+    "cueBoundary": "edd.bounded-event-adapter.v1",
+    "targetResolution": "deliberately downstream"
+  },
+  "limits": {
+    "maximumStateClips": 128,
+    "maximumActiveStateClips": 32,
+    "maximumDesiredStateBytes": 128,
+    "maximumLeadSeconds": 30.0,
+    "maximumTimeoutSeconds": 30.0
+  },
+  "variables": [
+    {"name":"StateClipIdsV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipStartTimesV1","type":"Real","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipEndTimesV1","type":"Real","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipDesiredStatesV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipEnterLeadSecondsV1","type":"Real","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipExitLeadSecondsV1","type":"Real","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipScopesV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipRestorePoliciesV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipConflictPoliciesV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipFailurePoliciesV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipTimeoutSecondsV1","type":"Real","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipPreviewPoliciesV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipBindingIdsV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipBindingTypesV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipBindingRegionsV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipBindingAdapterIdsV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipBindingAdapterVersionsV1","type":"Integer","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipBindingEnabledV1","type":"Boolean","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipBindingReauthorizedV1","type":"Boolean","container":"Array","role":"compiled","default":[]},
+    {"name":"StateClipPlanDurationV1","type":"Real","container":"None","role":"compiled","default":0.0},
+    {"name":"StateClipPlanValidV1","type":"Boolean","container":"None","role":"compiled-authority","default":false},
+
+    {"name":"StateClipQueryTimeV1","type":"Real","container":"None","role":"query","default":0.0},
+    {"name":"StateClipQueryScrubbingV1","type":"Boolean","container":"None","role":"query","default":false},
+    {"name":"StateClipLocalPreviewRequestedV1","type":"Boolean","container":"None","role":"query","default":false},
+
+    {"name":"StateClipValidationValidV1","type":"Boolean","container":"None","role":"stage","default":false},
+    {"name":"StateClipCollectionValidV1","type":"Boolean","container":"None","role":"stage","default":false},
+    {"name":"StateClipCommitValidV1","type":"Boolean","container":"None","role":"stage","default":false},
+    {"name":"StateClipCandidateValidV1","type":"Boolean","container":"None","role":"scratch","default":false},
+    {"name":"StateClipCurrentActiveV1","type":"Boolean","container":"None","role":"scratch","default":false},
+
+    {"name":"StateClipCandidateIdsV1","type":"String","container":"Array","role":"candidate","default":[]},
+    {"name":"StateClipCandidateBindingIdsV1","type":"String","container":"Array","role":"candidate","default":[]},
+    {"name":"StateClipCandidateAdapterIdsV1","type":"String","container":"Array","role":"candidate","default":[]},
+    {"name":"StateClipCandidateAdapterVersionsV1","type":"Integer","container":"Array","role":"candidate","default":[]},
+    {"name":"StateClipCandidateDesiredStatesV1","type":"String","container":"Array","role":"candidate","default":[]},
+    {"name":"StateClipCandidateScopesV1","type":"String","container":"Array","role":"candidate","default":[]},
+    {"name":"StateClipCandidateRestorePoliciesV1","type":"String","container":"Array","role":"candidate","default":[]},
+    {"name":"StateClipCandidatePreviewAllowedV1","type":"Boolean","container":"Array","role":"candidate","default":[]},
+    {"name":"StateClipCandidateCodesV1","type":"String","container":"Array","role":"candidate","default":[]},
+
+    {"name":"StateClipResultIdsV1","type":"String","container":"Array","role":"result","default":[]},
+    {"name":"StateClipResultBindingIdsV1","type":"String","container":"Array","role":"result","default":[]},
+    {"name":"StateClipResultAdapterIdsV1","type":"String","container":"Array","role":"result","default":[]},
+    {"name":"StateClipResultAdapterVersionsV1","type":"Integer","container":"Array","role":"result","default":[]},
+    {"name":"StateClipResultDesiredStatesV1","type":"String","container":"Array","role":"result","default":[]},
+    {"name":"StateClipResultScopesV1","type":"String","container":"Array","role":"result","default":[]},
+    {"name":"StateClipResultRestorePoliciesV1","type":"String","container":"Array","role":"result","default":[]},
+    {"name":"StateClipResultPreviewAllowedV1","type":"Boolean","container":"Array","role":"result","default":[]},
+    {"name":"StateClipResultCodesV1","type":"String","container":"Array","role":"result","default":[]},
+    {"name":"StateClipResultTimeV1","type":"Real","container":"None","role":"result","default":0.0},
+    {"name":"StateClipResultValidV1","type":"Boolean","container":"None","role":"result-authority","default":false}
+  ],
+  "functions": [
+    {"name":"ResetStateClipEvaluationV1","stage":0},
+    {"name":"ValidateStateClipPlanV1","stage":1},
+    {"name":"CollectActiveStateClipsV1","stage":2},
+    {"name":"CommitStateClipEvaluationV1","stage":3},
+    {"name":"EvaluateStateClipsAtTimeV1","stage":4,"uses":["ResetStateClipEvaluationV1","ValidateStateClipPlanV1","CollectActiveStateClipsV1","CommitStateClipEvaluationV1"]}
+  ],
+  "localTestAdapter": {
+    "adapter":"local.state_test",
+    "version":1,
+    "scope":"local_cinematic",
+    "bindingType":"local_channel",
+    "states":["off","on","accent"],
+    "mutatesWorld":false,
+    "preview":"explicit scrub request only"
+  },
+  "architecture": {
+    "intervals":"Active State Clips use exact half-open intervals start <= time < end. Adjacent clips may replace state at one exact boundary; overlapping active intervals for the same binding/adapter/version are rejected.",
+    "absoluteTime":"Evaluation is a pure history-free absolute-time query. Negative and overshoot finite queries are valid empty results, and forward/reverse query order cannot change output.",
+    "leads":"Enter and exit lead seconds are bounded scheduling metadata and never expand the active interval. Enter lead cannot precede shot zero; exit lead cannot precede its own clip start.",
+    "preview":"Scrubbing always computes predicted state. A local preview action is allowed only for the closed local.state_test adapter when the clip policy and current query both explicitly request it.",
+    "atomicity":"Reset invalidates stage/result authority and clears only candidates. Collection builds a bounded aligned private snapshot. Commit replaces all nine result arrays and evaluated time only after complete preflight, then publishes result authority last.",
+    "ordering":"Compiled clips and active results use stable start-time, binding-ID, and Clip-ID order. A maximum of 32 simultaneously active clips bounds one evaluation.",
+    "downstream":"Target resolution, Event Anchors, door state reads, RPC execution, leases, conflict restoration, and Cue ledger mutation are deliberately downstream seams.",
+    "forbidden":"Transient actor pointers, transform-only authority, arbitrary classes or functions, reflection dispatch, CameraTransform, camera/body/gimbal authorship, repository mutation, shared-world mutation, HUD, polished UI, cook, deployment, and synchronized performance are absent."
+  },
+  "acceptance": {
+    "offline":"Reference tests cover empty plans, exact boundaries, adjacent replacement, simultaneous distinct targets, explicit scrub preview, overlap rejection, unsafe schema families, nonfinite queries, immutability, and 40 seeded history-free query schedules.",
+    "live":"Only after deterministic full/paste generators and independent interpreters are green may one editor install these five graphs. Warm runtime and player-owned PIE must prove exact boundaries, scrub preview isolation, no shared-world mutation, restoration, guarded shutdown, reverse sync, and cold load."
+  }
+}

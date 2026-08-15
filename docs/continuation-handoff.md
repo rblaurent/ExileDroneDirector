@@ -1883,6 +1883,26 @@ seconds. Next: build the playback runtime oracle and automatic player-owned PIE
 probe, including distinct body/gimbal reconstruction, fail-closed corruption,
 upstream immutability, and complete touched-default restoration.
 
+The complete playback live-acceptance harness is now frozen offline. A shared
+fixture compiles a linear cinematic position with an intentionally unrelated
+cinematic rotation, constant distinct body/gimbal tracks, a third independent
+carrier frame, and the canonical 13-channel camera assembly on one exact
+one-second timeline. The runtime probe covers negative/start, midpoint, and
+overshoot/completion queries, proves `body * relative == world_gimbal`, exact
+filmback and 13/5 array shape, compiled-source immutability, prior-snapshot
+preservation after source-authority corruption, and restoration of the union of
+all touched schema defaults.
+
+The automatic Slate-owned PIE probe stages compiled defaults before each of
+three real player-owned sessions, then calls only `ComposeCameraPlaybackFrameV1`
+on the spawned component. Mid-frame, complete-frame, and invalid-source cases
+all have explicit assertions; every PIE session ends and every default restores
+on success or exception. Static contracts compile all five tools, require the
+three scenarios and lifecycle, and forbid legacy `CameraTransform`. The final
+pre-editor complete scaffold passes in 160.1 seconds. Next: push this clean
+preparedness checkpoint, then perform the single-editor installation and live
+acceptance sequence for the seven exact graphs.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

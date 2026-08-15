@@ -1784,6 +1784,17 @@ events, and server state are structurally absent. The complete MVP-required
 scaffold passes in 157.9 seconds. Next: the tiny four-call
 accepted-source evaluator coordinator.
 
+`EvaluateCameraPlaybackSourcesV1` is now deterministic at 5 full / 4 paste
+nodes with 4 / 3 reciprocal links. Its only behavior is the exact ordered call
+chain: accepted cinematic pose, accepted distinct airframe prebake, accepted
+independent carrier frame, then accepted camera-channel assembly. It owns no
+variable, validation, branch, macro, reroute, fallback, or policy, and all four
+calls still execute when an injected earlier evaluator fails so each accepted
+helper retains its own fail-closed authority. Both forms regenerate byte-
+identically and pass exact call/link contracts. The complete MVP-required
+scaffold passes in 158.5 seconds. Next: validate the four result
+families and stage distinct operator inputs without reading cinematic rotation.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

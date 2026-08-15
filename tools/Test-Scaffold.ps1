@@ -204,6 +204,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraPlaybackFrameTimeStageContracts.py',
     'tools\blueprint\snippets\stage-camera-playback-evaluation-time-v1.eddgraph',
     'tools\blueprint\snippets\stage-camera-playback-evaluation-time-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraPlaybackFrameSourceEvaluatorGraph.py',
+    'tools\blueprint\Test-CameraPlaybackFrameSourceEvaluatorContracts.py',
+    'tools\blueprint\snippets\evaluate-camera-playback-sources-v1.eddgraph',
+    'tools\blueprint\snippets\evaluate-camera-playback-sources-v1-paste.eddgraph',
     'tools\blueprint\Build-CarrierFrameTransportResetGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportResetContracts.py',
     'tools\blueprint\snippets\reset-carrier-frame-transport-v1.eddgraph',
@@ -1684,6 +1688,37 @@ if ($LASTEXITCODE -ne 0) { throw "Camera playback-frame time-stage paste contrac
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
     --project-root $ProjectRoot --graph $cameraPlaybackTimePaste
 if ($LASTEXITCODE -ne 0) { throw "Camera playback-frame time-stage paste links failed with exit code $LASTEXITCODE." }
+$cameraPlaybackSources = Join-Path $cameraPlaybackRoot 'evaluate-camera-playback-sources-v1.eddgraph'
+$cameraPlaybackSourcesPaste = Join-Path $cameraPlaybackRoot 'evaluate-camera-playback-sources-v1-paste.eddgraph'
+$cameraPlaybackSourcesRepeat = Join-Path $cameraPlaybackRoot 'evaluate-camera-playback-sources-v1-repeat.eddgraph'
+$cameraPlaybackSourcesRepeatPaste = Join-Path $cameraPlaybackRoot 'evaluate-camera-playback-sources-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($cameraPlaybackSources, $cameraPlaybackSourcesPaste),
+    @($cameraPlaybackSourcesRepeat, $cameraPlaybackSourcesRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraPlaybackFrameSourceEvaluatorGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera playback source-evaluator generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraPlaybackSources, $cameraPlaybackSourcesRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-camera-playback-sources-v1.eddgraph')),
+    @($cameraPlaybackSourcesPaste, $cameraPlaybackSourcesRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-camera-playback-sources-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Camera playback source-evaluator regeneration diverged." }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraPlaybackFrameSourceEvaluatorContracts.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackSources
+if ($LASTEXITCODE -ne 0) { throw "Camera playback source-evaluator full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackSources
+if ($LASTEXITCODE -ne 0) { throw "Camera playback source-evaluator full links failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraPlaybackFrameSourceEvaluatorContracts.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackSourcesPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera playback source-evaluator paste contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackSourcesPaste
+if ($LASTEXITCODE -ne 0) { throw "Camera playback source-evaluator paste links failed with exit code $LASTEXITCODE." }
 $carrierFrameRoot = Join-Path $scratchRoot ("edd-carrier-frame-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $carrierFrameRoot -Force | Out-Null
 $carrierFrameReset = Join-Path $carrierFrameRoot 'reset-carrier-frame-transport-v1.eddgraph'

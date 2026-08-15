@@ -2015,6 +2015,12 @@ before any polished editor UI or cook is attempted:
    delta/operator/authorship/downstream state is absent. Both forms execute 80
    valid plus three invalid cases; the complete MVP-required scaffold passes in
    157.9 seconds. The four-call source coordinator is next.
+   `EvaluateCameraPlaybackSourcesV1` is now deterministic at 5 full / 4 paste
+   nodes and exactly calls cinematic pose, airframe prebake, carrier frame, and
+   camera channels in that order. It owns no state, branch, policy, reroute, or
+   alternate path; both forms pass exact call/link and injected-failure
+   contracts, and the complete MVP-required scaffold passes in 158.5 seconds.
+   Distinct operator staging is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

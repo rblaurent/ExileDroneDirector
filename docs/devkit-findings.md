@@ -5681,3 +5681,9 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   80 finite cases spanning negative/overshoot values and three non-finite
   failures while preserving prior query snapshots on rejection. The complete
   MVP-required scaffold passes in 157.9 seconds.
+- The source-evaluation coordinator is intentionally only four self-context
+  calls (5/4 full/paste nodes). It does not invent a combined validity flag or
+  short-circuit later evaluation when one helper fails. This keeps failure
+  ownership in each already-accepted evaluator and lets the following staging
+  boundary make one explicit atomic decision across all four results. The
+  complete MVP-required scaffold passes in 158.5 seconds.

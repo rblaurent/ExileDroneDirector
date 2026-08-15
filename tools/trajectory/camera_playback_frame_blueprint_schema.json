@@ -1,0 +1,61 @@
+{
+  "schema": "edd.camera-playback-frame.v1",
+  "version": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Compose one complete local playback frame from accepted absolute-time evaluators while preserving separate body, gimbal, and carrier ownership.",
+  "variables": [
+    {"name":"CameraPlaybackInputElapsedSecondsV1","type":"Float","container":"None","role":"input","default":0.0},
+    {"name":"CameraPlaybackInputDeltaSecondsV1","type":"Float","container":"None","role":"input","default":0.016666666666666666},
+    {"name":"CameraPlaybackInputRequestedModeV1","type":"String","container":"None","role":"input","default":"directed"},
+    {"name":"CameraPlaybackInputTranslationV1","type":"Vector","container":"None","role":"input","default":[0.0,0.0,0.0]},
+    {"name":"CameraPlaybackInputLookV1","type":"Vector","container":"None","role":"input","default":[0.0,0.0,0.0]},
+    {"name":"CameraPlaybackInputRecenterRequestedV1","type":"Boolean","container":"None","role":"input","default":false},
+    {"name":"CameraPlaybackInputReturnToDirectedRequestedV1","type":"Boolean","container":"None","role":"input","default":false},
+    {"name":"CameraPlaybackInputProceduralTranslationOffsetV1","type":"Vector","container":"None","role":"input","default":[0.0,0.0,0.0]},
+    {"name":"CameraPlaybackInputProceduralRotationOffsetV1","type":"Quat","container":"None","role":"input","default":[0.0,0.0,0.0,1.0]},
+    {"name":"CameraPlaybackStageValidV1","type":"Boolean","container":"None","role":"stage","default":false},
+    {"name":"CameraPlaybackSourcesValidV1","type":"Boolean","container":"None","role":"stage","default":false},
+    {"name":"CameraPlaybackOperatorStageValidV1","type":"Boolean","container":"None","role":"stage","default":false},
+    {"name":"CameraPlaybackComfortStageValidV1","type":"Boolean","container":"None","role":"stage","default":false},
+    {"name":"CameraPlaybackResultPositionV1","type":"Vector","container":"None","role":"result","default":[0.0,0.0,0.0]},
+    {"name":"CameraPlaybackResultBodyWorldQuatV1","type":"Quat","container":"None","role":"result","default":[0.0,0.0,0.0,1.0]},
+    {"name":"CameraPlaybackResultGimbalWorldQuatV1","type":"Quat","container":"None","role":"result","default":[0.0,0.0,0.0,1.0]},
+    {"name":"CameraPlaybackResultGimbalRelativeQuatV1","type":"Quat","container":"None","role":"result","default":[0.0,0.0,0.0,1.0]},
+    {"name":"CameraPlaybackResultFilmbackPresetIdV1","type":"String","container":"None","role":"result","default":""},
+    {"name":"CameraPlaybackResultFilmbackSensorWidthMmV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"CameraPlaybackResultFilmbackSensorHeightMmV1","type":"Float","container":"None","role":"result","default":0.0},
+    {"name":"CameraPlaybackResultChannelValuesV1","type":"Float","container":"Array","role":"result"},
+    {"name":"CameraPlaybackResultCompleteV1","type":"Boolean","container":"None","role":"result","default":false},
+    {"name":"CameraPlaybackResultModeV1","type":"String","container":"None","role":"result","default":"directed"},
+    {"name":"CameraPlaybackResultOverrideActiveV1","type":"Boolean","container":"None","role":"result","default":false},
+    {"name":"CameraPlaybackResultTransitionActiveV1","type":"Boolean","container":"None","role":"result","default":false},
+    {"name":"CameraPlaybackResultTetherAppliedV1","type":"Boolean","container":"None","role":"result","default":false},
+    {"name":"CameraPlaybackResultComfortEffectiveWeightsV1","type":"Float","container":"Array","role":"result"},
+    {"name":"CameraPlaybackResultComfortAppliedV1","type":"Boolean","container":"None","role":"result","default":false},
+    {"name":"CameraPlaybackResultValidV1","type":"Boolean","container":"None","role":"result","default":false},
+    {"name":"CameraPlaybackFailureCodeV1","type":"String","container":"None","role":"diagnostic","default":""}
+  ],
+  "functions": [
+    {"name":"ResetCameraPlaybackFrameV1","stage":0},
+    {"name":"StageCameraPlaybackEvaluationTimeV1","stage":1,"writes":["CinematicPoseInputElapsedSecondsV1","AirframePrebakeInputElapsedSecondsV1","CarrierFrameInputElapsedSecondsV1","CameraChannelQueryTimeV1"]},
+    {"name":"EvaluateCameraPlaybackSourcesV1","stage":2,"uses":["EvaluateCompiledCinematicPoseV1","EvaluateCompiledAirframePrebakeV1","EvaluateCompiledCarrierFrameTransportV1","EvaluateCameraChannelAssemblyV1"]},
+    {"name":"StageCameraOperatorFromPlaybackV1","stage":3,"usesPosition":"CinematicPoseResultPositionV1","usesBody":"AirframePrebakeResultBodyQuatV1","usesGimbal":"AirframePrebakeResultGimbalQuatV1","usesCarrier":"CarrierFrameResultQuatV1"},
+    {"name":"StageCameraComfortFromPlaybackV1","stage":4,"usesPosition":"CameraOperatorResultPositionV1","usesGimbal":"CameraOperatorResultGimbalQuatV1","usesChannels":"CameraChannelResultValuesV1"},
+    {"name":"CommitCameraPlaybackFrameV1","stage":5},
+    {"name":"ComposeCameraPlaybackFrameV1","stage":6,"uses":["ResetCameraPlaybackFrameV1","StageCameraPlaybackEvaluationTimeV1","EvaluateCameraPlaybackSourcesV1","StageCameraOperatorFromPlaybackV1","ApplyCameraOperatorOverrideV1","StageCameraComfortFromPlaybackV1","ApplyCameraViewerComfortV1","CommitCameraPlaybackFrameV1"]}
+  ],
+  "architecture": {
+    "timeline": "All four accepted compiled families must expose the exact same positive total duration. One finite absolute elapsed time is copied to all four evaluator inputs before evaluation; delta seconds is used only by the viewer-local operator state machine.",
+    "authorship": "CinematicPoseResultPositionV1 supplies position only. AirframePrebakeResultBodyQuatV1 and AirframePrebakeResultGimbalQuatV1 remain distinct world-space authorship. CinematicPoseResultQuatV1 and the legacy CameraTransform rotation are forbidden sources.",
+    "carrier": "CarrierFrameResultQuatV1 feeds only CameraOperatorInputCarrierFrameQuatV1. It cannot replace, initialize, or modify body or gimbal rotation.",
+    "componentModel": "The final body quaternion is an actor world rotation. The final comfort-adjusted gimbal is a camera world rotation. inverse(body) * gimbal is published separately as the CineCameraComponent relative rotation, and body * relative must reconstruct the world gimbal.",
+    "stack": "Accepted sources feed operator override first; procedural motion and viewer comfort follow; comfort-adjusted channel values and discrete filmback then form the final local playback snapshot.",
+    "nativeApplication": "This schema publishes a complete final frame but performs no native actor, component, lens, focus, post-process, possession, input, HUD, repository, event, or server mutation. Native transactional application is a downstream boundary."
+  },
+  "contracts": {
+    "atomicity": "Reset invalidates playback authority first while preserving the prior result snapshot. Commit publishes all pose, filmback, channel, operator, and comfort fields before CameraPlaybackResultValidV1 is written last.",
+    "completion": "Cinematic pose, airframe prebake, carrier frame, and camera channel evaluators must agree exactly on completion for the common absolute query.",
+    "failure": "Invalid time, divergent timelines, invalid source evaluation, operator failure, comfort failure, non-unit final quaternions, or failed relative reconstruction leaves playback validity false and cannot partially replace the prior result snapshot.",
+    "ownership": "Playback composition may write only its own state, the four accepted evaluator query inputs, CameraOperatorInput* staging fields, and CameraComfortInput* staging fields. It cannot mutate compiled tracks, authored body/gimbal, operator policy/state directly, comfort preferences, native camera state, Flypaths, repositories, events, Cue ledgers, State Clips, or server state."
+  }
+}

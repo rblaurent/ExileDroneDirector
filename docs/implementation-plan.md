@@ -1989,10 +1989,19 @@ before any polished editor UI or cook is attempted:
    reverse sync, all-17 mirror equality, fresh zero-error cold compilation, and
    the complete 160.5-second scaffold pass. Live/mirror Client Director SHA-256
    is `96CE3CA0E16B35C285EBDD858E439FAAF0BCFF2623CD92A4E4B94C16F72F90AB`.
-   Next freeze the playback-frame integration boundary that evaluates this
-   independent carrier track and feeds only `CameraOperatorInputCarrierFrameQuatV1`;
-   authored body and gimbal remain distinct. Bounded event adapters and the
-   debug surface follow before attended keyboard dogfood.
+   The playback-frame integration boundary is now frozen offline at reference
+   and schema level. One absolute query evaluates cinematic position, distinct
+   prebaked body/gimbal, independent carrier, and all camera channels before
+   operator override and viewer comfort. The final actor body, camera world
+   gimbal, and `inverse(body) * gimbal` component-relative rotation remain three
+   explicit outputs; `CinematicPoseResultQuatV1` and legacy `CameraTransform`
+   rotation are forbidden authorship sources. Seven executable reference tests
+   and six schema tests freeze 30 variables, seven functions, exact evaluator
+   and coordinator order, fail-closed atomicity, and native-application
+   separation; the complete MVP-required scaffold passes in 157.8 seconds.
+   Deterministic graphs/interpreters are next, followed by the
+   downstream native pose application boundary. Bounded event adapters and the
+   debug surface still precede attended keyboard dogfood.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

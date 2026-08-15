@@ -192,6 +192,10 @@ $requiredFiles = @(
     'tools\trajectory\test_carrier_frame_transport_reference.py',
     'tools\trajectory\carrier_frame_transport_blueprint_schema.json',
     'tools\trajectory\test_carrier_frame_transport_blueprint_schema.py',
+    'tools\trajectory\camera_playback_frame_reference.py',
+    'tools\trajectory\test_camera_playback_frame_reference.py',
+    'tools\trajectory\camera_playback_frame_blueprint_schema.json',
+    'tools\trajectory\test_camera_playback_frame_blueprint_schema.py',
     'tools\blueprint\Build-CarrierFrameTransportResetGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportResetContracts.py',
     'tools\blueprint\snippets\reset-carrier-frame-transport-v1.eddgraph',
@@ -1599,6 +1603,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_carrier_frame_transport_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Carrier-frame transport Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_playback_frame_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera playback-frame reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_playback_frame_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera playback-frame Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 $carrierFrameRoot = Join-Path $scratchRoot ("edd-carrier-frame-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $carrierFrameRoot -Force | Out-Null

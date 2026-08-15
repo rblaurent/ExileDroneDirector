@@ -1739,11 +1739,26 @@ process loads all nine core assets and compiles all six Blueprints with zero
 errors. The complete MVP-required scaffold, including deterministic regeneration
 and all eight live topologies, passes in 160.5 seconds.
 
-Next: continue ordered task 10 offline by freezing the playback-frame integration
-boundary that evaluates this third carrier track and feeds only
-`CameraOperatorInputCarrierFrameQuatV1` while body and gimbal keep their own
-authored paths. Then continue into the remaining bounded event adapters and
-debug surface before keyboard dogfood; no polished UI starts before dogfood.
+The next playback-frame boundary is now frozen at reference/schema level. It
+evaluates cinematic position, distinct airframe body/gimbal, independent carrier,
+and all camera channels at one exact absolute time; applies operator override;
+then applies procedural motion and viewer comfort. The final frame publishes
+body world rotation, gimbal world rotation, and a separately derived camera-
+component relative rotation `inverse(body) * gimbal`. Recomposition is required
+to reproduce the world gimbal. `CinematicPoseResultQuatV1` and the legacy
+`CameraTransform` rotation are explicit forbidden authorship sources.
+
+Seven executable reference tests cover distinct authorship, carrier-only
+translation, comfort ordering, absolute boundaries, five fail-closed families,
+40 seeded forward/reverse queries, and compiled-source immutability. Six schema
+tests freeze 30 variables, seven functions, the exact four-evaluator call order,
+the eight-call top-level composition order, atomic publication, and native-
+application separation. Both focused suites and the complete MVP-required
+scaffold pass; the complete run took 157.8 seconds. Next: generate the seven
+deterministic full/paste graphs with executable interpreters in schema order,
+then prepare the downstream native actor/component application boundary before
+opening one editor. Bounded event adapters and the debug surface follow before
+keyboard dogfood; no polished UI starts before dogfood.
 
 ## Critical design mismatch
 

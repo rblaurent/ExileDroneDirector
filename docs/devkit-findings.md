@@ -5644,3 +5644,25 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   `96CE3CA0E16B35C285EBDD858E439FAAF0BCFF2623CD92A4E4B94C16F72F90AB`.
   A separate cold process loads all nine core assets and compiles all six
   Blueprints with zero errors; the complete scaffold passes in 160.5 seconds.
+
+## Playback-frame integration freezes separate actor and camera rotations
+
+- `BP_EDD_DroneCamera` is a Spectator Pawn with one Cine Camera component. The
+  accepted airframe gimbal result is a world-space final camera orientation,
+  not a body-relative rotation. Applying the same quaternion to the actor and
+  component would therefore alias authorship and produce the wrong view.
+- The frozen boundary keeps the operator's body result as the actor world
+  rotation, keeps the comfort-adjusted gimbal as the camera world rotation, and
+  derives `inverse(body) * gimbal` as the Cine Camera component's relative
+  rotation. Contracts require `body * relative` to reconstruct the world
+  gimbal within the existing unit-quaternion tolerance.
+- Cinematic pose contributes position only. Its legacy single orientation is
+  still evaluated as part of the accepted atomic pose helper but is never read
+  as body or gimbal input. The carrier result feeds only the operator carrier
+  input and cannot initialize either authored rotation track.
+- The reference executes the complete source -> operator -> procedural/comfort
+  stack across boundaries, failure families, and 40 forward/reverse queries.
+  The schema deliberately stops before native mutation; deterministic graph
+  generation and a separately transactional actor/component application seam
+  must pass offline before a single editor session begins. The complete
+  MVP-required scaffold passes in 157.8 seconds at this checkpoint.

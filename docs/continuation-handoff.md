@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after carrier-frame reference/schema freeze
+Last updated: 2026-08-15 after carrier-frame reset checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the independent twist-minimizing carrier-frame
-  reference/schema described below; after the checkpoint push, HEAD must equal
-  `origin/main` before deterministic Blueprint graph work starts
+- Current checkpoint is the deterministic carrier-frame reset described below;
+  after the checkpoint push, HEAD must equal `origin/main` before upstream
+  staging graph work starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1510,6 +1510,24 @@ The complete scaffold owns both packages and passes in 145.3 seconds. Next:
 build the deterministic reset, upstream-stage, validation, tangent, transport,
 atomic-commit, compile coordinator, and evaluator graphs in that order while
 Unreal remains closed.
+
+`ResetCarrierFrameTransportV1` is now deterministic at 25 full / 24 paste
+nodes with 24 / 23 reciprocal links. Its execution chain invalidates compiled
+authority first, invalidates evaluation authority second, and clears stage
+validity before touching four private candidate/compiled arrays. It then resets
+only compiled timing, evaluation results, diagnostics, and scratch basis state.
+The staged path positions, total/fixed-step schedule, and absolute elapsed-time
+query are structurally absent and proven object-identical after execution.
+Authored body/gimbal fields, `CameraTransform`, camera-operator state, playback
+time, events, repositories, and server state are forbidden.
+
+Both forms execute from exported reciprocal links against poisoned state, match
+all exact defaults including native Vector/Quat spellings, and regenerate
+byte-identically. The complete MVP-required scaffold owns the generator,
+interpreter, and both checked-in snippets and passes in 142.5 seconds with
+Unreal closed. Next: deterministically stage only the accepted desired-stream
+positions and schedule, with explicit `source_invalid` failure and no body or
+gimbal dependency.
 
 ## Critical design mismatch
 

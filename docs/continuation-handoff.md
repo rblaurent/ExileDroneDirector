@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after live native playback-application acceptance
+Last updated: 2026-08-15 after bounded event-adapter reference/schema freeze
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,11 +23,10 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the complete live-accepted seven-graph native playback-
-  application boundary described below. It maps an accepted composed frame onto
-  the player-owned actor/component pair, preserves genuinely distinct body and
-  gimbal authorship, and restores all touched native/engine state exactly.
-  Unreal remains closed.
+- Current checkpoint is the first bounded event-adapter boundary frozen offline
+  at executable reference and Blueprint-schema level, downstream of the complete
+  live-accepted seven-graph native playback-application boundary. Unreal remains
+  closed; no event graph has been installed or executed yet.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -2213,11 +2212,37 @@ editor shutdown completed normally, reverse sync copied only
 A fresh NullRHI process then loaded all nine core assets and compiled all six
 Blueprints with zero errors and `EDD_COLD_LOAD|RESULT|PASS`.
 
-Next: begin the documented bounded event-adapter seam offline with explicit
-reference behavior, Blueprint schema, deterministic generators, interpreters,
-and scaffold ownership. Only after its complete offline family is green should
-one editor be opened for live acceptance. Continue through temporary debug
-controls and full keyboard dogfood before starting polished UI.
+The first bounded event-adapter seam is now frozen offline at executable
+reference and Blueprint-schema level. It covers real-playback Cue crossings,
+not State Clips or arbitrary world mutation. Forward and reverse interval rules
+are exact, skipped frames collect every crossed Cue in deterministic time/Event-
+ID order, and scrubbing is an exact no-dispatch path that never authorizes an
+operation or changes the execution ledger.
+
+The closed five-operation capability manifest currently represents local
+subtitle and recording-marker Cues, read-only `Wait Until Open`, viewer-authorized
+normal door interaction, and a default-disabled server-world door lease. Non-
+local requests require immutable revision/session identity, an enabled binding
+reauthorized after cloning, exact adapter/version and region, a resolved target,
+bounded range, named permission, positive rate budget, and explicit server-world
+policy/revision approval where applicable. No serialized class name, function
+name, transient actor pointer, reflection fallback, or camera authorship can
+cross this boundary.
+
+The immutable execution ledger is keyed by Event ID, loop, and direction.
+Once-per-session and manual-reset Cues remain disarmed across loops; every-loop
+Cues may execute once per loop/direction. Authorization alone never records
+success: only an accepted bounded-adapter result can publish a ledger entry.
+Eight executable reference tests and five exact schema tests pass, and the
+complete MVP-required regression passes with 2,345 output lines in 175.3
+seconds. Unreal remains closed.
+
+Next: implement deterministic full/paste generators, independent interpreters,
+exact graph contracts, and scaffold ownership for this event family. Only after
+the complete offline family is green should one editor be opened for live
+acceptance. State Clips, target resolution/anchor work, and mutating server
+adapters remain later bounded seams before temporary debug controls and full
+keyboard dogfood. Polished UI starts only after dogfood.
 
 ## Critical design mismatch
 

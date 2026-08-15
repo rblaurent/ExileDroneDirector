@@ -200,6 +200,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_playback_native_application_reference.py',
     'tools\trajectory\camera_playback_native_application_blueprint_schema.json',
     'tools\trajectory\test_camera_playback_native_application_blueprint_schema.py',
+    'tools\events\bounded_event_adapter_reference.py',
+    'tools\events\test_bounded_event_adapter_reference.py',
+    'tools\events\bounded_event_adapter_blueprint_schema.json',
+    'tools\events\test_bounded_event_adapter_blueprint_schema.py',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1.eddgraph',
@@ -1705,6 +1709,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_playback_native_application_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera playback native-application Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\events\test_bounded_event_adapter_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Bounded event-adapter reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\events\test_bounded_event_adapter_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Bounded event-adapter Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 $cameraPlaybackRoot = Join-Path $scratchRoot ("edd-camera-playback-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraPlaybackRoot -Force | Out-Null

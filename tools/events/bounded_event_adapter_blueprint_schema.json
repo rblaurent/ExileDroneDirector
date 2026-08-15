@@ -1,0 +1,88 @@
+{
+  "schema": "edd.bounded-event-adapter.v1",
+  "version": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Deterministically collect real-playback Cue crossings and authorize only manifest-registered local or target-bound operations without exposing arbitrary actor classes or Blueprint functions.",
+  "dependencies": {
+    "eventArchitecture": "docs/event-system.md",
+    "immutablePlaybackRevision": "FetchPublishedRevisionV1",
+    "nativePlayback": "edd.camera-playback-native-application.v1"
+  },
+  "limits": {
+    "maximumCues": 256,
+    "maximumPayloadBytes": 1024,
+    "maximumLedgerEntries": 1024,
+    "maximumCrossingsPerFrame": 32
+  },
+  "variables": [
+    {"name":"EventCueIdsV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCueTimesV1","type":"Real","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCueAdapterIdsV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCueAdapterVersionsV1","type":"Integer","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCueOperationIdsV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCueScopesV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCuePayloadsV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCueDirectionPoliciesV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCueRepeatPoliciesV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCueFailurePoliciesV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCueBindingIdsV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCueBindingRegionsV1","type":"String","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCueBindingEnabledV1","type":"Boolean","container":"Array","role":"compiled","default":[]},
+    {"name":"EventCuePlanValidV1","type":"Boolean","container":"None","role":"compiled-authority","default":false},
+
+    {"name":"EventFlypathIdV1","type":"String","container":"None","role":"session","default":""},
+    {"name":"EventImmutableRevisionV1","type":"Integer","container":"None","role":"session","default":0},
+    {"name":"EventRequestedRevisionV1","type":"Integer","container":"None","role":"session","default":0},
+    {"name":"EventSessionIdV1","type":"String","container":"None","role":"session","default":""},
+    {"name":"EventSessionTokenV1","type":"String","container":"None","role":"session","default":""},
+    {"name":"EventRequesterIdV1","type":"String","container":"None","role":"session","default":""},
+    {"name":"EventPlaybackStartedV1","type":"Boolean","container":"None","role":"query","default":false},
+    {"name":"EventScrubbingV1","type":"Boolean","container":"None","role":"query","default":false},
+    {"name":"EventPreviousTimeV1","type":"Real","container":"None","role":"query","default":0.0},
+    {"name":"EventCurrentTimeV1","type":"Real","container":"None","role":"query","default":0.0},
+    {"name":"EventLoopIterationV1","type":"Integer","container":"None","role":"query","default":0},
+    {"name":"EventDirectionV1","type":"Integer","container":"None","role":"query","default":1},
+    {"name":"EventRegionIdV1","type":"String","container":"None","role":"authorization","default":""},
+    {"name":"EventRemainingRateBudgetV1","type":"Integer","container":"None","role":"authorization","default":0},
+    {"name":"EventServerWorldEnabledV1","type":"Boolean","container":"None","role":"authorization","default":false},
+    {"name":"EventServerRevisionApprovedV1","type":"Boolean","container":"None","role":"authorization","default":false},
+
+    {"name":"EventCrossedIndicesV1","type":"Integer","container":"Array","role":"scratch","default":[]},
+    {"name":"EventLedgerIdsV1","type":"String","container":"Array","role":"ledger","default":[]},
+    {"name":"EventLedgerLoopsV1","type":"Integer","container":"Array","role":"ledger","default":[]},
+    {"name":"EventLedgerDirectionsV1","type":"Integer","container":"Array","role":"ledger","default":[]},
+    {"name":"EventDispatchIndexV1","type":"Integer","container":"None","role":"result","default":-1},
+    {"name":"EventDispatchAuthorizedV1","type":"Boolean","container":"None","role":"result","default":false},
+    {"name":"EventDispatchCodeV1","type":"String","container":"None","role":"result","default":""},
+    {"name":"EventDispatchResultValidV1","type":"Boolean","container":"None","role":"result-authority","default":false}
+  ],
+  "functions": [
+    {"name":"ResetBoundedEventDispatchResultV1","stage":0},
+    {"name":"ValidateBoundedEventPlanV1","stage":1},
+    {"name":"CollectCrossedCuesV1","stage":2},
+    {"name":"AuthorizeCrossedCueV1","stage":3},
+    {"name":"CommitCueExecutionLedgerV1","stage":4},
+    {"name":"ResetManualCueLedgerEntryV1","stage":5},
+    {"name":"DispatchBoundedPlaybackEventsV1","stage":6,"uses":["ResetBoundedEventDispatchResultV1","ValidateBoundedEventPlanV1","CollectCrossedCuesV1","AuthorizeCrossedCueV1"]}
+  ],
+  "manifest": [
+    {"adapter":"local.presentation","version":1,"operation":"subtitle","scope":"local_cinematic","target":false,"mutatesWorld":false,"maximumPayloadBytes":240},
+    {"adapter":"local.recording","version":1,"operation":"marker","scope":"local_cinematic","target":false,"mutatesWorld":false,"maximumPayloadBytes":96},
+    {"adapter":"door","version":1,"operation":"wait_until_open","scope":"viewer_interaction","target":true,"mutatesWorld":false,"permission":"door.observe","maximumRange":5000.0},
+    {"adapter":"door","version":1,"operation":"request_normal_interaction","scope":"viewer_interaction","target":true,"mutatesWorld":true,"permission":"door.interact","maximumRange":250.0},
+    {"adapter":"door","version":1,"operation":"cinematic_state_lease","scope":"server_world","target":true,"mutatesWorld":true,"permission":"door.lease.admin","maximumRange":250.0,"enabledByDefault":false}
+  ],
+  "architecture": {
+    "crossing": "Only a started real-playback session can dispatch. Forward uses previous < cue <= current; reverse uses current <= cue < previous. Frame drops collect every crossing in deterministic time/event-ID order.",
+    "scrubbing": "Scrubbing is an exact no-dispatch path. It neither authorizes an operation nor mutates the execution ledger.",
+    "identity": "Flypath ID, immutable published revision, requested revision, session ID, requester ID, and non-local session token are explicit inputs. A revision mismatch fails the complete batch closed.",
+    "authorization": "Non-local operations require an enabled post-clone binding, exact adapter/version and region, resolved target, bounded range, named permission, positive rate budget, and policy approval for Server World scope.",
+    "ledger": "Execution authority is keyed by Event ID, loop iteration, and direction. Once-per-session and manual-reset Cues remain disarmed across loops; every-loop Cues may execute once per loop and direction. Only adapter success commits an entry.",
+    "failure": "Authorization returns stable typed rejection codes. It cannot execute a fallback operation, replace a binding, or claim ledger success.",
+    "forbidden": "Arbitrary actor pointers, class names, function names, reflection dispatch, CameraTransform, camera/body/gimbal authorship, native camera mutation, repository mutation, HUD, polished UI, cooking, deployment, and synchronized performance are absent."
+  },
+  "acceptance": {
+    "offline": "Executable reference tests cover deterministic skipped-frame crossings, reverse order, scrub isolation, repeat policies, manifest tampering, revision/session/binding/region/range/permission/rate failures, default-disabled Server World scope, and success-only ledger publication.",
+    "live": "Deterministic full/paste graphs and independent interpreters must match the reference before one-editor configuration. Warm runtime and player-owned PIE must prove local dispatch, typed remote rejection, scrub zero-dispatch, loop/reverse behavior, cancellation cleanup, exact defaults, guarded shutdown, reverse sync, and cold load."
+  }
+}

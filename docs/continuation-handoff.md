@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after bounded Cue authorization
+Last updated: 2026-08-15 after success-only bounded Cue ledger commit
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,8 +23,8 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is fail-closed Cue authorization against the exact bounded
-  capability manifest in the offline event-adapter family, downstream of the complete
+- Current checkpoint is atomic success-receipt-gated Cue ledger publication in
+  the offline event-adapter family, downstream of the complete
   live-accepted seven-graph native playback-application boundary. Unreal remains
   closed; no event graph has been installed or executed yet.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
@@ -2330,6 +2330,30 @@ Unreal remains closed. Next: require a successful bounded-adapter execution
 receipt before committing the exact Event ID/loop/direction ledger entry, then
 implement manual ledger reset and the tiny policy-free coordinator. Open one
 editor only after that complete offline family is green.
+
+`CommitCueExecutionLedgerV1` is deterministic at 93 full / 92 paste nodes with
+123 / 122 reciprocal links. Authorization cannot masquerade as execution: the
+graph requires fresh authorization authority plus a fresh bounded-adapter
+receipt whose success flag is true and whose exact code is `executed` or
+`state_satisfied`. It also rechecks selected identity, loop/direction context,
+the three-channel ledger shape, duplicate identity, and the 1,024-entry cap.
+
+A new entry is first copied and appended across three private candidate arrays.
+All three append indices must equal the prior authoritative length before the
+three public Event ID/loop/direction arrays are published and commit authority
+is set last. Every rejection preserves authoritative ledger identity. An exact
+duplicate receipt is an idempotent accepted result without another append. The
+strengthened dispatch reset is now 13 full / 12 paste nodes and clears receipt
+and commit authority every frame while preserving the accepted ledger.
+
+Both forms regenerate byte-identically and pass exact link/ownership contracts,
+13 typed rejection families, both success receipts, idempotent retry, and 100
+seeded aligned commits through an independent interpreter. The complete MVP-
+required regression passes with 2,370 captured output lines in 174.5 seconds;
+Unreal remains closed. Next: implement explicit manual-reset Cue re-arming with
+the same aligned candidate/publication discipline, then the tiny policy-free
+dispatcher coordinator. Only after the whole offline family is green should one
+editor be opened for live acceptance.
 
 ## Critical design mismatch
 

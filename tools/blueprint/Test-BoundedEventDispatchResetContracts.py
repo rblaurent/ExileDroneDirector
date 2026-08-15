@@ -13,7 +13,11 @@ DEFAULTS = {
     "EventPlanValidationValidV1": "false",
     "EventCrossingCollectionValidV1": "false",
     "EventSelectionValidV1": "false",
+    "EventLedgerCommitValidV1": "false",
     "EventCandidateAlreadyExecutedV1": "false",
+    "EventAdapterExecutionResultValidV1": "false",
+    "EventAdapterExecutionSucceededV1": "false",
+    "EventAdapterExecutionCodeV1": "",
     "EventDispatchResultValidV1": "false",
     "EventDispatchAuthorizedV1": "false",
     "EventDispatchIndexV1": "-1",
@@ -62,14 +66,14 @@ def main() -> None:
     args = parser.parse_args()
     contracts = load(args.project_root / "tools/blueprint/Test-WaypointCaptureContracts.py")
     nodes = contracts.parse_graph(args.graph)
-    contracts.require(len(nodes) == (8 if args.paste else 9), f"node count {len(nodes)}")
+    contracts.require(len(nodes) == (12 if args.paste else 13), f"node count {len(nodes)}")
     entries = [node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class]
     contracts.require(len(entries) == (0 if args.paste else 1), "entry count")
     setters = sorted(
         (node for node in nodes.values() if "K2Node_VariableSet" in node.node_class),
         key=lambda node: int(node.name.rsplit("_", 1)[1]),
     )
-    contracts.require(len(setters) == 8, "exact setter count")
+    contracts.require(len(setters) == 12, "exact setter count")
     contracts.require({member(node) for node in setters} == set(DEFAULTS), "exact reset ownership")
     if args.paste:
         contracts.require(not setters[0].pins["execute"].links, "paste execution root")

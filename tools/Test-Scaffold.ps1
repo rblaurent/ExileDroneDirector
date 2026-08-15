@@ -224,6 +224,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-BoundedEventAuthorizationContracts.py',
     'tools\blueprint\snippets\authorize-selected-cue-v1.eddgraph',
     'tools\blueprint\snippets\authorize-selected-cue-v1-paste.eddgraph',
+    'tools\blueprint\Build-BoundedEventLedgerCommitGraph.py',
+    'tools\blueprint\Test-BoundedEventLedgerCommitContracts.py',
+    'tools\blueprint\snippets\commit-cue-execution-ledger-v1.eddgraph',
+    'tools\blueprint\snippets\commit-cue-execution-ledger-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1.eddgraph',
@@ -1894,6 +1898,37 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventAuthorizationContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Bounded event authorization contracts failed with exit code $LASTEXITCODE." }
+}
+$boundedEventLedgerCommit = Join-Path $boundedEventRoot 'commit-cue-execution-ledger-v1.eddgraph'
+$boundedEventLedgerCommitPaste = Join-Path $boundedEventRoot 'commit-cue-execution-ledger-v1-paste.eddgraph'
+$boundedEventLedgerCommitRepeat = Join-Path $boundedEventRoot 'commit-cue-execution-ledger-v1-repeat.eddgraph'
+$boundedEventLedgerCommitRepeatPaste = Join-Path $boundedEventRoot 'commit-cue-execution-ledger-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($boundedEventLedgerCommit, $boundedEventLedgerCommitPaste),
+    @($boundedEventLedgerCommitRepeat, $boundedEventLedgerCommitRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-BoundedEventLedgerCommitGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event ledger commit generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($boundedEventLedgerCommit, $boundedEventLedgerCommitRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\commit-cue-execution-ledger-v1.eddgraph')),
+    @($boundedEventLedgerCommitPaste, $boundedEventLedgerCommitRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\commit-cue-execution-ledger-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Bounded event ledger commit regeneration diverged." }
+}
+foreach ($graphCase in @(
+    @($boundedEventLedgerCommit, $false),
+    @($boundedEventLedgerCommitPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event ledger commit link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventLedgerCommitContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event ledger commit contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraPlaybackRoot = Join-Path $scratchRoot ("edd-camera-playback-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraPlaybackRoot -Force | Out-Null

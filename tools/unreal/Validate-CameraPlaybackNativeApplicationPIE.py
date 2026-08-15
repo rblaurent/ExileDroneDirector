@@ -1,9 +1,9 @@
 """Automatic player-owned PIE acceptance for playback-native application."""
 from __future__ import annotations
-import sys,time,traceback
+import importlib,sys,time,traceback
 from pathlib import Path
 import unreal
-ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT/"tools/unreal"));import camera_playback_native_application_acceptance_common as common
+ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT/"tools/unreal"));import camera_playback_native_application_acceptance_common as common;common=importlib.reload(common)
 PREFIX="EDD_CAMERA_PLAYBACK_NATIVE_PIE";SOURCE="/Game/Dev/AlmostEmpty";WORLD="/Game/Dev/UEDPIE_0_AlmostEmpty.AlmostEmpty";DIRECTOR_CLASS="/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector_C";TIMEOUT=120.;SCENARIOS=("success","engine_rollback","pose_rejection")
 def emit(label,value):unreal.log(f"{PREFIX}|{label}|{value}")
 def require(value,message):
@@ -32,6 +32,7 @@ def checks(index):
  obj.call_method("EnterDroneMode");actor,component=camera(obj);baseline_pose=pose(actor,component);baseline_engine=engine(component);source=common.snapshot(obj,tuple(name for name in common.NAMES if name.startswith("CameraPlaybackResult")))
  obj.call_method("ApplyComposedCameraPlaybackFrameV1")
  if scenario=="success":
+  emit("SUCCESS_DIAGNOSTIC",f"native_result={bool(common.get(obj,'CameraPlaybackNativeResultValidV1'))}|native_failure={common.get(obj,'CameraPlaybackNativeFailureCodeV1')}|native_count={int(common.get(obj,'CameraPlaybackNativeAppliedFrameCountV1'))}|native_preflight={bool(common.get(obj,'CameraPlaybackNativePreflightValidV1'))}|native_session={bool(common.get(obj,'CameraPlaybackNativeSessionActiveV1'))}|engine_stage={bool(common.get(obj,'CameraApplyScratchStageValidV1'))}|engine_session={bool(common.get(obj,'CameraApplySessionActiveV1'))}|engine_result={bool(common.get(obj,'CameraApplyResultValidV1'))}|engine_failure={common.get(obj,'CameraApplyFailureCodeV1')}|engine_count={int(common.get(obj,'CameraApplyAppliedFrameCountV1'))}|input_body={common.norm(common.get(obj,'CameraPlaybackNativeInputBodyWorldQuatV1'))}|source_body={common.norm(common.get(obj,'CameraPlaybackResultBodyWorldQuatV1'))}|input_relative={common.norm(common.get(obj,'CameraPlaybackNativeInputGimbalRelativeQuatV1'))}|source_relative={common.norm(common.get(obj,'CameraPlaybackResultGimbalRelativeQuatV1'))}")
   require(bool(common.get(obj,"CameraPlaybackNativeResultValidV1")),f"success:{common.get(obj,'CameraPlaybackNativeFailureCodeV1')}");require(bool(common.get(obj,"CameraPlaybackNativeSessionActiveV1")),"success-session");require(int(common.get(obj,"CameraPlaybackNativeAppliedFrameCountV1"))==1,"count-1");assert_success_pose(actor,component,baseline_pose);assert_engine(component)
   captured=(common.norm(common.get(obj,"CameraPlaybackNativeBaselineActorTransformV1")),common.norm(common.get(obj,"CameraPlaybackNativeBaselineComponentRelativeTransformV1")));require(captured==baseline_pose,"verbatim-baselines")
   obj.call_method("ApplyComposedCameraPlaybackFrameV1");require(bool(common.get(obj,"CameraPlaybackNativeResultValidV1")),"repeat-result");require(int(common.get(obj,"CameraPlaybackNativeAppliedFrameCountV1"))==2,"count-2");require((common.norm(common.get(obj,"CameraPlaybackNativeBaselineActorTransformV1")),common.norm(common.get(obj,"CameraPlaybackNativeBaselineComponentRelativeTransformV1")))==captured,"repeat-capture-drift")

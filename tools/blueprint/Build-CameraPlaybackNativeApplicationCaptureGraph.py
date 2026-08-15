@@ -156,6 +156,12 @@ def main() -> None:
             1,
         ),
     )
+    component_transform.mutate_pin(
+        "ReturnValue",
+        lambda line: line.replace("PinType.bIsReference=True", "PinType.bIsReference=False").replace(
+            "PinType.bIsConst=True", "PinType.bIsConst=False"
+        ),
+    )
     bp.connect(component, "DroneCamera", component_transform, "self")
 
     baseline_actor = set_value(

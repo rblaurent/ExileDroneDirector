@@ -204,30 +204,37 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1.eddgraph',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-camera-playback-native-application-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationStageGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationStageContracts.py',
     'tools\blueprint\snippets\stage-camera-playback-native-application-inputs-v1.eddgraph',
     'tools\blueprint\snippets\stage-camera-playback-native-application-inputs-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\stage-camera-playback-native-application-inputs-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationValidationGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationValidationContracts.py',
     'tools\blueprint\snippets\validate-camera-playback-native-application-inputs-v1.eddgraph',
     'tools\blueprint\snippets\validate-camera-playback-native-application-inputs-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\validate-camera-playback-native-application-inputs-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationCaptureGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationCaptureContracts.py',
     'tools\blueprint\snippets\capture-camera-playback-native-state-v1.eddgraph',
     'tools\blueprint\snippets\capture-camera-playback-native-state-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\capture-camera-playback-native-state-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationApplyGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationApplyContracts.py',
     'tools\blueprint\snippets\apply-camera-playback-native-frame-v1.eddgraph',
     'tools\blueprint\snippets\apply-camera-playback-native-frame-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\apply-camera-playback-native-frame-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationRestoreGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationRestoreContracts.py',
     'tools\blueprint\snippets\restore-camera-playback-native-state-v1.eddgraph',
     'tools\blueprint\snippets\restore-camera-playback-native-state-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\restore-camera-playback-native-state-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationContracts.py',
     'tools\blueprint\snippets\apply-composed-camera-playback-frame-v1.eddgraph',
     'tools\blueprint\snippets\apply-composed-camera-playback-frame-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\apply-composed-camera-playback-frame-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackFrameResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackFrameResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-frame-v1.eddgraph',
@@ -2168,6 +2175,34 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraPlaybackNativeApplicationContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Camera playback native coordinator contracts failed with exit code $LASTEXITCODE." }
+}
+$cameraPlaybackNativeLiveContracts = @(
+    @('reset-camera-playback-native-application-v1.eddgraph', 'Test-CameraPlaybackNativeApplicationResetContracts.py', $cameraPlaybackNativeReset),
+    @('stage-camera-playback-native-application-inputs-v1.eddgraph', 'Test-CameraPlaybackNativeApplicationStageContracts.py', $cameraPlaybackNativeStage),
+    @('validate-camera-playback-native-application-inputs-v1.eddgraph', 'Test-CameraPlaybackNativeApplicationValidationContracts.py', $cameraPlaybackNativeValidation),
+    @('capture-camera-playback-native-state-v1.eddgraph', 'Test-CameraPlaybackNativeApplicationCaptureContracts.py', $cameraPlaybackNativeCapture),
+    @('apply-camera-playback-native-frame-v1.eddgraph', 'Test-CameraPlaybackNativeApplicationApplyContracts.py', $cameraPlaybackNativeApply),
+    @('restore-camera-playback-native-state-v1.eddgraph', 'Test-CameraPlaybackNativeApplicationRestoreContracts.py', $cameraPlaybackNativeRestore),
+    @('apply-composed-camera-playback-frame-v1.eddgraph', 'Test-CameraPlaybackNativeApplicationContracts.py', $cameraPlaybackNativeCoordinator)
+)
+foreach ($liveContract in $cameraPlaybackNativeLiveContracts) {
+    $liveGraph = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($liveContract[0])"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $liveGraph
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera playback native link integrity failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphTopologyMatch.py') `
+        --project-root $ProjectRoot --expected $liveContract[2] --actual $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera playback native topology changed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($liveContract[1])") `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera playback native graph contract failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
 }
 $carrierFrameRoot = Join-Path $scratchRoot ("edd-carrier-frame-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $carrierFrameRoot -Force | Out-Null

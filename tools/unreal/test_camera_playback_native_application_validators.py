@@ -18,6 +18,7 @@ assert "isinstance(value,unreal.Transform)" in RESTORE and "scale3d" in RESTORE
 assert "CameraTransform" not in CONFIG and "CameraTransform" not in RESTORE
 for token in ("BODY=","RELATIVE=","GIMBAL=","quat_mul","stage_result"):assert token in COMMON
 for token in ("ApplyComposedCameraPlaybackFrameV1","CAMERA_LESS_FAIL_CLOSED","PLAYBACK_RESULT_IMMUTABLE","DEFAULTS_RESTORED"):assert token in RUNTIME
+for token in ("CameraFilmbackSettings","CameraFocusSettings","PostProcessSettings","struct_text(value)"):assert token in COMMON
 for token in ("SCENARIOS=(\"success\",\"engine_rollback\",\"pose_rejection\")","ApplyComposedCameraPlaybackFrameV1","RestoreCameraPlaybackNativeStateV1","SUCCESS_FRAME","ENGINE_FAILURE_EXACT_ROLLBACK","POSE_REJECTION_ZERO_WRITE","editor_request_begin_play","editor_request_end_play"):assert token in PIE
 assert 'obj.call_method("ApplyComposedCameraPlaybackFrameV1")' in PIE and "compile_blueprint" not in PIE
 assert "CameraTransform" not in COMMON+RUNTIME+PIE

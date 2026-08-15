@@ -35,11 +35,16 @@ def field(value,*names):
   try:return getattr(value,name)
   except Exception:pass
  raise RuntimeError("missing-field:"+str(names))
+def struct_text(value):
+ exporter=getattr(value,"export_text",None)
+ return exporter() if callable(exporter) else str(value)
 def norm(value):
  if isinstance(value,(list,tuple)):return tuple(norm(item) for item in value)
  if isinstance(value,unreal.Vector):return float(value.x),float(value.y),float(value.z)
  if isinstance(value,unreal.Quat):return float(value.x),float(value.y),float(value.z),float(value.w)
  if isinstance(value,unreal.Transform):return norm(field(value,"translation","location")),norm(field(value,"rotation")),norm(field(value,"scale3d","scale"))
+ if isinstance(value,(unreal.CameraFilmbackSettings,unreal.CameraFocusSettings,unreal.PostProcessSettings)):
+  return type(value).__name__,struct_text(value)
  return value
 def snapshot(obj,names):return tuple(norm(get(obj,name)) for name in names)
 def close(a,b,tol=1e-5):return abs(float(a)-float(b))<=tol*max(1.,abs(float(a)),abs(float(b)))

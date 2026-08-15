@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after native playback-application input staging
+Last updated: 2026-08-15 after live native playback-application acceptance
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,11 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the deterministic native playback-application input
-  staging graph described below, downstream of the complete live-accepted
-  seven-graph playback-frame family. Unreal remains closed.
+- Current checkpoint is the complete live-accepted seven-graph native playback-
+  application boundary described below. It maps an accepted composed frame onto
+  the player-owned actor/component pair, preserves genuinely distinct body and
+  gimbal authorship, and restores all touched native/engine state exactly.
+  Unreal remains closed.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -2170,6 +2172,52 @@ regression passes in 165.7 seconds with 2,290 output lines. Next: push this clea
 preparedness checkpoint, then run the documented one-editor configure/paste/
 precompile-contract/compile/postcompile-export/runtime/PIE/default-restore/save/
 shutdown/sync/cold-proof sequence for all seven graphs.
+
+That single-editor sequence is now complete. The seven-graph native playback-
+application boundary is live accepted. It writes accepted position and body-
+world rotation to the player-owned actor, writes only the separately authored
+relative-gimbal rotation to the camera component, and uses reconstructed world-
+gimbal rotation only for validation. Success is published only after position,
+body, gimbal, and engine-property readback all pass. Every failure path either
+writes nothing or performs exact actor/component/engine rollback; repeated
+restore remains idempotent.
+
+The accepted live family contains 280 nodes and 362 reciprocal links: reset
+6/5, stage 70/104, validate 99/135, capture 20/20, apply 51/62, restore 23/26,
+and coordinator 11/10. The apply graph now has explicit position, body, gimbal,
+and engine readback diagnostics. Its body tolerance is 0.000100 degrees and its
+separately authored gimbal tolerance remains 0.000001 degrees. Focused offline
+execution covers 80 successful frames and 240 exact rollback cases for every
+failure family.
+
+Live PIE exposed and paid for a serialization hazard that offline text alone
+could not reveal: harvested `Quat_Rotator` inputs retained hidden split
+`Q_X`/`Q_Y`/`Q_Z`/`Q_W` children. Linking the visible parent pin therefore
+compiled as the zero child values and collapsed both authored rotations to
+identity. The generators now collapse those subpins before linking, and exact
+contracts forbid split quaternion inputs on both body and gimbal write paths.
+The restore export also canonicalized the local `IsValid` input as lowercase
+`object`; the restore generator freezes that graph-local engine spelling without
+weakening the shared topology checker.
+
+Warm runtime acceptance passes camera-less fail-closed behavior, distinct body/
+gimbal preservation, validation-only world gimbal, immutable playback results,
+inactive restore idempotence, and complete default restoration. Automatic PIE
+passes successful repeat apply/restore, engine-failure exact rollback, corrupt-
+pose zero-write rejection, player ownership, distinct actor/component
+authorship, Drone Mode exit, teardown, and default restoration. The complete
+MVP-required regression passes with 2,322 output lines in 242 seconds. Guarded
+editor shutdown completed normally, reverse sync copied only
+`BPC_EDD_ClientDirector.uasset`, and live/mirror SHA-256 is
+`52ADF11DDF961E7AD83009080137F9D866AE188D2F06FB63B43B975AEA95B111`.
+A fresh NullRHI process then loaded all nine core assets and compiled all six
+Blueprints with zero errors and `EDD_COLD_LOAD|RESULT|PASS`.
+
+Next: begin the documented bounded event-adapter seam offline with explicit
+reference behavior, Blueprint schema, deterministic generators, interpreters,
+and scaffold ownership. Only after its complete offline family is green should
+one editor be opened for live acceptance. Continue through temporary debug
+controls and full keyboard dogfood before starting polished UI.
 
 ## Critical design mismatch
 

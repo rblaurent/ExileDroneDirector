@@ -81,6 +81,8 @@ def main() -> None:
     actor_set = one(nodes, cls="K2Node_CallFunction", name="K2_SetActorTransform")
     component_set = one(nodes, cls="K2Node_CallFunction", name="K2_SetRelativeTransform")
     by_member = {member(node): node for node in getters}
+    valid_nodes = [node for node in nodes.values() if "K2Node_CallFunction" in node.node_class and member(node) == "IsValid"]
+    contracts.require(len(valid_nodes) == 2 and all("object" in node.pins and "Object" not in node.pins for node in valid_nodes), "restore freezes Unreal's lowercase IsValid object pin")
     contracts.require_link(by_member["CameraPlaybackNativeBaselineActorTransformV1"], "CameraPlaybackNativeBaselineActorTransformV1", actor_set, "NewTransform", "verbatim actor baseline")
     contracts.require_link(by_member["CameraPlaybackNativeBaselineComponentRelativeTransformV1"], "CameraPlaybackNativeBaselineComponentRelativeTransformV1", component_set, "NewTransform", "verbatim component baseline")
     contracts.require("ReturnValue" not in component_set.pins, "void component setter exact shape")

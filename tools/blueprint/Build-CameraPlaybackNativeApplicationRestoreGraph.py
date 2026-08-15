@@ -38,6 +38,15 @@ def remove_pin(node, pin_name: str) -> None:
     pin_id = node.pins.pop(pin_name); node.text = "\n".join(line for line in node.text.splitlines() if f"PinId={pin_id}" not in line)
 
 
+def rename_pin(node, old_name: str, new_name: str) -> None:
+    pin_id = node.pins.pop(old_name)
+    node.pins[new_name] = pin_id
+    token = f'PinName="{old_name}"'
+    if node.text.count(token) != 1:
+        raise RuntimeError(f"unexpected pin rename shape: {old_name}")
+    node.text = node.text.replace(token, f'PinName="{new_name}"', 1)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(); parser.add_argument("--project-root", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--paste-output", type=Path); args = parser.parse_args()
     scalar = load(args.project_root); bp = scalar.load_helpers(args.project_root); forms = scalar.load_templates(args.project_root, bp)
@@ -86,7 +95,8 @@ def main() -> None:
     if component.text.count(internal) != 1: raise RuntimeError("unexpected component owner")
     component.text = component.text.replace(internal, external); bp.connect(camera_ref, "DroneCameraRef", component, "self")
     actor_valid = add_form("actor_valid", "is_valid", 256, 320); component_valid = add_form("component_valid", "is_valid", 512, 480)
-    bp.connect(camera_ref, "DroneCameraRef", actor_valid, "Object"); bp.connect(component, "DroneCamera", component_valid, "Object")
+    rename_pin(actor_valid, "Object", "object"); rename_pin(component_valid, "Object", "object")
+    bp.connect(camera_ref, "DroneCameraRef", actor_valid, "object"); bp.connect(component, "DroneCamera", component_valid, "object")
     ready = bool_and(actor_valid, "ReturnValue", component_valid, "ReturnValue", 768, 400)
     restore_guard = builder.add("restore_guard", "branch", 704, 1760); bp.connect(invalidate, "then", restore_guard, "execute"); bp.connect(ready, "ReturnValue", restore_guard, "Condition")
     baseline_actor = get("CameraPlaybackNativeBaselineActorTransformV1", "transform", 0, 800)

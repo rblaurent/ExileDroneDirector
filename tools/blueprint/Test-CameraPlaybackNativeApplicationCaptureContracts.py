@@ -129,7 +129,7 @@ def main() -> None:
     actor_get = one(nodes, cls="K2Node_CallFunction", name="GetTransform")
     component_get = one(nodes, cls="K2Node_CallFunction", name="GetRelativeTransform")
     contracts.require("bIsReference=True" in actor_get.pins["ReturnValue"].body and "bIsConst=True" in actor_get.pins["ReturnValue"].body, "actor Transform returned verbatim const reference")
-    contracts.require("bIsReference=True" in component_get.pins["ReturnValue"].body and "bIsConst=True" in component_get.pins["ReturnValue"].body, "component Transform returned verbatim const reference")
+    contracts.require("bIsReference=False" in component_get.pins["ReturnValue"].body and "bIsConst=False" in component_get.pins["ReturnValue"].body, "component relative Transform uses Unreal's canonical by-value return")
     contracts.require("/Script/Engine.SceneComponent" in component_get.text, "relative getter owned by SceneComponent")
 
     by_member = {member(node): node for node in getters}

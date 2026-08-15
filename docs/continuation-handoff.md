@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after bounded Cue selection/repeat filtering
+Last updated: 2026-08-15 after bounded Cue authorization
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,8 +23,8 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is direction-correct Cue selection and repeat-ledger
-  filtering in the offline event-adapter family, downstream of the complete
+- Current checkpoint is fail-closed Cue authorization against the exact bounded
+  capability manifest in the offline event-adapter family, downstream of the complete
   live-accepted seven-graph native playback-application boundary. Unreal remains
   closed; no event graph has been installed or executed yet.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
@@ -2308,6 +2308,28 @@ lines in 182.6 seconds. The schema now separates `SelectEligibleCrossedCueV1` fr
 authorize the selected Cue against the closed five-operation manifest and exact
 runtime binding context, returning only a typed decision and performing no world
 mutation.
+
+`AuthorizeSelectedCueV1` is deterministic at 179 full / 178 paste nodes with
+232 / 231 reciprocal links. It first requires fresh selection authority and a
+valid selected index, then matches the selected Cue to exactly one of the five
+frozen capability tuples. Local subtitle/marker operations require complete
+local isolation. Non-local operations require a session token, enabled rebound
+binding, exact adapter/version and region, resolved target, finite in-range
+distance, named permission, positive rate budget, and explicit server approval
+for the default-disabled world lease.
+
+The graph publishes only decision authority, authorization, and one of sixteen
+stable result codes. It performs no adapter call and owns no world, camera,
+repository, HUD, or UI mutation. Compiled payloads remain opaque after the
+plan-validation boundary; a later authoritative server adapter must revalidate
+their bounded shape at its RPC boundary. Both graph forms regenerate
+byte-identically, pass exact reciprocal-link and independent typed-decision
+contracts, and preserve a prior no-selection reason. The complete MVP-required
+regression finishes with 2,365 captured output lines and no failure marker while
+Unreal remains closed. Next: require a successful bounded-adapter execution
+receipt before committing the exact Event ID/loop/direction ledger entry, then
+implement manual ledger reset and the tiny policy-free coordinator. Open one
+editor only after that complete offline family is green.
 
 ## Critical design mismatch
 

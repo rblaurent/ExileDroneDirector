@@ -79,6 +79,9 @@ class BoundedEventAdapterBlueprintSchemaContracts(unittest.TestCase):
         self.assertIn("immutable published revision", architecture["identity"])
         self.assertIn("post-clone binding", architecture["authorization"])
         self.assertIn("positive rate budget", architecture["authorization"])
+        self.assertIn("before EventCuePlanValidV1 is published", architecture["payload"])
+        self.assertIn("treats the compiled payload as opaque", architecture["payload"])
+        self.assertIn("server adapter must revalidate", architecture["payload"])
         self.assertIn("Only adapter success commits", architecture["ledger"])
 
     def test_coordinator_and_forbidden_ownership_are_exact(self):

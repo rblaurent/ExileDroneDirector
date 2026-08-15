@@ -220,6 +220,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-BoundedEventCueSelectionContracts.py',
     'tools\blueprint\snippets\select-eligible-crossed-cue-v1.eddgraph',
     'tools\blueprint\snippets\select-eligible-crossed-cue-v1-paste.eddgraph',
+    'tools\blueprint\Build-BoundedEventAuthorizationGraph.py',
+    'tools\blueprint\Test-BoundedEventAuthorizationContracts.py',
+    'tools\blueprint\snippets\authorize-selected-cue-v1.eddgraph',
+    'tools\blueprint\snippets\authorize-selected-cue-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1.eddgraph',
@@ -1859,6 +1863,37 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventCueSelectionContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Bounded event selection contracts failed with exit code $LASTEXITCODE." }
+}
+$boundedEventAuthorization = Join-Path $boundedEventRoot 'authorize-selected-cue-v1.eddgraph'
+$boundedEventAuthorizationPaste = Join-Path $boundedEventRoot 'authorize-selected-cue-v1-paste.eddgraph'
+$boundedEventAuthorizationRepeat = Join-Path $boundedEventRoot 'authorize-selected-cue-v1-repeat.eddgraph'
+$boundedEventAuthorizationRepeatPaste = Join-Path $boundedEventRoot 'authorize-selected-cue-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($boundedEventAuthorization, $boundedEventAuthorizationPaste),
+    @($boundedEventAuthorizationRepeat, $boundedEventAuthorizationRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-BoundedEventAuthorizationGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event authorization generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($boundedEventAuthorization, $boundedEventAuthorizationRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\authorize-selected-cue-v1.eddgraph')),
+    @($boundedEventAuthorizationPaste, $boundedEventAuthorizationRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\authorize-selected-cue-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Bounded event authorization regeneration diverged." }
+}
+foreach ($graphCase in @(
+    @($boundedEventAuthorization, $false),
+    @($boundedEventAuthorizationPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event authorization link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventAuthorizationContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event authorization contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraPlaybackRoot = Join-Path $scratchRoot ("edd-camera-playback-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraPlaybackRoot -Force | Out-Null

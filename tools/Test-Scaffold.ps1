@@ -212,6 +212,12 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraOperatorOverrideApplyContracts.py',
     'tools\blueprint\snippets\apply-camera-operator-override-v1.eddgraph',
     'tools\blueprint\snippets\apply-camera-operator-override-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-camera-operator-override-step-v1.eddgraph',
+    'tools\blueprint\live-snippets\validate-camera-operator-override-inputs-v1.eddgraph',
+    'tools\blueprint\live-snippets\build-camera-operator-translation-v1.eddgraph',
+    'tools\blueprint\live-snippets\build-camera-operator-look-v1.eddgraph',
+    'tools\blueprint\live-snippets\commit-camera-operator-override-v1.eddgraph',
+    'tools\blueprint\live-snippets\apply-camera-operator-override-v1.eddgraph',
     'tools\unreal\Configure-CameraOperatorOverride.py',
     'tools\unreal\Restore-CameraOperatorOverrideSchemaDefaults.py',
     'tools\unreal\Validate-CameraOperatorOverrideRuntime.py',
@@ -1742,6 +1748,27 @@ if ($LASTEXITCODE -ne 0) { throw "Camera operator apply full contracts failed wi
 if ($LASTEXITCODE -ne 0) { throw "Camera operator apply paste contracts failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_camera_operator_override_validators.py')
 if ($LASTEXITCODE -ne 0) { throw "Camera operator live-tool contracts failed with exit code $LASTEXITCODE." }
+$cameraOperatorLiveContracts = @(
+    @('reset-camera-operator-override-step-v1.eddgraph', 'Test-CameraOperatorOverrideResetContracts.py'),
+    @('validate-camera-operator-override-inputs-v1.eddgraph', 'Test-CameraOperatorOverrideValidationContracts.py'),
+    @('build-camera-operator-translation-v1.eddgraph', 'Test-CameraOperatorOverrideTranslationContracts.py'),
+    @('build-camera-operator-look-v1.eddgraph', 'Test-CameraOperatorOverrideLookContracts.py'),
+    @('commit-camera-operator-override-v1.eddgraph', 'Test-CameraOperatorOverrideCommitContracts.py'),
+    @('apply-camera-operator-override-v1.eddgraph', 'Test-CameraOperatorOverrideApplyContracts.py')
+)
+foreach ($liveContract in $cameraOperatorLiveContracts) {
+    $liveGraph = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($liveContract[0])"
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Camera operator accepted-live link integrity failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($liveContract[1])") `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Camera operator accepted-live contracts failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+}
 $cameraDollyRoot = Join-Path $scratchRoot ("edd-camera-dolly-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDollyRoot -Force | Out-Null
 $cameraDollyReset = Join-Path $cameraDollyRoot 'reset-camera-dolly-zoom-v1.eddgraph'

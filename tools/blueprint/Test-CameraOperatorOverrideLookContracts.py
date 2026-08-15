@@ -137,8 +137,12 @@ def main() -> None:
     contracts.require(sum("K2Node_IfThenElse" in node.node_class for node in nodes.values()) == 1, "single scratch guard")
     contracts.require(not any("K2Node_Knot" in node.node_class for node in nodes.values()), "no reroute knots")
     text = args.graph.read_text(encoding="utf-8"); contracts.require(not any(value in text for value in FORBIDDEN), "no translation policy/result/external access")
-    for literal in ("directed", "free_look", "carrier_freecam", "1e-9", "0.00001", "0.0001", "0, 0, 0, 1"):
+    for literal in ("directed", "free_look", "carrier_freecam", "1e-9", "0.00001", "0.0001"):
         contracts.require(literal in text, f"required look literal {literal}")
+    contracts.require(
+        "0, 0, 0, 1" in text or "(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000)" in text,
+        "required look identity quaternion literal",
+    )
     scratch = next(node for node in nodes.values() if member(node) == "CameraOperatorScratchValidV1")
     guard = next(node for node in nodes.values() if "K2Node_IfThenElse" in node.node_class)
     quat_set = next(node for node in nodes.values() if member(node) == "Quat_SetComponents")

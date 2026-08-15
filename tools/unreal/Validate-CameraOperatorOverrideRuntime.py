@@ -34,6 +34,7 @@ def normalized(value):
 def snapshot(obj,names):return tuple(normalized(get(obj,name)) for name in names)
 def close(left,right,tolerance=5e-4):return abs(float(left)-float(right))<=tolerance*max(1.,abs(float(left)),abs(float(right)))
 def vector_close(left,right):return all(close(a,b) for a,b in zip(normalized(left),right))
+def components_close(left,right,tolerance=1e-6):return all(close(a,b,tolerance) for a,b in zip(normalized(left),right))
 def same_rotation(left,right,tolerance=5e-4):
     a=normalized(left);b=tuple(right);al=math.sqrt(sum(v*v for v in a));bl=math.sqrt(sum(v*v for v in b));return al>0. and bl>0. and abs(sum(x*y for x,y in zip(a,b))/(al*bl))>=1.-tolerance
 def axis_angle(axis,degrees):
@@ -63,11 +64,13 @@ def stage(case):
 
 def verify(expected,case,label):
     state=expected.state
+    body=get(obj,"CameraOperatorResultBodyQuatV1");gimbal=get(obj,"CameraOperatorResultGimbalQuatV1")
     require(bool(get(obj,"CameraOperatorResultValidV1")),label+":valid");require(str(get(obj,"CameraOperatorFailureCodeV1"))=="",label+":failure")
     require(vector_close(get(obj,"CameraOperatorResultPositionV1"),expected.position),label+":position")
-    require(same_rotation(get(obj,"CameraOperatorResultBodyQuatV1"),expected.body_rotation),label+":body")
-    require(normalized(get(obj,"CameraOperatorResultBodyQuatV1"))==tuple(case["authored_body_rotation"]),label+":body-not-exact")
-    require(same_rotation(get(obj,"CameraOperatorResultGimbalQuatV1"),expected.gimbal_rotation),label+":gimbal")
+    require(same_rotation(body,expected.body_rotation),label+":body")
+    require(components_close(body,case["authored_body_rotation"]),label+":body-not-component-exact")
+    require(same_rotation(gimbal,expected.gimbal_rotation),label+":gimbal")
+    require(not same_rotation(body,normalized(gimbal),1e-6),label+":body-gimbal-aliased")
     require(str(get(obj,"CameraOperatorResultModeV1"))==state.mode,label+":result-mode")
     require(bool(get(obj,"CameraOperatorResultOverrideActiveV1"))==expected.override_active,label+":override")
     require(bool(get(obj,"CameraOperatorResultTransitionActiveV1"))==expected.transition_active,label+":transition")

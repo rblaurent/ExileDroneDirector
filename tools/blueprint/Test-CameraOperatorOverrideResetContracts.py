@@ -46,6 +46,10 @@ PRESERVED=(
     "CameraOperatorResultTetherAppliedV1",
 )
 FORBIDDEN=("CameraTransform","CameraComfort","CameraChannel","CameraApply","Airframe","Flypath","Repository","PlaybackTime","Event","Cue","StateClip","Server")
+IDENTITY_QUATERNION_DEFAULTS={
+    "0, 0, 0, 1",
+    "(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000)",
+}
 
 
 def load(path:Path):
@@ -79,7 +83,9 @@ def main()->None:
     for left,right in zip(setters,setters[1:]):contracts.require_link(left,"then",right,"execute",f"ordered reset seam {left.name} to {right.name}")
     for node in setters:
         name=member(node);actual=default(node,name)
-        contracts.require(actual==DEFAULTS[name],f"{name} default {actual!r}")
+        expected=DEFAULTS[name]
+        matches=actual in IDENTITY_QUATERNION_DEFAULTS if expected=="0, 0, 0, 1" else actual==expected
+        contracts.require(matches,f"{name} default {actual!r}")
     text=args.graph.read_text(encoding="utf-8")
     contracts.require(not any(name in text for name in PRESERVED),"inputs, policy, state, and prior accepted result preserved")
     contracts.require(not any(name in text for name in FORBIDDEN),"external ownership forbidden")

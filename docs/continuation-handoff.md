@@ -2008,6 +2008,26 @@ read-only native preflight validator, including exact body-relative-gimbal
 reconstruction and native target/capability readiness, before any capture or
 write graph.
 
+`ValidateCameraPlaybackNativeApplicationInputsV1` is deterministic at 99 full /
+98 paste nodes with 135 / 134 reciprocal links. It first invokes the accepted
+engine-property validator, then execution-gates actor validity before accessing
+the actor-owned `DroneCamera` component, gates component validity before the
+pose check, and publishes native preflight authority last. The pose check is
+read-only: finite position; finite unit body-world, gimbal-world, and gimbal-
+relative quaternions; and component-wise `body * relative == world gimbal`
+within `1e-6`, accepting the mathematically identical `q`/`-q` representation.
+
+The graph has no actor/component/property setter, no baseline or session write,
+and no playback-result, cinematic, carrier, legacy `CameraTransform`, authored,
+compiled, persistence, event, server, HUD, or UI access. Exact object/component
+and execution-order links are enforced. Both forms execute 100 seeded distinct
+poses, including 50 antipodal world-gimbal representations, plus twelve invalid
+authority, actor/component, nonfinite, nonunit, and reconstruction cases. Both
+regenerate byte-identically and are full-scaffold owned. The complete MVP-
+required regression passes in 164.7 seconds with 2,272 output lines and Unreal
+closed. Next: capture the verbatim actor world Transform, component relative
+Transform, and accepted engine baseline exactly once per native session.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

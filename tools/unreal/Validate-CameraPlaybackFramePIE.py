@@ -9,6 +9,7 @@ def emit(label,value):unreal.log(f"{PREFIX}|{label}|{value}")
 def require(value,message):
  if not value:raise RuntimeError(f"{PREFIX}|FAIL|{message}")
 def close(a,b,tol=1e-3):return abs(float(a)-float(b))<=tol*max(1.,abs(float(a)),abs(float(b)))
+def quat_close(a,b,tol=1e-6):return all(close(x,y,tol) for x,y in zip(a,b)) or all(close(x,-y,tol) for x,y in zip(a,b))
 def mul(a,b):ax,ay,az,aw=a;bx,by,bz,bw=b;return aw*bx+ax*bw+ay*bz-az*by,aw*by-ax*bz+ay*bw+az*bx,aw*bz+ax*by-ay*bx+az*bw,aw*bw-ax*bx-ay*by-az*bz
 def defaults():cls=unreal.load_class(None,CLIENT_CLASS_PATH);require(cls is not None,"class");return unreal.get_default_object(cls)
 def pie_world():value=unreal.find_object(None,WORLD_PATH);require(value is not None,"PIE world");return value
@@ -21,7 +22,7 @@ def run_scenario(component,scenario):
  compiled=common.snapshot(component,COMPILED);component.call_method("ComposeCameraPlaybackFrameV1");require(common.snapshot(component,COMPILED)==compiled,"compiled sources mutated")
  if scenario=="fail_closed":require(not bool(common.get(component,"CameraPlaybackResultValidV1")),"invalid source accepted");emit("FAIL_CLOSED_RESULT","PASS")
  else:
-  require(bool(common.get(component,"CameraPlaybackResultValidV1")),"frame invalid");wanted_x=50. if scenario=="mid_frame" else 100.;require(close(common.norm(common.get(component,"CameraPlaybackResultPositionV1"))[0],wanted_x),"position");require(bool(common.get(component,"CameraPlaybackResultCompleteV1"))==(scenario=="complete_frame"),"completion");body=common.norm(common.get(component,"CameraPlaybackResultBodyWorldQuatV1"));gimbal=common.norm(common.get(component,"CameraPlaybackResultGimbalWorldQuatV1"));relative=common.norm(common.get(component,"CameraPlaybackResultGimbalRelativeQuatV1"));require(body==common.norm(common.BODY) and gimbal==common.norm(common.GIMBAL),"distinct authorship");require(all(close(a,b) for a,b in zip(mul(body,relative),gimbal)),"relative reconstruction");require(len(common.get(component,"CameraPlaybackResultChannelValuesV1"))==13,"channels");emit("MID_FRAME_RESULT" if scenario=="mid_frame" else "COMPLETE_FRAME_RESULT","PASS")
+  require(bool(common.get(component,"CameraPlaybackResultValidV1")),"frame invalid");wanted_x=50. if scenario=="mid_frame" else 100.;require(close(common.norm(common.get(component,"CameraPlaybackResultPositionV1"))[0],wanted_x),"position");require(bool(common.get(component,"CameraPlaybackResultCompleteV1"))==(scenario=="complete_frame"),"completion");body=common.norm(common.get(component,"CameraPlaybackResultBodyWorldQuatV1"));gimbal=common.norm(common.get(component,"CameraPlaybackResultGimbalWorldQuatV1"));relative=common.norm(common.get(component,"CameraPlaybackResultGimbalRelativeQuatV1"));require(quat_close(body,common.norm(common.BODY)) and quat_close(gimbal,common.norm(common.GIMBAL)),"distinct authorship");require(quat_close(mul(body,relative),gimbal),"relative reconstruction");require(len(common.get(component,"CameraPlaybackResultChannelValuesV1"))==13,"channels");emit("MID_FRAME_RESULT" if scenario=="mid_frame" else "COMPLETE_FRAME_RESULT","PASS")
  emit("DISTINCT_BODY_GIMBAL_AUTHORSHIP_PRESERVED",True);emit("SCENARIO_RESULT",scenario+":PASS")
 def restore(state):
  if state.get("restored") or not state.get("originals"):return

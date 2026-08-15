@@ -1903,6 +1903,48 @@ pre-editor complete scaffold passes in 160.1 seconds. Next: push this clean
 preparedness checkpoint, then perform the single-editor installation and live
 acceptance sequence for the seven exact graphs.
 
+That single-editor playback-frame acceptance is complete. The seven saved
+graphs contain 7, 14, 5, 93, 26, 238, and 9 nodes: 392 nodes and 494 reciprocal
+links in total. All seven postcompile exports are now owned under
+`tools/blueprint/live-snippets`; each passes snippet integrity, reciprocal-link
+integrity, exact generated-to-live topology, and its full executable contract.
+The complete regression permanently reruns those four layers for every live
+graph.
+
+Warm runtime covers negative/start, midpoint, and overshoot/completion absolute
+queries, preserves distinct 45-degree body and 30-degree gimbal authorship,
+ignores the unrelated 180-degree cinematic rotation, reconstructs the world
+gimbal from `body * relative`, preserves all compiled sources, and fails closed
+after injected airframe-authority corruption without replacing the prior
+15-field snapshot. The first runtime attempt exposed a test-only defect:
+Blueprint quaternion normalization differed from the Python fixture by roughly
+`5e-9`, while the probe incorrectly required bitwise tuple equality. Both warm
+and PIE probes now require strict `1e-6` rotational equivalence and accept the
+mathematically identical `q`/`-q` representation; the authored body and gimbal
+expectations remain separate and unchanged.
+
+Three automatic player-owned PIE sessions pass midpoint, completion, and
+invalid-source failure. Each spawned Client Director inherits the staged
+compiled inputs, calls only `ComposeCameraPlaybackFrameV1`, preserves compiled
+state and distinct body/gimbal authorship, ends PIE, and restores every touched
+class default. The 30-variable/seven-function configurator reruns with every
+member already present, every schema default preserved, and no duplicate graph.
+
+Guarded shutdown closed both asset editors and reached `LogExit: Exiting.`.
+Closed-editor reverse sync found exactly `BPC_EDD_ClientDirector.uasset`
+changed with 16 other managed files unchanged, copied that one package, and a
+second preview found all 17 unchanged. Live and mirror are both 27,594,151 bytes
+with SHA-256
+`F1A60B9E702F4F10399894F73F36B30FF81AE2EB2FAEA155C9DC89AF4E78F955`.
+A fresh NullRHI process loads all nine core assets and compiles all six
+Blueprints; a second fresh process repeats the full playback runtime/tamper
+matrix. The final MVP-required scaffold, including deterministic regeneration
+and all seven live topologies, passes in 167.6 seconds. Next: freeze and connect
+the playback-result-to-native-camera application boundary offline, reusing the
+already accepted transactional engine-property helpers without granting them
+body/gimbal authorship; bounded event adapters and debug controls then lead to
+keyboard dogfood, after which polished UI may begin.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

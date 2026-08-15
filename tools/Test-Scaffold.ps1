@@ -200,30 +200,37 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraPlaybackFrameResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-frame-v1.eddgraph',
     'tools\blueprint\snippets\reset-camera-playback-frame-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-camera-playback-frame-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackFrameTimeStageGraph.py',
     'tools\blueprint\Test-CameraPlaybackFrameTimeStageContracts.py',
     'tools\blueprint\snippets\stage-camera-playback-evaluation-time-v1.eddgraph',
     'tools\blueprint\snippets\stage-camera-playback-evaluation-time-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\stage-camera-playback-evaluation-time-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackFrameSourceEvaluatorGraph.py',
     'tools\blueprint\Test-CameraPlaybackFrameSourceEvaluatorContracts.py',
     'tools\blueprint\snippets\evaluate-camera-playback-sources-v1.eddgraph',
     'tools\blueprint\snippets\evaluate-camera-playback-sources-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\evaluate-camera-playback-sources-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackFrameOperatorStageGraph.py',
     'tools\blueprint\Test-CameraPlaybackFrameOperatorStageContracts.py',
     'tools\blueprint\snippets\stage-camera-operator-from-playback-v1.eddgraph',
     'tools\blueprint\snippets\stage-camera-operator-from-playback-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\stage-camera-operator-from-playback-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackFrameComfortStageGraph.py',
     'tools\blueprint\Test-CameraPlaybackFrameComfortStageContracts.py',
     'tools\blueprint\snippets\stage-camera-comfort-from-playback-v1.eddgraph',
     'tools\blueprint\snippets\stage-camera-comfort-from-playback-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\stage-camera-comfort-from-playback-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackFrameCommitGraph.py',
     'tools\blueprint\Test-CameraPlaybackFrameCommitContracts.py',
     'tools\blueprint\snippets\commit-camera-playback-frame-v1.eddgraph',
     'tools\blueprint\snippets\commit-camera-playback-frame-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\commit-camera-playback-frame-v1.eddgraph',
     'tools\blueprint\Build-CameraPlaybackFrameComposeGraph.py',
     'tools\blueprint\Test-CameraPlaybackFrameComposeContracts.py',
     'tools\blueprint\snippets\compose-camera-playback-frame-v1.eddgraph',
     'tools\blueprint\snippets\compose-camera-playback-frame-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\compose-camera-playback-frame-v1.eddgraph',
     'tools\unreal\Configure-CameraPlaybackFrame.py',
     'tools\unreal\Restore-CameraPlaybackFrameSchemaDefaults.py',
     'tools\unreal\camera_playback_acceptance_common.py',
@@ -1867,6 +1874,34 @@ if ($LASTEXITCODE -ne 0) { throw "Camera playback compose paste contracts failed
 if ($LASTEXITCODE -ne 0) { throw "Camera playback compose paste links failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_camera_playback_frame_validators.py')
 if ($LASTEXITCODE -ne 0) { throw "Camera playback-frame live-tool contracts failed with exit code $LASTEXITCODE." }
+$cameraPlaybackLiveContracts = @(
+    @('reset-camera-playback-frame-v1.eddgraph', 'Test-CameraPlaybackFrameResetContracts.py', $cameraPlaybackReset),
+    @('stage-camera-playback-evaluation-time-v1.eddgraph', 'Test-CameraPlaybackFrameTimeStageContracts.py', $cameraPlaybackTime),
+    @('evaluate-camera-playback-sources-v1.eddgraph', 'Test-CameraPlaybackFrameSourceEvaluatorContracts.py', $cameraPlaybackSources),
+    @('stage-camera-operator-from-playback-v1.eddgraph', 'Test-CameraPlaybackFrameOperatorStageContracts.py', $cameraPlaybackOperator),
+    @('stage-camera-comfort-from-playback-v1.eddgraph', 'Test-CameraPlaybackFrameComfortStageContracts.py', $cameraPlaybackComfort),
+    @('commit-camera-playback-frame-v1.eddgraph', 'Test-CameraPlaybackFrameCommitContracts.py', $cameraPlaybackCommit),
+    @('compose-camera-playback-frame-v1.eddgraph', 'Test-CameraPlaybackFrameComposeContracts.py', $cameraPlaybackCompose)
+)
+foreach ($liveContract in $cameraPlaybackLiveContracts) {
+    $liveGraph = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($liveContract[0])"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $liveGraph
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera playback link integrity failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphTopologyMatch.py') `
+        --project-root $ProjectRoot --expected $liveContract[2] --actual $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera playback topology changed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($liveContract[1])") `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live camera playback graph contract failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+}
 $carrierFrameRoot = Join-Path $scratchRoot ("edd-carrier-frame-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $carrierFrameRoot -Force | Out-Null
 $carrierFrameReset = Join-Path $carrierFrameRoot 'reset-carrier-frame-transport-v1.eddgraph'

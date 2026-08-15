@@ -30,7 +30,7 @@
     {"name":"ValidateCameraPlaybackNativeApplicationInputsV1","stage":2,"uses":["ValidateCameraEngineApplicationInputsV1"]},
     {"name":"CaptureCameraPlaybackNativeStateV1","stage":3,"engineReads":true,"uses":["CaptureCameraEngineStateV1"]},
     {"name":"ApplyCameraPlaybackNativeFrameV1","stage":4,"engineWrites":true,"uses":["ApplyCameraEngineFrameV1"]},
-    {"name":"RestoreCameraPlaybackNativeStateV1","stage":5,"engineWrites":true,"uses":["RestoreCameraEngineStateV1"]},
+    {"name":"RestoreCameraPlaybackNativeStateV1","stage":5,"engineWrites":true,"uses":["ResetCameraEngineApplicationResultV1","RestoreCameraEngineStateV1"]},
     {"name":"ApplyComposedCameraPlaybackFrameV1","stage":6,"uses":["ResetCameraPlaybackNativeApplicationResultV1","ResetCameraEngineApplicationResultV1","StageCameraPlaybackNativeApplicationInputsV1","ValidateCameraPlaybackNativeApplicationInputsV1","CaptureCameraPlaybackNativeStateV1","ApplyCameraPlaybackNativeFrameV1"]}
   ],
   "architecture": {

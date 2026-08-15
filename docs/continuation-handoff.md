@@ -2091,6 +2091,27 @@ passes in 165.8 seconds with 2,280 output lines and Unreal closed. Next: build
 idempotent exact actor/component/engine restoration, then the corrected thin
 coordinator.
 
+`RestoreCameraPlaybackNativeStateV1` is deterministic at 23 full / 22 paste
+nodes with 26 / 25 reciprocal links. An inactive native session is an exact
+no-op. An active session invalidates only native frame-result authority,
+revalidates actor/component references, writes the two captured native
+Transforms verbatim with teleport/no-sweep semantics, then calls
+`ResetCameraEngineApplicationResultV1` immediately before the accepted exact
+engine restore. It deactivates native session authority only after fresh engine
+restore success and engine-session inactivity are both proven.
+
+Native baseline Transforms, applied-frame count, pose inputs/stages, and the
+native diagnostic are never changed. This preserves the original apply failure
+reason through rollback. Reference, actor-set, or engine-restore failure leaves
+the session active and retryable; engine failure may leave pose already safely
+restored but never claims the native session closed. Both forms execute 80
+opaque exact restores plus 240 retryable failures, prove repeated-restore
+idempotence, regenerate byte-identically, and are full-scaffold owned. The
+restore schema now freezes its fresh engine reset dependency. The complete MVP-
+required regression passes in 165.9 seconds with 2,286 output lines and Unreal
+closed. Next: generate the corrected thin coordinator and prove the complete
+seven-graph native adapter family together.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

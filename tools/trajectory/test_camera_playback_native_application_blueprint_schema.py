@@ -89,7 +89,7 @@ class CameraPlaybackNativeApplicationBlueprintSchemaContracts(unittest.TestCase)
         )
         self.assertEqual(
             functions["RestoreCameraPlaybackNativeStateV1"]["uses"],
-            ["RestoreCameraEngineStateV1"],
+            ["ResetCameraEngineApplicationResultV1", "RestoreCameraEngineStateV1"],
         )
         self.assertEqual(
             functions["ApplyComposedCameraPlaybackFrameV1"]["uses"],

@@ -1963,6 +1963,19 @@ before any polished editor UI or cook is attempted:
    external authorship writes, component mutation, and PIE-time compilation;
    the complete scaffold passes in 139.1 seconds. Commit this clean tooling
    checkpoint before opening the single editor.
+   The camera-operator family is now fully live-accepted, and its next required
+   dependency is frozen offline as an independent carrier-frame transport
+   track. The reference consumes only accepted sampled path positions on the
+   established zero/integer-step/exact-terminal schedule. It parallel-transports
+   an orthonormal frame through curves, holds, vertical motion, and deterministic
+   reversals without Frenet normals; body and gimbal authorship are not inputs.
+   Eight executable behavior/tamper tests and five exact schema/ownership tests
+   pass, including absolute-time query-order invariance and partial terminal
+   evaluation. The 24-variable/eight-function Blueprint schema owns reset,
+   upstream staging, validation, tangent construction, transport construction,
+   atomic commit, policy-free compile coordination, and evaluation. The complete
+   scaffold passes in 145.3 seconds. Deterministic graph checkpoints are next
+   before the carrier result may feed `CameraOperatorInputCarrierFrameQuatV1`.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

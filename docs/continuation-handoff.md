@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after complete offline camera-operator family
+Last updated: 2026-08-15 after carrier-frame reference/schema freeze
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the complete offline camera-operator override family
-  described below; after the checkpoint push, HEAD must equal `origin/main`
-  before the documented single-editor acceptance sequence starts
+- Current checkpoint is the independent twist-minimizing carrier-frame
+  reference/schema described below; after the checkpoint push, HEAD must equal
+  `origin/main` before deterministic Blueprint graph work starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1489,6 +1489,27 @@ zero errors. The complete MVP-required scaffold, including all six promoted
 accepted-live exports, passes in 145.0 seconds. Next: commit/push this live
 checkpoint, then continue the documented backend camera-mode/event-adapter
 sequence toward debug dogfood. No UI work begins before dogfood.
+
+The missing Carrier Freecam dependency is now frozen offline as
+`carrier_frame_transport_reference.py` and
+`carrier_frame_transport_blueprint_schema.json`. It consumes only the accepted
+sampled path positions plus their exact total/fixed-step schedule. Authored body
+and gimbal quaternions are deliberately absent; neither can be reused as the
+carrier frame. The first basis uses world up unless parallel, then a
+deterministic least-aligned axis. Later bases shortest-arc transport the prior up
+vector and re-orthogonalize it, so the track is twist-minimizing and never uses
+a Frenet normal. Holds find a deterministic nearest nonzero direction; a wholly
+stationary path fails closed. Consecutive quaternions remain in one hemisphere.
+
+Eight executable reference tests cover straight, planar, vertical, held,
+reversing, seeded three-dimensional, partial-terminal, absolute-query-order,
+malformed-input, and compiled-track tamper behavior. Five schema tests freeze 24
+private variables, eight ordered functions, the exact upstream staging fields,
+atomic publication, absolute-time evaluation, and non-authoritative ownership.
+The complete scaffold owns both packages and passes in 145.3 seconds. Next:
+build the deterministic reset, upstream-stage, validation, tangent, transport,
+atomic-commit, compile coordinator, and evaluator graphs in that order while
+Unreal remains closed.
 
 ## Critical design mismatch
 

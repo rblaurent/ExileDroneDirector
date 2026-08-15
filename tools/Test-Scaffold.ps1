@@ -188,6 +188,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_operator_override_reference.py',
     'tools\trajectory\camera_operator_override_blueprint_schema.json',
     'tools\trajectory\test_camera_operator_override_blueprint_schema.py',
+    'tools\trajectory\carrier_frame_transport_reference.py',
+    'tools\trajectory\test_carrier_frame_transport_reference.py',
+    'tools\trajectory\carrier_frame_transport_blueprint_schema.json',
+    'tools\trajectory\test_carrier_frame_transport_blueprint_schema.py',
     'tools\blueprint\Build-CameraOperatorOverrideResetGraph.py',
     'tools\blueprint\Test-CameraOperatorOverrideResetContracts.py',
     'tools\blueprint\snippets\reset-camera-operator-override-step-v1.eddgraph',
@@ -1542,6 +1546,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_operator_override_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera operator-override Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_carrier_frame_transport_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Carrier-frame transport reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_carrier_frame_transport_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Carrier-frame transport Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 $cameraOperatorRoot = Join-Path $scratchRoot ("edd-camera-operator-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraOperatorRoot -Force | Out-Null

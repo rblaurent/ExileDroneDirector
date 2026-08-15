@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after bounded event-plan validation graph
+Last updated: 2026-08-15 after bounded Cue crossing collection graph
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,7 +23,7 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the deterministic bounded event-plan validator in the
+- Current checkpoint is deterministic bounded Cue crossing collection in the
   offline event-adapter family, downstream of the complete live-accepted seven-
   graph native playback-application boundary. Unreal remains closed; no event
   graph has been installed or executed yet.
@@ -2265,6 +2265,27 @@ families through an independent interpreter; regeneration and reciprocal-link
 contracts are scaffold-owned. The complete MVP-required regression passes with
 2,353 output lines in 172.7 seconds. Next: collect deterministic forward/reverse
 Cue crossings with scrub zero-dispatch and bounded frame-drop recovery.
+
+`CollectCrossedCuesV1` is deterministic at 67 full / 66 paste nodes with 91 /
+90 reciprocal links. It clears crossing scratch first, requires fresh plan-
+validation authority, and gives scrubbing an immediate successful zero-dispatch
+path. Real playback requires direction-consistent previous/current time, then
+walks the canonical compiled time array once. Exact half-open forward/reverse
+intervals and closed direction policies decide eligibility; nonfinite Cue time
+invalidates the stage, and no more than 32 crossings may be retained per frame.
+The scratch array remains in canonical ascending compiled-index order; later
+dispatch selects from the front for forward playback and the back for reverse,
+which produces the reference's execution order without reverse-loop machinery.
+
+The collector owns only crossing scratch, its stage flag, and diagnostic. It has
+no ledger, authorization, dispatch-result, camera, repository, HUD, or UI access.
+Both forms match 160 seeded forward/reverse queries plus scrub, inactive/order,
+nonfinite, and exact-cap failures through an independent interpreter; exact
+regeneration and reciprocal-link contracts are scaffold-owned. The complete
+MVP-required regression passes with 2,357 output lines in 169.7 seconds. Next:
+select the direction-correct eligible Cue, apply repeat-ledger filtering, and
+authorize its closed manifest/binding request without executing any world
+mutation.
 
 ## Critical design mismatch
 

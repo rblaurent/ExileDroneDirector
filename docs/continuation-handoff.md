@@ -2146,6 +2146,31 @@ lines and Unreal closed. Next: build the shared native runtime fixture, warm
 class-default transaction/rollback probe, automatic player-owned PIE probe,
 postcompile exporter/interpreter checks, and failure-safe default restoration.
 
+The native adapter warm-runtime/PIE acceptance harness is now frozen offline.
+The shared fixture stages a final accepted playback snapshot with distinct
+45-degree body world and 30-degree relative gimbal rotations, reconstructs a
+separate world-gimbal validation track, and provides canonical comfort-adjusted
+engine channels. The warm CDO probe runs valid and corrupt-pose inputs through
+only `ApplyComposedCameraPlaybackFrameV1`, proves camera-less fail-closed
+behavior, immutable playback results/baselines, inactive restore idempotence,
+and complete touched-default restoration.
+
+The automatic player-owned PIE harness owns three independent worlds: successful
+apply/repeat/restore; unsupported optional lens request after pose placement,
+requiring exact three-domain rollback; and corrupt world-gimbal reconstruction,
+requiring zero native writes. It verifies actor position/body ownership,
+component-only relative-gimbal ownership, preserved scales/component
+translation, lens fields, one-shot verbatim baselines, frame counts, exact actor/
+component/engine restoration, stable diagnostics, immutable playback results,
+Drone Mode exit, PIE teardown, callback cleanup, and class-default restoration
+on success or exception. It never compiles inside the Slate callback. Static
+contracts compile all five native live tools, require those markers/lifecycles,
+and forbid legacy `CameraTransform`. The complete pre-editor MVP-required
+regression passes in 165.7 seconds with 2,290 output lines. Next: push this clean
+preparedness checkpoint, then run the documented one-editor configure/paste/
+precompile-contract/compile/postcompile-export/runtime/PIE/default-restore/save/
+shutdown/sync/cold-proof sequence for all seven graphs.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

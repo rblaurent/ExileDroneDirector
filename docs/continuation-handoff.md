@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after bounded Cue crossing collection graph
+Last updated: 2026-08-15 after bounded Cue selection/repeat filtering
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,10 +23,10 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is deterministic bounded Cue crossing collection in the
-  offline event-adapter family, downstream of the complete live-accepted seven-
-  graph native playback-application boundary. Unreal remains closed; no event
-  graph has been installed or executed yet.
+- Current checkpoint is direction-correct Cue selection and repeat-ledger
+  filtering in the offline event-adapter family, downstream of the complete
+  live-accepted seven-graph native playback-application boundary. Unreal remains
+  closed; no event graph has been installed or executed yet.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -2245,12 +2245,12 @@ adapters remain later bounded seams before temporary debug controls and full
 keyboard dogfood. Polished UI starts only after dogfood.
 
 `ResetBoundedEventDispatchResultV1` is the first deterministic event graph. It
-now contains 7 full / 6 paste nodes with 6 / 5 reciprocal links and fail-closes
-both stage flags plus result authority, authorization, selected index, and
-diagnostic code. The complete compiled Cue plan, playback query/session identity,
-authorization context, crossing scratch, and execution ledger remain preserved.
-The extra stage invalidation closes stale prior-frame validation reuse before
-the next graph runs.
+now contains 9 full / 8 paste nodes with 8 / 7 reciprocal links and fail-closes
+all three stage flags, candidate-repeat scratch, result authority, authorization,
+selected index, and diagnostic code. The complete compiled Cue plan, playback
+query/session identity, authorization context, crossing scratch, and execution
+ledger remain preserved. The stage invalidation closes stale prior-frame
+validation, collection, or selection reuse before the next graph runs.
 
 `ValidateBoundedEventPlanV1` is deterministic at 117 full / 116 paste nodes with
 138 / 137 reciprocal links. It requires accepted plan authority, 1..256 aligned
@@ -2285,6 +2285,28 @@ regeneration and reciprocal-link contracts are scaffold-owned. The complete
 MVP-required regression passes with 2,357 output lines in 169.7 seconds. Next:
 select the direction-correct eligible Cue, apply repeat-ledger filtering, and
 authorize its closed manifest/binding request without executing any world
+mutation.
+
+`SelectEligibleCrossedCueV1` is deterministic at 66 full / 65 paste nodes with
+80 / 79 reciprocal links. It requires fresh crossing authority, validates the
+three parallel ledger arrays and 1,024-entry cap, then filters every canonical
+crossing against Event ID plus repeat policy. Once-per-session and manual-reset
+Cues remain disarmed after any prior ledger entry; every-loop Cues compare the
+exact current loop and direction. Forward playback retains the first eligible
+compiled index, while reverse playback replaces the selection through the loop
+and therefore retains the last. Empty crossings and fully exhausted crossings
+publish distinct typed selection states.
+
+Selection explicitly invalidates dispatch-result and authorization authority.
+It cannot inspect adapter/operation/scope/payload/binding/permission state and
+cannot execute any target. Both forms match 200 seeded direction/ledger queries
+plus invalid crossing, malformed ledger, and empty-crossing cases through an
+independent interpreter; exact regeneration and reciprocal-link contracts are
+scaffold-owned. The complete MVP-required regression passes with 2,361 output
+lines in 182.6 seconds. The schema now separates `SelectEligibleCrossedCueV1` from
+`AuthorizeSelectedCueV1`, with independent selection-stage authority. Next:
+authorize the selected Cue against the closed five-operation manifest and exact
+runtime binding context, returning only a typed decision and performing no world
 mutation.
 
 ## Critical design mismatch

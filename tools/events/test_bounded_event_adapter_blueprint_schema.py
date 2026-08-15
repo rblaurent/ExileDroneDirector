@@ -26,18 +26,19 @@ class BoundedEventAdapterBlueprintSchemaContracts(unittest.TestCase):
                 "ResetBoundedEventDispatchResultV1",
                 "ValidateBoundedEventPlanV1",
                 "CollectCrossedCuesV1",
-                "AuthorizeCrossedCueV1",
+                "SelectEligibleCrossedCueV1",
+                "AuthorizeSelectedCueV1",
                 "CommitCueExecutionLedgerV1",
                 "ResetManualCueLedgerEntryV1",
                 "DispatchBoundedPlaybackEventsV1",
             ],
         )
-        self.assertEqual([function["stage"] for function in SCHEMA["functions"]], list(range(7)))
+        self.assertEqual([function["stage"] for function in SCHEMA["functions"]], list(range(8)))
 
     def test_parallel_compiled_arrays_and_authority_are_frozen(self):
         variables = SCHEMA["variables"]
-        self.assertEqual(len(variables), 46)
-        self.assertEqual(len({item["name"] for item in variables}), 46)
+        self.assertEqual(len(variables), 48)
+        self.assertEqual(len({item["name"] for item in variables}), 48)
         compiled = [item for item in variables if item["role"] == "compiled"]
         self.assertEqual(len(compiled), 16)
         self.assertTrue(all(item["container"] == "Array" and item["default"] == [] for item in compiled))
@@ -49,6 +50,8 @@ class BoundedEventAdapterBlueprintSchemaContracts(unittest.TestCase):
         self.assertFalse(by_name["EventServerRevisionApprovedV1"]["default"])
         self.assertEqual(by_name["EventPlanValidationValidV1"]["role"], "stage")
         self.assertEqual(by_name["EventCrossingCollectionValidV1"]["role"], "stage")
+        self.assertEqual(by_name["EventSelectionValidV1"]["role"], "stage")
+        self.assertEqual(by_name["EventCandidateAlreadyExecutedV1"]["role"], "scratch")
         for name in (
             "EventResolvedBindingIdsV1",
             "EventResolvedBindingDistancesV1",
@@ -84,7 +87,8 @@ class BoundedEventAdapterBlueprintSchemaContracts(unittest.TestCase):
             "ResetBoundedEventDispatchResultV1",
             "ValidateBoundedEventPlanV1",
             "CollectCrossedCuesV1",
-            "AuthorizeCrossedCueV1",
+            "SelectEligibleCrossedCueV1",
+            "AuthorizeSelectedCueV1",
         ])
         forbidden = SCHEMA["architecture"]["forbidden"]
         for value in (

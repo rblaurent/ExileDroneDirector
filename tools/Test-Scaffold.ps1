@@ -216,6 +216,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-BoundedEventCrossingCollectionContracts.py',
     'tools\blueprint\snippets\collect-crossed-cues-v1.eddgraph',
     'tools\blueprint\snippets\collect-crossed-cues-v1-paste.eddgraph',
+    'tools\blueprint\Build-BoundedEventCueSelectionGraph.py',
+    'tools\blueprint\Test-BoundedEventCueSelectionContracts.py',
+    'tools\blueprint\snippets\select-eligible-crossed-cue-v1.eddgraph',
+    'tools\blueprint\snippets\select-eligible-crossed-cue-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1.eddgraph',
@@ -1824,6 +1828,37 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventCrossingCollectionContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Bounded event crossing contracts failed with exit code $LASTEXITCODE." }
+}
+$boundedEventSelection = Join-Path $boundedEventRoot 'select-eligible-crossed-cue-v1.eddgraph'
+$boundedEventSelectionPaste = Join-Path $boundedEventRoot 'select-eligible-crossed-cue-v1-paste.eddgraph'
+$boundedEventSelectionRepeat = Join-Path $boundedEventRoot 'select-eligible-crossed-cue-v1-repeat.eddgraph'
+$boundedEventSelectionRepeatPaste = Join-Path $boundedEventRoot 'select-eligible-crossed-cue-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($boundedEventSelection, $boundedEventSelectionPaste),
+    @($boundedEventSelectionRepeat, $boundedEventSelectionRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-BoundedEventCueSelectionGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event selection generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($boundedEventSelection, $boundedEventSelectionRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\select-eligible-crossed-cue-v1.eddgraph')),
+    @($boundedEventSelectionPaste, $boundedEventSelectionRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\select-eligible-crossed-cue-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Bounded event selection regeneration diverged." }
+}
+foreach ($graphCase in @(
+    @($boundedEventSelection, $false),
+    @($boundedEventSelectionPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event selection link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventCueSelectionContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event selection contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraPlaybackRoot = Join-Path $scratchRoot ("edd-camera-playback-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraPlaybackRoot -Force | Out-Null

@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after carrier-frame tangent checkpoint
+Last updated: 2026-08-15 after carrier-frame transport-sample checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is deterministic carrier-frame tangent construction
-  described below; after the checkpoint push, HEAD must equal `origin/main`
-  before twist-minimizing quaternion transport graph work starts
+- Current checkpoint is deterministic twist-minimizing carrier-frame quaternion
+  transport described below; after the checkpoint push, HEAD must equal
+  `origin/main` before atomic compiled-track commit work starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1586,6 +1586,28 @@ the complete MVP-required scaffold passes in 141.1 seconds with Unreal closed.
 Next: build the actual carrier quaternion samples by deterministic initial-basis
 selection and shortest-arc parallel transport, keeping this tangent track and
 authored body/gimbal immutable.
+
+`BuildCarrierFrameTransportSamplesV1` is now deterministic at 128 full / 127
+paste nodes with 205 / 204 reciprocal links. It initializes from world up, uses
+the deterministic least-aligned X/Y fallback for vertical motion, and builds
+each later frame by the shortest-arc quaternion from the prior tangent. The
+prior up vector is rotated, projected back onto the new tangent plane, and
+re-orthogonalized; a bounded cross-product fallback handles numerical collapse.
+`MakeRotFromXZ` creates the basis through an already-proven native node, and an
+explicit component dot/negation keeps consecutive quaternions in one
+hemisphere.
+
+The graph reads only the candidate tangent track and its own scratch/quaternion
+candidate state. Authored body/gimbal, source positions, compiled/evaluation
+state, operator state, playback, document, repository, events, and server state
+are structurally absent. Both forms execute 104 straight/vertical/held/
+reversing/planar/seeded paths forward and reverse against the frozen reference,
+proving unit quaternions, exact forward/tangent alignment, stable planar world
+up, deterministic vertical fallback, and hemisphere continuity. Regeneration
+is byte-identical, reciprocal links are exact, and the complete MVP-required
+scaffold passes in 142.7 seconds with Unreal closed. Next: preflight and
+atomically copy the complete tangent/quaternion pair plus timing, publishing
+compiled validity last.
 
 ## Critical design mismatch
 

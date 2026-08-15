@@ -2523,6 +2523,18 @@ order. Only after the complete offline family is green should one editor be
 opened for live acceptance. Target binding and Event Anchors remain the next
 seam after State Clips, exactly as ordered in `docs/event-system.md`.
 
+`ResetStateClipEvaluationV1` is deterministic at 25 full / 24 paste nodes with
+24 / 23 reciprocal links. It invalidates validation, collection, commit,
+candidate, and result authority; clears exactly the nine private candidate
+arrays; and preserves all 19 compiled arrays, plan duration/authority, the three
+query inputs, all nine prior accepted result arrays, and prior result time.
+Both forms pass exact graph ownership, reciprocal-link, poisoned-state
+execution, and regeneration contracts. The complete MVP-required regression
+passes with 2,447 captured output lines in 176.9 seconds. Next: validate the
+compiled State Clip plan, including empty-plan support, complete 19-array shape,
+bounded types and policies, exact half-open ranges, lead constraints, stable
+IDs, and same-target overlap rejection.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

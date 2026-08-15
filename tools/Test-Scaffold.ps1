@@ -208,6 +208,10 @@ $requiredFiles = @(
     'tools\events\test_state_clip_evaluation_reference.py',
     'tools\events\state_clip_evaluation_blueprint_schema.json',
     'tools\events\test_state_clip_evaluation_blueprint_schema.py',
+    'tools\blueprint\Build-StateClipEvaluationResetGraph.py',
+    'tools\blueprint\Test-StateClipEvaluationResetContracts.py',
+    'tools\blueprint\snippets\reset-state-clip-evaluation-v1.eddgraph',
+    'tools\blueprint\snippets\reset-state-clip-evaluation-v1-paste.eddgraph',
     'tools\blueprint\Build-BoundedEventDispatchResetGraph.py',
     'tools\blueprint\Test-BoundedEventDispatchResetContracts.py',
     'tools\blueprint\snippets\reset-bounded-event-dispatch-result-v1.eddgraph',
@@ -1783,6 +1787,39 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\unreal\test_bounded_event_adapter_validators.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Bounded event-adapter live-tool contracts failed with exit code $LASTEXITCODE."
+}
+$stateClipRoot = Join-Path $scratchRoot ("edd-state-clips-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $stateClipRoot -Force | Out-Null
+$stateClipReset = Join-Path $stateClipRoot 'reset-state-clip-evaluation-v1.eddgraph'
+$stateClipResetPaste = Join-Path $stateClipRoot 'reset-state-clip-evaluation-v1-paste.eddgraph'
+$stateClipResetRepeat = Join-Path $stateClipRoot 'reset-state-clip-evaluation-v1-repeat.eddgraph'
+$stateClipResetRepeatPaste = Join-Path $stateClipRoot 'reset-state-clip-evaluation-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($stateClipReset, $stateClipResetPaste),
+    @($stateClipResetRepeat, $stateClipResetRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-StateClipEvaluationResetGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "State Clip reset generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($stateClipReset, $stateClipResetRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-state-clip-evaluation-v1.eddgraph')),
+    @($stateClipResetPaste, $stateClipResetRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-state-clip-evaluation-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "State Clip reset regeneration diverged." }
+}
+foreach ($graphCase in @(
+    @($stateClipReset, $false),
+    @($stateClipResetPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "State Clip reset link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-StateClipEvaluationResetContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "State Clip reset contracts failed with exit code $LASTEXITCODE." }
 }
 $boundedEventRoot = Join-Path $scratchRoot ("edd-bounded-events-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $boundedEventRoot -Force | Out-Null

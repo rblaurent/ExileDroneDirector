@@ -2028,6 +2028,30 @@ required regression passes in 164.7 seconds with 2,272 output lines and Unreal
 closed. Next: capture the verbatim actor world Transform, component relative
 Transform, and accepted engine baseline exactly once per native session.
 
+`CaptureCameraPlaybackNativeStateV1` is deterministic at 20 full / 19 paste
+nodes with 20 / 19 reciprocal links. Accepted native preflight gates a session-
+active check; an already active session is a strict no-op. A new session stages
+`native_capture_failed`, invokes the accepted engine baseline capture, and only
+after engine stage/session authority succeeds copies the actor's native
+`GetTransform` result and the Cine Camera component's native
+`GetRelativeTransform` result directly into the two baseline Transforms. It
+does not break, normalize, or reconstruct either value. Applied-frame count is
+initialized to zero, the diagnostic clears, and native session authority
+publishes last.
+
+Engine-capture failure preserves both prior native baselines, count, and
+inactive authority. Exact actor/component ownership and the const-reference
+native Transform outputs are structurally enforced. Pose inputs/results,
+engine input/baseline/current values, native writes, body/gimbal/cinematic/
+carrier authorship, persistence, events, server, HUD, and UI are absent. Both
+forms execute 80 opaque verbatim snapshots, repeated-capture immutability,
+preflight no-op, and engine-failure preservation; both regenerate byte-
+identically and are full-scaffold owned. The complete MVP-required regression
+passes in 165.9 seconds with 2,276 output lines and Unreal closed. Next: apply
+one fully preflighted frame as actor world position/body rotation, component
+relative gimbal rotation, and the accepted engine-property transaction, with
+defensive rollback on any native failure.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

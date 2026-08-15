@@ -1945,6 +1945,33 @@ already accepted transactional engine-property helpers without granting them
 body/gimbal authorship; bounded event adapters and debug controls then lead to
 keyboard dogfood, after which polished UI may begin.
 
+The playback-result-to-native-camera boundary is now frozen offline at
+reference/schema level. One accepted playback snapshot maps position and body
+world rotation to the drone actor, maps only the separately derived gimbal-
+relative quaternion to the Cine Camera component, and retains world gimbal only
+to prove reconstruction. Component relative translation, actor scale, and
+component scale remain untouched. Final comfort-adjusted filmback plus all 13
+channels value-copy directly into the existing `CameraApplyInput*` transaction;
+the accepted engine validator/capture/apply/restore helpers retain exclusive
+lens, focus, post-process, and hidden-override ownership.
+
+The integration preflights playback authority, finite/unit pose, exact
+`body * relative == world_gimbal`, the local drone/component reference, the
+canonical 15-target frame, frozen capability identity, required availability,
+and unavailable-target neutrality before any native write. Actor/component and
+engine baselines capture once per session and restore together on stop,
+completion, cancellation, invalid-camera recovery, normal exit, or emergency
+exit. An early reference test caught last-bit quaternion normalization of the
+captured baseline; validation is now read-only and exact restoration preserves
+the verbatim native Transform snapshots. Eight reference and six schema tests
+pass, including distinct setter ownership, corrupt reconstruction, poisoned
+shape/nonfinite input, unavailable optional targets, non-overwriting repeated
+capture, exact idempotent restoration, and forward/reverse history independence.
+The complete MVP-required scaffold passes in 163.8 seconds. No editor was opened.
+Next: deterministic reset, stage, validate, capture, apply, restore, and thin
+orchestrator graphs/interpreters, plus offline configurator/runtime/PIE tooling,
+before the next single-editor acceptance session.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

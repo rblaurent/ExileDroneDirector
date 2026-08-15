@@ -1,0 +1,56 @@
+{
+  "schema": "edd.camera-playback-native-application.v1",
+  "version": 1,
+  "asset": "Local/Core/Client/BPC_EDD_ClientDirector.uasset",
+  "purpose": "Transactionally apply one accepted playback snapshot to the local drone actor, Cine Camera component, and accepted engine-property applicator without collapsing body and gimbal authorship.",
+  "dependencies": {
+    "playback": "edd.camera-playback-frame.v1",
+    "engineApplication": "edd.camera-engine-application.v1",
+    "cameraActor": "/Game/Mods/ExileDroneDirector/Core/Camera/BP_EDD_DroneCamera",
+    "cameraComponent": "DroneCamera"
+  },
+  "variables": [
+    {"name":"CameraPlaybackNativeInputPositionV1","type":"Vector","container":"None","role":"input","default":[0.0,0.0,0.0]},
+    {"name":"CameraPlaybackNativeInputBodyWorldQuatV1","type":"Quat","container":"None","role":"input","default":[0.0,0.0,0.0,1.0]},
+    {"name":"CameraPlaybackNativeInputGimbalWorldQuatV1","type":"Quat","container":"None","role":"input","default":[0.0,0.0,0.0,1.0]},
+    {"name":"CameraPlaybackNativeInputGimbalRelativeQuatV1","type":"Quat","container":"None","role":"input","default":[0.0,0.0,0.0,1.0]},
+    {"name":"CameraPlaybackNativeInputValidV1","type":"Boolean","container":"None","role":"input","default":false},
+    {"name":"CameraPlaybackNativeStageValidV1","type":"Boolean","container":"None","role":"stage","default":false},
+    {"name":"CameraPlaybackNativePreflightValidV1","type":"Boolean","container":"None","role":"stage","default":false},
+    {"name":"CameraPlaybackNativeBaselineActorTransformV1","type":"Transform","container":"None","role":"baseline","default":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[1.0,1.0,1.0]}},
+    {"name":"CameraPlaybackNativeBaselineComponentRelativeTransformV1","type":"Transform","container":"None","role":"baseline","default":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[1.0,1.0,1.0]}},
+    {"name":"CameraPlaybackNativeSessionActiveV1","type":"Boolean","container":"None","role":"session","default":false},
+    {"name":"CameraPlaybackNativeAppliedFrameCountV1","type":"Integer","container":"None","role":"session","default":0},
+    {"name":"CameraPlaybackNativeFailureCodeV1","type":"String","container":"None","role":"result","default":""},
+    {"name":"CameraPlaybackNativeResultValidV1","type":"Boolean","container":"None","role":"result","default":false}
+  ],
+  "functions": [
+    {"name":"ResetCameraPlaybackNativeApplicationResultV1","stage":0},
+    {"name":"StageCameraPlaybackNativeApplicationInputsV1","stage":1,"reads":"CameraPlaybackResult*","writes":["CameraPlaybackNativeInput*","CameraApplyInput*"]},
+    {"name":"ValidateCameraPlaybackNativeApplicationInputsV1","stage":2,"uses":["ValidateCameraEngineApplicationInputsV1"]},
+    {"name":"CaptureCameraPlaybackNativeStateV1","stage":3,"engineReads":true,"uses":["CaptureCameraEngineStateV1"]},
+    {"name":"ApplyCameraPlaybackNativeFrameV1","stage":4,"engineWrites":true,"uses":["ApplyCameraEngineFrameV1"]},
+    {"name":"RestoreCameraPlaybackNativeStateV1","stage":5,"engineWrites":true,"uses":["RestoreCameraEngineStateV1"]},
+    {"name":"ApplyComposedCameraPlaybackFrameV1","stage":6,"uses":["ResetCameraPlaybackNativeApplicationResultV1","StageCameraPlaybackNativeApplicationInputsV1","ValidateCameraPlaybackNativeApplicationInputsV1","CaptureCameraPlaybackNativeStateV1","ApplyCameraPlaybackNativeFrameV1"]}
+  ],
+  "architecture": {
+    "authorship": "CameraPlaybackResultBodyWorldQuatV1 is the drone actor world rotation. CameraPlaybackResultGimbalRelativeQuatV1 alone is the Cine Camera component relative rotation. CameraPlaybackResultGimbalWorldQuatV1 is retained only to prove body * relative reconstructs the final world view.",
+    "position": "CameraPlaybackResultPositionV1 is the drone actor world position. Component relative translation and both actor/component scales are preserved.",
+    "lens": "The final playback filmback and thirteen comfort-adjusted channel values are value-copied directly into CameraApplyInput* in canonical order, then the already accepted validation, capture, apply, and restore helpers retain engine-property ownership.",
+    "preflight": "Playback authority, finite position, three finite unit quaternions, exact world-gimbal reconstruction, valid DroneCameraRef and DroneCamera component, canonical 15-target engine input, frozen capability identity, required availability, and optional-target neutrality all pass before the first actor, component, lens, focus, or post-process write.",
+    "capture": "The complete actor world Transform, complete component relative Transform, and accepted engine-property baseline are captured once per active playback-native session. Repeated capture cannot replace either baseline.",
+    "restore": "Normal stop, completion, cancellation, invalid-camera recovery, normal Drone Mode exit, and emergency exit restore the exact actor/component transforms and complete engine-property baseline before camera ownership is released. Repeated restore is a no-op.",
+    "failure": "Rejected staging or preflight performs zero native writes. Actor placement failure restores or preserves the captured pose and cannot call the engine writer. A defensive engine-apply failure restores the captured actor/component and engine state and keeps a stable failure code.",
+    "forbidden": "CinematicPoseResultQuatV1, CameraTransform rotation, CarrierFrameResultQuatV1, authored/compiled arrays, persistence, server state, HUD, UI, and input dispatch are forbidden. Body and gimbal can never share a source getter or native setter."
+  },
+  "contracts": {
+    "stageOwnership": "Stage reads only the accepted CameraPlaybackResult snapshot and value-copies pose plus filmback/channels. It cannot mutate playback, channel-result, authored, candidate, or compiled state.",
+    "nativeOwnership": "The actor setter receives position plus body world rotation; the component setter receives only the derived relative gimbal rotation. The world-gimbal value is validation-only.",
+    "transaction": "Application preflights the complete pose and engine plan, captures baselines once, applies one native frame, and publishes CameraPlaybackNativeResultValidV1 last.",
+    "lifecycle": "The integration adapter never releases view ownership itself. Every existing ownership-release path must invoke RestoreCameraPlaybackNativeStateV1 before view-target restoration or reference teardown."
+  },
+  "acceptance": {
+    "offline": "Reference tests cover distinct actor/component ownership, canonical comfort-adjusted lens staging, corrupt reconstruction, invalid authority/shape/nonfinite values, unavailable optional targets, repeated baseline capture, exact restoration, and forward/reverse history independence.",
+    "live": "One editor must prove every generated graph before and after compile, warm engine-neutral semantics, real player-owned PIE actor/component/lens mutation and exact restoration across completion, cancellation, normal exit, emergency exit, and invalid-camera failure, then guarded sync, cold load/runtime, and complete regression."
+  }
+}

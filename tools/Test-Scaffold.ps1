@@ -196,6 +196,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_playback_frame_reference.py',
     'tools\trajectory\camera_playback_frame_blueprint_schema.json',
     'tools\trajectory\test_camera_playback_frame_blueprint_schema.py',
+    'tools\trajectory\camera_playback_native_application_reference.py',
+    'tools\trajectory\test_camera_playback_native_application_reference.py',
+    'tools\trajectory\camera_playback_native_application_blueprint_schema.json',
+    'tools\trajectory\test_camera_playback_native_application_blueprint_schema.py',
     'tools\blueprint\Build-CameraPlaybackFrameResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackFrameResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-frame-v1.eddgraph',
@@ -1652,6 +1656,14 @@ if ($LASTEXITCODE -ne 0) {
 & python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_playback_frame_blueprint_schema.py')
 if ($LASTEXITCODE -ne 0) {
     throw "Camera playback-frame Blueprint schema contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_playback_native_application_reference.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera playback native-application reference contracts failed with exit code $LASTEXITCODE."
+}
+& python (Join-Path $ProjectRoot 'tools\trajectory\test_camera_playback_native_application_blueprint_schema.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "Camera playback native-application Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
 $cameraPlaybackRoot = Join-Path $scratchRoot ("edd-camera-playback-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraPlaybackRoot -Force | Out-Null

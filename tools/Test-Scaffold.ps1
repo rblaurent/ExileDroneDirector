@@ -220,6 +220,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraPlaybackFrameCommitContracts.py',
     'tools\blueprint\snippets\commit-camera-playback-frame-v1.eddgraph',
     'tools\blueprint\snippets\commit-camera-playback-frame-v1-paste.eddgraph',
+    'tools\blueprint\Build-CameraPlaybackFrameComposeGraph.py',
+    'tools\blueprint\Test-CameraPlaybackFrameComposeContracts.py',
+    'tools\blueprint\snippets\compose-camera-playback-frame-v1.eddgraph',
+    'tools\blueprint\snippets\compose-camera-playback-frame-v1-paste.eddgraph',
     'tools\blueprint\Build-CarrierFrameTransportResetGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportResetContracts.py',
     'tools\blueprint\snippets\reset-carrier-frame-transport-v1.eddgraph',
@@ -1824,6 +1828,37 @@ if ($LASTEXITCODE -ne 0) { throw "Camera playback commit paste contracts failed 
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
     --project-root $ProjectRoot --graph $cameraPlaybackCommitPaste
 if ($LASTEXITCODE -ne 0) { throw "Camera playback commit paste links failed with exit code $LASTEXITCODE." }
+$cameraPlaybackCompose = Join-Path $cameraPlaybackRoot 'compose-camera-playback-frame-v1.eddgraph'
+$cameraPlaybackComposePaste = Join-Path $cameraPlaybackRoot 'compose-camera-playback-frame-v1-paste.eddgraph'
+$cameraPlaybackComposeRepeat = Join-Path $cameraPlaybackRoot 'compose-camera-playback-frame-v1-repeat.eddgraph'
+$cameraPlaybackComposeRepeatPaste = Join-Path $cameraPlaybackRoot 'compose-camera-playback-frame-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($cameraPlaybackCompose, $cameraPlaybackComposePaste),
+    @($cameraPlaybackComposeRepeat, $cameraPlaybackComposeRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraPlaybackFrameComposeGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera playback compose generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraPlaybackCompose, $cameraPlaybackComposeRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\compose-camera-playback-frame-v1.eddgraph')),
+    @($cameraPlaybackComposePaste, $cameraPlaybackComposeRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\compose-camera-playback-frame-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Camera playback compose regeneration diverged." }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraPlaybackFrameComposeContracts.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackCompose
+if ($LASTEXITCODE -ne 0) { throw "Camera playback compose full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackCompose
+if ($LASTEXITCODE -ne 0) { throw "Camera playback compose full links failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraPlaybackFrameComposeContracts.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackComposePaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera playback compose paste contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackComposePaste
+if ($LASTEXITCODE -ne 0) { throw "Camera playback compose paste links failed with exit code $LASTEXITCODE." }
 $carrierFrameRoot = Join-Path $scratchRoot ("edd-carrier-frame-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $carrierFrameRoot -Force | Out-Null
 $carrierFrameReset = Join-Path $carrierFrameRoot 'reset-carrier-frame-transport-v1.eddgraph'

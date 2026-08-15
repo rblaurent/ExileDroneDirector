@@ -1855,6 +1855,22 @@ MVP-required scaffold passes in 160.2 seconds. Next: generate the tiny exact
 eight-call `ComposeCameraPlaybackFrameV1` coordinator, then run the complete
 seven-graph offline family before preparing editor acceptance.
 
+`ComposeCameraPlaybackFrameV1` completes the seven-graph offline playback
+family at 9 full / 8 paste nodes with 8 / 7 reciprocal links. Its only behavior
+is the exact ordered chain: reset playback; stage one absolute time; evaluate
+the four accepted sources; stage the operator; apply operator override; stage
+viewer comfort; apply viewer comfort; then atomically commit the final frame.
+It owns no variable, validation, branch, macro, reroute, fallback, or policy,
+and the final commit remains reachable after every injected earlier-stage
+failure so that one fail-closed boundary owns publication authority.
+
+Both forms regenerate byte-identically and pass exact call/link contracts. The
+complete MVP-required scaffold, now covering all seven playback graphs together
+with every older backend seam and live topology, passes in 161.9 seconds. The
+editor may now be opened only through the documented single-editor acceptance
+sequence after deterministic configurator, export/interpreter, restore,
+runtime, PIE, cold-load, and topology tools for this family are ready offline.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

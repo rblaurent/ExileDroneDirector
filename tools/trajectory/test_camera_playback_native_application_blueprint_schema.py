@@ -91,6 +91,17 @@ class CameraPlaybackNativeApplicationBlueprintSchemaContracts(unittest.TestCase)
             functions["RestoreCameraPlaybackNativeStateV1"]["uses"],
             ["RestoreCameraEngineStateV1"],
         )
+        self.assertEqual(
+            functions["ApplyComposedCameraPlaybackFrameV1"]["uses"],
+            [
+                "ResetCameraPlaybackNativeApplicationResultV1",
+                "ResetCameraEngineApplicationResultV1",
+                "StageCameraPlaybackNativeApplicationInputsV1",
+                "ValidateCameraPlaybackNativeApplicationInputsV1",
+                "CaptureCameraPlaybackNativeStateV1",
+                "ApplyCameraPlaybackNativeFrameV1",
+            ],
+        )
         self.assertIn("CameraApplyInput*", SCHEMA["architecture"]["lens"])
         self.assertNotIn("CameraChannelResult", SCHEMA["architecture"]["lens"])
 
@@ -103,6 +114,7 @@ class CameraPlaybackNativeApplicationBlueprintSchemaContracts(unittest.TestCase)
         self.assertIn("Repeated restore is a no-op", architecture["restore"])
         self.assertIn("zero native writes", architecture["failure"])
         self.assertIn("publishes CameraPlaybackNativeResultValidV1 last", SCHEMA["contracts"]["transaction"])
+        self.assertIn("resets both native and engine result authority", SCHEMA["contracts"]["transaction"])
 
     def test_forbidden_legacy_and_unrelated_ownership_is_explicit(self):
         forbidden = SCHEMA["architecture"]["forbidden"]

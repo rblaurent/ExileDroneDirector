@@ -2052,6 +2052,18 @@ one fully preflighted frame as actor world position/body rotation, component
 relative gimbal rotation, and the accepted engine-property transaction, with
 defensive rollback on any native failure.
 
+Before native apply implementation, a transaction-order review found and fixed
+one frozen-contract defect: `CameraApplyResultValidV1` is result authority and
+can remain true from a prior frame, while the accepted low-level engine writer
+assumes its coordinator has reset that result. The native coordinator contract
+now explicitly calls `ResetCameraEngineApplicationResultV1` after native reset
+and before stage/validate/capture/apply. Stage and validation then rebuild fresh
+engine-input and scratch authority, so native apply can never interpret stale
+engine success as the current frame's result. No accepted engine helper or
+body/gimbal ownership was changed. All eight reference tests, six schema tests,
+and the complete 2,275-line regression pass in 165.5 seconds with Unreal
+closed. Next remains the native apply/rollback graph under this corrected order.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

@@ -31,7 +31,7 @@
     {"name":"CaptureCameraPlaybackNativeStateV1","stage":3,"engineReads":true,"uses":["CaptureCameraEngineStateV1"]},
     {"name":"ApplyCameraPlaybackNativeFrameV1","stage":4,"engineWrites":true,"uses":["ApplyCameraEngineFrameV1"]},
     {"name":"RestoreCameraPlaybackNativeStateV1","stage":5,"engineWrites":true,"uses":["RestoreCameraEngineStateV1"]},
-    {"name":"ApplyComposedCameraPlaybackFrameV1","stage":6,"uses":["ResetCameraPlaybackNativeApplicationResultV1","StageCameraPlaybackNativeApplicationInputsV1","ValidateCameraPlaybackNativeApplicationInputsV1","CaptureCameraPlaybackNativeStateV1","ApplyCameraPlaybackNativeFrameV1"]}
+    {"name":"ApplyComposedCameraPlaybackFrameV1","stage":6,"uses":["ResetCameraPlaybackNativeApplicationResultV1","ResetCameraEngineApplicationResultV1","StageCameraPlaybackNativeApplicationInputsV1","ValidateCameraPlaybackNativeApplicationInputsV1","CaptureCameraPlaybackNativeStateV1","ApplyCameraPlaybackNativeFrameV1"]}
   ],
   "architecture": {
     "authorship": "CameraPlaybackResultBodyWorldQuatV1 is the drone actor world rotation. CameraPlaybackResultGimbalRelativeQuatV1 alone is the Cine Camera component relative rotation. CameraPlaybackResultGimbalWorldQuatV1 is retained only to prove body * relative reconstructs the final world view.",
@@ -46,7 +46,7 @@
   "contracts": {
     "stageOwnership": "Stage reads only the accepted CameraPlaybackResult snapshot and value-copies pose plus filmback/channels. It cannot mutate playback, channel-result, authored, candidate, or compiled state.",
     "nativeOwnership": "The actor setter receives position plus body world rotation; the component setter receives only the derived relative gimbal rotation. The world-gimbal value is validation-only.",
-    "transaction": "Application preflights the complete pose and engine plan, captures baselines once, applies one native frame, and publishes CameraPlaybackNativeResultValidV1 last.",
+    "transaction": "Application resets both native and engine result authority before staging, preflights the complete pose and engine plan, captures baselines once, applies one native frame, and publishes CameraPlaybackNativeResultValidV1 last.",
     "lifecycle": "The integration adapter never releases view ownership itself. Every existing ownership-release path must invoke RestoreCameraPlaybackNativeStateV1 before view-target restoration or reference teardown."
   },
   "acceptance": {

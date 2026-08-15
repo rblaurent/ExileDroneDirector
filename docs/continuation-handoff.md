@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after carrier-frame atomic-commit checkpoint
+Last updated: 2026-08-15 after carrier-frame compile-coordinator checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the atomic compiled carrier-frame publication described
-  below; after the checkpoint push, HEAD must equal `origin/main` before the
-  compile coordinator and absolute-time evaluator graphs are built
+- Current checkpoint is the complete seven-graph carrier-frame compiler
+  described below; after the checkpoint push, HEAD must equal `origin/main`
+  before the absolute-time evaluator graph is built
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1627,6 +1627,22 @@ playback, document, event, repository, and server state are absent. Exact
 regeneration and reciprocal links pass, and the complete MVP-required scaffold
 is green in 143.5 seconds with Unreal closed. Next: the tiny six-call compile
 coordinator, then immutable absolute-time quaternion evaluation including the
+real partial terminal interval.
+
+`CompileCarrierFrameTransportV1` completes the compiler transaction at 7 full /
+6 paste nodes with exactly reset -> upstream stage -> validation -> tangents ->
+transport samples -> atomic commit and 6 / 5 reciprocal execution links. It has
+no variables, branches, macros, reroutes, alternate terminal, or policy. Both
+forms freeze the six exact self-context calls and injected failure outcomes;
+regeneration is byte-identical.
+
+The seven compiler graphs now total 386 full nodes / 379 paste nodes with 528 /
+521 reciprocal links. Their generators, checked-in snippets, structural and
+executable interpreters, ownership barriers, and repeat hashes all pass in the
+complete 144.7-second MVP-required scaffold with Unreal closed. Distinct body
+and gimbal authorship remains absent from the entire carrier family. Next:
+generate and execute the eighth graph, `EvaluateCompiledCarrierFrameTransportV1`,
+using only immutable compiled samples and absolute elapsed time, including the
 real partial terminal interval.
 
 ## Critical design mismatch

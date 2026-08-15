@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after complete offline carrier-frame family checkpoint
+Last updated: 2026-08-15 after carrier-frame live-acceptance preparedness checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -24,8 +24,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
 - Current checkpoint is the complete eight-graph offline carrier-frame family
-  described below; after the checkpoint push, HEAD must equal `origin/main`
-  before live configurator/oracle/PIE tooling is built
+  plus its offline-green live-acceptance harness described below; after the
+  checkpoint push, HEAD must equal `origin/main` before the one-editor live
+  installation begins
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1668,6 +1669,35 @@ Next: build deterministic idempotent live configurator, exact restore-defaults
 support, runtime oracle, and PIE integration sessions for all 24 variables and
 eight functions. Only after those tools are offline-green should one guarded
 single-editor installation and live acceptance begin.
+
+The complete carrier-frame live-acceptance harness is now frozen while Unreal
+remains closed. `Configure-CarrierFrameTransport.py` idempotently creates and
+verifies the exact 24-variable/eight-function native Vector/Quat schema while
+preserving every pre-existing default. `Restore-CarrierFrameTransportSchemaDefaults.py`
+compiles before reacquiring the generated class, converges every scalar and
+array default to the schema, verifies them, and saves once.
+
+`Validate-CarrierFrameTransportRuntime.py` prepares ten seeded straight,
+curved, held, reversing, vertical, and partial-terminal tracks, runs all ten
+forward and reverse, and evaluates six absolute-time boundaries per run. It
+compares compiled tangents/quaternions and 120 evaluations to the independent
+reference, covers invalid upstream and off-query compiled-track corruption,
+proves the compiled snapshot immutable during evaluation, and restores the
+complete touched default set. Accepted body/gimbal prebake data and downstream
+camera-operator state are snapshotted and proven unchanged.
+
+`Validate-CarrierFrameTransportPIE.py` owns its Slate lifecycle and three real
+player-owned sessions: partial-terminal interpolation, deterministic vertical
+transport, and invalid-upstream failure. It compiles and evaluates on the game
+world component, proves external authorship/downstream isolation, ends every
+PIE session, and restores all carrier plus upstream defaults. Static contracts
+forbid `CameraTransform`, authored body/gimbal writes, downstream operator
+writes, and PIE-time compilation. The complete MVP-required scaffold owns all
+five tools and passes in 149.8 seconds with Unreal closed. Next: commit/push
+this preparedness checkpoint, then open exactly one editor for schema creation,
+the eight exact graph installations, compile/save/export, warm runtime,
+automatic PIE, schema restoration, idempotence rerun, guarded shutdown,
+reverse sync, cold runtime/load proof, and final remote-equal checkpoint.
 
 ## Critical design mismatch
 

@@ -224,6 +224,11 @@ $requiredFiles = @(
     'tools\blueprint\Test-CarrierFrameTransportEvaluatorContracts.py',
     'tools\blueprint\snippets\evaluate-compiled-carrier-frame-transport-v1.eddgraph',
     'tools\blueprint\snippets\evaluate-compiled-carrier-frame-transport-v1-paste.eddgraph',
+    'tools\unreal\Configure-CarrierFrameTransport.py',
+    'tools\unreal\Restore-CarrierFrameTransportSchemaDefaults.py',
+    'tools\unreal\Validate-CarrierFrameTransportRuntime.py',
+    'tools\unreal\Validate-CarrierFrameTransportPIE.py',
+    'tools\unreal\test_carrier_frame_transport_validators.py',
     'tools\blueprint\Build-CameraOperatorOverrideResetGraph.py',
     'tools\blueprint\Test-CameraOperatorOverrideResetContracts.py',
     'tools\blueprint\snippets\reset-camera-operator-override-step-v1.eddgraph',
@@ -1847,6 +1852,8 @@ foreach ($graphCase in @(
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CarrierFrameTransportEvaluatorContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Carrier-frame evaluator contracts failed with exit code $LASTEXITCODE." }
 }
+& python (Join-Path $ProjectRoot 'tools\unreal\test_carrier_frame_transport_validators.py')
+if ($LASTEXITCODE -ne 0) { throw "Carrier-frame live-tool contracts failed with exit code $LASTEXITCODE." }
 $cameraOperatorRoot = Join-Path $scratchRoot ("edd-camera-operator-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraOperatorRoot -Force | Out-Null
 $cameraOperatorReset = Join-Path $cameraOperatorRoot 'reset-camera-operator-override-step-v1.eddgraph'

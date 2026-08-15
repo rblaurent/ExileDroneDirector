@@ -2132,6 +2132,20 @@ default restorer, postcompile exporter/interpreter ownership, warm runtime
 oracle, and automatic player-owned PIE mutation/restoration probe before the
 single-editor acceptance sequence.
 
+The native adapter's idempotent configurator and exact schema-default restorer
+are now frozen offline. The configurator loads the 13-variable/seven-function
+schema, creates native Vector, Quat, and Transform members plus scalar members,
+compiles after each new variable, preserves every existing default on rerun,
+creates only missing function graphs, verifies every generated property/graph,
+and saves once. The restorer compiles before reacquiring the generated class,
+sets every schema default, normalizes Vector/Quat/Transform values for exact
+verification, and saves once. Static contracts compile both tools, enforce
+Transform baseline ownership/lifecycle, and forbid legacy `CameraTransform`.
+The complete MVP-required regression passes in 166.3 seconds with 2,289 output
+lines and Unreal closed. Next: build the shared native runtime fixture, warm
+class-default transaction/rollback probe, automatic player-owned PIE probe,
+postcompile exporter/interpreter checks, and failure-safe default restoration.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

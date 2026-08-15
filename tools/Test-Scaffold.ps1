@@ -269,6 +269,9 @@ $requiredFiles = @(
     'tools\unreal\Validate-CameraPlaybackFrameRuntime.py',
     'tools\unreal\Validate-CameraPlaybackFramePIE.py',
     'tools\unreal\test_camera_playback_frame_validators.py',
+    'tools\unreal\Configure-CameraPlaybackNativeApplication.py',
+    'tools\unreal\Restore-CameraPlaybackNativeApplicationSchemaDefaults.py',
+    'tools\unreal\test_camera_playback_native_application_validators.py',
     'tools\blueprint\Build-CarrierFrameTransportResetGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportResetContracts.py',
     'tools\blueprint\snippets\reset-carrier-frame-transport-v1.eddgraph',
@@ -1914,6 +1917,8 @@ if ($LASTEXITCODE -ne 0) { throw "Camera playback compose paste contracts failed
 if ($LASTEXITCODE -ne 0) { throw "Camera playback compose paste links failed with exit code $LASTEXITCODE." }
 & python (Join-Path $ProjectRoot 'tools\unreal\test_camera_playback_frame_validators.py')
 if ($LASTEXITCODE -ne 0) { throw "Camera playback-frame live-tool contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\unreal\test_camera_playback_native_application_validators.py')
+if ($LASTEXITCODE -ne 0) { throw "Camera playback native-application live-tool contracts failed with exit code $LASTEXITCODE." }
 $cameraPlaybackLiveContracts = @(
     @('reset-camera-playback-frame-v1.eddgraph', 'Test-CameraPlaybackFrameResetContracts.py', $cameraPlaybackReset),
     @('stage-camera-playback-evaluation-time-v1.eddgraph', 'Test-CameraPlaybackFrameTimeStageContracts.py', $cameraPlaybackTime),

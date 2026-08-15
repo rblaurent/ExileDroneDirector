@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after carrier-frame reset checkpoint
+Last updated: 2026-08-15 after carrier-frame upstream staging checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the deterministic carrier-frame reset described below;
-  after the checkpoint push, HEAD must equal `origin/main` before upstream
-  staging graph work starts
+- Current checkpoint is deterministic carrier-frame upstream staging described
+  below; after the checkpoint push, HEAD must equal `origin/main` before input
+  validation graph work starts
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1528,6 +1528,24 @@ interpreter, and both checked-in snippets and passes in 142.5 seconds with
 Unreal closed. Next: deterministically stage only the accepted desired-stream
 positions and schedule, with explicit `source_invalid` failure and no body or
 gimbal dependency.
+
+`StageCarrierFrameTransportInputsV1` is now deterministic at 13 full / 12
+paste nodes with 12 / 11 reciprocal links. It reads exactly desired-stream
+compile validity, sampled positions, total seconds, and fixed step. Direct
+execution invalidates stage authority and clears its diagnostic first. A valid
+source snapshots all three values and publishes stage validity last; an invalid
+source writes only `source_invalid` and preserves the prior staged positions and
+schedule. Candidate, compiled, evaluation, operator, and external state are
+structurally absent, as are authored body/gimbal and `CameraTransform`.
+
+The exported-link interpreter executes 80 randomized valid snapshots and the
+invalid-source preservation path in both full and paste forms. It proves the
+position array is copied by value, protected object identities survive, and
+each path visits exactly its intended execution nodes. Regeneration is
+byte-identical, link integrity is exact, and the complete MVP-required scaffold
+passes in 140.4 seconds with Unreal closed. Next: validate staged shape,
+schedule, finite position values, and the existence of a usable path direction
+without mutating the staged snapshot.
 
 ## Critical design mismatch
 

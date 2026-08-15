@@ -5666,3 +5666,10 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   generation and a separately transactional actor/component application seam
   must pass offline before a single editor session begins. The complete
   MVP-required scaffold passes in 157.8 seconds at this checkpoint.
+- The first production graph, `ResetCameraPlaybackFrameV1`, is deliberately
+  tiny: 7 full / 6 paste nodes with 6 / 5 reciprocal links. It clears only four
+  stage-valid flags, final playback validity, and the local failure code. The
+  complete prior pose/filmback/channel/operator/comfort result remains intact
+  but non-authoritative, matching the transaction pattern used by the accepted
+  downstream families. Exact contracts and repeat hashes pass in both forms.
+  The complete MVP-required scaffold passes in 156.9 seconds.

@@ -2002,6 +2002,12 @@ before any polished editor UI or cook is attempted:
    Deterministic graphs/interpreters are next, followed by the
    downstream native pose application boundary. Bounded event adapters and the
    debug surface still precede attended keyboard dogfood.
+   `ResetCameraPlaybackFrameV1` is the first deterministic graph at 7 full / 6
+   paste nodes and 6 / 5 reciprocal links. It invalidates only playback stage/
+   result authority plus its failure code, preserves every input and the entire
+   prior result snapshot, excludes all upstream/native/authoritative owners,
+   and regenerates byte-identically. The complete MVP-required scaffold passes
+   in 156.9 seconds. Common absolute-time staging is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

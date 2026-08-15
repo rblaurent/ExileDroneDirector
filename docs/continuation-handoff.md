@@ -1760,6 +1760,17 @@ then prepare the downstream native actor/component application boundary before
 opening one editor. Bounded event adapters and the debug surface follow before
 keyboard dogfood; no polished UI starts before dogfood.
 
+`ResetCameraPlaybackFrameV1` is now deterministic at 7 full / 6 paste nodes
+with 6 / 5 reciprocal links. It invalidates the four composition-stage flags
+and final playback authority before clearing only the playback failure code.
+All nine inputs and the complete prior 15-field result snapshot remain object-
+identical; compiled sources, operator state/policy, comfort preferences, native
+camera state, persistence, events, and server state are structurally absent.
+Both forms pass exact execution/ownership contracts and regenerate byte-for-
+byte. The complete MVP-required scaffold passes in 156.9 seconds. Next: stage
+one finite absolute query into the four accepted evaluator
+inputs, with delta remaining exclusively an operator-state input.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

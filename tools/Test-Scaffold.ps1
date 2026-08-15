@@ -196,6 +196,10 @@ $requiredFiles = @(
     'tools\trajectory\test_camera_playback_frame_reference.py',
     'tools\trajectory\camera_playback_frame_blueprint_schema.json',
     'tools\trajectory\test_camera_playback_frame_blueprint_schema.py',
+    'tools\blueprint\Build-CameraPlaybackFrameResetGraph.py',
+    'tools\blueprint\Test-CameraPlaybackFrameResetContracts.py',
+    'tools\blueprint\snippets\reset-camera-playback-frame-v1.eddgraph',
+    'tools\blueprint\snippets\reset-camera-playback-frame-v1-paste.eddgraph',
     'tools\blueprint\Build-CarrierFrameTransportResetGraph.py',
     'tools\blueprint\Test-CarrierFrameTransportResetContracts.py',
     'tools\blueprint\snippets\reset-carrier-frame-transport-v1.eddgraph',
@@ -1612,6 +1616,39 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw "Camera playback-frame Blueprint schema contracts failed with exit code $LASTEXITCODE."
 }
+$cameraPlaybackRoot = Join-Path $scratchRoot ("edd-camera-playback-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $cameraPlaybackRoot -Force | Out-Null
+$cameraPlaybackReset = Join-Path $cameraPlaybackRoot 'reset-camera-playback-frame-v1.eddgraph'
+$cameraPlaybackResetPaste = Join-Path $cameraPlaybackRoot 'reset-camera-playback-frame-v1-paste.eddgraph'
+$cameraPlaybackResetRepeat = Join-Path $cameraPlaybackRoot 'reset-camera-playback-frame-v1-repeat.eddgraph'
+$cameraPlaybackResetRepeatPaste = Join-Path $cameraPlaybackRoot 'reset-camera-playback-frame-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($cameraPlaybackReset, $cameraPlaybackResetPaste),
+    @($cameraPlaybackResetRepeat, $cameraPlaybackResetRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CameraPlaybackFrameResetGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Camera playback-frame reset generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($cameraPlaybackReset, $cameraPlaybackResetRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-playback-frame-v1.eddgraph')),
+    @($cameraPlaybackResetPaste, $cameraPlaybackResetRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-camera-playback-frame-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Camera playback-frame reset regeneration diverged." }
+}
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraPlaybackFrameResetContracts.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackReset
+if ($LASTEXITCODE -ne 0) { throw "Camera playback-frame reset full contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackReset
+if ($LASTEXITCODE -ne 0) { throw "Camera playback-frame reset full links failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraPlaybackFrameResetContracts.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackResetPaste --paste
+if ($LASTEXITCODE -ne 0) { throw "Camera playback-frame reset paste contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+    --project-root $ProjectRoot --graph $cameraPlaybackResetPaste
+if ($LASTEXITCODE -ne 0) { throw "Camera playback-frame reset paste links failed with exit code $LASTEXITCODE." }
 $carrierFrameRoot = Join-Path $scratchRoot ("edd-carrier-frame-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $carrierFrameRoot -Force | Out-Null
 $carrierFrameReset = Join-Path $carrierFrameRoot 'reset-carrier-frame-transport-v1.eddgraph'

@@ -228,6 +228,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-BoundedEventLedgerCommitContracts.py',
     'tools\blueprint\snippets\commit-cue-execution-ledger-v1.eddgraph',
     'tools\blueprint\snippets\commit-cue-execution-ledger-v1-paste.eddgraph',
+    'tools\blueprint\Build-BoundedEventManualLedgerResetGraph.py',
+    'tools\blueprint\Test-BoundedEventManualLedgerResetContracts.py',
+    'tools\blueprint\snippets\reset-manual-cue-ledger-entry-v1.eddgraph',
+    'tools\blueprint\snippets\reset-manual-cue-ledger-entry-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1.eddgraph',
@@ -1929,6 +1933,37 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventLedgerCommitContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Bounded event ledger commit contracts failed with exit code $LASTEXITCODE." }
+}
+$boundedEventManualReset = Join-Path $boundedEventRoot 'reset-manual-cue-ledger-entry-v1.eddgraph'
+$boundedEventManualResetPaste = Join-Path $boundedEventRoot 'reset-manual-cue-ledger-entry-v1-paste.eddgraph'
+$boundedEventManualResetRepeat = Join-Path $boundedEventRoot 'reset-manual-cue-ledger-entry-v1-repeat.eddgraph'
+$boundedEventManualResetRepeatPaste = Join-Path $boundedEventRoot 'reset-manual-cue-ledger-entry-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($boundedEventManualReset, $boundedEventManualResetPaste),
+    @($boundedEventManualResetRepeat, $boundedEventManualResetRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-BoundedEventManualLedgerResetGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event manual ledger-reset generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($boundedEventManualReset, $boundedEventManualResetRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-manual-cue-ledger-entry-v1.eddgraph')),
+    @($boundedEventManualResetPaste, $boundedEventManualResetRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\reset-manual-cue-ledger-entry-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Bounded event manual ledger-reset regeneration diverged." }
+}
+foreach ($graphCase in @(
+    @($boundedEventManualReset, $false),
+    @($boundedEventManualResetPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event manual ledger-reset link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventManualLedgerResetContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event manual ledger-reset contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraPlaybackRoot = Join-Path $scratchRoot ("edd-camera-playback-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraPlaybackRoot -Force | Out-Null

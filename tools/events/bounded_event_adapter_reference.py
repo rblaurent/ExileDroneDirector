@@ -372,8 +372,12 @@ def commit_cue_execution_v1(
 def reset_manual_cue_v1(
     ledger: EventExecutionLedgerV1,
     event_id: str,
+    compiled_cues: tuple[EventCueV1, ...],
 ) -> EventExecutionLedgerV1:
     """Explicitly re-arm one manual-reset Cue without affecting other entries."""
 
     _text(event_id, "event_id")
+    matches = tuple(cue for cue in compiled_cues if cue.event_id == event_id)
+    if len(matches) != 1 or matches[0].repeat_policy != "manual_reset":
+        raise BoundedEventAdapterError("manual_reset_policy_invalid", event_id)
     return EventExecutionLedgerV1(tuple(key for key in ledger.keys if key.event_id != event_id))

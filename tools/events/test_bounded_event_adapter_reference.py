@@ -112,7 +112,11 @@ class BoundedEventAdapterContracts(unittest.TestCase):
         self.assertEqual(len(ledger.keys), 3)
         second = plan_cue_crossings_v1(plan, context(loop_iteration=1), ledger)
         self.assertEqual([item.cue.event_id for item in second], ["looped"])
-        ledger = reset_manual_cue_v1(ledger, "manual")
+        with self.assertRaisesRegex(BoundedEventAdapterError, "manual_reset_policy_invalid"):
+            reset_manual_cue_v1(ledger, "once", plan)
+        with self.assertRaisesRegex(BoundedEventAdapterError, "manual_reset_policy_invalid"):
+            reset_manual_cue_v1(ledger, "missing", plan)
+        ledger = reset_manual_cue_v1(ledger, "manual", plan)
         third = plan_cue_crossings_v1(plan, context(loop_iteration=1), ledger)
         self.assertEqual([item.cue.event_id for item in third], ["looped", "manual"])
 

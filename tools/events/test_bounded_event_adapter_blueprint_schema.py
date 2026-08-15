@@ -37,8 +37,8 @@ class BoundedEventAdapterBlueprintSchemaContracts(unittest.TestCase):
 
     def test_parallel_compiled_arrays_and_authority_are_frozen(self):
         variables = SCHEMA["variables"]
-        self.assertEqual(len(variables), 55)
-        self.assertEqual(len({item["name"] for item in variables}), 55)
+        self.assertEqual(len(variables), 60)
+        self.assertEqual(len({item["name"] for item in variables}), 60)
         compiled = [item for item in variables if item["role"] == "compiled"]
         self.assertEqual(len(compiled), 16)
         self.assertTrue(all(item["container"] == "Array" and item["default"] == [] for item in compiled))
@@ -52,6 +52,7 @@ class BoundedEventAdapterBlueprintSchemaContracts(unittest.TestCase):
         self.assertEqual(by_name["EventCrossingCollectionValidV1"]["role"], "stage")
         self.assertEqual(by_name["EventSelectionValidV1"]["role"], "stage")
         self.assertEqual(by_name["EventLedgerCommitValidV1"]["role"], "stage")
+        self.assertEqual(by_name["EventManualResetResultValidV1"]["role"], "stage")
         self.assertEqual(by_name["EventCandidateAlreadyExecutedV1"]["role"], "scratch")
         self.assertEqual(
             by_name["EventAdapterExecutionResultValidV1"]["role"],
@@ -67,6 +68,13 @@ class BoundedEventAdapterBlueprintSchemaContracts(unittest.TestCase):
         ):
             self.assertEqual(by_name[name]["role"], "scratch")
             self.assertEqual(by_name[name]["container"], "Array")
+        self.assertEqual(by_name["EventManualResetCueIdV1"]["role"], "manual-reset-request")
+        for name in (
+            "EventManualResetCueFoundV1",
+            "EventManualResetRemovedAnyV1",
+            "EventManualResetCandidateValidV1",
+        ):
+            self.assertEqual(by_name[name]["role"], "scratch")
         for name in (
             "EventResolvedBindingIdsV1",
             "EventResolvedBindingDistancesV1",
@@ -101,6 +109,8 @@ class BoundedEventAdapterBlueprintSchemaContracts(unittest.TestCase):
         self.assertIn("fresh explicit bounded-adapter receipt", architecture["ledger"])
         self.assertIn("executed or state_satisfied", architecture["ledger"])
         self.assertIn("publish atomically", architecture["ledger"])
+        self.assertIn("policy is manual_reset", architecture["ledger"])
+        self.assertIn("cannot re-arm once_per_session or every_loop", architecture["ledger"])
 
     def test_coordinator_and_forbidden_ownership_are_exact(self):
         coordinator = SCHEMA["functions"][-1]

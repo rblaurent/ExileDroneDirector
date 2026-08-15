@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after success-only bounded Cue ledger commit
+Last updated: 2026-08-15 after policy-safe manual Cue re-arming
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,8 +23,8 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is atomic success-receipt-gated Cue ledger publication in
-  the offline event-adapter family, downstream of the complete
+- Current checkpoint is policy-safe atomic manual Cue ledger re-arming in the
+  offline event-adapter family, downstream of the complete
   live-accepted seven-graph native playback-application boundary. Unreal remains
   closed; no event graph has been installed or executed yet.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
@@ -2343,7 +2343,8 @@ All three append indices must equal the prior authoritative length before the
 three public Event ID/loop/direction arrays are published and commit authority
 is set last. Every rejection preserves authoritative ledger identity. An exact
 duplicate receipt is an idempotent accepted result without another append. The
-strengthened dispatch reset is now 13 full / 12 paste nodes and clears receipt
+At that checkpoint the strengthened dispatch reset was 13 full / 12 paste nodes
+and cleared receipt
 and commit authority every frame while preserving the accepted ledger.
 
 Both forms regenerate byte-identically and pass exact link/ownership contracts,
@@ -2354,6 +2355,31 @@ Unreal remains closed. Next: implement explicit manual-reset Cue re-arming with
 the same aligned candidate/publication discipline, then the tiny policy-free
 dispatcher coordinator. Only after the whole offline family is green should one
 editor be opened for live acceptance.
+
+`ResetManualCueLedgerEntryV1` is deterministic at 88 full / 87 paste nodes with
+120 / 119 reciprocal links. An explicit request is accepted only when its ID
+matches exactly one compiled Cue whose repeat policy is `manual_reset`; unknown,
+`once_per_session`, and `every_loop` requests cannot remove anything. The
+reference contract now enforces that same policy instead of trusting its caller.
+
+The graph validates plan and ledger shape, clears only the three private ledger
+candidates, then stably copies every nonmatching Event ID/loop/direction triple.
+Per-entry append indices and final candidate cardinalities must remain aligned
+and cannot exceed the original ledger length. Only then are the three
+authoritative arrays published. Every matching context for the requested Event
+is removed; unrelated order is preserved. No-match is an idempotent accepted
+`already_armed` result. Authorization, adapter execution, payload, camera,
+repository, HUD, UI, and world mutation remain outside this function.
+
+Both forms regenerate byte-identically and pass exact link/ownership contracts,
+nine typed failure families, completed/already-armed terminals, and 100 seeded
+stable filters through an independent interpreter. The dispatch reset has
+evolved to 17 full / 16 paste nodes so all manual-reset and receipt scratch
+authority fail-closes per frame while the accepted ledger and explicit reset
+request remain preserved. The complete MVP-required regression passes with
+2,374 captured output lines in 172.8 seconds; Unreal remains closed. Next: build
+the tiny policy-free dispatcher coordinator and run the full offline-family gate.
+Only then begin the documented single-editor live acceptance sequence.
 
 ## Critical design mismatch
 

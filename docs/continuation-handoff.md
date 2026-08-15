@@ -1833,6 +1833,28 @@ The complete MVP-required scaffold passes in 158.0 seconds. Next: atomically
 commit the final body world, gimbal world, derived gimbal-
 relative, filmback, channel, operator, completion, and comfort snapshot.
 
+`CommitCameraPlaybackFrameV1` is deterministic at 238 full / 237 paste nodes
+with 325 / 324 reciprocal links. It requires the accepted comfort stage plus
+operator, comfort, and channel result authority; tamper-checks finite position,
+four finite/unit quaternions, positive finite filmback, a nonempty preset, all
+13 finite channel values, and all five finite bounded comfort weights. It
+derives the camera-component rotation only as `inverse(body) * world_gimbal`
+and independently proves `body * relative` reconstructs the comfort-adjusted
+world gimbal component-by-component within `1e-6`.
+
+The commit invalidates playback authority first, stages `commit_failed`, and
+only after the complete preflight atomically publishes the 15-field pose,
+filmback, channel, completion, operator, and comfort snapshot, clears the
+diagnostic, and publishes result validity last. Fourteen injected authority,
+shape, nonfinite, nonunit, and bounds failures preserve the entire prior result
+snapshot in both graph forms; 80 seeded distinct-body/gimbal frames reconstruct
+and deep-copy exactly. Cinematic rotation, legacy `CameraTransform`, carrier
+authorship, staging inputs, operator state, comfort preferences, native camera,
+persistence, events, and server state are structurally absent. The complete
+MVP-required scaffold passes in 160.2 seconds. Next: generate the tiny exact
+eight-call `ComposeCameraPlaybackFrameV1` coordinator, then run the complete
+seven-graph offline family before preparing editor acceptance.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

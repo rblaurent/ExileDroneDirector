@@ -2531,9 +2531,24 @@ query inputs, all nine prior accepted result arrays, and prior result time.
 Both forms pass exact graph ownership, reciprocal-link, poisoned-state
 execution, and regeneration contracts. The complete MVP-required regression
 passes with 2,447 captured output lines in 176.9 seconds. Next: validate the
-compiled State Clip plan, including empty-plan support, complete 19-array shape,
-bounded types and policies, exact half-open ranges, lead constraints, stable
-IDs, and same-target overlap rejection.
+accepted compiled State Clip plan's authority, empty-plan support, complete
+19-array shape, 0..128 bound, and finite nonnegative duration. Per-row policy,
+half-open range, lead, ID/binding, and same-binding active-conflict defense
+belongs to collection before any candidate append; compilation semantics remain
+owned by the independent plan compiler/reference.
+
+`ValidateStateClipPlanV1` is deterministic at 88 full / 87 paste nodes with
+107 / 106 reciprocal links. It requires accepted plan authority, supports an
+exact empty plan, proves all 19 compiled arrays have one 0..128 cardinality,
+and requires a finite nonnegative plan duration. It owns only its validation
+flag and cannot touch candidates, accepted results, Cue ledgers, camera,
+repository, world, HUD, or UI state. Both forms match 80 seeded valid shapes
+and reject 22 authority/count/parallel-shape/duration failure families. The
+complete MVP-required regression passes with 2,451 captured output lines in
+177.6 seconds. Next:
+collect every active clip at one finite absolute time, revalidate each active
+row against the closed local-test capability, reject duplicate active bindings,
+and append all nine candidate channels only after complete row success.
 
 ## Critical design mismatch
 

@@ -208,6 +208,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-BoundedEventDispatchResetContracts.py',
     'tools\blueprint\snippets\reset-bounded-event-dispatch-result-v1.eddgraph',
     'tools\blueprint\snippets\reset-bounded-event-dispatch-result-v1-paste.eddgraph',
+    'tools\blueprint\Build-BoundedEventPlanValidationGraph.py',
+    'tools\blueprint\Test-BoundedEventPlanValidationContracts.py',
+    'tools\blueprint\snippets\validate-bounded-event-plan-v1.eddgraph',
+    'tools\blueprint\snippets\validate-bounded-event-plan-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraPlaybackNativeApplicationResetGraph.py',
     'tools\blueprint\Test-CameraPlaybackNativeApplicationResetContracts.py',
     'tools\blueprint\snippets\reset-camera-playback-native-application-v1.eddgraph',
@@ -1754,6 +1758,37 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventDispatchResetContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Bounded event reset contracts failed with exit code $LASTEXITCODE." }
+}
+$boundedEventValidation = Join-Path $boundedEventRoot 'validate-bounded-event-plan-v1.eddgraph'
+$boundedEventValidationPaste = Join-Path $boundedEventRoot 'validate-bounded-event-plan-v1-paste.eddgraph'
+$boundedEventValidationRepeat = Join-Path $boundedEventRoot 'validate-bounded-event-plan-v1-repeat.eddgraph'
+$boundedEventValidationRepeatPaste = Join-Path $boundedEventRoot 'validate-bounded-event-plan-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($boundedEventValidation, $boundedEventValidationPaste),
+    @($boundedEventValidationRepeat, $boundedEventValidationRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-BoundedEventPlanValidationGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event validation generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($boundedEventValidation, $boundedEventValidationRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-bounded-event-plan-v1.eddgraph')),
+    @($boundedEventValidationPaste, $boundedEventValidationRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\validate-bounded-event-plan-v1-paste.eddgraph'))
+)) {
+    $hashes = @($comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash })
+    if ($hashes[0] -ne $hashes[1] -or $hashes[0] -ne $hashes[2]) { throw "Bounded event validation regeneration diverged." }
+}
+foreach ($graphCase in @(
+    @($boundedEventValidation, $false),
+    @($boundedEventValidationPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event validation link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventPlanValidationContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Bounded event validation contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraPlaybackRoot = Join-Path $scratchRoot ("edd-camera-playback-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraPlaybackRoot -Force | Out-Null

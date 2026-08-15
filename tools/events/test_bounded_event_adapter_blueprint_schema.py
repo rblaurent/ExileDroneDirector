@@ -36,10 +36,10 @@ class BoundedEventAdapterBlueprintSchemaContracts(unittest.TestCase):
 
     def test_parallel_compiled_arrays_and_authority_are_frozen(self):
         variables = SCHEMA["variables"]
-        self.assertEqual(len(variables), 38)
-        self.assertEqual(len({item["name"] for item in variables}), 38)
+        self.assertEqual(len(variables), 46)
+        self.assertEqual(len({item["name"] for item in variables}), 46)
         compiled = [item for item in variables if item["role"] == "compiled"]
-        self.assertEqual(len(compiled), 13)
+        self.assertEqual(len(compiled), 16)
         self.assertTrue(all(item["container"] == "Array" and item["default"] == [] for item in compiled))
         by_name = {item["name"]: item for item in variables}
         self.assertEqual(by_name["EventCuePlanValidV1"]["role"], "compiled-authority")
@@ -47,6 +47,15 @@ class BoundedEventAdapterBlueprintSchemaContracts(unittest.TestCase):
         self.assertEqual(by_name["EventDispatchIndexV1"]["default"], -1)
         self.assertFalse(by_name["EventServerWorldEnabledV1"]["default"])
         self.assertFalse(by_name["EventServerRevisionApprovedV1"]["default"])
+        self.assertEqual(by_name["EventPlanValidationValidV1"]["role"], "stage")
+        self.assertEqual(by_name["EventCrossingCollectionValidV1"]["role"], "stage")
+        for name in (
+            "EventResolvedBindingIdsV1",
+            "EventResolvedBindingDistancesV1",
+            "EventGrantedPermissionsV1",
+        ):
+            self.assertEqual(by_name[name]["role"], "authorization")
+            self.assertEqual(by_name[name]["container"], "Array")
 
     def test_manifest_is_closed_bounded_and_safe_by_default(self):
         manifest = SCHEMA["manifest"]

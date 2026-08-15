@@ -11,6 +11,8 @@ from pathlib import Path
 
 FUNCTION = "ResetBoundedEventDispatchResultV1"
 SCALARS = (
+    ("EventPlanValidationValidV1", "bool", "false"),
+    ("EventCrossingCollectionValidV1", "bool", "false"),
     ("EventDispatchResultValidV1", "bool", "false"),
     ("EventDispatchAuthorizedV1", "bool", "false"),
     ("EventDispatchIndexV1", "int", "-1"),

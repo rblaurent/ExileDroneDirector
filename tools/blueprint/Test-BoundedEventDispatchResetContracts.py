@@ -10,6 +10,8 @@ from pathlib import Path
 
 
 DEFAULTS = {
+    "EventPlanValidationValidV1": "false",
+    "EventCrossingCollectionValidV1": "false",
     "EventDispatchResultValidV1": "false",
     "EventDispatchAuthorizedV1": "false",
     "EventDispatchIndexV1": "-1",
@@ -58,14 +60,14 @@ def main() -> None:
     args = parser.parse_args()
     contracts = load(args.project_root / "tools/blueprint/Test-WaypointCaptureContracts.py")
     nodes = contracts.parse_graph(args.graph)
-    contracts.require(len(nodes) == (4 if args.paste else 5), f"node count {len(nodes)}")
+    contracts.require(len(nodes) == (6 if args.paste else 7), f"node count {len(nodes)}")
     entries = [node for node in nodes.values() if "K2Node_FunctionEntry" in node.node_class]
     contracts.require(len(entries) == (0 if args.paste else 1), "entry count")
     setters = sorted(
         (node for node in nodes.values() if "K2Node_VariableSet" in node.node_class),
         key=lambda node: int(node.name.rsplit("_", 1)[1]),
     )
-    contracts.require(len(setters) == 4, "exact setter count")
+    contracts.require(len(setters) == 6, "exact setter count")
     contracts.require({member(node) for node in setters} == set(DEFAULTS), "exact reset ownership")
     if args.paste:
         contracts.require(not setters[0].pins["execute"].links, "paste execution root")
@@ -84,7 +86,7 @@ def main() -> None:
     state = dict(sentinels)
     state.update(DEFAULTS)
     contracts.require(all(state[name] is sentinels[name] for name in PRESERVED), "preserved identity")
-    contracts.require(state == {**sentinels, **DEFAULTS}, "reset changes exactly four result fields")
+    contracts.require(state == {**sentinels, **DEFAULTS}, "reset changes exactly stage and result fields")
     print(
         f"Bounded event dispatch reset contracts passed "
         f"({'paste' if args.paste else 'full'}): plan, query, and ledger preserved"

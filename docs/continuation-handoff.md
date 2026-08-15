@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after bounded event-dispatch reset graph
+Last updated: 2026-08-15 after bounded event-plan validation graph
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,10 +23,10 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the first deterministic graph in the offline bounded
-  event-adapter family, downstream of the complete live-accepted seven-graph
-  native playback-application boundary. Unreal remains closed; no event graph
-  has been installed or executed yet.
+- Current checkpoint is the deterministic bounded event-plan validator in the
+  offline event-adapter family, downstream of the complete live-accepted seven-
+  graph native playback-application boundary. Unreal remains closed; no event
+  graph has been installed or executed yet.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -2244,15 +2244,27 @@ acceptance. State Clips, target resolution/anchor work, and mutating server
 adapters remain later bounded seams before temporary debug controls and full
 keyboard dogfood. Polished UI starts only after dogfood.
 
-`ResetBoundedEventDispatchResultV1` is the first deterministic event graph at 5
-full / 4 paste nodes with 4 / 3 reciprocal links. It fail-closes result authority,
-authorization, selected index, and diagnostic code while preserving the complete
-compiled Cue plan, playback query/session identity, authorization context,
-crossing scratch, and execution ledger. Both forms execute exact ownership
-contracts, regenerate byte-identically, and are scaffold-owned. The complete
-MVP-required regression passes with 2,349 output lines in 172.8 seconds. Next:
-build the complete parallel-array plan validator before any crossing or adapter
-work.
+`ResetBoundedEventDispatchResultV1` is the first deterministic event graph. It
+now contains 7 full / 6 paste nodes with 6 / 5 reciprocal links and fail-closes
+both stage flags plus result authority, authorization, selected index, and
+diagnostic code. The complete compiled Cue plan, playback query/session identity,
+authorization context, crossing scratch, and execution ledger remain preserved.
+The extra stage invalidation closes stale prior-frame validation reuse before
+the next graph runs.
+
+`ValidateBoundedEventPlanV1` is deterministic at 117 full / 116 paste nodes with
+138 / 137 reciprocal links. It requires accepted plan authority, 1..256 aligned
+entries across all 16 compiled Cue arrays, positive/equal immutable and requested
+revisions, active playback or explicit scrub preview, finite previous/current
+time, nonnegative loop, exact forward/reverse direction, aligned resolved target
+IDs/distances, no more than 64 permissions, and a nonnegative rate budget.
+It owns only its stage flag and diagnostic, publishes stage authority last, and
+cannot touch crossing scratch, ledger, dispatch result, camera, repository, HUD,
+or UI state. Both forms match 80 seeded valid plans and reject 15 exact failure
+families through an independent interpreter; regeneration and reciprocal-link
+contracts are scaffold-owned. The complete MVP-required regression passes with
+2,353 output lines in 172.7 seconds. Next: collect deterministic forward/reverse
+Cue crossings with scrub zero-dispatch and bounded frame-drop recovery.
 
 ## Critical design mismatch
 

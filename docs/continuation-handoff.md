@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after bounded-event live-acceptance preparedness
+Last updated: 2026-08-16 after bounded-event decision/ledger live acceptance
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,10 +23,11 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is complete offline preparedness for the bounded-event
-  single-editor live-acceptance sequence, downstream of the complete
-  live-accepted seven-graph native playback-application boundary. Unreal remains
-  closed; no event graph has been installed or executed yet.
+- Current checkpoint is the complete live-accepted bounded-event decision and
+  execution-ledger boundary, downstream of the complete live-accepted
+  seven-graph native playback-application boundary. Unreal is closed. The
+  closed five-operation manifest can validate, collect, select, authorize, and
+  receipt-gate Cue execution without owning a target or mutating the world.
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -2427,11 +2428,61 @@ its callback, and restores all class defaults on success or exception.
 Static lifecycle contracts compile all four live tools, require their scenario/
 cleanup markers, and forbid legacy `CameraTransform`, body/gimbal writes, camera,
 repository, HUD, or UI ownership. The complete MVP-required regression passes
-with 2,380 captured output lines in 170.5 seconds and Unreal closed. Next: push
-this preparedness checkpoint, then run exactly one Enhanced editor through
-configure, eight body installs with native-entry repair, precompile contracts,
-compile, postcompile exports/contracts, warm runtime, automatic PIE, defaults
-restore, save, guarded shutdown, one-file reverse sync, and fresh cold load.
+with 2,380 captured output lines in 170.5 seconds and Unreal closed. The exact
+single-editor sequence prepared by this checkpoint is complete; its accepted
+evidence follows.
+
+## Live bounded-event decision and ledger state
+
+The complete eight-graph bounded-event decision/ledger family is now
+live-accepted on Client Director. It covers real-playback Cue crossing,
+direction/repeat selection, the closed capability manifest, explicit adapter
+receipt gating, stable execution-ledger publication, manual re-arming, and
+scrub isolation. It still performs no target resolution, adapter call, world
+mutation, State Clip evaluation, camera mutation, repository mutation, HUD, or
+UI work.
+
+- The saved graphs contain 17, 117, 67, 66, 179, 93, 88, and 6 nodes in
+  reset-to-dispatch order, with 805 total reciprocal links. All eight exact
+  postcompile exports are scaffold-owned and match their deterministic full
+  generators exactly.
+- Exact live contracts cover all five manifest capabilities, 15 plan failure
+  families, 160 ordered crossing queries, 200 direction/ledger selections,
+  typed authorization failures, success-only atomic ledger publication, and
+  policy-safe stable manual filtering. Full and paste forms remain
+  byte-deterministic.
+- Three warm runtime passes cover all five capabilities, missing-token remote
+  rejection, failed versus successful receipts, scrub zero-dispatch, reverse
+  selection order, manual re-arm, immutable inputs, and complete restoration.
+  Distinct body and gimbal quaternion/rate channels remain unchanged.
+- The first automatic PIE attempt exposed a real harness-boundary mismatch:
+  class-default receipt staging is correctly erased by the production dispatch
+  reset, while Blueprint member variables are not instance-editable through
+  `set_editor_property`. The final harness uses Unreal's reflected
+  `SetBoolPropertyByName` / `SetStringPropertyByName` only to simulate the
+  downstream adapter receipt after authorization. No production variable was
+  exposed, no ninth graph was added, and fail-closed reset behavior was not
+  weakened.
+- Three independent player-owned PIE worlds pass local authorization plus one
+  exact successful ledger commit, typed remote missing-token rejection, and
+  manual-reset plus scrub isolation. Every scenario preserves separate body and
+  gimbal authorship, ends PIE, unregisters the callback, and restores all 60
+  class defaults.
+- Guarded shutdown closed all asset editors and reached `LogExit: Exiting.`.
+  Closed-editor reverse sync reported 16 unchanged assets and copied only
+  `BPC_EDD_ClientDirector.uasset`. Live and mirror SHA-256 is
+  `62691D3B62C1332DA7B1FBE878CF3E4ECC15FCC6719959DC536AA91AB3BD69FA`.
+- A fresh NullRHI process loaded all nine core assets and compiled all six
+  Blueprints with zero errors. The complete MVP-required regression passes with
+  2,419 captured output lines in 179.9 seconds.
+
+Next: freeze the backend target-binding resolution and EDD Event Anchor seam
+offline, including immutable published identity, clone reauthorization,
+region/range checks, typed unresolved/ambiguous/stale results, and diagnostics.
+Only then install it in one editor and proceed to the read-only `Wait Until
+Open` door adapter. Mutating interaction, bounded state leases, temporary debug
+controls, and attended keyboard dogfood remain later ordered gates before
+polished UI.
 
 ## Critical design mismatch
 
@@ -2499,6 +2550,8 @@ complete live source-sampling bridge, lossless compiled-document adapter with
 post-boundary discontinuity diagnostics, named-look composition, the separate
 viewer-local comfort layer, scalar-track engine, and synchronized thirteen-
 channel lens/focus/effect frame assembly, and exact transactional engine
-property application/restoration. Confidence is not yet claimed for
-camera modes, events, keyboard
-dogfood, UI, cooking, Workshop, G-Portal, deployment, or whole-mod completion.
+property application/restoration. Confidence is also high in bounded Cue
+crossing, authorization, receipt-gated ledger commit, manual re-arm, and scrub
+isolation. Confidence is not yet claimed for target resolution, Event Anchors,
+door adapters, State Clips, mutating world interaction, keyboard dogfood, UI,
+cooking, Workshop, G-Portal, deployment, or whole-mod completion.

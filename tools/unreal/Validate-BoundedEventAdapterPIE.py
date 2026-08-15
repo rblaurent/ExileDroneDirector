@@ -13,6 +13,7 @@ PREFIX = "EDD_BOUNDED_EVENT_PIE"
 SOURCE_LEVEL_PATH = "/Game/Dev/AlmostEmpty"
 WORLD_PATH = "/Game/Dev/UEDPIE_0_AlmostEmpty.AlmostEmpty"
 CLIENT_CLASS_PATH = "/Game/Mods/ExileDroneDirector/Core/Client/BPC_EDD_ClientDirector.BPC_EDD_ClientDirector_C"
+KISMET_SYSTEM_LIBRARY_PATH = "/Script/Engine.Default__KismetSystemLibrary"
 TIMEOUT_SECONDS = 120.0
 SCENARIOS = ("local_success", "remote_reject", "manual_scrub")
 ROOT = Path(__file__).resolve().parents[2]
@@ -59,6 +60,17 @@ def set_(obj, name, value):
         except Exception:
             pass
     raise RuntimeError("could not set property:" + name)
+
+
+def set_runtime_scalar(obj, kind, name, value):
+    """Write one simulated adapter output without making schema state public."""
+    library = unreal.find_object(None, KISMET_SYSTEM_LIBRARY_PATH)
+    require(library is not None, "Kismet system library")
+    library.call_method(
+        f"Set{kind}PropertyByName",
+        args=(obj, unreal.Name(name), value),
+    )
+    require(normalized(get(obj, name)) == normalized(value), "runtime scalar write:" + name)
 
 
 def clone(value):
@@ -158,9 +170,9 @@ def run_scenario(component, scenario):
         require(bool(get(component, "EventDispatchResultValidV1")), "local decision authority")
         require(bool(get(component, "EventDispatchAuthorizedV1")), "local authorization")
         require(str(get(component, "EventDispatchCodeV1")) == "authorized_local", "local code")
-        set_(component, "EventAdapterExecutionResultValidV1", True)
-        set_(component, "EventAdapterExecutionSucceededV1", True)
-        set_(component, "EventAdapterExecutionCodeV1", "executed")
+        set_runtime_scalar(component, "Bool", "EventAdapterExecutionResultValidV1", True)
+        set_runtime_scalar(component, "Bool", "EventAdapterExecutionSucceededV1", True)
+        set_runtime_scalar(component, "String", "EventAdapterExecutionCodeV1", "executed")
         component.call_method("CommitCueExecutionLedgerV1")
         require(bool(get(component, "EventLedgerCommitValidV1")), "local ledger authority")
         require(list(get(component, "EventLedgerIdsV1")) == ["subtitle"], "local ledger")
@@ -176,7 +188,7 @@ def run_scenario(component, scenario):
         component.call_method("ResetManualCueLedgerEntryV1")
         require(bool(get(component, "EventManualResetResultValidV1")), "manual reset authority")
         require(list(get(component, "EventLedgerIdsV1")) == ["other"], "manual stable filter")
-        set_(component, "EventScrubbingV1", True)
+        set_runtime_scalar(component, "Bool", "EventScrubbingV1", True)
         before = snapshot(component, ("EventLedgerIdsV1", "EventLedgerLoopsV1", "EventLedgerDirectionsV1"))
         component.call_method("DispatchBoundedPlaybackEventsV1")
         require(len(get(component, "EventCrossedIndicesV1")) == 0, "scrub crossing")

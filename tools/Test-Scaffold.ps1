@@ -208,34 +208,42 @@ $requiredFiles = @(
     'tools\blueprint\Test-BoundedEventDispatchResetContracts.py',
     'tools\blueprint\snippets\reset-bounded-event-dispatch-result-v1.eddgraph',
     'tools\blueprint\snippets\reset-bounded-event-dispatch-result-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-bounded-event-dispatch-result-v1.eddgraph',
     'tools\blueprint\Build-BoundedEventPlanValidationGraph.py',
     'tools\blueprint\Test-BoundedEventPlanValidationContracts.py',
     'tools\blueprint\snippets\validate-bounded-event-plan-v1.eddgraph',
     'tools\blueprint\snippets\validate-bounded-event-plan-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\validate-bounded-event-plan-v1.eddgraph',
     'tools\blueprint\Build-BoundedEventCrossingCollectionGraph.py',
     'tools\blueprint\Test-BoundedEventCrossingCollectionContracts.py',
     'tools\blueprint\snippets\collect-crossed-cues-v1.eddgraph',
     'tools\blueprint\snippets\collect-crossed-cues-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\collect-crossed-cues-v1.eddgraph',
     'tools\blueprint\Build-BoundedEventCueSelectionGraph.py',
     'tools\blueprint\Test-BoundedEventCueSelectionContracts.py',
     'tools\blueprint\snippets\select-eligible-crossed-cue-v1.eddgraph',
     'tools\blueprint\snippets\select-eligible-crossed-cue-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\select-eligible-crossed-cue-v1.eddgraph',
     'tools\blueprint\Build-BoundedEventAuthorizationGraph.py',
     'tools\blueprint\Test-BoundedEventAuthorizationContracts.py',
     'tools\blueprint\snippets\authorize-selected-cue-v1.eddgraph',
     'tools\blueprint\snippets\authorize-selected-cue-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\authorize-selected-cue-v1.eddgraph',
     'tools\blueprint\Build-BoundedEventLedgerCommitGraph.py',
     'tools\blueprint\Test-BoundedEventLedgerCommitContracts.py',
     'tools\blueprint\snippets\commit-cue-execution-ledger-v1.eddgraph',
     'tools\blueprint\snippets\commit-cue-execution-ledger-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\commit-cue-execution-ledger-v1.eddgraph',
     'tools\blueprint\Build-BoundedEventManualLedgerResetGraph.py',
     'tools\blueprint\Test-BoundedEventManualLedgerResetContracts.py',
     'tools\blueprint\snippets\reset-manual-cue-ledger-entry-v1.eddgraph',
     'tools\blueprint\snippets\reset-manual-cue-ledger-entry-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\reset-manual-cue-ledger-entry-v1.eddgraph',
     'tools\blueprint\Build-BoundedEventDispatchCoordinatorGraph.py',
     'tools\blueprint\Test-BoundedEventDispatchCoordinatorContracts.py',
     'tools\blueprint\snippets\dispatch-bounded-playback-events-v1.eddgraph',
     'tools\blueprint\snippets\dispatch-bounded-playback-events-v1-paste.eddgraph',
+    'tools\blueprint\live-snippets\dispatch-bounded-playback-events-v1.eddgraph',
     'tools\unreal\Configure-BoundedEventAdapter.py',
     'tools\unreal\Restore-BoundedEventAdapterSchemaDefaults.py',
     'tools\unreal\test_bounded_event_adapter_configuration.py',
@@ -2013,6 +2021,36 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BoundedEventDispatchCoordinatorContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Bounded event dispatcher contracts failed with exit code $LASTEXITCODE." }
+}
+$boundedEventLiveContracts = @(
+    @('reset-bounded-event-dispatch-result-v1.eddgraph', 'Test-BoundedEventDispatchResetContracts.py', $boundedEventReset, $false),
+    @('validate-bounded-event-plan-v1.eddgraph', 'Test-BoundedEventPlanValidationContracts.py', $boundedEventValidation, $false),
+    @('collect-crossed-cues-v1.eddgraph', 'Test-BoundedEventCrossingCollectionContracts.py', $boundedEventCrossing, $true),
+    @('select-eligible-crossed-cue-v1.eddgraph', 'Test-BoundedEventCueSelectionContracts.py', $boundedEventSelection, $true),
+    @('authorize-selected-cue-v1.eddgraph', 'Test-BoundedEventAuthorizationContracts.py', $boundedEventAuthorization, $true),
+    @('commit-cue-execution-ledger-v1.eddgraph', 'Test-BoundedEventLedgerCommitContracts.py', $boundedEventLedgerCommit, $true),
+    @('reset-manual-cue-ledger-entry-v1.eddgraph', 'Test-BoundedEventManualLedgerResetContracts.py', $boundedEventManualReset, $true),
+    @('dispatch-bounded-playback-events-v1.eddgraph', 'Test-BoundedEventDispatchCoordinatorContracts.py', $boundedEventCoordinator, $false)
+)
+foreach ($liveContract in $boundedEventLiveContracts) {
+    $liveGraph = Join-Path $ProjectRoot "tools\blueprint\live-snippets\$($liveContract[0])"
+    & (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphSnippet.ps1') -Path $liveGraph
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live bounded event link integrity failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphTopologyMatch.py') `
+        --project-root $ProjectRoot --expected $liveContract[2] --actual $liveGraph
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live bounded event topology changed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $liveGraph)
+    if ($liveContract[3]) { $arguments += '--live-export' }
+    & python (Join-Path $ProjectRoot "tools\blueprint\$($liveContract[1])") @arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Live bounded event graph contract failed for $($liveContract[0]) with exit code $LASTEXITCODE."
+    }
 }
 $cameraPlaybackRoot = Join-Path $scratchRoot ("edd-camera-playback-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraPlaybackRoot -Force | Out-Null

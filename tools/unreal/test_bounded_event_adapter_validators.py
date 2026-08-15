@@ -48,6 +48,13 @@ assert "compile_blueprint" not in PIE
 assert 'component.call_method("DispatchBoundedPlaybackEventsV1")' in PIE
 assert 'component.call_method("CommitCueExecutionLedgerV1")' in PIE
 assert 'component.call_method("ResetManualCueLedgerEntryV1")' in PIE
+assert "KISMET_SYSTEM_LIBRARY_PATH" in PIE
+assert 'Set{kind}PropertyByName' in PIE
+assert 'set_runtime_scalar(component, "Bool", "EventAdapterExecutionResultValidV1", True)' in PIE
+assert 'set_runtime_scalar(component, "Bool", "EventAdapterExecutionSucceededV1", True)' in PIE
+assert 'set_runtime_scalar(component, "String", "EventAdapterExecutionCodeV1", "executed")' in PIE
+assert 'set_(component, "EventAdapterExecutionResultValidV1"' not in PIE
+assert 'set_(component, "EventScrubbingV1"' not in PIE
 assert "only_if_is_dirty=False" in RESTORE
 assert RESTORE.index("compile_blueprint(blueprint)") < RESTORE.index("load_blueprint_class(CLIENT)")
 assert 'spec["container"] == "Array"' in RESTORE and "return []" in RESTORE

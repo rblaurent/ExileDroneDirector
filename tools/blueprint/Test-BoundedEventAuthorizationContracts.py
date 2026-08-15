@@ -139,6 +139,7 @@ def main() -> None:
     parser.add_argument("--project-root", type=Path, required=True)
     parser.add_argument("--graph", type=Path, required=True)
     parser.add_argument("--paste", action="store_true")
+    parser.add_argument("--live-export", action="store_true")
     args = parser.parse_args()
     contracts = load(args.project_root / "tools/blueprint/Test-WaypointCaptureContracts.py")
     nodes = contracts.parse_graph(args.graph)
@@ -156,7 +157,8 @@ def main() -> None:
     contracts.require(text.count('MemberName="Array_Find"') == 4, "resolved target plus three permissions")
     contracts.require(text.count('MemberName="Array_IsValidIndex"') == 1, "selected index revalidated")
     contracts.require(text.count('MemberName="EqualEqual_StrStr"') == 20, "closed manifest, identity, and binding comparisons")
-    contracts.require(text.count("KismetStringLibrary") == 20, "string comparisons use reflected owner")
+    reflected_owner_count = 60 if args.live_export else 20
+    contracts.require(text.count("KismetStringLibrary") == reflected_owner_count, "string comparisons use reflected owner")
     contracts.require(sum("K2Node_IfThenElse" in node.node_class for node in nodes.values()) == 17, "exact typed rejection chain")
     writes = [member(node) for node in nodes.values() if "K2Node_VariableSet" in node.node_class]
     contracts.require(set(writes) == {"EventDispatchResultValidV1", "EventDispatchAuthorizedV1", "EventDispatchCodeV1"}, "decision-only write ownership")

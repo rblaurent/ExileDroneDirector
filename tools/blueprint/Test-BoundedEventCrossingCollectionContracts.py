@@ -73,6 +73,7 @@ def main() -> None:
     parser.add_argument("--project-root", type=Path, required=True)
     parser.add_argument("--graph", type=Path, required=True)
     parser.add_argument("--paste", action="store_true")
+    parser.add_argument("--live-export", action="store_true")
     args = parser.parse_args()
     contracts = load(args.project_root / "tools/blueprint/Test-WaypointCaptureContracts.py")
     nodes = contracts.parse_graph(args.graph)
@@ -91,7 +92,8 @@ def main() -> None:
     contracts.require(text.count("StandardMacros:ForEachLoop") == 1, "one canonical-time loop")
     contracts.require(sum("K2Node_GetArrayItem" in node.node_class for node in nodes.values()) == 1, "one direction-policy lookup")
     contracts.require(text.count('MemberName="EqualEqual_StrStr"') == 4, "closed direction-policy comparisons")
-    contracts.require(text.count("KismetStringLibrary") == 4, "string comparisons use reflected owner")
+    reflected_owner_count = 12 if args.live_export else 4
+    contracts.require(text.count("KismetStringLibrary") == reflected_owner_count, "string comparisons use reflected owner")
     contracts.require(sum("K2Node_IfThenElse" in node.node_class for node in nodes.values()) == 7, "exact control guards")
     writes = [member(node) for node in nodes.values() if "K2Node_VariableSet" in node.node_class]
     contracts.require(writes.count("EventCrossingCollectionValidV1") == 5, "fail-close, scrub/live success, and two bounded failures")

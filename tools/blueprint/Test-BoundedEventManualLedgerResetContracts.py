@@ -94,6 +94,7 @@ def main() -> None:
     parser.add_argument("--project-root", type=Path, required=True)
     parser.add_argument("--graph", type=Path, required=True)
     parser.add_argument("--paste", action="store_true")
+    parser.add_argument("--live-export", action="store_true")
     args = parser.parse_args()
     contracts = load(args.project_root / "tools/blueprint/Test-WaypointCaptureContracts.py")
     nodes = contracts.parse_graph(args.graph)
@@ -116,7 +117,8 @@ def main() -> None:
     contracts.require(sum("K2Node_IfThenElse" in node.node_class for node in nodes.values()) == 10, "exact policy/rebuild guard chain")
     contracts.require(text.count('MemberName="EqualEqual_StrStr"') == 3, "policy ID, manual policy, and removal ID")
     contracts.require(text.count('MemberName="NotEqual_StrStr"') == 1, "nonempty reset request")
-    contracts.require(text.count("KismetStringLibrary") == 4, "all strings use reflected owner")
+    reflected_owner_count = 12 if args.live_export else 4
+    contracts.require(text.count("KismetStringLibrary") == reflected_owner_count, "all strings use reflected owner")
 
     writes = [member(node) for node in nodes.values() if "K2Node_VariableSet" in node.node_class]
     contracts.require(writes.count("EventManualResetResultValidV1") == 2, "fail-close and terminal authority")

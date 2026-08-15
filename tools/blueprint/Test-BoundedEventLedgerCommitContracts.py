@@ -101,6 +101,7 @@ def main() -> None:
     parser.add_argument("--project-root", type=Path, required=True)
     parser.add_argument("--graph", type=Path, required=True)
     parser.add_argument("--paste", action="store_true")
+    parser.add_argument("--live-export", action="store_true")
     args = parser.parse_args()
     contracts = load(args.project_root / "tools/blueprint/Test-WaypointCaptureContracts.py")
     nodes = contracts.parse_graph(args.graph)
@@ -123,7 +124,8 @@ def main() -> None:
     contracts.require(sum("K2Node_IfThenElse" in node.node_class for node in nodes.values()) == 12, "exact typed guard chain")
     contracts.require(text.count('MemberName="EqualEqual_StrStr"') == 3, "two success codes plus duplicate ID")
     contracts.require(text.count('MemberName="NotEqual_StrStr"') == 1, "nonempty selected Cue identity")
-    contracts.require(text.count("KismetStringLibrary") == 4, "all string comparisons use reflected owner")
+    reflected_owner_count = 12 if args.live_export else 4
+    contracts.require(text.count("KismetStringLibrary") == reflected_owner_count, "all string comparisons use reflected owner")
 
     writes = [member(node) for node in nodes.values() if "K2Node_VariableSet" in node.node_class]
     contracts.require(writes.count("EventLedgerCommitValidV1") == 3, "fail-close, duplicate, and new commit authority")

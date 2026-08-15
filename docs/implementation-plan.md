@@ -1954,6 +1954,15 @@ before any polished editor UI or cook is attempted:
    ownership, topology, and determinism suite passes in 138.2 seconds with
    Unreal closed. Idempotent configuration and the documented one-editor live
    acceptance sequence are next.
+   The offline live-acceptance harness is now prepared and scaffold-owned:
+   idempotent 51-variable/six-function configuration, compile-safe full-default
+   restoration, 40 history-explicit warm oracle frames in both orders, five
+   invalid-input families plus poisoned direct commit, and three automatic
+   player-owned PIE sessions for distinct authorship, carrier-frame isolation,
+   and fail-closed preservation. Static contracts forbid `CameraTransform`,
+   external authorship writes, component mutation, and PIE-time compilation;
+   the complete scaffold passes in 139.1 seconds. Commit this clean tooling
+   checkpoint before opening the single editor.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

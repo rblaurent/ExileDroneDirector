@@ -212,6 +212,11 @@ $requiredFiles = @(
     'tools\blueprint\Test-CameraOperatorOverrideApplyContracts.py',
     'tools\blueprint\snippets\apply-camera-operator-override-v1.eddgraph',
     'tools\blueprint\snippets\apply-camera-operator-override-v1-paste.eddgraph',
+    'tools\unreal\Configure-CameraOperatorOverride.py',
+    'tools\unreal\Restore-CameraOperatorOverrideSchemaDefaults.py',
+    'tools\unreal\Validate-CameraOperatorOverrideRuntime.py',
+    'tools\unreal\Validate-CameraOperatorOverridePIE.py',
+    'tools\unreal\test_camera_operator_override_validators.py',
     'tools\blueprint\Build-CameraViewerComfortResetGraph.py',
     'tools\blueprint\Test-CameraViewerComfortResetContracts.py',
     'tools\blueprint\snippets\reset-camera-viewer-comfort-v1.eddgraph',
@@ -1735,6 +1740,8 @@ if ($LASTEXITCODE -ne 0) { throw "Camera operator apply full contracts failed wi
 & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CameraOperatorOverrideApplyContracts.py') `
     --project-root $ProjectRoot --graph $cameraOperatorApplyPaste --paste
 if ($LASTEXITCODE -ne 0) { throw "Camera operator apply paste contracts failed with exit code $LASTEXITCODE." }
+& python (Join-Path $ProjectRoot 'tools\unreal\test_camera_operator_override_validators.py')
+if ($LASTEXITCODE -ne 0) { throw "Camera operator live-tool contracts failed with exit code $LASTEXITCODE." }
 $cameraDollyRoot = Join-Path $scratchRoot ("edd-camera-dolly-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraDollyRoot -Force | Out-Null
 $cameraDollyReset = Join-Path $cameraDollyRoot 'reset-camera-dolly-zoom-v1.eddgraph'

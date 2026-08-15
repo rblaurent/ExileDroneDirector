@@ -1430,6 +1430,25 @@ prepare idempotent tooling, then run the documented one-editor configuration,
 compile/save/export, warm-runtime, automatic PIE, restoration, and exact
 postcompile-topology sequence. Do not open a second editor.
 
+The complete operator live-acceptance harness is now frozen while Unreal remains
+closed. `Configure-CameraOperatorOverride.py` idempotently creates and verifies
+the exact 51-variable/six-function native Vector/Quat schema, while
+`Restore-CameraOperatorOverrideSchemaDefaults.py` compiles before reacquiring
+the generated class and restores/verifies every default before saving.
+`Validate-CameraOperatorOverrideRuntime.py` prepares 40 history-explicit oracle
+frames for both forward and reverse execution, five validation failures, and a
+direct poisoned commit. It verifies complete state/result output, exact body
+passthrough, separate gimbal/look composition, carrier-frame isolation,
+immutable inputs/policy, accepted-snapshot preservation, external ownership,
+and cleanup. `Validate-CameraOperatorOverridePIE.py` owns its Slate lifecycle
+and three real player-owned sessions: distinct settled Directed authorship,
+carrier-relative translation isolated from body/gimbal, and fail-closed state/
+result preservation. Static contracts forbid `CameraTransform`, external
+authorship writes, component mutation, and PIE-time compilation. The complete
+MVP-required scaffold owns all five tools and passes in 139.1 seconds. Next:
+commit/push this preparedness checkpoint, then open exactly one editor for the
+six graph installations and the complete live acceptance sequence.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

@@ -1771,6 +1771,19 @@ byte. The complete MVP-required scaffold passes in 156.9 seconds. Next: stage
 one finite absolute query into the four accepted evaluator
 inputs, with delta remaining exclusively an operator-state input.
 
+`StageCameraPlaybackEvaluationTimeV1` is deterministic at 14 full / 13 paste
+nodes with 18 / 17 reciprocal links. It invalidates only its stage flag, clears
+the playback diagnostic, proves the single elapsed input finite across the full
+double domain, and copies that exact value into cinematic pose, airframe
+prebake, carrier frame, and camera-channel query inputs before publishing stage
+validity last. Negative and overshoot times remain legal for absolute scrubbing;
+NaN and both infinities fail with `query_invalid` while preserving all four
+prior query values. Both forms execute 80 valid and three invalid cases. Delta,
+operator controls/state, body/gimbal, results, native camera, persistence,
+events, and server state are structurally absent. The complete MVP-required
+scaffold passes in 157.9 seconds. Next: the tiny four-call
+accepted-source evaluator coordinator.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

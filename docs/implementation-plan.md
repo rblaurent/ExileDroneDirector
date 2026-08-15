@@ -2008,6 +2008,13 @@ before any polished editor UI or cook is attempted:
    prior result snapshot, excludes all upstream/native/authoritative owners,
    and regenerates byte-identically. The complete MVP-required scaffold passes
    in 156.9 seconds. Common absolute-time staging is next.
+   `StageCameraPlaybackEvaluationTimeV1` is now deterministic at 14 full / 13
+   paste nodes and 18 / 17 reciprocal links. One finite elapsed value is copied
+   exactly to all four accepted query inputs; negative/overshoot scrubbing is
+   retained, non-finite values fail closed without replacing prior queries, and
+   delta/operator/authorship/downstream state is absent. Both forms execute 80
+   valid plus three invalid cases; the complete MVP-required scaffold passes in
+   157.9 seconds. The four-call source coordinator is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

@@ -5673,3 +5673,11 @@ See `docs/blueprint-workflow.md` and `tools/blueprint/`.
   but non-authoritative, matching the transaction pattern used by the accepted
   downstream families. Exact contracts and repeat hashes pass in both forms.
   The complete MVP-required scaffold passes in 156.9 seconds.
+- Common-time staging needs no playback clamp. The four accepted evaluators
+  already define negative, terminal, and overshoot behavior from absolute time.
+  `StageCameraPlaybackEvaluationTimeV1` therefore rejects only non-finite
+  elapsed input, writes the same unclamped double to all four query variables,
+  and leaves frame delta to the operator. Its 14/13-node full/paste graphs pass
+  80 finite cases spanning negative/overshoot values and three non-finite
+  failures while preserving prior query snapshots on rejection. The complete
+  MVP-required scaffold passes in 157.9 seconds.

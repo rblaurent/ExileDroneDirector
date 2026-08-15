@@ -1927,6 +1927,14 @@ before any polished editor UI or cook is attempted:
    settle one frame early. Both forms match 160 history-explicit forward/reverse
    candidates; exact regeneration and the complete 138.1-second scaffold pass
    with Unreal closed. Look integration is next.
+   `BuildCameraOperatorLookV1` is now deterministic at 147 full / 146 paste
+   nodes with 216 / 215 reciprocal links. It implements exact axis-angle local
+   look with angular acceleration/recenter limits, freezes scratch-dependent
+   values before candidate replacement, copies authored body exactly, and
+   composes only non-identity local look onto authored gimbal. One hundred sixty
+   history-explicit forward/reverse frames match position, body, gimbal, state,
+   and flags; false scratch is a no-op. Exact regeneration and the complete
+   139.0-second scaffold pass with Unreal closed. Atomic commit is next.
 11. Expose every backend operation through temporary shortcuts, compact debug
    displays, path geometry, and stable logs; cover success, rejection, boundary,
    reconnect, restart, cancellation, and restoration cases in programmatic PIE.

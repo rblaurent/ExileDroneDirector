@@ -1366,8 +1366,29 @@ world/carrier isolation and false-validation preservation. Full/paste SHA-256
 is `A6B5ABF693BF1B671AA72F9D0884F1180F7AA40F473601A69F26B6D0BDC2A95A` /
 `EECB8B04B739465886558DE783A22C0CA2B5589FF3B4A4CFFD8A0E980FE22287`.
 The complete MVP-required scaffold passes in 138.1 seconds with Unreal closed.
-Next: generate and interpret look integration, then atomic commit and the tiny
-coordinator before editor work.
+
+`BuildCameraOperatorLookV1` is now deterministic at 147 full / 146 paste nodes
+with 216 / 215 reciprocal links. It integrates a bounded local-axis angular
+velocity, constructs the exact axis-angle delta quaternion, composes that delta
+only into viewer-local look state, and derives complete candidate position,
+body, gimbal, recenter, transition, and override flags. Authored body is a
+literal getter-to-setter passthrough. Authored gimbal is returned exactly when
+look is identity; only non-identity local look is composed and normalized.
+Translation policy, carrier orientation, tether state, authoritative results,
+and every external backend are absent.
+
+The graph uses the already-private candidate look quaternion briefly to
+materialize the native axis-angle delta through `Quat_SetComponents`. Execution
+then freezes angular velocity and final look through setter outputs before any
+downstream pure node can re-read the replaced scratch value. Structural
+contracts freeze that order. Both forms match 160 history-explicit
+forward/reverse frames, including exact body authorship, gimbal-only look,
+recenter settlement, transition/override flags, and false-scratch no-op.
+Full/paste SHA-256 is
+`2B41A5674867E6CADFE6E9118602F415B98C167B42D39AEF8358816C3BC75327` /
+`0BA709263311782641D24CB84D63806624A9EB2A11401F1EAC6769054385F172`.
+The complete MVP-required scaffold passes in 139.0 seconds with Unreal closed.
+Next: atomic commit, then the tiny five-call coordinator before editor work.
 
 ## Critical design mismatch
 

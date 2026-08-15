@@ -2064,6 +2064,33 @@ body/gimbal ownership was changed. All eight reference tests, six schema tests,
 and the complete 2,275-line regression pass in 165.5 seconds with Unreal
 closed. Next remains the native apply/rollback graph under this corrected order.
 
+`ApplyCameraPlaybackNativeFrameV1` is deterministic at 85 full / 84 paste
+nodes with 115 / 114 reciprocal links. It invalidates native result authority,
+stages `native_apply_failed`, and rechecks native/engine session authority plus
+actor/component references. The desired actor Transform combines accepted
+position and body-world rotation with only the captured actor scale. The
+desired component relative Transform combines only accepted gimbal-relative
+rotation with the captured component translation and scale. The world-gimbal
+validation track is structurally absent from mutation.
+
+The actor uses `K2_SetActorTransform`; its success gates the component's
+`K2_SetRelativeTransform`. The component relative rotation is then read back,
+converted to quaternion, and checked within `1e-6` with `q`/`-q` equivalence
+before the accepted engine-property writer runs. Actor failure, component
+verification failure, or fresh engine-result failure all converge on exactly
+one `RestoreCameraPlaybackNativeStateV1` call. Only complete success increments
+the native frame count, clears the diagnostic, and publishes native result
+authority last. Both pose setters use teleport/no-sweep semantics.
+
+Exact source-to-owner links, void component-setter shape, fresh engine-result
+check, and three rollback edges are structural contracts. Both forms execute
+80 successful frames plus 240 actor/component/engine exact-rollbacks, preserve
+body/gimbal separation and baseline translation/scale, regenerate byte-
+identically, and are full-scaffold owned. The complete MVP-required regression
+passes in 165.8 seconds with 2,280 output lines and Unreal closed. Next: build
+idempotent exact actor/component/engine restoration, then the corrected thin
+coordinator.
+
 ## Critical design mismatch
 
 The Python document model has distinct `body_rotation` and `gimbal_rotation`,

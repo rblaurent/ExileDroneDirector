@@ -220,6 +220,10 @@ $requiredFiles = @(
     'tools\blueprint\Test-CarrierFrameTransportCompileContracts.py',
     'tools\blueprint\snippets\compile-carrier-frame-transport-v1.eddgraph',
     'tools\blueprint\snippets\compile-carrier-frame-transport-v1-paste.eddgraph',
+    'tools\blueprint\Build-CarrierFrameTransportEvaluatorGraph.py',
+    'tools\blueprint\Test-CarrierFrameTransportEvaluatorContracts.py',
+    'tools\blueprint\snippets\evaluate-compiled-carrier-frame-transport-v1.eddgraph',
+    'tools\blueprint\snippets\evaluate-compiled-carrier-frame-transport-v1-paste.eddgraph',
     'tools\blueprint\Build-CameraOperatorOverrideResetGraph.py',
     'tools\blueprint\Test-CameraOperatorOverrideResetContracts.py',
     'tools\blueprint\snippets\reset-camera-operator-override-step-v1.eddgraph',
@@ -1811,6 +1815,37 @@ foreach ($graphCase in @(
     if ($graphCase[1]) { $arguments += '--paste' }
     & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CarrierFrameTransportCompileContracts.py') @arguments
     if ($LASTEXITCODE -ne 0) { throw "Carrier-frame compile contracts failed with exit code $LASTEXITCODE." }
+}
+$carrierFrameEvaluator = Join-Path $carrierFrameRoot 'evaluate-compiled-carrier-frame-transport-v1.eddgraph'
+$carrierFrameEvaluatorPaste = Join-Path $carrierFrameRoot 'evaluate-compiled-carrier-frame-transport-v1-paste.eddgraph'
+$carrierFrameEvaluatorRepeat = Join-Path $carrierFrameRoot 'evaluate-compiled-carrier-frame-transport-v1-repeat.eddgraph'
+$carrierFrameEvaluatorRepeatPaste = Join-Path $carrierFrameRoot 'evaluate-compiled-carrier-frame-transport-v1-repeat-paste.eddgraph'
+foreach ($pair in @(
+    @($carrierFrameEvaluator, $carrierFrameEvaluatorPaste),
+    @($carrierFrameEvaluatorRepeat, $carrierFrameEvaluatorRepeatPaste)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Build-CarrierFrameTransportEvaluatorGraph.py') `
+        --project-root $ProjectRoot --output $pair[0] --paste-output $pair[1]
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame evaluator generation failed with exit code $LASTEXITCODE." }
+}
+foreach ($comparison in @(
+    @($carrierFrameEvaluator, $carrierFrameEvaluatorRepeat, (Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-compiled-carrier-frame-transport-v1.eddgraph')),
+    @($carrierFrameEvaluatorPaste, $carrierFrameEvaluatorRepeatPaste, (Join-Path $ProjectRoot 'tools\blueprint\snippets\evaluate-compiled-carrier-frame-transport-v1-paste.eddgraph'))
+)) {
+    $hashes = $comparison | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash }
+    if (@($hashes | Select-Object -Unique).Count -ne 1) { throw 'Carrier-frame evaluator generation is not byte deterministic.' }
+}
+foreach ($graphCase in @(
+    @($carrierFrameEvaluator, $false),
+    @($carrierFrameEvaluatorPaste, $true)
+)) {
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-BlueprintGraphLinkIntegrity.py') `
+        --project-root $ProjectRoot --graph $graphCase[0]
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame evaluator link integrity failed with exit code $LASTEXITCODE." }
+    $arguments = @('--project-root', $ProjectRoot, '--graph', $graphCase[0])
+    if ($graphCase[1]) { $arguments += '--paste' }
+    & python (Join-Path $ProjectRoot 'tools\blueprint\Test-CarrierFrameTransportEvaluatorContracts.py') @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Carrier-frame evaluator contracts failed with exit code $LASTEXITCODE." }
 }
 $cameraOperatorRoot = Join-Path $scratchRoot ("edd-camera-operator-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $cameraOperatorRoot -Force | Out-Null

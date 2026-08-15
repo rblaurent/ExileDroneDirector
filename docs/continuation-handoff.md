@@ -1,6 +1,6 @@
 # Continuation Handoff
 
-Last updated: 2026-08-15 after carrier-frame compile-coordinator checkpoint
+Last updated: 2026-08-15 after complete offline carrier-frame family checkpoint
 
 This is the first file a fresh implementation session should read. It is a
 high-signal continuation map, not a replacement for the authoritative evidence
@@ -23,9 +23,9 @@ in `implementation-plan.md`, `devkit-findings.md`, and
 
 - Repository: `T:\Projects\ExileDroneDirector`
 - Branch: `main`
-- Current checkpoint is the complete seven-graph carrier-frame compiler
+- Current checkpoint is the complete eight-graph offline carrier-frame family
   described below; after the checkpoint push, HEAD must equal `origin/main`
-  before the absolute-time evaluator graph is built
+  before live configurator/oracle/PIE tooling is built
 - Expected state at this checkpoint: clean worktree and remote-equal `main`
 - Git remote: `origin/main`
 - Enhanced DevKit root: `F:\CEUE5Devkit`
@@ -1636,14 +1636,38 @@ no variables, branches, macros, reroutes, alternate terminal, or policy. Both
 forms freeze the six exact self-context calls and injected failure outcomes;
 regeneration is byte-identical.
 
-The seven compiler graphs now total 386 full nodes / 379 paste nodes with 528 /
-521 reciprocal links. Their generators, checked-in snippets, structural and
-executable interpreters, ownership barriers, and repeat hashes all pass in the
-complete 144.7-second MVP-required scaffold with Unreal closed. Distinct body
-and gimbal authorship remains absent from the entire carrier family. Next:
-generate and execute the eighth graph, `EvaluateCompiledCarrierFrameTransportV1`,
-using only immutable compiled samples and absolute elapsed time, including the
-real partial terminal interval.
+The seven compiler graphs total 386 full nodes / 379 paste nodes with 528 / 521
+reciprocal links. Their generators, checked-in snippets, structural and
+executable interpreters, ownership barriers, and repeat hashes all passed in
+the complete 144.7-second MVP-required scaffold with Unreal closed. Distinct
+body and gimbal authorship remains absent from the entire carrier family.
+
+`EvaluateCompiledCarrierFrameTransportV1` completes the offline family at 117
+full / 116 paste nodes with 172 / 171 reciprocal links. It resets only its five
+evaluation results plus deterministic internal validation scratch, then
+preflights the immutable compiled tangent/quaternion pair, cardinality, bounded
+timing, exact schedule, finite/unit samples, tangent/forward alignment, and
+hemisphere continuity. Corruption anywhere in the track fails closed even when
+the queried segment itself is intact.
+
+Successful evaluation is stateless and uses absolute elapsed time only.
+Negative/start queries resolve to sample zero, terminal/overshoot queries
+resolve to the final sample, and interior queries choose the fixed-step segment
+and slerp adjacent carrier quaternions. The last segment explicitly uses
+`total - segmentStart`, preserving the real partial terminal interval. Result
+validity is written only as the terminal publication on active and complete
+paths. Compiled state, authored body/gimbal tracks, desired/prebake state,
+camera-operator state, playback delta/history, documents, events, repository,
+and server state are never mutated or read outside the frozen carrier inputs.
+
+Both forms execute 414 oracle-equivalent queries across 20 seeded tracks,
+arbitrary-order replay, and 13 corrupt-state families. The complete eight-graph
+family totals 503 full / 495 paste nodes with 700 / 692 reciprocal links, and
+the full MVP-required scaffold passes in 150.7 seconds with Unreal closed.
+Next: build deterministic idempotent live configurator, exact restore-defaults
+support, runtime oracle, and PIE integration sessions for all 24 variables and
+eight functions. Only after those tools are offline-green should one guarded
+single-editor installation and live acceptance begin.
 
 ## Critical design mismatch
 
